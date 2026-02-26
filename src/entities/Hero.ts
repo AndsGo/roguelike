@@ -16,7 +16,7 @@ export class Hero extends Unit {
     // Calculate level-scaled stats
     const stats = Hero.calculateStats(heroData, heroState);
 
-    super(scene, x, y, heroData.id, heroData.name, heroData.role, stats, true);
+    super(scene, x, y, heroData.id, heroData.name, heroData.role, stats, true, heroData.element);
 
     this.heroData = heroData;
     this.heroState = heroState;

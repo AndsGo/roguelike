@@ -1,7 +1,8 @@
 import Phaser from 'phaser';
-import { UnitStats, UnitRole, StatusEffect, SkillData } from '../types';
+import { UnitStats, UnitRole, StatusEffect, SkillData, ElementType } from '../types';
 import { HealthBar } from '../components/HealthBar';
 import { HEALTH_BAR_WIDTH, HEALTH_BAR_HEIGHT, Y_MOVEMENT_DAMPING } from '../constants';
+import { EventBus } from '../systems/EventBus';
 
 export class Unit extends Phaser.GameObjects.Container {
   // Identity
@@ -9,11 +10,15 @@ export class Unit extends Phaser.GameObjects.Container {
   unitName: string;
   role: UnitRole;
   isHero: boolean;
+  element: ElementType | undefined;
 
   // Stats
   baseStats: UnitStats;
   currentStats: UnitStats;
   currentHp: number;
+
+  // Stat modifiers from synergies/relics (added to getEffectiveStats pipeline)
+  synergyBonuses: Partial<UnitStats> = {};
 
   // Combat state
   isAlive: boolean = true;
@@ -37,12 +42,14 @@ export class Unit extends Phaser.GameObjects.Container {
     role: UnitRole,
     stats: UnitStats,
     isHero: boolean,
+    element?: ElementType,
   ) {
     super(scene, x, y);
     this.unitId = id;
     this.unitName = name;
     this.role = role;
     this.isHero = isHero;
+    this.element = element;
     this.baseStats = { ...stats };
     this.currentStats = { ...stats };
     this.currentHp = stats.hp;
@@ -74,8 +81,12 @@ export class Unit extends Phaser.GameObjects.Container {
     return this.unitName.substring(0, 4);
   }
 
+  /**
+   * Effective stats pipeline: base + equipment/level (currentStats) + buff/debuff + synergy
+   */
   getEffectiveStats(): UnitStats {
     const stats = { ...this.currentStats };
+
     // Apply buff/debuff status effects
     for (const effect of this.statusEffects) {
       if ((effect.type === 'buff' || effect.type === 'debuff') && effect.stat) {
@@ -83,7 +94,29 @@ export class Unit extends Phaser.GameObjects.Container {
         (stats[key] as number) += effect.value;
       }
     }
+
+    // Apply synergy bonuses
+    for (const [key, value] of Object.entries(this.synergyBonuses)) {
+      if (key in stats && typeof value === 'number') {
+        (stats[key as keyof UnitStats] as number) += value;
+      }
+    }
+
     return stats;
+  }
+
+  /** Dynamically add a skill at runtime (e.g. from synergy unlock) */
+  addSkill(skill: SkillData): void {
+    if (!this.skills.some(s => s.id === skill.id)) {
+      this.skills.push(skill);
+      this.skillCooldowns.set(skill.id, 0);
+    }
+  }
+
+  /** Remove a dynamically added skill */
+  removeSkill(skillId: string): void {
+    this.skills = this.skills.filter(s => s.id !== skillId);
+    this.skillCooldowns.delete(skillId);
   }
 
   takeDamage(amount: number): number {
@@ -105,12 +138,27 @@ export class Unit extends Phaser.GameObjects.Container {
     const actual = Math.min(Math.round(amount), maxHp - this.currentHp);
     this.currentHp += actual;
     this.healthBar.updateHealth(this.currentHp, maxHp);
+
+    if (actual > 0) {
+      EventBus.getInstance().emit('unit:heal', {
+        sourceId: this.unitId,
+        targetId: this.unitId,
+        amount: actual,
+      });
+    }
+
     return actual;
   }
 
   die(): void {
     this.isAlive = false;
     this.target = null;
+
+    EventBus.getInstance().emit('unit:death', {
+      unitId: this.unitId,
+      isHero: this.isHero,
+    });
+
     this.scene.tweens.add({
       targets: this,
       alpha: 0,

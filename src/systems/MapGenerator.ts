@@ -13,6 +13,7 @@ const MAP_TEMPLATE: NodeType[] = [
 export class MapGenerator {
   /**
    * Generate a linear 15-node map using the seed RNG.
+   * Each node connects to the next node (linear path).
    */
   static generate(rng: SeededRNG, floor: number): MapNode[] {
     const nodes: MapNode[] = [];
@@ -23,6 +24,7 @@ export class MapGenerator {
         index: i,
         type: nodeType,
         completed: false,
+        connections: i < MAP_NODE_COUNT - 1 ? [i + 1] : [], // linear chain
       };
 
       if (nodeType === 'battle' || nodeType === 'elite' || nodeType === 'boss') {
