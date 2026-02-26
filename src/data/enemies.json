@@ -1,0 +1,178 @@
+[
+  {
+    "id": "slime",
+    "name": "史莱姆",
+    "role": "tank",
+    "baseStats": {
+      "maxHp": 150,
+      "hp": 150,
+      "attack": 15,
+      "defense": 5,
+      "magicPower": 0,
+      "magicResist": 5,
+      "speed": 50,
+      "attackSpeed": 0.8,
+      "attackRange": 35,
+      "critChance": 0.0,
+      "critDamage": 1.5
+    },
+    "scalingPerLevel": {
+      "maxHp": 30,
+      "attack": 3,
+      "defense": 2,
+      "magicPower": 0,
+      "magicResist": 1
+    },
+    "skills": [],
+    "spriteKey": "enemy_slime",
+    "goldReward": 8,
+    "expReward": 20
+  },
+  {
+    "id": "goblin",
+    "name": "哥布林",
+    "role": "melee_dps",
+    "baseStats": {
+      "maxHp": 120,
+      "hp": 120,
+      "attack": 25,
+      "defense": 8,
+      "magicPower": 0,
+      "magicResist": 5,
+      "speed": 100,
+      "attackSpeed": 1.2,
+      "attackRange": 40,
+      "critChance": 0.1,
+      "critDamage": 1.5
+    },
+    "scalingPerLevel": {
+      "maxHp": 20,
+      "attack": 5,
+      "defense": 1,
+      "magicPower": 0,
+      "magicResist": 1
+    },
+    "skills": [],
+    "spriteKey": "enemy_goblin",
+    "goldReward": 10,
+    "expReward": 25
+  },
+  {
+    "id": "skeleton_archer",
+    "name": "骷髅弓手",
+    "role": "ranged_dps",
+    "baseStats": {
+      "maxHp": 100,
+      "hp": 100,
+      "attack": 30,
+      "defense": 5,
+      "magicPower": 0,
+      "magicResist": 3,
+      "speed": 70,
+      "attackSpeed": 1.0,
+      "attackRange": 200,
+      "critChance": 0.15,
+      "critDamage": 1.8
+    },
+    "scalingPerLevel": {
+      "maxHp": 15,
+      "attack": 6,
+      "defense": 1,
+      "magicPower": 0,
+      "magicResist": 1
+    },
+    "skills": [],
+    "spriteKey": "enemy_skeleton_archer",
+    "goldReward": 12,
+    "expReward": 30
+  },
+  {
+    "id": "dark_mage",
+    "name": "暗黑法师",
+    "role": "ranged_dps",
+    "baseStats": {
+      "maxHp": 90,
+      "hp": 90,
+      "attack": 10,
+      "defense": 5,
+      "magicPower": 40,
+      "magicResist": 20,
+      "speed": 60,
+      "attackSpeed": 0.8,
+      "attackRange": 200,
+      "critChance": 0.1,
+      "critDamage": 1.6
+    },
+    "scalingPerLevel": {
+      "maxHp": 15,
+      "attack": 1,
+      "defense": 1,
+      "magicPower": 7,
+      "magicResist": 2
+    },
+    "skills": ["dark_bolt"],
+    "spriteKey": "enemy_dark_mage",
+    "goldReward": 15,
+    "expReward": 35
+  },
+  {
+    "id": "orc_warrior",
+    "name": "兽人战士",
+    "role": "tank",
+    "baseStats": {
+      "maxHp": 400,
+      "hp": 400,
+      "attack": 35,
+      "defense": 25,
+      "magicPower": 0,
+      "magicResist": 10,
+      "speed": 65,
+      "attackSpeed": 0.7,
+      "attackRange": 45,
+      "critChance": 0.05,
+      "critDamage": 1.5
+    },
+    "scalingPerLevel": {
+      "maxHp": 50,
+      "attack": 5,
+      "defense": 4,
+      "magicPower": 0,
+      "magicResist": 2
+    },
+    "skills": ["war_cry"],
+    "spriteKey": "enemy_orc_warrior",
+    "goldReward": 20,
+    "expReward": 40,
+    "isBoss": false
+  },
+  {
+    "id": "dragon_boss",
+    "name": "黑龙",
+    "role": "ranged_dps",
+    "baseStats": {
+      "maxHp": 1500,
+      "hp": 1500,
+      "attack": 60,
+      "defense": 40,
+      "magicPower": 80,
+      "magicResist": 40,
+      "speed": 70,
+      "attackSpeed": 0.6,
+      "attackRange": 180,
+      "critChance": 0.15,
+      "critDamage": 2.0
+    },
+    "scalingPerLevel": {
+      "maxHp": 200,
+      "attack": 10,
+      "defense": 5,
+      "magicPower": 12,
+      "magicResist": 5
+    },
+    "skills": ["fire_breath", "tail_sweep"],
+    "spriteKey": "enemy_dragon",
+    "goldReward": 150,
+    "expReward": 200,
+    "isBoss": true
+  }
+]

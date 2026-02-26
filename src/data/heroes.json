@@ -1,0 +1,137 @@
+[
+  {
+    "id": "warrior",
+    "name": "铁甲骑士",
+    "role": "tank",
+    "baseStats": {
+      "maxHp": 500,
+      "hp": 500,
+      "attack": 30,
+      "defense": 40,
+      "magicPower": 0,
+      "magicResist": 20,
+      "speed": 80,
+      "attackSpeed": 0.8,
+      "attackRange": 40,
+      "critChance": 0.05,
+      "critDamage": 1.5
+    },
+    "scalingPerLevel": {
+      "maxHp": 60,
+      "attack": 3,
+      "defense": 5,
+      "magicPower": 0,
+      "magicResist": 3
+    },
+    "skills": ["shield_bash", "taunt_shout"],
+    "spriteKey": "hero_warrior"
+  },
+  {
+    "id": "archer",
+    "name": "疾风弓手",
+    "role": "ranged_dps",
+    "baseStats": {
+      "maxHp": 280,
+      "hp": 280,
+      "attack": 55,
+      "defense": 12,
+      "magicPower": 0,
+      "magicResist": 10,
+      "speed": 100,
+      "attackSpeed": 1.4,
+      "attackRange": 250,
+      "critChance": 0.25,
+      "critDamage": 2.0
+    },
+    "scalingPerLevel": {
+      "maxHp": 25,
+      "attack": 8,
+      "defense": 1,
+      "magicPower": 0,
+      "magicResist": 1
+    },
+    "skills": ["multi_shot", "piercing_arrow"],
+    "spriteKey": "hero_archer"
+  },
+  {
+    "id": "mage",
+    "name": "烈焰法师",
+    "role": "ranged_dps",
+    "baseStats": {
+      "maxHp": 250,
+      "hp": 250,
+      "attack": 15,
+      "defense": 8,
+      "magicPower": 65,
+      "magicResist": 25,
+      "speed": 85,
+      "attackSpeed": 0.9,
+      "attackRange": 220,
+      "critChance": 0.1,
+      "critDamage": 1.8
+    },
+    "scalingPerLevel": {
+      "maxHp": 20,
+      "attack": 1,
+      "defense": 1,
+      "magicPower": 10,
+      "magicResist": 3
+    },
+    "skills": ["fireball", "flame_wave"],
+    "spriteKey": "hero_mage"
+  },
+  {
+    "id": "priest",
+    "name": "圣光牧师",
+    "role": "healer",
+    "baseStats": {
+      "maxHp": 300,
+      "hp": 300,
+      "attack": 20,
+      "defense": 15,
+      "magicPower": 50,
+      "magicResist": 30,
+      "speed": 75,
+      "attackSpeed": 0.7,
+      "attackRange": 200,
+      "critChance": 0.05,
+      "critDamage": 1.5
+    },
+    "scalingPerLevel": {
+      "maxHp": 30,
+      "attack": 1,
+      "defense": 2,
+      "magicPower": 8,
+      "magicResist": 4
+    },
+    "skills": ["heal", "group_heal"],
+    "spriteKey": "hero_priest"
+  },
+  {
+    "id": "rogue",
+    "name": "暗影刺客",
+    "role": "melee_dps",
+    "baseStats": {
+      "maxHp": 220,
+      "hp": 220,
+      "attack": 70,
+      "defense": 10,
+      "magicPower": 0,
+      "magicResist": 8,
+      "speed": 130,
+      "attackSpeed": 1.6,
+      "attackRange": 50,
+      "critChance": 0.3,
+      "critDamage": 2.2
+    },
+    "scalingPerLevel": {
+      "maxHp": 18,
+      "attack": 10,
+      "defense": 1,
+      "magicPower": 0,
+      "magicResist": 1
+    },
+    "skills": ["backstab", "shadow_strike"],
+    "spriteKey": "hero_rogue"
+  }
+]

@@ -1,0 +1,178 @@
+[
+  {
+    "id": "mysterious_merchant",
+    "title": "神秘商人",
+    "description": "路边出现一个神秘的蒙面商人，他的货物似乎与众不同...",
+    "choices": [
+      {
+        "text": "花费50金币购买神秘宝箱",
+        "outcomes": [
+          { "probability": 0.6, "description": "宝箱中有一件稀有装备！", "effects": [{ "type": "gold", "value": -50 }, { "type": "item", "value": 1 }] },
+          { "probability": 0.4, "description": "宝箱是空的...被骗了。", "effects": [{ "type": "gold", "value": -50 }] }
+        ]
+      },
+      {
+        "text": "礼貌地离开",
+        "outcomes": [
+          { "probability": 1.0, "description": "你继续前行。", "effects": [] }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "healing_spring",
+    "title": "治愈之泉",
+    "description": "你发现了一处散发着淡淡光芒的泉水...",
+    "choices": [
+      {
+        "text": "饮用泉水（恢复全队50%HP）",
+        "outcomes": [
+          { "probability": 0.8, "description": "清澈的泉水恢复了你们的伤势。", "effects": [{ "type": "heal", "value": 0.5, "target": "all" }] },
+          { "probability": 0.2, "description": "泉水被污染了！全队受到伤害。", "effects": [{ "type": "damage", "value": 0.2, "target": "all" }] }
+        ]
+      },
+      {
+        "text": "装满水囊带走（获得30金币）",
+        "outcomes": [
+          { "probability": 1.0, "description": "你把泉水装入水囊，也许能卖个好价钱。", "effects": [{ "type": "gold", "value": 30 }] }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "ancient_altar",
+    "title": "远古祭坛",
+    "description": "一座布满苔藓的石制祭坛矗立在道路旁，上面刻着神秘的符文...",
+    "choices": [
+      {
+        "text": "献上100金币祈祷",
+        "outcomes": [
+          { "probability": 0.5, "description": "祭坛发出金光，你感到力量涌入体内！", "effects": [{ "type": "gold", "value": -100 }, { "type": "stat_boost", "value": 10 }] },
+          { "probability": 0.3, "description": "什么也没有发生...", "effects": [{ "type": "gold", "value": -100 }] },
+          { "probability": 0.2, "description": "祭坛突然崩塌，散落的金币比你献上的还多！", "effects": [{ "type": "gold", "value": 50 }] }
+        ]
+      },
+      {
+        "text": "研究符文（获得经验）",
+        "outcomes": [
+          { "probability": 1.0, "description": "你从符文中学到了一些知识。", "effects": [{ "type": "stat_boost", "value": 5 }] }
+        ]
+      },
+      {
+        "text": "离开",
+        "outcomes": [
+          { "probability": 1.0, "description": "你决定不去冒险。", "effects": [] }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "trapped_chest",
+    "title": "宝箱陷阱",
+    "description": "你发现了一个精致的宝箱，但隐约能看到一些机关...",
+    "choices": [
+      {
+        "text": "强行打开",
+        "outcomes": [
+          { "probability": 0.4, "description": "宝箱中有大量金币！", "effects": [{ "type": "gold", "value": 80 }] },
+          { "probability": 0.6, "description": "触发了陷阱！全队受到伤害。", "effects": [{ "type": "damage", "value": 0.15, "target": "all" }] }
+        ]
+      },
+      {
+        "text": "小心解除机关",
+        "outcomes": [
+          { "probability": 0.7, "description": "成功解除了机关并获得了宝物。", "effects": [{ "type": "gold", "value": 50 }] },
+          { "probability": 0.3, "description": "机关太复杂了，你只好放弃。", "effects": [] }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "wandering_warrior",
+    "title": "流浪战士",
+    "description": "一位受伤的战士坐在路边，他请求你的帮助...",
+    "choices": [
+      {
+        "text": "治疗他（消耗全队10%HP）",
+        "outcomes": [
+          { "probability": 0.7, "description": "战士感激地给了你他的传家宝。", "effects": [{ "type": "damage", "value": 0.1, "target": "all" }, { "type": "gold", "value": 60 }] },
+          { "probability": 0.3, "description": "战士感激地分享了战斗经验。", "effects": [{ "type": "damage", "value": 0.1, "target": "all" }, { "type": "stat_boost", "value": 8 }] }
+        ]
+      },
+      {
+        "text": "给他一些金币（花费30金币）",
+        "outcomes": [
+          { "probability": 1.0, "description": "战士向你道谢后离开了。", "effects": [{ "type": "gold", "value": -30 }] }
+        ]
+      },
+      {
+        "text": "无视他继续前行",
+        "outcomes": [
+          { "probability": 1.0, "description": "你冷漠地走过。", "effects": [] }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "goblin_camp",
+    "title": "哥布林营地",
+    "description": "你偶然发现了一个无人看守的哥布林营地...",
+    "choices": [
+      {
+        "text": "搜刮营地",
+        "outcomes": [
+          { "probability": 0.5, "description": "你找到了不少金币和物资！", "effects": [{ "type": "gold", "value": 60 }] },
+          { "probability": 0.5, "description": "哥布林回来了！你在混乱中逃跑。", "effects": [{ "type": "damage", "value": 0.1, "target": "random" }] }
+        ]
+      },
+      {
+        "text": "放火烧营",
+        "outcomes": [
+          { "probability": 0.8, "description": "营地被烧毁，你在灰烬中找到了一些东西。", "effects": [{ "type": "gold", "value": 40 }] },
+          { "probability": 0.2, "description": "火势蔓延，你自己也被烫伤了。", "effects": [{ "type": "gold", "value": 40 }, { "type": "damage", "value": 0.15, "target": "random" }] }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "fortune_teller",
+    "title": "占卜师",
+    "description": "一位老妇人坐在水晶球旁，声称能预知未来...",
+    "choices": [
+      {
+        "text": "花费40金币占卜",
+        "outcomes": [
+          { "probability": 0.5, "description": "她的预言让你领悟了新的战斗技巧！", "effects": [{ "type": "gold", "value": -40 }, { "type": "stat_boost", "value": 12 }] },
+          { "probability": 0.5, "description": "她的预言模糊不清，似乎是个骗子。", "effects": [{ "type": "gold", "value": -40 }] }
+        ]
+      },
+      {
+        "text": "谢绝并离开",
+        "outcomes": [
+          { "probability": 1.0, "description": "你不太相信这种事情。", "effects": [] }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "mushroom_grove",
+    "title": "蘑菇丛林",
+    "description": "一片奇异的发光蘑菇丛出现在你面前，散发着迷人的香气...",
+    "choices": [
+      {
+        "text": "采集蘑菇食用",
+        "outcomes": [
+          { "probability": 0.4, "description": "美味的蘑菇恢复了大量体力！", "effects": [{ "type": "heal", "value": 0.4, "target": "all" }] },
+          { "probability": 0.3, "description": "蘑菇有轻微毒性，但也有药效。", "effects": [{ "type": "heal", "value": 0.1, "target": "all" }] },
+          { "probability": 0.3, "description": "毒蘑菇！全队中毒。", "effects": [{ "type": "damage", "value": 0.2, "target": "all" }] }
+        ]
+      },
+      {
+        "text": "采集后出售（获得25金币）",
+        "outcomes": [
+          { "probability": 1.0, "description": "这些蘑菇应该能卖个好价钱。", "effects": [{ "type": "gold", "value": 25 }] }
+        ]
+      }
+    ]
+  }
+]

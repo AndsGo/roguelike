@@ -1,0 +1,164 @@
+[
+  {
+    "id": "iron_sword",
+    "name": "铁剑",
+    "description": "一把普通的铁剑",
+    "slot": "weapon",
+    "rarity": "common",
+    "cost": 30,
+    "stats": { "attack": 10 }
+  },
+  {
+    "id": "steel_sword",
+    "name": "钢剑",
+    "description": "精钢打造的利剑",
+    "slot": "weapon",
+    "rarity": "uncommon",
+    "cost": 60,
+    "stats": { "attack": 20, "critChance": 0.05 }
+  },
+  {
+    "id": "flame_blade",
+    "name": "烈焰之刃",
+    "description": "附带火焰魔力的武器",
+    "slot": "weapon",
+    "rarity": "rare",
+    "cost": 120,
+    "stats": { "attack": 25, "magicPower": 15 }
+  },
+  {
+    "id": "shadow_dagger",
+    "name": "暗影匕首",
+    "description": "极快的刺杀武器",
+    "slot": "weapon",
+    "rarity": "rare",
+    "cost": 100,
+    "stats": { "attack": 15, "critChance": 0.15, "critDamage": 0.3 }
+  },
+  {
+    "id": "holy_staff",
+    "name": "圣光法杖",
+    "description": "增强治疗效果的法杖",
+    "slot": "weapon",
+    "rarity": "rare",
+    "cost": 110,
+    "stats": { "magicPower": 30 }
+  },
+  {
+    "id": "arcane_wand",
+    "name": "奥术魔杖",
+    "description": "蕴含奥术之力",
+    "slot": "weapon",
+    "rarity": "uncommon",
+    "cost": 65,
+    "stats": { "magicPower": 20 }
+  },
+  {
+    "id": "hunting_bow",
+    "name": "猎弓",
+    "description": "射手的基础武器",
+    "slot": "weapon",
+    "rarity": "common",
+    "cost": 35,
+    "stats": { "attack": 12, "attackSpeed": 0.1 }
+  },
+  {
+    "id": "leather_armor",
+    "name": "皮甲",
+    "description": "轻便的皮革护甲",
+    "slot": "armor",
+    "rarity": "common",
+    "cost": 25,
+    "stats": { "defense": 8, "maxHp": 30 }
+  },
+  {
+    "id": "chain_mail",
+    "name": "锁子甲",
+    "description": "金属链环编织的护甲",
+    "slot": "armor",
+    "rarity": "uncommon",
+    "cost": 55,
+    "stats": { "defense": 15, "maxHp": 50 }
+  },
+  {
+    "id": "plate_armor",
+    "name": "板甲",
+    "description": "厚重的金属板甲",
+    "slot": "armor",
+    "rarity": "rare",
+    "cost": 100,
+    "stats": { "defense": 30, "maxHp": 80, "speed": -10 }
+  },
+  {
+    "id": "mage_robe",
+    "name": "法师长袍",
+    "description": "增强魔力的长袍",
+    "slot": "armor",
+    "rarity": "uncommon",
+    "cost": 50,
+    "stats": { "magicResist": 15, "magicPower": 10, "maxHp": 30 }
+  },
+  {
+    "id": "hp_ring",
+    "name": "生命戒指",
+    "description": "增加最大生命值",
+    "slot": "accessory",
+    "rarity": "common",
+    "cost": 20,
+    "stats": { "maxHp": 50 }
+  },
+  {
+    "id": "crit_amulet",
+    "name": "暴击护符",
+    "description": "提升暴击率",
+    "slot": "accessory",
+    "rarity": "uncommon",
+    "cost": 45,
+    "stats": { "critChance": 0.1, "critDamage": 0.2 }
+  },
+  {
+    "id": "speed_boots",
+    "name": "疾风之靴",
+    "description": "提升移动和攻击速度",
+    "slot": "accessory",
+    "rarity": "uncommon",
+    "cost": 50,
+    "stats": { "speed": 20, "attackSpeed": 0.15 }
+  },
+  {
+    "id": "shield_talisman",
+    "name": "护盾符文",
+    "description": "提升防御和魔抗",
+    "slot": "accessory",
+    "rarity": "rare",
+    "cost": 80,
+    "stats": { "defense": 12, "magicResist": 12 }
+  },
+  {
+    "id": "dragon_scale",
+    "name": "龙鳞甲",
+    "description": "用黑龙鳞片打造的传说护甲",
+    "slot": "armor",
+    "rarity": "epic",
+    "cost": 200,
+    "stats": { "defense": 40, "magicResist": 30, "maxHp": 120 }
+  },
+  {
+    "id": "excalibur",
+    "name": "神圣之剑",
+    "description": "传说中的圣剑",
+    "slot": "weapon",
+    "rarity": "epic",
+    "cost": 250,
+    "stats": { "attack": 45, "critChance": 0.1, "critDamage": 0.5 }
+  },
+  {
+    "id": "phoenix_feather",
+    "name": "凤凰羽饰",
+    "description": "蕴含重生之力",
+    "slot": "accessory",
+    "rarity": "epic",
+    "cost": 180,
+    "stats": { "maxHp": 100, "magicPower": 20, "magicResist": 15 }
+  }
+]
