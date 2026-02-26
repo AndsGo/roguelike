@@ -6,29 +6,67 @@ import { MovementSystem } from './MovementSystem';
 import { DamageSystem } from './DamageSystem';
 import { SkillSystem } from './SkillSystem';
 import { StatusEffectSystem } from './StatusEffectSystem';
+import { ComboSystem } from './ComboSystem';
+import { SynergySystem } from './SynergySystem';
+import { EventBus } from './EventBus';
 import { SeededRNG } from '../utils/rng';
+import { HeroData, HeroState, BattleResult } from '../types';
 
+/**
+ * Public battle state exposed to scenes (backward-compatible).
+ */
 export type BattleState = 'fighting' | 'victory' | 'defeat';
+
+/**
+ * Internal phases within the 'fighting' state.
+ */
+type InternalPhase = 'preparing' | 'combat' | 'settling';
+
+const PREPARE_DURATION = 500; // ms
+const SETTLE_DURATION = 500;  // ms
 
 export class BattleSystem {
   heroes: Hero[] = [];
   enemies: Enemy[] = [];
   damageSystem: DamageSystem;
   skillSystem: SkillSystem;
+  comboSystem: ComboSystem;
+  synergySystem: SynergySystem;
   battleState: BattleState = 'fighting';
   speedMultiplier: number = 1;
   private rng: SeededRNG;
+  private internalPhase: InternalPhase = 'preparing';
+  private phaseTimer: number = 0;
+  private battleResult: BattleResult | null = null;
 
   constructor(rng: SeededRNG) {
     this.rng = rng;
+    this.comboSystem = new ComboSystem();
+    this.synergySystem = new SynergySystem();
     this.damageSystem = new DamageSystem(rng);
+    this.damageSystem.comboSystem = this.comboSystem;
     this.skillSystem = new SkillSystem(rng, this.damageSystem);
   }
 
-  setUnits(heroes: Hero[], enemies: Enemy[]): void {
+  /**
+   * Set up units for battle. Optionally pass hero data/state for synergy calculation.
+   */
+  setUnits(
+    heroes: Hero[],
+    enemies: Enemy[],
+    heroStates?: HeroState[],
+    heroDataMap?: Map<string, HeroData>,
+  ): void {
     this.heroes = heroes;
     this.enemies = enemies;
     this.battleState = 'fighting';
+    this.internalPhase = 'preparing';
+    this.phaseTimer = PREPARE_DURATION;
+    this.battleResult = null;
+
+    // Reset threat tracking for new battle
+    TargetingSystem.resetThreat();
+    this.comboSystem.reset();
 
     // Initialize skills
     for (const hero of heroes) {
@@ -36,6 +74,42 @@ export class BattleSystem {
     }
     for (const enemy of enemies) {
       this.skillSystem.initializeSkills(enemy, enemy.enemyData.skills);
+    }
+
+    // Calculate and apply synergy bonuses
+    if (heroStates && heroDataMap) {
+      this.applySynergies(heroStates, heroDataMap);
+    }
+
+    // Emit battle:start event
+    EventBus.getInstance().emit('battle:start', {
+      heroCount: heroes.length,
+      enemyCount: enemies.length,
+    });
+  }
+
+  /**
+   * Calculate synergy bonuses and apply them to hero units.
+   */
+  private applySynergies(
+    heroStates: HeroState[],
+    heroDataMap: Map<string, HeroData>,
+  ): void {
+    const cache = this.synergySystem.calculateActiveSynergies(heroStates, heroDataMap);
+
+    // Apply stat bonuses to each hero unit
+    for (const hero of this.heroes) {
+      const bonuses = cache.heroBonuses.get(hero.unitId);
+      if (bonuses) {
+        hero.synergyBonuses = bonuses;
+      }
+    }
+
+    // Add unlocked skills to all heroes
+    for (const skill of cache.unlockedSkills) {
+      for (const hero of this.heroes) {
+        hero.addSkill(skill);
+      }
     }
   }
 
@@ -46,6 +120,40 @@ export class BattleSystem {
     if (this.battleState !== 'fighting') return;
 
     const adjustedDelta = delta * this.speedMultiplier;
+
+    switch (this.internalPhase) {
+      case 'preparing':
+        this.phaseTimer -= adjustedDelta;
+        if (this.phaseTimer <= 0) {
+          this.internalPhase = 'combat';
+        }
+        return;
+
+      case 'combat':
+        this.updateCombat(adjustedDelta);
+        return;
+
+      case 'settling':
+        this.phaseTimer -= adjustedDelta;
+        if (this.phaseTimer <= 0) {
+          // Transition to final public state
+          if (this.battleResult?.victory) {
+            this.battleState = 'victory';
+          } else {
+            this.battleState = 'defeat';
+          }
+        }
+        return;
+    }
+  }
+
+  /**
+   * Core combat update loop.
+   */
+  private updateCombat(adjustedDelta: number): void {
+    // Update combo timers
+    this.comboSystem.update(adjustedDelta);
+
     const allUnits: Unit[] = [...this.heroes, ...this.enemies];
 
     for (const unit of allUnits) {
@@ -69,7 +177,7 @@ export class BattleSystem {
 
       if (!unit.target) continue;
 
-      // 5. In range → attack or use skill
+      // 5. In range -> attack or use skill
       if (unit.isInRange(unit.target)) {
         // Try skill first
         const readySkill = this.skillSystem.findReadySkill(
@@ -110,6 +218,13 @@ export class BattleSystem {
             ? 'magical' as const
             : 'physical' as const;
           this.damageSystem.applyDamage(unit, unit.target, damageType);
+
+          // Register threat from normal attacks
+          TargetingSystem.registerThreat(
+            unit.target.unitId,
+            unit.unitId,
+            unit.getEffectiveStats().attack,
+          );
         }
       }
     }
@@ -119,11 +234,33 @@ export class BattleSystem {
     const heroesAlive = this.heroes.some(h => h.isAlive);
     const enemiesAlive = this.enemies.some(e => e.isAlive);
 
-    if (!enemiesAlive) {
-      this.battleState = 'victory';
-    } else if (!heroesAlive) {
-      this.battleState = 'defeat';
+    if (!enemiesAlive || !heroesAlive) {
+      const victory = !enemiesAlive;
+
+      this.battleResult = {
+        victory,
+        goldEarned: victory ? this.getTotalGoldReward() : 0,
+        expEarned: victory ? this.getTotalExpReward() : 0,
+        survivors: this.heroes.filter(h => h.isAlive).map(h => h.unitId),
+      };
+
+      // Emit battle:end event
+      EventBus.getInstance().emit('battle:end', {
+        victory,
+        result: this.battleResult,
+      });
+
+      // Transition to settling phase (still publicly 'fighting')
+      this.internalPhase = 'settling';
+      this.phaseTimer = SETTLE_DURATION;
     }
+  }
+
+  /**
+   * Get the battle result (available after battle ends).
+   */
+  getBattleResult(): BattleResult | null {
+    return this.battleResult;
   }
 
   getTotalGoldReward(): number {

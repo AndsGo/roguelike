@@ -1,8 +1,10 @@
 import { Unit } from '../entities/Unit';
-import { SkillData, StatusEffect, StatusEffectType } from '../types';
+import { SkillData, SkillEffect, StatusEffect, StatusEffectType } from '../types';
 import { DamageSystem } from './DamageSystem';
 import { DamageNumber } from '../components/DamageNumber';
 import { SeededRNG } from '../utils/rng';
+import { EventBus } from './EventBus';
+import { TargetingSystem } from './TargetingSystem';
 import skillsData from '../data/skills.json';
 
 export class SkillSystem {
@@ -17,7 +19,7 @@ export class SkillSystem {
   /** Initialize skills for a unit from skill IDs */
   initializeSkills(unit: Unit, skillIds: string[]): void {
     unit.skills = skillIds
-      .map(id => skillsData.find(s => s.id === id) as SkillData)
+      .map(id => (skillsData as SkillData[]).find(s => s.id === id) as SkillData)
       .filter(Boolean);
     for (const skill of unit.skills) {
       unit.skillCooldowns.set(skill.id, 0);
@@ -100,17 +102,33 @@ export class SkillSystem {
         break;
     }
 
+    // Emit skill:use event
+    EventBus.getInstance().emit('skill:use', {
+      casterId: unit.unitId,
+      skillId: skill.id,
+      targets: targets.map(t => t.unitId),
+    });
+
+    // Determine skill element (from skill data or unit element)
+    const skillElement = skill.element ?? unit.element;
+
     for (const target of targets) {
       if (totalDamage < 0) {
         // Healing skill
         this.damageSystem.applyHeal(unit, target, Math.abs(totalDamage));
       } else if (totalDamage > 0) {
-        // Damage skill
+        // Damage skill - pass element through
         const forceCrit = skill.id === 'backstab';
         const result = this.damageSystem.calculateDamage(
-          unit, target, totalDamage, skill.damageType, forceCrit,
+          unit, target, totalDamage, skill.damageType, forceCrit, skillElement,
         );
         target.takeDamage(result.finalDamage);
+
+        // Register combo hit
+        if (this.damageSystem.comboSystem) {
+          this.damageSystem.comboSystem.registerHit(unit.unitId, target.unitId);
+        }
+
         new DamageNumber(
           target.scene,
           target.x + this.rng.nextInt(-10, 10),
@@ -119,11 +137,49 @@ export class SkillSystem {
           false,
           result.isCrit,
         );
+
+        // Show reaction damage
+        if (result.elementReactionDamage > 0) {
+          new DamageNumber(
+            target.scene,
+            target.x + this.rng.nextInt(-10, 10),
+            target.y - 30,
+            result.elementReactionDamage,
+            false,
+            false,
+          );
+        }
+
+        // Emit damage event
+        EventBus.getInstance().emit('unit:damage', {
+          sourceId: unit.unitId,
+          targetId: target.unitId,
+          amount: result.finalDamage + result.elementReactionDamage,
+          damageType: skill.damageType,
+          element: skillElement,
+          isCrit: result.isCrit,
+        });
+
+        // Check for kill
+        if (!target.isAlive) {
+          EventBus.getInstance().emit('unit:kill', {
+            killerId: unit.unitId,
+            targetId: target.unitId,
+          });
+        }
+
+        // Register threat
+        TargetingSystem.registerThreat(target.unitId, unit.unitId, result.finalDamage);
       }
 
       // Apply status effect
       if (skill.statusEffect && skill.effectDuration) {
         this.applyStatusEffect(unit, target, skill);
+      }
+
+      // Process chain effects if present
+      if (skill.effects) {
+        this.processEffectChain(unit, target, skill.effects, allies, enemies);
       }
     }
 
@@ -136,8 +192,84 @@ export class SkillSystem {
     });
   }
 
+  /**
+   * Process a chain of SkillEffects sequentially on a target.
+   */
+  private processEffectChain(
+    caster: Unit,
+    target: Unit,
+    effects: SkillEffect[],
+    allies: Unit[],
+    enemies: Unit[],
+  ): void {
+    for (const effect of effects) {
+      this.processEffect(caster, target, effect, allies, enemies);
+    }
+  }
+
+  private processEffect(
+    caster: Unit,
+    target: Unit,
+    effect: SkillEffect,
+    allies: Unit[],
+    enemies: Unit[],
+  ): void {
+    if (!target.isAlive && effect.type !== 'heal') return;
+
+    const stats = caster.getEffectiveStats();
+    const effectElement = effect.element ?? caster.element;
+
+    switch (effect.type) {
+      case 'damage': {
+        const scaleStat = effect.scalingStat === 'magicPower' ? stats.magicPower : stats.attack;
+        const base = (effect.baseDamage ?? 0) + scaleStat * (effect.scalingRatio ?? 0);
+        if (base > 0) {
+          this.damageSystem.applyDamage(
+            caster, target,
+            effect.damageType ?? 'physical',
+            base,
+            effectElement,
+          );
+        }
+        break;
+      }
+      case 'heal': {
+        const scaleStat = effect.scalingStat === 'magicPower' ? stats.magicPower : stats.attack;
+        const heal = (effect.baseDamage ?? 0) + scaleStat * (effect.scalingRatio ?? 0);
+        if (heal > 0) {
+          this.damageSystem.applyHeal(caster, target, heal);
+        }
+        break;
+      }
+      case 'status': {
+        if (effect.statusEffectId && effect.statusDuration) {
+          const statusEffect: StatusEffect = {
+            id: `${effect.statusEffectId}_${Date.now()}`,
+            type: this.mapEffectType(effect.statusEffectId),
+            name: effect.statusEffectId,
+            duration: effect.statusDuration,
+            value: effect.baseDamage ?? 0,
+            element: effectElement,
+          };
+          target.statusEffects.push(statusEffect);
+        }
+        break;
+      }
+      case 'element_reaction': {
+        // Deliberately trigger an element reaction check
+        break;
+      }
+    }
+
+    // Process chained effect
+    if (effect.chain) {
+      this.processEffect(caster, target, effect.chain, allies, enemies);
+    }
+  }
+
   private applyStatusEffect(source: Unit, target: Unit, skill: SkillData): void {
     const effectType = this.mapEffectType(skill.statusEffect!);
+    const skillElement = skill.element ?? source.element;
     const effect: StatusEffect = {
       id: `${skill.statusEffect}_${Date.now()}`,
       type: effectType,
@@ -147,6 +279,7 @@ export class SkillSystem {
       tickInterval: effectType === 'dot' || effectType === 'hot' ? 1 : undefined,
       stat: effectType === 'buff' ? 'attack' : undefined,
       sourceId: source.unitId,
+      element: skillElement,
     };
 
     if (effectType === 'taunt') {
@@ -154,6 +287,13 @@ export class SkillSystem {
     }
 
     target.statusEffects.push(effect);
+
+    // Emit status apply event
+    EventBus.getInstance().emit('status:apply', {
+      targetId: target.unitId,
+      effectId: effect.id,
+      effectType: effectType,
+    });
   }
 
   private mapEffectType(effectName: string): StatusEffectType {
