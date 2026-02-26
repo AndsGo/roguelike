@@ -2,6 +2,8 @@ import Phaser from 'phaser';
 import { GAME_WIDTH, GAME_HEIGHT } from '../constants';
 import { RunManager } from '../managers/RunManager';
 import { Button } from '../ui/Button';
+import { Theme, colorToString } from '../ui/Theme';
+import { SceneTransition } from '../systems/SceneTransition';
 
 export class GameOverScene extends Phaser.Scene {
   constructor() {
@@ -13,36 +15,45 @@ export class GameOverScene extends Phaser.Scene {
 
     this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, 0x0a0a0a);
 
-    this.add.text(GAME_WIDTH / 2, 100, 'GAME OVER', {
+    const title = this.add.text(GAME_WIDTH / 2, 95, 'GAME OVER', {
       fontSize: '36px',
-      color: '#ff4444',
+      color: colorToString(Theme.colors.danger),
       fontFamily: 'monospace',
+      fontStyle: 'bold',
       stroke: '#000000',
       strokeThickness: 4,
-    }).setOrigin(0.5);
+    }).setOrigin(0.5).setScale(0);
 
-    this.add.text(GAME_WIDTH / 2, 160, '你的队伍全军覆没...', {
-      fontSize: '14px',
+    this.tweens.add({
+      targets: title,
+      scaleX: 1,
+      scaleY: 1,
+      duration: 500,
+      ease: 'Back.easeOut',
+    });
+
+    this.add.text(GAME_WIDTH / 2, 155, 'Your team has been defeated...', {
+      fontSize: '13px',
       color: '#888888',
       fontFamily: 'monospace',
     }).setOrigin(0.5);
 
     // Run stats
     const node = rm.getCurrentNode() + 1;
-    this.add.text(GAME_WIDTH / 2, 210, `到达: 第 ${node} 关`, {
+    this.add.text(GAME_WIDTH / 2, 205, `Reached: Stage ${node}`, {
       fontSize: '12px',
       color: '#aaaaaa',
       fontFamily: 'monospace',
     }).setOrigin(0.5);
 
-    this.add.text(GAME_WIDTH / 2, 235, `获得金币: ${rm.getGold()}`, {
+    this.add.text(GAME_WIDTH / 2, 230, `Gold earned: ${rm.getGold()}`, {
       fontSize: '12px',
-      color: '#ffdd44',
+      color: colorToString(Theme.colors.gold),
       fontFamily: 'monospace',
     }).setOrigin(0.5);
 
-    new Button(this, GAME_WIDTH / 2, 320, '返回主菜单', 180, 45, () => {
-      this.scene.start('MainMenuScene');
-    });
+    new Button(this, GAME_WIDTH / 2, 315, 'Main Menu', 180, 45, () => {
+      SceneTransition.fadeTransition(this, 'MainMenuScene');
+    }, Theme.colors.danger);
   }
 }

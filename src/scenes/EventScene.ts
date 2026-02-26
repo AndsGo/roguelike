@@ -3,6 +3,8 @@ import { GAME_WIDTH, GAME_HEIGHT } from '../constants';
 import { RunManager } from '../managers/RunManager';
 import { EventData, EventChoice, EventOutcome } from '../types';
 import { Button } from '../ui/Button';
+import { Theme, colorToString } from '../ui/Theme';
+import { SceneTransition } from '../systems/SceneTransition';
 import eventsData from '../data/events.json';
 
 export class EventScene extends Phaser.Scene {
@@ -20,21 +22,22 @@ export class EventScene extends Phaser.Scene {
     const rm = RunManager.getInstance();
     const rng = rm.getRng();
 
-    this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, 0x111122);
+    this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, Theme.colors.background);
 
     // Pick a random event
     const eventPool = eventsData as EventData[];
     const event = rng.pick(eventPool);
 
     // Title
-    this.add.text(GAME_WIDTH / 2, 40, event.title, {
-      fontSize: '20px',
+    this.add.text(GAME_WIDTH / 2, 38, event.title, {
+      fontSize: '18px',
       color: '#cc88ff',
       fontFamily: 'monospace',
+      fontStyle: 'bold',
     }).setOrigin(0.5);
 
     // Description
-    this.add.text(GAME_WIDTH / 2, 90, event.description, {
+    this.add.text(GAME_WIDTH / 2, 85, event.description, {
       fontSize: '11px',
       color: '#cccccc',
       fontFamily: 'monospace',
@@ -43,9 +46,9 @@ export class EventScene extends Phaser.Scene {
     }).setOrigin(0.5);
 
     // Gold display
-    this.add.text(GAME_WIDTH - 20, 15, `金币: ${rm.getGold()}`, {
+    this.add.text(GAME_WIDTH - 15, 12, `${rm.getGold()}G`, {
       fontSize: '11px',
-      color: '#ffdd44',
+      color: colorToString(Theme.colors.gold),
       fontFamily: 'monospace',
     }).setOrigin(1, 0);
 
@@ -54,7 +57,7 @@ export class EventScene extends Phaser.Scene {
       new Button(
         this,
         GAME_WIDTH / 2,
-        170 + i * 55,
+        165 + i * 55,
         choice.text,
         400,
         40,
@@ -64,7 +67,6 @@ export class EventScene extends Phaser.Scene {
   }
 
   private makeChoice(choice: EventChoice, rng: ReturnType<RunManager['getRng']>, rm: RunManager): void {
-    // Roll outcome based on probabilities
     const roll = rng.next();
     let cumulative = 0;
     let selectedOutcome: EventOutcome = choice.outcomes[choice.outcomes.length - 1];
@@ -77,7 +79,6 @@ export class EventScene extends Phaser.Scene {
       }
     }
 
-    // Apply effects
     for (const effect of selectedOutcome.effects) {
       switch (effect.type) {
         case 'gold':
@@ -90,14 +91,11 @@ export class EventScene extends Phaser.Scene {
           rm.damageAllHeroes(effect.value);
           break;
         case 'stat_boost':
-          // Small permanent stat boost — simplified as exp
           for (const hero of rm.getHeroes()) {
-            const data = rm.getHeroData(hero.id);
             hero.exp += effect.value * 5;
           }
           break;
         case 'item':
-          // Would add random item — simplified for MVP
           rm.addGold(30);
           break;
       }
@@ -105,7 +103,7 @@ export class EventScene extends Phaser.Scene {
 
     // Show outcome
     this.children.removeAll();
-    this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, 0x111122);
+    this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, Theme.colors.background);
 
     this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 - 40, selectedOutcome.description, {
       fontSize: '14px',
@@ -115,13 +113,12 @@ export class EventScene extends Phaser.Scene {
       align: 'center',
     }).setOrigin(0.5);
 
-    // Show effect summary
     const effectTexts = selectedOutcome.effects.map(e => {
       switch (e.type) {
-        case 'gold': return `金币 ${e.value > 0 ? '+' : ''}${e.value}`;
-        case 'heal': return `治疗 ${Math.round(e.value * 100)}% HP`;
-        case 'damage': return `受到 ${Math.round(e.value * 100)}% HP 伤害`;
-        case 'stat_boost': return `属性提升 +${e.value}`;
+        case 'gold': return `Gold ${e.value > 0 ? '+' : ''}${e.value}`;
+        case 'heal': return `Heal ${Math.round(e.value * 100)}% HP`;
+        case 'damage': return `Damage ${Math.round(e.value * 100)}% HP`;
+        case 'stat_boost': return `Stat boost +${e.value}`;
         default: return '';
       }
     }).filter(Boolean);
@@ -137,8 +134,8 @@ export class EventScene extends Phaser.Scene {
 
     rm.markNodeCompleted(this.nodeIndex);
 
-    new Button(this, GAME_WIDTH / 2, GAME_HEIGHT - 50, '继续', 140, 40, () => {
-      this.scene.start('MapScene');
+    new Button(this, GAME_WIDTH / 2, GAME_HEIGHT - 50, 'Continue', 140, 40, () => {
+      SceneTransition.fadeTransition(this, 'MapScene');
     });
   }
 }

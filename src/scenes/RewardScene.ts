@@ -3,6 +3,8 @@ import { GAME_WIDTH, GAME_HEIGHT } from '../constants';
 import { BattleResult } from '../types';
 import { Button } from '../ui/Button';
 import { RunManager } from '../managers/RunManager';
+import { Theme, colorToString } from '../ui/Theme';
+import { SceneTransition } from '../systems/SceneTransition';
 
 export class RewardScene extends Phaser.Scene {
   constructor() {
@@ -13,53 +15,67 @@ export class RewardScene extends Phaser.Scene {
     const result = data.result;
     const rm = RunManager.getInstance();
 
-    this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, 0x111122);
+    this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, Theme.colors.background);
 
-    this.add.text(GAME_WIDTH / 2, 60, '战斗胜利！', {
+    const title = this.add.text(GAME_WIDTH / 2, 55, 'VICTORY!', {
       fontSize: '22px',
-      color: '#44ff44',
+      color: colorToString(Theme.colors.success),
       fontFamily: 'monospace',
-    }).setOrigin(0.5);
+      fontStyle: 'bold',
+    }).setOrigin(0.5).setScale(0);
 
-    // Rewards
-    this.add.text(GAME_WIDTH / 2, 120, `获得金币: ${result.goldEarned}`, {
+    this.tweens.add({
+      targets: title,
+      scaleX: 1,
+      scaleY: 1,
+      duration: 300,
+      ease: 'Back.easeOut',
+    });
+
+    // Rewards with staggered appearance
+    const goldText = this.add.text(GAME_WIDTH / 2, 110, `Gold: +${result.goldEarned}`, {
       fontSize: '14px',
-      color: '#ffdd44',
+      color: colorToString(Theme.colors.gold),
       fontFamily: 'monospace',
-    }).setOrigin(0.5);
+    }).setOrigin(0.5).setAlpha(0);
 
-    this.add.text(GAME_WIDTH / 2, 150, `获得经验: ${result.expEarned}`, {
+    const expText = this.add.text(GAME_WIDTH / 2, 138, `EXP: +${result.expEarned}`, {
       fontSize: '14px',
       color: '#88aaff',
       fontFamily: 'monospace',
-    }).setOrigin(0.5);
+    }).setOrigin(0.5).setAlpha(0);
 
-    this.add.text(GAME_WIDTH / 2, 190, `存活英雄: ${result.survivors.length}`, {
-      fontSize: '12px',
+    this.tweens.add({ targets: goldText, alpha: 1, y: 105, delay: 200, duration: 300 });
+    this.tweens.add({ targets: expText, alpha: 1, y: 133, delay: 400, duration: 300 });
+
+    // Survivors
+    this.add.text(GAME_WIDTH / 2, 170, `Survivors: ${result.survivors.length}`, {
+      fontSize: '11px',
       color: '#aaaaaa',
       fontFamily: 'monospace',
     }).setOrigin(0.5);
 
-    // Show current team status
+    // Team status
     const heroes = rm.getHeroes();
     heroes.forEach((hero, i) => {
       const hd = rm.getHeroData(hero.id);
       const maxHp = rm.getMaxHp(hero, hd);
-      this.add.text(GAME_WIDTH / 2, 230 + i * 20, `${hd.name} Lv.${hero.level} HP:${hero.currentHp}/${maxHp}`, {
+      const alive = result.survivors.includes(hero.id);
+      this.add.text(GAME_WIDTH / 2, 200 + i * 20, `${hd.name} Lv.${hero.level}  HP:${hero.currentHp}/${maxHp}`, {
         fontSize: '10px',
-        color: result.survivors.includes(hero.id) ? '#ffffff' : '#ff6666',
+        color: alive ? '#ffffff' : '#ff6666',
         fontFamily: 'monospace',
       }).setOrigin(0.5);
     });
 
-    this.add.text(GAME_WIDTH / 2, GAME_HEIGHT - 80, `总金币: ${rm.getGold()}`, {
+    this.add.text(GAME_WIDTH / 2, GAME_HEIGHT - 80, `Total Gold: ${rm.getGold()}`, {
       fontSize: '12px',
-      color: '#ffdd44',
+      color: colorToString(Theme.colors.gold),
       fontFamily: 'monospace',
     }).setOrigin(0.5);
 
-    new Button(this, GAME_WIDTH / 2, GAME_HEIGHT - 40, '继续冒险', 160, 40, () => {
-      this.scene.start('MapScene');
+    new Button(this, GAME_WIDTH / 2, GAME_HEIGHT - 38, 'Continue', 160, 38, () => {
+      SceneTransition.fadeTransition(this, 'MapScene');
     });
   }
 }

@@ -1,20 +1,25 @@
 import Phaser from 'phaser';
 import { GAME_WIDTH, GAME_HEIGHT, BATTLE_GROUND_Y, HERO_START_X, ENEMY_START_X, UNIT_SPACING_Y } from '../constants';
 import { RunManager } from '../managers/RunManager';
-import { BattleSystem, BattleState } from '../systems/BattleSystem';
+import { BattleSystem } from '../systems/BattleSystem';
 import { Hero } from '../entities/Hero';
 import { Enemy } from '../entities/Enemy';
 import { BattleNodeData, EnemyData, BattleResult } from '../types';
-import { Button } from '../ui/Button';
+import { BattleHUD } from '../ui/BattleHUD';
+import { BattleEffects } from '../systems/BattleEffects';
+import { ParticleManager } from '../systems/ParticleManager';
+import { SceneTransition } from '../systems/SceneTransition';
+import { EventBus } from '../systems/EventBus';
+import { Theme, colorToString } from '../ui/Theme';
 import enemiesData from '../data/enemies.json';
 
 export class BattleScene extends Phaser.Scene {
   private battleSystem!: BattleSystem;
   private nodeIndex!: number;
   private battleEndHandled: boolean = false;
-  private speedButton!: Button;
-  private speedLevels = [1, 2, 3];
-  private currentSpeedIndex = 0;
+  private hud!: BattleHUD;
+  private effects!: BattleEffects;
+  private particles!: ParticleManager;
 
   constructor() {
     super({ key: 'BattleScene' });
@@ -23,26 +28,33 @@ export class BattleScene extends Phaser.Scene {
   init(data: { nodeIndex: number }): void {
     this.nodeIndex = data.nodeIndex;
     this.battleEndHandled = false;
-    this.currentSpeedIndex = 0;
   }
 
   create(): void {
     const rm = RunManager.getInstance();
     const rng = rm.getRng();
 
-    // Background gradient
-    this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, 0x1a1a2e);
+    // Initialize effects systems
+    this.effects = new BattleEffects(this);
+    this.particles = new ParticleManager(this);
+
+    // Background
+    this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, Theme.colors.background);
 
     // Ground line
-    this.add.rectangle(GAME_WIDTH / 2, BATTLE_GROUND_Y + 50, GAME_WIDTH, 2, 0x333355);
+    const ground = this.add.graphics();
+    ground.lineStyle(1, 0x333355, 0.5);
+    ground.lineBetween(0, BATTLE_GROUND_Y + 50, GAME_WIDTH, BATTLE_GROUND_Y + 50);
 
     // Node info
     const node = rm.getMap()[this.nodeIndex];
-    const typeLabel = node.type === 'boss' ? 'BOSS战' : node.type === 'elite' ? '精英战' : '战斗';
-    this.add.text(GAME_WIDTH / 2, 15, typeLabel, {
-      fontSize: '14px',
-      color: node.type === 'boss' ? '#ff4444' : '#ffffff',
+    const typeLabel = node.type === 'boss' ? 'BOSS' : node.type === 'elite' ? 'ELITE' : 'BATTLE';
+    const labelColor = node.type === 'boss' ? colorToString(Theme.colors.danger) : '#ffffff';
+    this.add.text(GAME_WIDTH / 2, 12, typeLabel, {
+      fontSize: '12px',
+      color: labelColor,
       fontFamily: 'monospace',
+      fontStyle: 'bold',
     }).setOrigin(0.5);
 
     // Create battle system
@@ -66,33 +78,66 @@ export class BattleScene extends Phaser.Scene {
 
     this.battleSystem.setUnits(heroes, enemies);
 
-    // Speed button
-    this.speedButton = new Button(this, GAME_WIDTH - 50, 15, '1x', 50, 25, () => {
-      this.cycleSpeed();
+    // Create HUD
+    this.hud = new BattleHUD(this, heroes, enemies, (speed) => {
+      this.battleSystem.speedMultiplier = speed;
+    });
+
+    // Listen for visual events
+    EventBus.getInstance().on('unit:damage', (data) => {
+      if (data.isCrit) {
+        this.effects.screenShake(0.008, 150);
+        this.effects.critSlowMotion();
+      } else {
+        this.effects.screenShake(0.003, 60);
+      }
+      // Hit particles
+      const target = [...heroes, ...enemies].find(u => u.unitId === data.targetId);
+      if (target) {
+        this.particles.createHitEffect(target.x, target.y, data.element);
+        this.effects.hitFlash(target);
+      }
+    });
+
+    EventBus.getInstance().on('unit:heal', (data) => {
+      const target = [...heroes, ...enemies].find(u => u.unitId === data.targetId);
+      if (target) {
+        this.particles.createHealEffect(target.x, target.y);
+      }
+    });
+
+    EventBus.getInstance().on('unit:death', (data) => {
+      const unit = [...heroes, ...enemies].find(u => u.unitId === data.unitId);
+      if (unit) {
+        this.particles.createDeathEffect(unit.x, unit.y);
+        this.effects.screenShake(0.01, 200);
+      }
+    });
+
+    EventBus.getInstance().on('element:reaction', (data) => {
+      const target = [...heroes, ...enemies].find(u => u.unitId === data.targetId);
+      if (target) {
+        this.particles.createElementReactionEffect(target.x, target.y, data.element1, data.element2);
+        this.effects.screenShake(0.012, 200);
+      }
     });
 
     // Gold display
-    this.add.text(10, 10, `金币: ${rm.getGold()}`, {
+    this.add.text(10, 10, `${rm.getGold()}G`, {
       fontSize: '10px',
-      color: '#ffdd44',
+      color: colorToString(Theme.colors.gold),
       fontFamily: 'monospace',
     });
   }
 
   update(_time: number, delta: number): void {
     this.battleSystem.update(delta);
+    this.hud.updatePortraits();
 
     if (this.battleSystem.battleState !== 'fighting' && !this.battleEndHandled) {
       this.battleEndHandled = true;
       this.handleBattleEnd();
     }
-  }
-
-  private cycleSpeed(): void {
-    this.currentSpeedIndex = (this.currentSpeedIndex + 1) % this.speedLevels.length;
-    const speed = this.speedLevels[this.currentSpeedIndex];
-    this.battleSystem.speedMultiplier = speed;
-    this.speedButton.setText(`${speed}x`);
   }
 
   private handleBattleEnd(): void {
@@ -106,7 +151,6 @@ export class BattleScene extends Phaser.Scene {
         .filter(h => h.isAlive)
         .map(h => h.unitId);
 
-      // Update hero HP in RunManager
       for (const hero of this.battleSystem.heroes) {
         rm.updateHeroHp(hero.unitId, hero.currentHp);
       }
@@ -121,32 +165,41 @@ export class BattleScene extends Phaser.Scene {
       rm.applyBattleResult(result);
       rm.markNodeCompleted(this.nodeIndex);
 
-      // Check if boss was defeated
       const node = rm.getMap()[this.nodeIndex];
       if (node.type === 'boss') {
         this.time.delayedCall(1500, () => {
-          this.scene.start('VictoryScene');
+          SceneTransition.fadeTransition(this, 'VictoryScene');
         });
       } else {
         this.time.delayedCall(1500, () => {
-          this.scene.start('RewardScene', { result });
+          SceneTransition.fadeTransition(this, 'RewardScene', { result });
         });
       }
     } else {
       this.time.delayedCall(1500, () => {
-        this.scene.start('GameOverScene');
+        SceneTransition.fadeTransition(this, 'GameOverScene');
       });
     }
 
-    // Show result text
-    const text = isVictory ? '胜利！' : '战败...';
-    const color = isVictory ? '#44ff44' : '#ff4444';
-    this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 - 30, text, {
+    // Victory/defeat text with animation
+    const text = isVictory ? 'VICTORY' : 'DEFEAT';
+    const color = isVictory ? colorToString(Theme.colors.success) : colorToString(Theme.colors.danger);
+    const resultText = this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 - 30, text, {
       fontSize: '28px',
       color,
       fontFamily: 'monospace',
+      fontStyle: 'bold',
       stroke: '#000000',
       strokeThickness: 4,
-    }).setOrigin(0.5);
+    }).setOrigin(0.5).setScale(0).setAlpha(0);
+
+    this.tweens.add({
+      targets: resultText,
+      scaleX: 1,
+      scaleY: 1,
+      alpha: 1,
+      duration: 400,
+      ease: 'Back.easeOut',
+    });
   }
 }

@@ -1,9 +1,15 @@
 import Phaser from 'phaser';
+import { Theme, lightenColor, darkenColor } from './Theme';
 
 export class Button extends Phaser.GameObjects.Container {
-  private bg: Phaser.GameObjects.Rectangle;
+  private bg: Phaser.GameObjects.Graphics;
   private label: Phaser.GameObjects.Text;
   private isEnabled: boolean = true;
+  private btnWidth: number;
+  private btnHeight: number;
+  private baseColor: number;
+  private borderColor: number;
+  private callback?: () => void;
 
   constructor(
     scene: Phaser.Scene,
@@ -13,11 +19,18 @@ export class Button extends Phaser.GameObjects.Container {
     width: number = 160,
     height: number = 40,
     callback?: () => void,
+    color?: number,
   ) {
     super(scene, x, y);
 
-    this.bg = scene.add.rectangle(0, 0, width, height, 0x445588);
-    this.bg.setStrokeStyle(2, 0x8899cc);
+    this.btnWidth = width;
+    this.btnHeight = height;
+    this.baseColor = color ?? Theme.colors.primary;
+    this.borderColor = lightenColor(this.baseColor, 0.2);
+    this.callback = callback;
+
+    this.bg = scene.add.graphics();
+    this.drawButton(this.baseColor, this.borderColor);
     this.add(this.bg);
 
     this.label = scene.add.text(0, 0, text, {
@@ -30,23 +43,85 @@ export class Button extends Phaser.GameObjects.Container {
     this.setSize(width, height);
     this.setInteractive({ useHandCursor: true });
 
-    this.on('pointerover', () => {
-      if (this.isEnabled) this.bg.setFillStyle(0x5566aa);
-    });
-    this.on('pointerout', () => {
-      if (this.isEnabled) this.bg.setFillStyle(0x445588);
-    });
-    this.on('pointerdown', () => {
-      if (this.isEnabled && callback) callback();
-    });
+    this.on('pointerover', this.onHover, this);
+    this.on('pointerout', this.onOut, this);
+    this.on('pointerdown', this.onDown, this);
+    this.on('pointerup', this.onUp, this);
 
     scene.add.existing(this);
   }
 
+  private drawButton(fill: number, border: number, alpha: number = 1): void {
+    this.bg.clear();
+    const w = this.btnWidth;
+    const h = this.btnHeight;
+    const r = 6;
+    this.bg.fillStyle(fill, alpha);
+    this.bg.fillRoundedRect(-w / 2, -h / 2, w, h, r);
+    this.bg.lineStyle(2, border, alpha);
+    this.bg.strokeRoundedRect(-w / 2, -h / 2, w, h, r);
+  }
+
+  private onHover(): void {
+    if (!this.isEnabled) return;
+    this.drawButton(lightenColor(this.baseColor, 0.15), lightenColor(this.borderColor, 0.15));
+    this.scene.tweens.add({
+      targets: this,
+      scaleX: 1.05,
+      scaleY: 1.05,
+      duration: 100,
+      ease: 'Sine.easeOut',
+    });
+  }
+
+  private onOut(): void {
+    if (!this.isEnabled) return;
+    this.drawButton(this.baseColor, this.borderColor);
+    this.scene.tweens.add({
+      targets: this,
+      scaleX: 1,
+      scaleY: 1,
+      duration: 100,
+      ease: 'Sine.easeOut',
+    });
+  }
+
+  private onDown(): void {
+    if (!this.isEnabled) return;
+    this.drawButton(darkenColor(this.baseColor, 0.2), this.borderColor);
+    this.scene.tweens.add({
+      targets: this,
+      scaleX: 0.95,
+      scaleY: 0.95,
+      duration: 60,
+      ease: 'Sine.easeOut',
+    });
+    if (this.callback) this.callback();
+  }
+
+  private onUp(): void {
+    if (!this.isEnabled) return;
+    this.drawButton(this.baseColor, this.borderColor);
+    this.scene.tweens.add({
+      targets: this,
+      scaleX: 1.05,
+      scaleY: 1.05,
+      duration: 60,
+      ease: 'Sine.easeOut',
+    });
+  }
+
   setEnabled(enabled: boolean): void {
     this.isEnabled = enabled;
-    this.bg.setFillStyle(enabled ? 0x445588 : 0x333344);
-    this.label.setAlpha(enabled ? 1 : 0.5);
+    if (enabled) {
+      this.drawButton(this.baseColor, this.borderColor);
+      this.label.setAlpha(1);
+      this.setInteractive({ useHandCursor: true });
+    } else {
+      this.drawButton(0x555555, 0x666666, 0.6);
+      this.label.setAlpha(0.5);
+      this.disableInteractive();
+    }
   }
 
   setText(text: string): void {

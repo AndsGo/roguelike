@@ -4,13 +4,16 @@ import { RunManager } from '../managers/RunManager';
 import { ShopGenerator } from '../systems/ShopGenerator';
 import { ItemData, HeroState } from '../types';
 import { Button } from '../ui/Button';
+import { Theme, colorToString } from '../ui/Theme';
+import { SceneTransition } from '../systems/SceneTransition';
 
 export class ShopScene extends Phaser.Scene {
   private nodeIndex!: number;
   private shopItems: ItemData[] = [];
   private goldText!: Phaser.GameObjects.Text;
   private selectedHero: HeroState | null = null;
-  private itemButtons: { button: Phaser.GameObjects.Container; item: ItemData; priceText: Phaser.GameObjects.Text }[] = [];
+  private itemCards: { container: Phaser.GameObjects.Container; item: ItemData; priceText: Phaser.GameObjects.Text; sold: boolean }[] = [];
+  private heroButtons: Phaser.GameObjects.Container[] = [];
 
   constructor() {
     super({ key: 'ShopScene' });
@@ -19,32 +22,36 @@ export class ShopScene extends Phaser.Scene {
   init(data: { nodeIndex: number }): void {
     this.nodeIndex = data.nodeIndex;
     this.selectedHero = null;
-    this.itemButtons = [];
+    this.itemCards = [];
+    this.heroButtons = [];
   }
 
   create(): void {
     const rm = RunManager.getInstance();
     const rng = rm.getRng();
 
-    // Generate shop inventory
     this.shopItems = ShopGenerator.generate(rng, this.nodeIndex);
 
-    this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, 0x111122);
+    // Background
+    this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, Theme.colors.background);
 
-    this.add.text(GAME_WIDTH / 2, 25, '商店', {
+    // Title
+    this.add.text(GAME_WIDTH / 2, 22, 'SHOP', {
       fontSize: '20px',
-      color: '#44cc44',
+      color: colorToString(Theme.colors.success),
       fontFamily: 'monospace',
+      fontStyle: 'bold',
     }).setOrigin(0.5);
 
-    this.goldText = this.add.text(GAME_WIDTH - 20, 15, `金币: ${rm.getGold()}`, {
+    // Gold display
+    this.goldText = this.add.text(GAME_WIDTH - 15, 12, `${rm.getGold()}G`, {
       fontSize: '12px',
-      color: '#ffdd44',
+      color: colorToString(Theme.colors.gold),
       fontFamily: 'monospace',
     }).setOrigin(1, 0);
 
-    // Hero selection at top
-    this.add.text(20, 50, '选择英雄装备:', {
+    // Hero selection
+    this.add.text(20, 50, 'Select hero:', {
       fontSize: '10px',
       color: '#8899cc',
       fontFamily: 'monospace',
@@ -53,148 +60,192 @@ export class ShopScene extends Phaser.Scene {
     const heroes = rm.getHeroes();
     heroes.forEach((hero, i) => {
       const data = rm.getHeroData(hero.id);
-      const btn = this.add.text(20 + i * 100, 70, data.name, {
-        fontSize: '11px',
+      const btnContainer = this.add.container(25 + i * 100, 72);
+
+      const bg = this.add.graphics();
+      bg.fillStyle(Theme.colors.panel, 0.8);
+      bg.fillRoundedRect(0, -10, 85, 22, 4);
+      bg.lineStyle(1, Theme.colors.panelBorder, 0.5);
+      bg.strokeRoundedRect(0, -10, 85, 22, 4);
+      btnContainer.add(bg);
+
+      const text = this.add.text(42, 1, data.name, {
+        fontSize: '10px',
         color: '#ffffff',
         fontFamily: 'monospace',
-        backgroundColor: '#333355',
-        padding: { x: 6, y: 3 },
-      }).setInteractive({ useHandCursor: true });
+      }).setOrigin(0.5);
+      btnContainer.add(text);
 
-      btn.on('pointerdown', () => {
+      btnContainer.setSize(85, 22);
+      btnContainer.setInteractive({ useHandCursor: true });
+      btnContainer.on('pointerdown', () => {
         this.selectedHero = hero;
-        // Highlight selected
-        heroes.forEach((_, j) => {
-          const otherBtn = this.children.list.find(
-            c => c instanceof Phaser.GameObjects.Text && (c as Phaser.GameObjects.Text).text === rm.getHeroData(heroes[j].id).name
-          ) as Phaser.GameObjects.Text;
-          if (otherBtn) otherBtn.setColor(j === i ? '#ffdd44' : '#ffffff');
-        });
+        this.highlightHeroButton(i);
       });
+
+      this.heroButtons.push(btnContainer);
     });
 
     // Shop items
     this.shopItems.forEach((item, i) => {
-      const x = 60 + (i % 3) * 240;
-      const y = 130 + Math.floor(i / 3) * 100;
+      const x = 70 + (i % 3) * 230;
+      const y = 135 + Math.floor(i / 3) * 110;
       this.createItemCard(item, x, y, rm);
     });
 
     // Leave button
-    new Button(this, GAME_WIDTH / 2, GAME_HEIGHT - 35, '离开商店', 140, 35, () => {
+    new Button(this, GAME_WIDTH / 2, GAME_HEIGHT - 30, 'Leave Shop', 140, 35, () => {
       rm.markNodeCompleted(this.nodeIndex);
-      this.scene.start('MapScene');
+      SceneTransition.fadeTransition(this, 'MapScene');
+    });
+  }
+
+  private highlightHeroButton(selectedIndex: number): void {
+    this.heroButtons.forEach((btn, i) => {
+      const text = btn.getAt(1) as Phaser.GameObjects.Text;
+      text.setColor(i === selectedIndex ? colorToString(Theme.colors.secondary) : '#ffffff');
     });
   }
 
   private createItemCard(item: ItemData, x: number, y: number, rm: RunManager): void {
-    const rarityColors: Record<string, string> = {
-      common: '#aaaaaa',
-      uncommon: '#44cc44',
-      rare: '#4488ff',
-      epic: '#cc44cc',
-      legendary: '#ff8844',
-    };
-
     const container = this.add.container(x, y);
 
-    const bg = this.add.rectangle(0, 0, 220, 80, 0x222244, 0.9);
-    bg.setStrokeStyle(1, 0x445588);
+    const rarityColor = Theme.colors.rarity[item.rarity] ?? 0xbbbbbb;
+
+    // Card background
+    const bg = this.add.graphics();
+    bg.fillStyle(Theme.colors.panel, 0.9);
+    bg.fillRoundedRect(-60, -42, 210, 85, 6);
+    bg.lineStyle(2, rarityColor, 0.7);
+    bg.strokeRoundedRect(-60, -42, 210, 85, 6);
     container.add(bg);
 
-    const nameText = this.add.text(-100, -30, item.name, {
+    // Rarity indicator dot
+    const rarityDot = this.add.graphics();
+    rarityDot.fillStyle(rarityColor, 1);
+    rarityDot.fillCircle(-48, -28, 4);
+    container.add(rarityDot);
+
+    // Item name
+    const nameText = this.add.text(-38, -34, item.name, {
       fontSize: '11px',
-      color: rarityColors[item.rarity] || '#ffffff',
+      color: colorToString(rarityColor),
       fontFamily: 'monospace',
     });
     container.add(nameText);
 
-    const desc = this.add.text(-100, -14, item.description, {
+    // Slot tag
+    const slotTag = this.add.text(140, -34, `[${item.slot}]`, {
+      fontSize: '8px',
+      color: '#666688',
+      fontFamily: 'monospace',
+    }).setOrigin(1, 0);
+    container.add(slotTag);
+
+    // Description
+    const desc = this.add.text(-55, -16, item.description, {
       fontSize: '8px',
       color: '#888888',
       fontFamily: 'monospace',
+      wordWrap: { width: 190 },
     });
     container.add(desc);
 
     // Stats
     const statStr = Object.entries(item.stats)
-      .map(([k, v]) => `${k}:${v > 0 ? '+' : ''}${v}`)
+      .map(([k, v]) => `${k}:${(v as number) > 0 ? '+' : ''}${v}`)
       .join(' ');
-    const statsText = this.add.text(-100, 2, statStr, {
+    const statsText = this.add.text(-55, 2, statStr, {
       fontSize: '8px',
       color: '#aaccff',
       fontFamily: 'monospace',
     });
     container.add(statsText);
 
-    const priceText = this.add.text(-100, 20, `${item.cost} 金币`, {
+    // Price
+    const canAfford = rm.getGold() >= item.cost;
+    const priceText = this.add.text(-55, 22, `${item.cost}G`, {
       fontSize: '10px',
-      color: rm.getGold() >= item.cost ? '#ffdd44' : '#ff4444',
+      color: canAfford ? colorToString(Theme.colors.gold) : colorToString(Theme.colors.danger),
       fontFamily: 'monospace',
     });
     container.add(priceText);
 
     // Buy button
-    const buyBtn = this.add.text(80, 20, '购买', {
+    const buyBg = this.add.graphics();
+    buyBg.fillStyle(Theme.colors.primary, 0.8);
+    buyBg.fillRoundedRect(100, 16, 48, 22, 4);
+    container.add(buyBg);
+
+    const buyLabel = this.add.text(124, 27, 'BUY', {
       fontSize: '10px',
       color: '#ffffff',
       fontFamily: 'monospace',
-      backgroundColor: '#445588',
-      padding: { x: 8, y: 3 },
-    }).setInteractive({ useHandCursor: true });
-    container.add(buyBtn);
+    }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+    container.add(buyLabel);
 
-    buyBtn.on('pointerdown', () => {
+    buyLabel.on('pointerdown', () => {
       this.buyItem(item, container, priceText);
     });
 
-    this.itemButtons.push({ button: container, item, priceText });
+    this.itemCards.push({ container, item, priceText, sold: false });
   }
 
   private buyItem(item: ItemData, container: Phaser.GameObjects.Container, priceText: Phaser.GameObjects.Text): void {
     const rm = RunManager.getInstance();
 
     if (!this.selectedHero) {
-      this.showMessage('请先选择一个英雄！');
+      this.showMessage('Select a hero first!');
       return;
     }
 
     if (!rm.spendGold(item.cost)) {
-      this.showMessage('金币不足！');
+      this.showMessage('Not enough gold!');
       return;
     }
 
     const oldItem = rm.equipItem(this.selectedHero.id, item);
-    this.goldText.setText(`金币: ${rm.getGold()}`);
+    this.goldText.setText(`${rm.getGold()}G`);
 
-    // Remove bought item from display
-    container.setAlpha(0.3);
-    container.removeInteractive();
+    // Mark as sold
+    const card = this.itemCards.find(c => c.item === item);
+    if (card) {
+      card.sold = true;
+      this.tweens.add({
+        targets: container,
+        alpha: 0.3,
+        scaleX: 0.95,
+        scaleY: 0.95,
+        duration: 200,
+      });
+    }
 
-    // Update price colors for remaining items
-    for (const ib of this.itemButtons) {
-      const canAfford = rm.getGold() >= ib.item.cost;
-      ib.priceText.setColor(canAfford ? '#ffdd44' : '#ff4444');
+    // Update affordability
+    for (const ic of this.itemCards) {
+      if (ic.sold) continue;
+      const canAfford = rm.getGold() >= ic.item.cost;
+      ic.priceText.setColor(canAfford ? colorToString(Theme.colors.gold) : colorToString(Theme.colors.danger));
     }
 
     if (oldItem) {
-      this.showMessage(`装备了 ${item.name}，替换了 ${oldItem.name}`);
+      this.showMessage(`Equipped ${item.name}, replaced ${oldItem.name}`);
     } else {
-      this.showMessage(`装备了 ${item.name}！`);
+      this.showMessage(`Equipped ${item.name}!`);
     }
   }
 
   private showMessage(text: string): void {
-    const msg = this.add.text(GAME_WIDTH / 2, GAME_HEIGHT - 70, text, {
+    const msg = this.add.text(GAME_WIDTH / 2, GAME_HEIGHT - 65, text, {
       fontSize: '11px',
       color: '#ffffff',
       fontFamily: 'monospace',
-      backgroundColor: '#333355',
-      padding: { x: 10, y: 5 },
+      stroke: '#000000',
+      strokeThickness: 2,
     }).setOrigin(0.5);
 
     this.tweens.add({
       targets: msg,
+      y: msg.y - 10,
       alpha: 0,
       delay: 1500,
       duration: 500,
