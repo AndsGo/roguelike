@@ -63,7 +63,8 @@
     "scalingStat": "magicPower",
     "scalingRatio": 1.2,
     "range": 220,
-    "aoeRadius": 60
+    "aoeRadius": 60,
+    "element": "fire"
   },
   {
     "id": "flame_wave",
@@ -77,7 +78,8 @@
     "scalingRatio": 0.8,
     "range": 250,
     "statusEffect": "burn",
-    "effectDuration": 3
+    "effectDuration": 3,
+    "element": "fire"
   },
   {
     "id": "heal",
@@ -89,7 +91,8 @@
     "baseDamage": -80,
     "scalingStat": "magicPower",
     "scalingRatio": 1.0,
-    "range": 200
+    "range": 200,
+    "element": "holy"
   },
   {
     "id": "group_heal",
@@ -101,7 +104,8 @@
     "baseDamage": -40,
     "scalingStat": "magicPower",
     "scalingRatio": 0.5,
-    "range": 300
+    "range": 300,
+    "element": "holy"
   },
   {
     "id": "backstab",
@@ -113,7 +117,8 @@
     "baseDamage": 50,
     "scalingStat": "attack",
     "scalingRatio": 1.8,
-    "range": 60
+    "range": 60,
+    "element": "dark"
   },
   {
     "id": "shadow_strike",
@@ -125,7 +130,8 @@
     "baseDamage": 30,
     "scalingStat": "attack",
     "scalingRatio": 0.7,
-    "range": 55
+    "range": 55,
+    "element": "dark"
   },
   {
     "id": "dark_bolt",
@@ -137,7 +143,8 @@
     "baseDamage": 35,
     "scalingStat": "magicPower",
     "scalingRatio": 0.9,
-    "range": 200
+    "range": 200,
+    "element": "dark"
   },
   {
     "id": "war_cry",
@@ -165,7 +172,8 @@
     "scalingRatio": 1.0,
     "range": 250,
     "statusEffect": "burn",
-    "effectDuration": 3
+    "effectDuration": 3,
+    "element": "fire"
   },
   {
     "id": "tail_sweep",
@@ -180,5 +188,307 @@
     "range": 80,
     "statusEffect": "stun",
     "effectDuration": 1
+  },
+  {
+    "id": "ice_bolt",
+    "name": "冰弹",
+    "description": "发射寒冰弹，造成冰属性伤害并减速目标",
+    "cooldown": 5,
+    "damageType": "magical",
+    "targetType": "enemy",
+    "baseDamage": 40,
+    "scalingStat": "magicPower",
+    "scalingRatio": 0.9,
+    "range": 220,
+    "statusEffect": "slow",
+    "effectDuration": 2,
+    "element": "ice"
+  },
+  {
+    "id": "frost_nova",
+    "name": "冰霜新星",
+    "description": "释放冰霜风暴，对范围内所有敌人造成冰伤并冻结",
+    "cooldown": 12,
+    "damageType": "magical",
+    "targetType": "all_enemies",
+    "baseDamage": 50,
+    "scalingStat": "magicPower",
+    "scalingRatio": 0.8,
+    "range": 200,
+    "aoeRadius": 100,
+    "statusEffect": "freeze",
+    "effectDuration": 1.5,
+    "element": "ice"
+  },
+  {
+    "id": "chain_lightning",
+    "name": "雷电链",
+    "description": "释放闪电弹射3个目标，每次弹射伤害衰减",
+    "cooldown": 8,
+    "damageType": "magical",
+    "targetType": "enemy",
+    "baseDamage": 55,
+    "scalingStat": "magicPower",
+    "scalingRatio": 1.0,
+    "range": 230,
+    "element": "lightning",
+    "effects": [
+      {
+        "type": "damage",
+        "damageType": "magical",
+        "element": "lightning",
+        "baseDamage": 55,
+        "scalingStat": "magicPower",
+        "scalingRatio": 1.0,
+        "chain": {
+          "type": "damage",
+          "damageType": "magical",
+          "element": "lightning",
+          "baseDamage": 38,
+          "scalingStat": "magicPower",
+          "scalingRatio": 0.7,
+          "chain": {
+            "type": "damage",
+            "damageType": "magical",
+            "element": "lightning",
+            "baseDamage": 25,
+            "scalingStat": "magicPower",
+            "scalingRatio": 0.5
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "thunder_strike",
+    "name": "雷霆一击",
+    "description": "召唤雷电打击单个目标，造成高额雷伤并眩晕",
+    "cooldown": 10,
+    "damageType": "magical",
+    "targetType": "enemy",
+    "baseDamage": 85,
+    "scalingStat": "magicPower",
+    "scalingRatio": 1.4,
+    "range": 220,
+    "statusEffect": "stun",
+    "effectDuration": 1.5,
+    "element": "lightning"
+  },
+  {
+    "id": "shadow_bolt",
+    "name": "暗影弹",
+    "description": "发射暗影能量弹，造成暗属性伤害并附加持续暗蚀",
+    "cooldown": 6,
+    "damageType": "magical",
+    "targetType": "enemy",
+    "baseDamage": 45,
+    "scalingStat": "magicPower",
+    "scalingRatio": 1.0,
+    "range": 210,
+    "statusEffect": "dark_dot",
+    "effectDuration": 3,
+    "element": "dark"
+  },
+  {
+    "id": "shadow_drain",
+    "name": "暗影吸取",
+    "description": "吸取目标生命力，造成暗伤并回复自身生命",
+    "cooldown": 9,
+    "damageType": "magical",
+    "targetType": "enemy",
+    "baseDamage": 50,
+    "scalingStat": "magicPower",
+    "scalingRatio": 1.1,
+    "range": 180,
+    "element": "dark",
+    "effects": [
+      {
+        "type": "damage",
+        "damageType": "magical",
+        "element": "dark",
+        "baseDamage": 50,
+        "scalingStat": "magicPower",
+        "scalingRatio": 1.1
+      },
+      {
+        "type": "heal",
+        "baseDamage": 25,
+        "scalingStat": "magicPower",
+        "scalingRatio": 0.5
+      }
+    ]
+  },
+  {
+    "id": "holy_smite",
+    "name": "圣光打击",
+    "description": "召唤圣光之力打击敌人，对暗属性目标伤害加成",
+    "cooldown": 6,
+    "damageType": "magical",
+    "targetType": "enemy",
+    "baseDamage": 50,
+    "scalingStat": "magicPower",
+    "scalingRatio": 1.0,
+    "range": 200,
+    "element": "holy"
+  },
+  {
+    "id": "divine_shield",
+    "name": "神圣护盾",
+    "description": "为自身施加神圣护盾，大幅提升防御并免疫控制",
+    "cooldown": 18,
+    "damageType": "magical",
+    "targetType": "self",
+    "baseDamage": 0,
+    "scalingStat": "magicPower",
+    "scalingRatio": 0,
+    "range": 0,
+    "statusEffect": "divine_shield",
+    "effectDuration": 4,
+    "element": "holy"
+  },
+  {
+    "id": "nature_heal",
+    "name": "自然治疗",
+    "description": "引导自然之力持续治疗一名队友",
+    "cooldown": 6,
+    "damageType": "magical",
+    "targetType": "ally",
+    "baseDamage": -50,
+    "scalingStat": "magicPower",
+    "scalingRatio": 0.8,
+    "range": 200,
+    "statusEffect": "regen",
+    "effectDuration": 4
+  },
+  {
+    "id": "rejuvenation",
+    "name": "回春术",
+    "description": "为全体队友施加持续回复效果",
+    "cooldown": 16,
+    "damageType": "magical",
+    "targetType": "all_allies",
+    "baseDamage": -25,
+    "scalingStat": "magicPower",
+    "scalingRatio": 0.4,
+    "range": 300,
+    "statusEffect": "regen",
+    "effectDuration": 5
+  },
+  {
+    "id": "berserk_rage",
+    "name": "狂暴",
+    "description": "进入狂暴状态，攻击力大幅提升但防御降低",
+    "cooldown": 20,
+    "damageType": "physical",
+    "targetType": "self",
+    "baseDamage": 0,
+    "scalingStat": "attack",
+    "scalingRatio": 0,
+    "range": 0,
+    "statusEffect": "berserk",
+    "effectDuration": 6,
+    "element": "fire"
+  },
+  {
+    "id": "flame_strike",
+    "name": "烈焰打击",
+    "description": "将武器注入火焰之力进行近战攻击",
+    "cooldown": 7,
+    "damageType": "magical",
+    "targetType": "enemy",
+    "baseDamage": 55,
+    "scalingStat": "attack",
+    "scalingRatio": 1.2,
+    "range": 55,
+    "statusEffect": "burn",
+    "effectDuration": 2,
+    "element": "fire"
+  },
+  {
+    "id": "ice_armor",
+    "name": "冰甲",
+    "description": "为自身覆盖冰甲，提升防御并冻伤攻击者",
+    "cooldown": 15,
+    "damageType": "magical",
+    "targetType": "self",
+    "baseDamage": 0,
+    "scalingStat": "magicPower",
+    "scalingRatio": 0,
+    "range": 0,
+    "statusEffect": "ice_armor",
+    "effectDuration": 6,
+    "element": "ice"
+  },
+  {
+    "id": "summon_skeleton",
+    "name": "亡灵召唤",
+    "description": "召唤亡灵力量，对全体敌人造成暗属性伤害",
+    "cooldown": 14,
+    "damageType": "magical",
+    "targetType": "all_enemies",
+    "baseDamage": 35,
+    "scalingStat": "magicPower",
+    "scalingRatio": 0.7,
+    "range": 250,
+    "element": "dark"
+  },
+  {
+    "id": "ultimate_holy_burst",
+    "name": "圣光爆发",
+    "description": "释放终极圣光，治疗全体队友并对全体敌人造成光伤",
+    "cooldown": 25,
+    "damageType": "magical",
+    "targetType": "all_allies",
+    "baseDamage": -70,
+    "scalingStat": "magicPower",
+    "scalingRatio": 1.0,
+    "range": 300,
+    "element": "holy",
+    "effects": [
+      {
+        "type": "heal",
+        "baseDamage": 70,
+        "scalingStat": "magicPower",
+        "scalingRatio": 1.0
+      },
+      {
+        "type": "damage",
+        "damageType": "magical",
+        "element": "holy",
+        "baseDamage": 60,
+        "scalingStat": "magicPower",
+        "scalingRatio": 0.8,
+        "aoeRadius": 300
+      }
+    ]
+  },
+  {
+    "id": "ultimate_dark_ritual",
+    "name": "黑暗仪式",
+    "description": "以自身生命为代价，大幅增强全队攻击力和魔法力量",
+    "cooldown": 30,
+    "damageType": "magical",
+    "targetType": "all_allies",
+    "baseDamage": 0,
+    "scalingStat": "magicPower",
+    "scalingRatio": 0,
+    "range": 300,
+    "element": "dark",
+    "statusEffect": "dark_empowerment",
+    "effectDuration": 8,
+    "effects": [
+      {
+        "type": "damage",
+        "damageType": "pure",
+        "baseDamage": 100,
+        "scalingStat": "magicPower",
+        "scalingRatio": 0
+      },
+      {
+        "type": "buff",
+        "statusEffectId": "dark_empowerment",
+        "statusDuration": 8
+      }
+    ]
   }
 ]

@@ -160,5 +160,239 @@
     "rarity": "epic",
     "cost": 180,
     "stats": { "maxHp": 100, "magicPower": 20, "magicResist": 15 }
+  },
+  {
+    "id": "frost_blade",
+    "name": "冰霜之刃",
+    "description": "寒冰铸就的利剑，攻击附带冰冻效果",
+    "slot": "weapon",
+    "rarity": "rare",
+    "cost": 115,
+    "stats": { "attack": 22, "magicPower": 12 }
+  },
+  {
+    "id": "thunder_hammer",
+    "name": "雷霆战锤",
+    "description": "雷电缠绕的重锤，兼具物理与魔法之力",
+    "slot": "weapon",
+    "rarity": "rare",
+    "cost": 125,
+    "stats": { "attack": 20, "magicPower": 18 }
+  },
+  {
+    "id": "shadow_dagger_epic",
+    "name": "深渊暗影匕首",
+    "description": "由深渊暗影凝聚的致命匕首",
+    "slot": "weapon",
+    "rarity": "epic",
+    "cost": 190,
+    "stats": { "attack": 30, "critChance": 0.2, "critDamage": 0.5 }
+  },
+  {
+    "id": "holy_sword",
+    "name": "圣光之剑",
+    "description": "受圣光祝福的神圣武器",
+    "slot": "weapon",
+    "rarity": "epic",
+    "cost": 210,
+    "stats": { "attack": 35, "defense": 15, "magicPower": 10 }
+  },
+  {
+    "id": "nature_staff",
+    "name": "自然法杖",
+    "description": "蕴含自然生命之力的法杖",
+    "slot": "weapon",
+    "rarity": "uncommon",
+    "cost": 55,
+    "stats": { "magicPower": 22 }
+  },
+  {
+    "id": "demon_axe",
+    "name": "恶魔战斧",
+    "description": "恶魔铸造的巨斧，力量强大但会侵蚀防御",
+    "slot": "weapon",
+    "rarity": "rare",
+    "cost": 110,
+    "stats": { "attack": 38, "defense": -8 }
+  },
+  {
+    "id": "crystal_bow",
+    "name": "水晶弓",
+    "description": "用魔法水晶打造的长弓，射程极远",
+    "slot": "weapon",
+    "rarity": "rare",
+    "cost": 105,
+    "stats": { "attack": 20, "attackRange": 40 }
+  },
+  {
+    "id": "ice_armor_item",
+    "name": "冰霜铠甲",
+    "description": "由永恒寒冰铸造的铠甲，提供强大的防护",
+    "slot": "armor",
+    "rarity": "rare",
+    "cost": 120,
+    "stats": { "defense": 25, "magicResist": 18, "maxHp": 60 }
+  },
+  {
+    "id": "fire_cloak",
+    "name": "火焰斗篷",
+    "description": "燃烧着永恒火焰的斗篷，提升魔力和速度",
+    "slot": "armor",
+    "rarity": "uncommon",
+    "cost": 60,
+    "stats": { "magicPower": 15, "speed": 12 }
+  },
+  {
+    "id": "shadow_vest",
+    "name": "暗影背心",
+    "description": "暗影纺织的轻甲，适合刺客穿戴",
+    "slot": "armor",
+    "rarity": "rare",
+    "cost": 95,
+    "stats": { "critChance": 0.1, "speed": 15, "defense": 10 }
+  },
+  {
+    "id": "holy_plate",
+    "name": "圣骑铠甲",
+    "description": "受圣光祝福的重型铠甲，拥有极高防护",
+    "slot": "armor",
+    "rarity": "epic",
+    "cost": 220,
+    "stats": { "defense": 45, "maxHp": 150, "magicResist": 20 }
+  },
+  {
+    "id": "elemental_ring",
+    "name": "元素之戒",
+    "description": "汇聚元素之力的神奇戒指",
+    "slot": "accessory",
+    "rarity": "rare",
+    "cost": 90,
+    "stats": { "magicPower": 18, "critChance": 0.08 }
+  },
+  {
+    "id": "berserker_charm",
+    "name": "狂战护符",
+    "description": "激发战斗狂热的护符，以防御换取攻击",
+    "slot": "accessory",
+    "rarity": "rare",
+    "cost": 85,
+    "stats": { "attack": 20, "attackSpeed": 0.2, "defense": -5 }
+  },
+  {
+    "id": "healers_pendant",
+    "name": "治疗者坠饰",
+    "description": "增强治疗能力的神圣坠饰",
+    "slot": "accessory",
+    "rarity": "uncommon",
+    "cost": 48,
+    "stats": { "magicPower": 15, "maxHp": 40 }
+  },
+  {
+    "id": "dragon_scale_ring",
+    "name": "龙鳞戒指",
+    "description": "用龙鳞碎片打造的戒指，全面提升防护",
+    "slot": "accessory",
+    "rarity": "epic",
+    "cost": 175,
+    "stats": { "defense": 15, "magicResist": 15, "maxHp": 80 }
+  },
+  {
+    "id": "boots_of_haste",
+    "name": "疾行之靴",
+    "description": "附魔的靴子，极大提升行动速度",
+    "slot": "accessory",
+    "rarity": "uncommon",
+    "cost": 52,
+    "stats": { "speed": 25, "attackSpeed": 0.12 }
+  },
+  {
+    "id": "mjolnir",
+    "name": "雷神之锤",
+    "description": "传说中的雷神武器，蕴含毁天灭地之力",
+    "slot": "weapon",
+    "rarity": "legendary",
+    "cost": 400,
+    "stats": { "attack": 55, "magicPower": 30, "attackSpeed": 0.1 }
+  },
+  {
+    "id": "aegis_shield",
+    "name": "神盾铠甲",
+    "description": "神界铸造的究极护甲，几乎刀枪不入",
+    "slot": "armor",
+    "rarity": "legendary",
+    "cost": 420,
+    "stats": { "defense": 60, "magicResist": 45, "maxHp": 200 }
+  },
+  {
+    "id": "philosophers_stone",
+    "name": "贤者之石",
+    "description": "蕴含无尽智慧的传说宝石，全面提升所有能力",
+    "slot": "accessory",
+    "rarity": "legendary",
+    "cost": 450,
+    "stats": { "attack": 15, "defense": 15, "magicPower": 20, "magicResist": 15, "maxHp": 100, "speed": 10, "critChance": 0.05 }
+  },
+  {
+    "id": "iron_buckler",
+    "name": "铁盾",
+    "description": "简单但可靠的铁质圆盾",
+    "slot": "armor",
+    "rarity": "common",
+    "cost": 28,
+    "stats": { "defense": 10, "maxHp": 20 }
+  },
+  {
+    "id": "silk_gloves",
+    "name": "丝绸手套",
+    "description": "精致的丝绸手套，提升攻击速度",
+    "slot": "accessory",
+    "rarity": "common",
+    "cost": 22,
+    "stats": { "attackSpeed": 0.15 }
+  },
+  {
+    "id": "bone_staff",
+    "name": "骨杖",
+    "description": "由古老骸骨制成的法杖，增强暗属性魔力",
+    "slot": "weapon",
+    "rarity": "uncommon",
+    "cost": 58,
+    "stats": { "magicPower": 22, "magicResist": 5 }
+  },
+  {
+    "id": "warriors_shield",
+    "name": "勇士之盾",
+    "description": "坚固的战盾，为战士量身打造",
+    "slot": "armor",
+    "rarity": "rare",
+    "cost": 105,
+    "stats": { "defense": 28, "maxHp": 70, "magicResist": 10 }
+  },
+  {
+    "id": "assassins_cloak",
+    "name": "刺客斗篷",
+    "description": "暗影编织的隐匿斗篷",
+    "slot": "armor",
+    "rarity": "rare",
+    "cost": 98,
+    "stats": { "critChance": 0.12, "speed": 18, "critDamage": 0.2 }
+  },
+  {
+    "id": "ruby_pendant",
+    "name": "红宝石坠饰",
+    "description": "散发温暖光芒的红宝石，增强火系之力",
+    "slot": "accessory",
+    "rarity": "rare",
+    "cost": 88,
+    "stats": { "magicPower": 20, "maxHp": 50 }
+  },
+  {
+    "id": "frozen_heart",
+    "name": "冰冻之心",
+    "description": "永恒寒冰凝聚的心脏形状宝石",
+    "slot": "accessory",
+    "rarity": "epic",
+    "cost": 185,
+    "stats": { "magicPower": 25, "defense": 12, "magicResist": 18 }
   }
 ]

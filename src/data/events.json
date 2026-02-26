@@ -174,5 +174,195 @@
         ]
       }
     ]
+  },
+  {
+    "id": "volcano_cave",
+    "title": "火山洞穴",
+    "description": "一个散发着灼热气息的洞穴入口出现在前方，火光在深处闪烁...",
+    "choices": [
+      {
+        "text": "深入洞穴探索",
+        "outcomes": [
+          { "probability": 0.5, "description": "你在深处发现了一件火焰遗物！", "effects": [{ "type": "relic", "value": 1, "relicId": "fire_emblem" }] },
+          { "probability": 0.3, "description": "高温灼伤了队伍，但你找到了一些宝石。", "effects": [{ "type": "damage", "value": 0.2, "target": "all" }, { "type": "gold", "value": 70 }] },
+          { "probability": 0.2, "description": "火山活动加剧，你被迫撤退。", "effects": [{ "type": "damage", "value": 0.15, "target": "all" }] }
+        ]
+      },
+      {
+        "text": "在洞口收集火山岩",
+        "outcomes": [
+          { "probability": 1.0, "description": "你小心翼翼地收集了一些珍贵的火山岩。", "effects": [{ "type": "gold", "value": 35 }] }
+        ]
+      },
+      {
+        "text": "绕道离开",
+        "outcomes": [
+          { "probability": 1.0, "description": "明智的选择，谁知道里面有什么。", "effects": [] }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "frozen_lake",
+    "title": "冰封之湖",
+    "description": "一片完全冻结的湖面上，冰层下隐约可见闪烁的光芒...",
+    "choices": [
+      {
+        "text": "踏上冰面寻找宝物",
+        "outcomes": [
+          { "probability": 0.4, "description": "你在冰层中发现了一件冰霜遗物！", "effects": [{ "type": "relic", "value": 1, "relicId": "ice_crystal_pendant" }] },
+          { "probability": 0.4, "description": "冰面破裂，你掉入冰水但抢救出了一些宝物。", "effects": [{ "type": "damage", "value": 0.15, "target": "all" }, { "type": "gold", "value": 55 }] },
+          { "probability": 0.2, "description": "冰面坚固，你安全地找到了一些冰晶矿石。", "effects": [{ "type": "gold", "value": 45 }] }
+        ]
+      },
+      {
+        "text": "在湖边冰钓",
+        "outcomes": [
+          { "probability": 0.7, "description": "钓到了珍贵的冰鱼，恢复了体力。", "effects": [{ "type": "heal", "value": 0.3, "target": "all" }] },
+          { "probability": 0.3, "description": "什么也没钓到，浪费了时间。", "effects": [] }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "thunder_peak",
+    "title": "雷霆之巅",
+    "description": "山顶上雷电交加，一座古老的雷电祭坛矗立在风暴中心...",
+    "choices": [
+      {
+        "text": "冒险攀登至祭坛",
+        "outcomes": [
+          { "probability": 0.4, "description": "你获得了雷电之力的祝福！", "effects": [{ "type": "relic", "value": 1, "relicId": "lightning_rod" }, { "type": "damage", "value": 0.1, "target": "random" }] },
+          { "probability": 0.3, "description": "雷电击中了你的武器，武器获得了雷电附魔。", "effects": [{ "type": "stat_boost", "value": 15 }] },
+          { "probability": 0.3, "description": "风暴太过猛烈，你被雷电击伤。", "effects": [{ "type": "damage", "value": 0.25, "target": "random" }] }
+        ]
+      },
+      {
+        "text": "在山脚避雨等待风暴结束",
+        "outcomes": [
+          { "probability": 0.6, "description": "风暴过后你找到了被雷击落的矿石。", "effects": [{ "type": "gold", "value": 40 }] },
+          { "probability": 0.4, "description": "平安无事地等待风暴过去。", "effects": [] }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "shadow_shrine",
+    "title": "暗影神殿",
+    "description": "一座散发着不祥气息的暗色神殿隐藏在迷雾之中...",
+    "choices": [
+      {
+        "text": "献祭生命力（消耗20%HP换取力量）",
+        "outcomes": [
+          { "probability": 0.6, "description": "暗影之力涌入体内，你变得更加强大！", "effects": [{ "type": "damage", "value": 0.2, "target": "all" }, { "type": "relic", "value": 1, "relicId": "dark_grimoire" }] },
+          { "probability": 0.4, "description": "暗影吞噬了你的生命力，但你获得了暗黑知识。", "effects": [{ "type": "damage", "value": 0.2, "target": "all" }, { "type": "stat_boost", "value": 18 }] }
+        ]
+      },
+      {
+        "text": "探索神殿外围",
+        "outcomes": [
+          { "probability": 0.5, "description": "你在神殿外围找到了一些被遗弃的宝物。", "effects": [{ "type": "gold", "value": 50 }] },
+          { "probability": 0.5, "description": "暗影生物袭击了你！", "effects": [{ "type": "damage", "value": 0.1, "target": "random" }] }
+        ]
+      },
+      {
+        "text": "迅速离开这个不祥之地",
+        "outcomes": [
+          { "probability": 1.0, "description": "有些地方还是不要去的好。", "effects": [] }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "holy_temple",
+    "title": "圣光神殿",
+    "description": "一座散发着温暖金光的白色神殿出现在路旁，门口站着一位圣光祭司...",
+    "choices": [
+      {
+        "text": "接受圣光祝福（花费60金币）",
+        "outcomes": [
+          { "probability": 0.8, "description": "圣光洗涤了你们的伤痛，全队恢复！", "effects": [{ "type": "gold", "value": -60 }, { "type": "heal", "value": 0.6, "target": "all" }] },
+          { "probability": 0.2, "description": "圣光特别眷顾你们，获得了圣光遗物！", "effects": [{ "type": "gold", "value": -60 }, { "type": "heal", "value": 0.6, "target": "all" }, { "type": "relic", "value": 1, "relicId": "holy_scripture" }] }
+        ]
+      },
+      {
+        "text": "祈祷",
+        "outcomes": [
+          { "probability": 0.6, "description": "你的虔诚打动了圣光，获得祝福。", "effects": [{ "type": "heal", "value": 0.2, "target": "all" }, { "type": "stat_boost", "value": 5 }] },
+          { "probability": 0.4, "description": "平静的祈祷让你心灵平和。", "effects": [{ "type": "heal", "value": 0.15, "target": "all" }] }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "ancient_library",
+    "title": "远古图书馆",
+    "description": "一座被藤蔓覆盖的古老图书馆，里面的书架上摆满了泛黄的魔法典籍...",
+    "choices": [
+      {
+        "text": "研读魔法典籍（提升全队能力）",
+        "outcomes": [
+          { "probability": 0.5, "description": "你从古籍中学到了强大的战斗技巧！", "effects": [{ "type": "stat_boost", "value": 15 }] },
+          { "probability": 0.3, "description": "书中隐藏着诅咒！但你也获得了知识。", "effects": [{ "type": "damage", "value": 0.1, "target": "random" }, { "type": "stat_boost", "value": 20 }] },
+          { "probability": 0.2, "description": "书页已经腐朽，只学到了一点点。", "effects": [{ "type": "stat_boost", "value": 5 }] }
+        ]
+      },
+      {
+        "text": "搜索值钱的书籍出售",
+        "outcomes": [
+          { "probability": 0.7, "description": "找到了几本珍贵的典籍。", "effects": [{ "type": "gold", "value": 55 }] },
+          { "probability": 0.3, "description": "所有的书都已经被虫蛀了。", "effects": [{ "type": "gold", "value": 10 }] }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "blacksmith",
+    "title": "铁匠铺",
+    "description": "路边一座冒着浓烟的铁匠铺，矮人铁匠正在锻造武器...",
+    "choices": [
+      {
+        "text": "花费80金币强化装备",
+        "outcomes": [
+          { "probability": 0.6, "description": "铁匠精湛的手艺让你的装备更加锋利！", "effects": [{ "type": "gold", "value": -80 }, { "type": "stat_boost", "value": 12 }] },
+          { "probability": 0.3, "description": "强化成功，但效果一般。", "effects": [{ "type": "gold", "value": -80 }, { "type": "stat_boost", "value": 6 }] },
+          { "probability": 0.1, "description": "大成功！铁匠灵感迸发，装备得到极大强化！", "effects": [{ "type": "gold", "value": -80 }, { "type": "stat_boost", "value": 25 }] }
+        ]
+      },
+      {
+        "text": "出售多余材料（获得40金币）",
+        "outcomes": [
+          { "probability": 1.0, "description": "铁匠高兴地买下了你的材料。", "effects": [{ "type": "gold", "value": 40 }] }
+        ]
+      },
+      {
+        "text": "聊天后离开",
+        "outcomes": [
+          { "probability": 1.0, "description": "矮人铁匠分享了一些锻造知识。", "effects": [{ "type": "stat_boost", "value": 3 }] }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "mysterious_portal",
+    "title": "神秘传送门",
+    "description": "一个不稳定的空间裂缝悬浮在空中，散发着七彩光芒...",
+    "choices": [
+      {
+        "text": "跳入传送门",
+        "outcomes": [
+          { "probability": 0.3, "description": "你被传送到了一个充满宝藏的空间！", "effects": [{ "type": "gold", "value": 100 }, { "type": "item", "value": 1 }] },
+          { "probability": 0.4, "description": "空间湍流让你受了些伤，但你获得了一件遗物。", "effects": [{ "type": "damage", "value": 0.15, "target": "all" }, { "type": "relic", "value": 1, "relicId": "lucky_coin" }] },
+          { "probability": 0.3, "description": "传送门不稳定，把你弹了回来。", "effects": [{ "type": "damage", "value": 0.1, "target": "random" }] }
+        ]
+      },
+      {
+        "text": "观察并收集空间碎片",
+        "outcomes": [
+          { "probability": 0.6, "description": "你小心地收集了一些空间碎片。", "effects": [{ "type": "gold", "value": 35 }] },
+          { "probability": 0.4, "description": "碎片不稳定，在你手中消散了。", "effects": [] }
+        ]
+      }
+    ]
   }
 ]

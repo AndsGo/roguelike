@@ -1,0 +1,35 @@
+[
+  {
+    "id": "act1_forest",
+    "name": "Enchanted Forest",
+    "description": "A mystical forest teeming with creatures",
+    "nodeCount": 8,
+    "enemyPool": ["slime", "goblin", "ice_wolf", "fire_lizard", "light_sprite"],
+    "bossPool": ["frost_queen"],
+    "eventPool": ["healing_spring", "wandering_warrior", "frozen_lake", "ancient_library", "mushroom_grove"],
+    "elementAffinity": "ice",
+    "difficultyMultiplier": 1.0
+  },
+  {
+    "id": "act2_volcano",
+    "name": "Volcanic Wastes",
+    "description": "Scorched lands ruled by demons and flame",
+    "nodeCount": 8,
+    "enemyPool": ["fire_elemental", "flame_knight", "orc_warrior", "storm_hawk", "dark_cultist"],
+    "bossPool": ["thunder_titan"],
+    "eventPool": ["volcano_cave", "blacksmith", "mysterious_merchant", "thunder_peak", "trapped_chest"],
+    "elementAffinity": "fire",
+    "difficultyMultiplier": 1.3
+  },
+  {
+    "id": "act3_abyss",
+    "name": "The Abyss",
+    "description": "Realm of shadow and undeath",
+    "nodeCount": 8,
+    "enemyPool": ["shadow_wraith", "dark_cultist", "skeleton_archer", "dark_mage", "thunder_golem"],
+    "bossPool": ["shadow_lord"],
+    "eventPool": ["shadow_shrine", "holy_temple", "fortune_teller", "mysterious_portal", "goblin_camp"],
+    "elementAffinity": "dark",
+    "difficultyMultiplier": 1.6
+  }
+]

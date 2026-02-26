@@ -1,0 +1,242 @@
+[
+  {
+    "id": "iron_heart",
+    "name": "铁之心",
+    "description": "战斗开始时获得+50护盾",
+    "rarity": "common",
+    "triggerEvent": "battle:start",
+    "effect": { "type": "on_battle_start", "value": 50 }
+  },
+  {
+    "id": "blood_vial",
+    "name": "鲜血瓶",
+    "description": "击杀敌人回复5%最大HP",
+    "rarity": "common",
+    "triggerEvent": "unit:kill",
+    "effect": { "type": "on_kill", "value": 0.05 }
+  },
+  {
+    "id": "quick_boots",
+    "name": "疾行靴",
+    "description": "永久+10%速度",
+    "rarity": "common",
+    "triggerEvent": "battle:start",
+    "effect": { "type": "stat_boost", "stat": "speed", "value": 10 }
+  },
+  {
+    "id": "lucky_coin",
+    "name": "幸运金币",
+    "description": "金币获取+20%",
+    "rarity": "common",
+    "triggerEvent": "battle:end",
+    "effect": { "type": "passive", "value": 0.2 }
+  },
+  {
+    "id": "training_manual",
+    "name": "训练手册",
+    "description": "经验获取+15%",
+    "rarity": "common",
+    "triggerEvent": "battle:end",
+    "effect": { "type": "passive", "value": 0.15 }
+  },
+  {
+    "id": "herb_pouch",
+    "name": "草药袋",
+    "description": "每场战斗开始恢复3%最大HP",
+    "rarity": "common",
+    "triggerEvent": "battle:start",
+    "effect": { "type": "on_battle_start", "value": 0.03 }
+  },
+  {
+    "id": "sharp_stone",
+    "name": "磨刀石",
+    "description": "+5%暴击率",
+    "rarity": "common",
+    "triggerEvent": "battle:start",
+    "effect": { "type": "stat_boost", "stat": "critChance", "value": 0.05 }
+  },
+  {
+    "id": "thick_skin",
+    "name": "厚皮护符",
+    "description": "+10防御",
+    "rarity": "common",
+    "triggerEvent": "battle:start",
+    "effect": { "type": "stat_boost", "stat": "defense", "value": 10 }
+  },
+  {
+    "id": "mana_crystal",
+    "name": "魔力水晶",
+    "description": "+15魔法力量",
+    "rarity": "common",
+    "triggerEvent": "battle:start",
+    "effect": { "type": "stat_boost", "stat": "magicPower", "value": 15 }
+  },
+  {
+    "id": "warriors_belt",
+    "name": "战士腰带",
+    "description": "+50最大HP",
+    "rarity": "common",
+    "triggerEvent": "battle:start",
+    "effect": { "type": "stat_boost", "stat": "maxHp", "value": 50 }
+  },
+  {
+    "id": "vampiric_fang",
+    "name": "吸血獠牙",
+    "description": "造成伤害时回复3%为生命",
+    "rarity": "rare",
+    "triggerEvent": "unit:damage",
+    "effect": { "type": "on_damage", "value": 0.03 }
+  },
+  {
+    "id": "thunder_emblem",
+    "name": "雷电徽章",
+    "description": "攻击时10%概率释放雷电造成额外伤害",
+    "rarity": "rare",
+    "triggerEvent": "unit:damage",
+    "effect": { "type": "on_damage", "value": 30, "chance": 0.1 }
+  },
+  {
+    "id": "frost_aura",
+    "name": "霜冻光环",
+    "description": "受击时20%概率减速攻击者",
+    "rarity": "rare",
+    "triggerEvent": "unit:damage",
+    "effect": { "type": "on_damage", "value": 0.3, "chance": 0.2 }
+  },
+  {
+    "id": "phoenix_ash",
+    "name": "凤凰灰烬",
+    "description": "首次死亡时复活30%HP（每场战斗一次）",
+    "rarity": "rare",
+    "triggerEvent": "unit:death",
+    "effect": { "type": "on_kill", "value": 0.3 }
+  },
+  {
+    "id": "berserker_mask",
+    "name": "狂战士面具",
+    "description": "HP低于50%时攻击力+30%",
+    "rarity": "rare",
+    "triggerEvent": "unit:damage",
+    "effect": { "type": "passive", "stat": "attack", "value": 0.3 }
+  },
+  {
+    "id": "elemental_catalyst",
+    "name": "元素催化剂",
+    "description": "元素反应伤害+25%",
+    "rarity": "rare",
+    "triggerEvent": "element:reaction",
+    "effect": { "type": "passive", "value": 0.25 }
+  },
+  {
+    "id": "combo_gloves",
+    "name": "连击手套",
+    "description": "连击伤害奖励+50%",
+    "rarity": "rare",
+    "triggerEvent": "combo:hit",
+    "effect": { "type": "passive", "value": 0.5 }
+  },
+  {
+    "id": "soul_collector",
+    "name": "灵魂收割者",
+    "description": "每次击杀永久+2攻击力（本场战斗）",
+    "rarity": "rare",
+    "triggerEvent": "unit:kill",
+    "effect": { "type": "on_kill", "stat": "attack", "value": 2 }
+  },
+  {
+    "id": "shield_charm",
+    "name": "护盾饰品",
+    "description": "每5秒获得一个小护盾",
+    "rarity": "rare",
+    "triggerEvent": "battle:turn",
+    "effect": { "type": "passive", "value": 20 }
+  },
+  {
+    "id": "healers_blessing",
+    "name": "治疗者祝福",
+    "description": "治疗效果+20%",
+    "rarity": "rare",
+    "triggerEvent": "unit:heal",
+    "effect": { "type": "on_heal", "value": 0.2 }
+  },
+  {
+    "id": "crown_of_elements",
+    "name": "元素之冠",
+    "description": "所有元素伤害+15%",
+    "rarity": "legendary",
+    "triggerEvent": "unit:damage",
+    "effect": { "type": "passive", "value": 0.15 }
+  },
+  {
+    "id": "heart_of_dragon",
+    "name": "龙之心",
+    "description": "+200HP，+20%所有伤害",
+    "rarity": "legendary",
+    "triggerEvent": "battle:start",
+    "effect": { "type": "stat_boost", "stat": "maxHp", "value": 200 }
+  },
+  {
+    "id": "time_crystal",
+    "name": "时间水晶",
+    "description": "战斗开始时所有技能冷却-30%",
+    "rarity": "legendary",
+    "triggerEvent": "battle:start",
+    "effect": { "type": "on_battle_start", "value": 0.3 }
+  },
+  {
+    "id": "soul_mirror",
+    "name": "灵魂之镜",
+    "description": "反弹15%受到的伤害给攻击者",
+    "rarity": "legendary",
+    "triggerEvent": "unit:damage",
+    "effect": { "type": "on_damage", "value": 0.15 }
+  },
+  {
+    "id": "infinity_stone",
+    "name": "无限宝石",
+    "description": "所有属性+10%",
+    "rarity": "legendary",
+    "triggerEvent": "battle:start",
+    "effect": { "type": "stat_boost", "value": 0.1 }
+  },
+  {
+    "id": "fire_emblem",
+    "name": "火焰纹章",
+    "description": "火属性伤害+20%",
+    "rarity": "rare",
+    "triggerEvent": "unit:damage",
+    "effect": { "type": "on_damage", "value": 0.2 }
+  },
+  {
+    "id": "ice_crystal_pendant",
+    "name": "冰晶坠饰",
+    "description": "冰属性伤害+20%",
+    "rarity": "rare",
+    "triggerEvent": "unit:damage",
+    "effect": { "type": "on_damage", "value": 0.2 }
+  },
+  {
+    "id": "lightning_rod",
+    "name": "避雷针",
+    "description": "雷属性伤害+20%",
+    "rarity": "rare",
+    "triggerEvent": "unit:damage",
+    "effect": { "type": "on_damage", "value": 0.2 }
+  },
+  {
+    "id": "dark_grimoire",
+    "name": "黑暗魔典",
+    "description": "暗属性伤害+20%",
+    "rarity": "rare",
+    "triggerEvent": "unit:damage",
+    "effect": { "type": "on_damage", "value": 0.2 }
+  },
+  {
+    "id": "holy_scripture",
+    "name": "圣典",
+    "description": "光属性伤害+20%",
+    "rarity": "rare",
+    "triggerEvent": "unit:damage",
+    "effect": { "type": "on_damage", "value": 0.2 }
+  }
+]

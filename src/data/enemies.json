@@ -3,6 +3,8 @@
     "id": "slime",
     "name": "史莱姆",
     "role": "tank",
+    "element": null,
+    "race": "beast",
     "baseStats": {
       "maxHp": 150,
       "hp": 150,
@@ -32,6 +34,8 @@
     "id": "goblin",
     "name": "哥布林",
     "role": "melee_dps",
+    "element": null,
+    "race": "beast",
     "baseStats": {
       "maxHp": 120,
       "hp": 120,
@@ -61,6 +65,8 @@
     "id": "skeleton_archer",
     "name": "骷髅弓手",
     "role": "ranged_dps",
+    "element": "dark",
+    "race": "undead",
     "baseStats": {
       "maxHp": 100,
       "hp": 100,
@@ -90,6 +96,8 @@
     "id": "dark_mage",
     "name": "暗黑法师",
     "role": "ranged_dps",
+    "element": "dark",
+    "race": "undead",
     "baseStats": {
       "maxHp": 90,
       "hp": 90,
@@ -119,6 +127,8 @@
     "id": "orc_warrior",
     "name": "兽人战士",
     "role": "tank",
+    "element": null,
+    "race": "demon",
     "baseStats": {
       "maxHp": 400,
       "hp": 400,
@@ -149,6 +159,8 @@
     "id": "dragon_boss",
     "name": "黑龙",
     "role": "ranged_dps",
+    "element": "fire",
+    "race": "dragon",
     "baseStats": {
       "maxHp": 1500,
       "hp": 1500,
@@ -173,6 +185,474 @@
     "spriteKey": "enemy_dragon",
     "goldReward": 150,
     "expReward": 200,
+    "isBoss": true
+  },
+  {
+    "id": "fire_lizard",
+    "name": "火蜥蜴",
+    "role": "melee_dps",
+    "element": "fire",
+    "race": "beast",
+    "baseStats": {
+      "maxHp": 180,
+      "hp": 180,
+      "attack": 28,
+      "defense": 12,
+      "magicPower": 15,
+      "magicResist": 15,
+      "speed": 90,
+      "attackSpeed": 1.1,
+      "attackRange": 40,
+      "critChance": 0.1,
+      "critDamage": 1.6
+    },
+    "scalingPerLevel": {
+      "maxHp": 25,
+      "attack": 5,
+      "defense": 2,
+      "magicPower": 3,
+      "magicResist": 2
+    },
+    "skills": [],
+    "spriteKey": "enemy_fire_lizard",
+    "goldReward": 12,
+    "expReward": 28
+  },
+  {
+    "id": "fire_elemental",
+    "name": "火焰元素",
+    "role": "ranged_dps",
+    "element": "fire",
+    "race": "demon",
+    "baseStats": {
+      "maxHp": 200,
+      "hp": 200,
+      "attack": 10,
+      "defense": 8,
+      "magicPower": 45,
+      "magicResist": 30,
+      "speed": 75,
+      "attackSpeed": 0.9,
+      "attackRange": 180,
+      "critChance": 0.1,
+      "critDamage": 1.7
+    },
+    "scalingPerLevel": {
+      "maxHp": 25,
+      "attack": 1,
+      "defense": 2,
+      "magicPower": 8,
+      "magicResist": 3
+    },
+    "skills": ["fireball"],
+    "spriteKey": "enemy_fire_elemental",
+    "goldReward": 18,
+    "expReward": 35
+  },
+  {
+    "id": "flame_knight",
+    "name": "烈焰骑士",
+    "role": "tank",
+    "element": "fire",
+    "race": "human",
+    "baseStats": {
+      "maxHp": 350,
+      "hp": 350,
+      "attack": 32,
+      "defense": 30,
+      "magicPower": 10,
+      "magicResist": 20,
+      "speed": 70,
+      "attackSpeed": 0.8,
+      "attackRange": 45,
+      "critChance": 0.08,
+      "critDamage": 1.5
+    },
+    "scalingPerLevel": {
+      "maxHp": 45,
+      "attack": 5,
+      "defense": 4,
+      "magicPower": 2,
+      "magicResist": 2
+    },
+    "skills": ["flame_strike"],
+    "spriteKey": "enemy_flame_knight",
+    "goldReward": 20,
+    "expReward": 38
+  },
+  {
+    "id": "ice_wolf",
+    "name": "冰霜狼",
+    "role": "melee_dps",
+    "element": "ice",
+    "race": "beast",
+    "baseStats": {
+      "maxHp": 160,
+      "hp": 160,
+      "attack": 30,
+      "defense": 10,
+      "magicPower": 10,
+      "magicResist": 12,
+      "speed": 120,
+      "attackSpeed": 1.3,
+      "attackRange": 40,
+      "critChance": 0.15,
+      "critDamage": 1.7
+    },
+    "scalingPerLevel": {
+      "maxHp": 22,
+      "attack": 5,
+      "defense": 2,
+      "magicPower": 2,
+      "magicResist": 1
+    },
+    "skills": ["ice_bolt"],
+    "spriteKey": "enemy_ice_wolf",
+    "goldReward": 12,
+    "expReward": 26
+  },
+  {
+    "id": "frost_giant",
+    "name": "霜巨人",
+    "role": "tank",
+    "element": "ice",
+    "race": "demon",
+    "baseStats": {
+      "maxHp": 450,
+      "hp": 450,
+      "attack": 38,
+      "defense": 28,
+      "magicPower": 15,
+      "magicResist": 25,
+      "speed": 50,
+      "attackSpeed": 0.6,
+      "attackRange": 50,
+      "critChance": 0.05,
+      "critDamage": 1.5
+    },
+    "scalingPerLevel": {
+      "maxHp": 55,
+      "attack": 5,
+      "defense": 5,
+      "magicPower": 2,
+      "magicResist": 3
+    },
+    "skills": ["frost_nova"],
+    "spriteKey": "enemy_frost_giant",
+    "goldReward": 22,
+    "expReward": 42
+  },
+  {
+    "id": "ice_mage",
+    "name": "冰霜法师",
+    "role": "ranged_dps",
+    "element": "ice",
+    "race": "elf",
+    "baseStats": {
+      "maxHp": 110,
+      "hp": 110,
+      "attack": 10,
+      "defense": 6,
+      "magicPower": 42,
+      "magicResist": 22,
+      "speed": 65,
+      "attackSpeed": 0.85,
+      "attackRange": 210,
+      "critChance": 0.1,
+      "critDamage": 1.7
+    },
+    "scalingPerLevel": {
+      "maxHp": 16,
+      "attack": 1,
+      "defense": 1,
+      "magicPower": 7,
+      "magicResist": 2
+    },
+    "skills": ["ice_bolt", "frost_nova"],
+    "spriteKey": "enemy_ice_mage",
+    "goldReward": 16,
+    "expReward": 34
+  },
+  {
+    "id": "storm_hawk",
+    "name": "雷暴鹰",
+    "role": "ranged_dps",
+    "element": "lightning",
+    "race": "beast",
+    "baseStats": {
+      "maxHp": 130,
+      "hp": 130,
+      "attack": 35,
+      "defense": 6,
+      "magicPower": 20,
+      "magicResist": 10,
+      "speed": 140,
+      "attackSpeed": 1.4,
+      "attackRange": 180,
+      "critChance": 0.2,
+      "critDamage": 1.8
+    },
+    "scalingPerLevel": {
+      "maxHp": 18,
+      "attack": 6,
+      "defense": 1,
+      "magicPower": 3,
+      "magicResist": 1
+    },
+    "skills": ["chain_lightning"],
+    "spriteKey": "enemy_storm_hawk",
+    "goldReward": 14,
+    "expReward": 30
+  },
+  {
+    "id": "thunder_golem",
+    "name": "雷霆魔像",
+    "role": "tank",
+    "element": "lightning",
+    "race": "demon",
+    "baseStats": {
+      "maxHp": 500,
+      "hp": 500,
+      "attack": 30,
+      "defense": 35,
+      "magicPower": 25,
+      "magicResist": 30,
+      "speed": 45,
+      "attackSpeed": 0.5,
+      "attackRange": 50,
+      "critChance": 0.05,
+      "critDamage": 1.5
+    },
+    "scalingPerLevel": {
+      "maxHp": 60,
+      "attack": 4,
+      "defense": 5,
+      "magicPower": 4,
+      "magicResist": 4
+    },
+    "skills": ["thunder_strike"],
+    "spriteKey": "enemy_thunder_golem",
+    "goldReward": 25,
+    "expReward": 45
+  },
+  {
+    "id": "shadow_wraith",
+    "name": "暗影亡灵",
+    "role": "melee_dps",
+    "element": "dark",
+    "race": "undead",
+    "baseStats": {
+      "maxHp": 140,
+      "hp": 140,
+      "attack": 20,
+      "defense": 5,
+      "magicPower": 35,
+      "magicResist": 25,
+      "speed": 110,
+      "attackSpeed": 1.2,
+      "attackRange": 45,
+      "critChance": 0.15,
+      "critDamage": 1.8
+    },
+    "scalingPerLevel": {
+      "maxHp": 18,
+      "attack": 3,
+      "defense": 1,
+      "magicPower": 6,
+      "magicResist": 3
+    },
+    "skills": ["shadow_bolt", "shadow_drain"],
+    "spriteKey": "enemy_shadow_wraith",
+    "goldReward": 16,
+    "expReward": 34
+  },
+  {
+    "id": "dark_cultist",
+    "name": "暗黑祭司",
+    "role": "support",
+    "element": "dark",
+    "race": "human",
+    "baseStats": {
+      "maxHp": 170,
+      "hp": 170,
+      "attack": 12,
+      "defense": 10,
+      "magicPower": 38,
+      "magicResist": 22,
+      "speed": 70,
+      "attackSpeed": 0.8,
+      "attackRange": 190,
+      "critChance": 0.08,
+      "critDamage": 1.6
+    },
+    "scalingPerLevel": {
+      "maxHp": 20,
+      "attack": 2,
+      "defense": 2,
+      "magicPower": 6,
+      "magicResist": 3
+    },
+    "skills": ["shadow_bolt"],
+    "spriteKey": "enemy_dark_cultist",
+    "goldReward": 15,
+    "expReward": 32
+  },
+  {
+    "id": "holy_guardian",
+    "name": "圣光守卫",
+    "role": "tank",
+    "element": "holy",
+    "race": "human",
+    "baseStats": {
+      "maxHp": 380,
+      "hp": 380,
+      "attack": 28,
+      "defense": 35,
+      "magicPower": 20,
+      "magicResist": 30,
+      "speed": 60,
+      "attackSpeed": 0.7,
+      "attackRange": 45,
+      "critChance": 0.05,
+      "critDamage": 1.5
+    },
+    "scalingPerLevel": {
+      "maxHp": 48,
+      "attack": 4,
+      "defense": 5,
+      "magicPower": 3,
+      "magicResist": 4
+    },
+    "skills": ["holy_smite"],
+    "spriteKey": "enemy_holy_guardian",
+    "goldReward": 20,
+    "expReward": 38
+  },
+  {
+    "id": "light_sprite",
+    "name": "光灵",
+    "role": "healer",
+    "element": "holy",
+    "race": "elf",
+    "baseStats": {
+      "maxHp": 90,
+      "hp": 90,
+      "attack": 10,
+      "defense": 5,
+      "magicPower": 35,
+      "magicResist": 20,
+      "speed": 100,
+      "attackSpeed": 1.0,
+      "attackRange": 200,
+      "critChance": 0.05,
+      "critDamage": 1.5
+    },
+    "scalingPerLevel": {
+      "maxHp": 12,
+      "attack": 1,
+      "defense": 1,
+      "magicPower": 6,
+      "magicResist": 2
+    },
+    "skills": ["heal"],
+    "spriteKey": "enemy_light_sprite",
+    "goldReward": 14,
+    "expReward": 30
+  },
+  {
+    "id": "frost_queen",
+    "name": "冰霜女王",
+    "role": "ranged_dps",
+    "element": "ice",
+    "race": "elf",
+    "baseStats": {
+      "maxHp": 2000,
+      "hp": 2000,
+      "attack": 25,
+      "defense": 30,
+      "magicPower": 90,
+      "magicResist": 45,
+      "speed": 75,
+      "attackSpeed": 0.7,
+      "attackRange": 220,
+      "critChance": 0.15,
+      "critDamage": 1.8
+    },
+    "scalingPerLevel": {
+      "maxHp": 250,
+      "attack": 4,
+      "defense": 5,
+      "magicPower": 14,
+      "magicResist": 6
+    },
+    "skills": ["ice_bolt", "frost_nova", "ice_armor"],
+    "spriteKey": "enemy_frost_queen",
+    "goldReward": 180,
+    "expReward": 250,
+    "isBoss": true
+  },
+  {
+    "id": "thunder_titan",
+    "name": "雷霆泰坦",
+    "role": "tank",
+    "element": "lightning",
+    "race": "demon",
+    "baseStats": {
+      "maxHp": 2500,
+      "hp": 2500,
+      "attack": 55,
+      "defense": 45,
+      "magicPower": 70,
+      "magicResist": 35,
+      "speed": 55,
+      "attackSpeed": 0.5,
+      "attackRange": 60,
+      "critChance": 0.1,
+      "critDamage": 2.0
+    },
+    "scalingPerLevel": {
+      "maxHp": 300,
+      "attack": 8,
+      "defense": 6,
+      "magicPower": 10,
+      "magicResist": 5
+    },
+    "skills": ["chain_lightning", "thunder_strike"],
+    "spriteKey": "enemy_thunder_titan",
+    "goldReward": 200,
+    "expReward": 300,
+    "isBoss": true
+  },
+  {
+    "id": "shadow_lord",
+    "name": "暗影领主",
+    "role": "ranged_dps",
+    "element": "dark",
+    "race": "undead",
+    "baseStats": {
+      "maxHp": 3000,
+      "hp": 3000,
+      "attack": 50,
+      "defense": 35,
+      "magicPower": 100,
+      "magicResist": 50,
+      "speed": 80,
+      "attackSpeed": 0.8,
+      "attackRange": 200,
+      "critChance": 0.15,
+      "critDamage": 2.0
+    },
+    "scalingPerLevel": {
+      "maxHp": 350,
+      "attack": 8,
+      "defense": 5,
+      "magicPower": 15,
+      "magicResist": 6
+    },
+    "skills": ["shadow_bolt", "shadow_drain", "summon_skeleton"],
+    "spriteKey": "enemy_shadow_lord",
+    "goldReward": 250,
+    "expReward": 400,
     "isBoss": true
   }
 ]
