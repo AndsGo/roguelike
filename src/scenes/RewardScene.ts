@@ -5,6 +5,7 @@ import { Button } from '../ui/Button';
 import { RunManager } from '../managers/RunManager';
 import { Theme, colorToString } from '../ui/Theme';
 import { SceneTransition } from '../systems/SceneTransition';
+import { UI } from '../i18n';
 
 export class RewardScene extends Phaser.Scene {
   private result!: BattleResult;
@@ -23,7 +24,7 @@ export class RewardScene extends Phaser.Scene {
 
     this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, Theme.colors.background);
 
-    const title = this.add.text(GAME_WIDTH / 2, 55, 'VICTORY!', {
+    const title = this.add.text(GAME_WIDTH / 2, 55, UI.reward.title, {
       fontSize: '22px',
       color: colorToString(Theme.colors.success),
       fontFamily: 'monospace',
@@ -39,13 +40,13 @@ export class RewardScene extends Phaser.Scene {
     });
 
     // Rewards with staggered appearance
-    const goldText = this.add.text(GAME_WIDTH / 2, 110, `Gold: +${result.goldEarned}`, {
+    const goldText = this.add.text(GAME_WIDTH / 2, 110, UI.reward.gold(result.goldEarned), {
       fontSize: '14px',
       color: colorToString(Theme.colors.gold),
       fontFamily: 'monospace',
     }).setOrigin(0.5).setAlpha(0);
 
-    const expText = this.add.text(GAME_WIDTH / 2, 138, `EXP: +${result.expEarned}`, {
+    const expText = this.add.text(GAME_WIDTH / 2, 138, UI.reward.exp(result.expEarned), {
       fontSize: '14px',
       color: colorToString(Theme.colors.primary),
       fontFamily: 'monospace',
@@ -55,7 +56,7 @@ export class RewardScene extends Phaser.Scene {
     this.tweens.add({ targets: expText, alpha: 1, y: 133, delay: 400, duration: 300 });
 
     // Survivors
-    this.add.text(GAME_WIDTH / 2, 170, `Survivors: ${result.survivors.length}`, {
+    this.add.text(GAME_WIDTH / 2, 170, UI.reward.survivors(result.survivors.length), {
       fontSize: '11px',
       color: colorToString(Theme.colors.textDim),
       fontFamily: 'monospace',
@@ -74,13 +75,13 @@ export class RewardScene extends Phaser.Scene {
       }).setOrigin(0.5);
     });
 
-    this.add.text(GAME_WIDTH / 2, GAME_HEIGHT - 80, `Total Gold: ${rm.getGold()}`, {
+    this.add.text(GAME_WIDTH / 2, GAME_HEIGHT - 80, UI.reward.totalGold(rm.getGold()), {
       fontSize: '12px',
       color: colorToString(Theme.colors.gold),
       fontFamily: 'monospace',
     }).setOrigin(0.5);
 
-    new Button(this, GAME_WIDTH / 2, GAME_HEIGHT - 38, 'Continue', 160, 38, () => {
+    new Button(this, GAME_WIDTH / 2, GAME_HEIGHT - 38, UI.reward.continueBtn, 160, 38, () => {
       SceneTransition.fadeTransition(this, 'MapScene');
     });
   }

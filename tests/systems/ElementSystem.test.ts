@@ -105,24 +105,24 @@ describe('ElementSystem', () => {
   });
 
   describe('ELEMENT_REACTIONS existence', () => {
-    it('fire+ice (Melt) exists', () => {
+    it('fire+ice (融化) exists', () => {
       expect(ELEMENT_REACTIONS['fire+ice']).toBeDefined();
-      expect(ELEMENT_REACTIONS['fire+ice'].name).toBe('Melt');
+      expect(ELEMENT_REACTIONS['fire+ice'].name).toBe('融化');
     });
 
-    it('fire+lightning (Overload) exists', () => {
+    it('fire+lightning (超载) exists', () => {
       expect(ELEMENT_REACTIONS['fire+lightning']).toBeDefined();
-      expect(ELEMENT_REACTIONS['fire+lightning'].name).toBe('Overload');
+      expect(ELEMENT_REACTIONS['fire+lightning'].name).toBe('超载');
     });
 
-    it('ice+lightning (Superconduct) exists', () => {
+    it('ice+lightning (超导) exists', () => {
       expect(ELEMENT_REACTIONS['ice+lightning']).toBeDefined();
-      expect(ELEMENT_REACTIONS['ice+lightning'].name).toBe('Superconduct');
+      expect(ELEMENT_REACTIONS['ice+lightning'].name).toBe('超导');
     });
 
-    it('dark+holy (Annihilation) exists', () => {
+    it('dark+holy (湮灭) exists', () => {
       expect(ELEMENT_REACTIONS['dark+holy']).toBeDefined();
-      expect(ELEMENT_REACTIONS['dark+holy'].name).toBe('Annihilation');
+      expect(ELEMENT_REACTIONS['dark+holy'].name).toBe('湮灭');
     });
   });
 
@@ -166,7 +166,7 @@ describe('ElementSystem', () => {
       });
       const result = ElementSystem.checkElementReaction('fire', target as any);
       expect(result).not.toBeNull();
-      expect(result!.reaction.name).toBe('Melt');
+      expect(result!.reaction.name).toBe('融化');
       expect(result!.existingElement).toBe('ice');
     });
 

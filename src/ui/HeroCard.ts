@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { HeroData, HeroState, EquipmentSlot } from '../types';
 import { RunManager } from '../managers/RunManager';
 import { Theme, colorToString } from './Theme';
+import { UI } from '../i18n';
 
 export class HeroCard extends Phaser.GameObjects.Container {
   private bg: Phaser.GameObjects.Graphics;
@@ -94,7 +95,7 @@ export class HeroCard extends Phaser.GameObjects.Container {
     const lvl = heroState.level;
     const atk = stats.attack + scaling.attack * (lvl - 1);
     const def = stats.defense + scaling.defense * (lvl - 1);
-    const statsText = scene.add.text(0, 38, `ATK:${atk}  DEF:${def}`, {
+    const statsText = scene.add.text(0, 38, UI.heroCard.atkDef(atk, def), {
       fontSize: '8px',
       color: '#aaccff',
       fontFamily: 'monospace',
@@ -169,11 +170,11 @@ export class HeroCard extends Phaser.GameObjects.Container {
     const lvl = this.heroState.level;
 
     const lines = [
-      `SPD: ${stats.speed}  ASPD: ${stats.attackSpeed.toFixed(1)}`,
-      `CRIT: ${Math.round(stats.critChance * 100)}%  x${stats.critDamage}`,
-      `M.POW: ${stats.magicPower + scaling.magicPower * (lvl - 1)}`,
-      `M.RES: ${stats.magicResist + scaling.magicResist * (lvl - 1)}`,
-      `RNG: ${stats.attackRange}`,
+      UI.heroCard.spdAspd(stats.speed, stats.attackSpeed),
+      UI.heroCard.crit(stats.critChance, stats.critDamage),
+      UI.heroCard.magicPow(stats.magicPower + scaling.magicPower * (lvl - 1)),
+      UI.heroCard.magicRes(stats.magicResist + scaling.magicResist * (lvl - 1)),
+      UI.heroCard.range(stats.attackRange),
     ];
 
     lines.forEach((line, i) => {
@@ -187,7 +188,7 @@ export class HeroCard extends Phaser.GameObjects.Container {
 
     // Skills list
     if (this.heroData.skills.length > 0) {
-      const skillText = scene.add.text(-this.cardWidth / 2 + 8, 82, `Skills: ${this.heroData.skills.join(', ')}`, {
+      const skillText = scene.add.text(-this.cardWidth / 2 + 8, 82, UI.heroCard.skills(this.heroData.skills.join(', ')), {
         fontSize: '7px',
         color: '#8899cc',
         fontFamily: 'monospace',

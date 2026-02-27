@@ -8,6 +8,7 @@ import { SaveManager } from '../managers/SaveManager';
 import { Button } from '../ui/Button';
 import { Theme, colorToString } from '../ui/Theme';
 import { SceneTransition } from '../systems/SceneTransition';
+import { UI, getHeroDisplayName } from '../i18n';
 
 export class GameOverScene extends Phaser.Scene {
   private rewardsApplied: boolean = false;
@@ -25,7 +26,7 @@ export class GameOverScene extends Phaser.Scene {
 
     this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, 0x0a0a0a);
 
-    const title = this.add.text(GAME_WIDTH / 2, 70, 'GAME OVER', {
+    const title = this.add.text(GAME_WIDTH / 2, 70, UI.gameOver.title, {
       fontSize: '36px',
       color: colorToString(Theme.colors.danger),
       fontFamily: 'monospace',
@@ -42,7 +43,7 @@ export class GameOverScene extends Phaser.Scene {
       ease: 'Back.easeOut',
     });
 
-    this.add.text(GAME_WIDTH / 2, 120, 'Your team has been defeated...', {
+    this.add.text(GAME_WIDTH / 2, 120, UI.gameOver.subtitle, {
       fontSize: '13px',
       color: '#888888',
       fontFamily: 'monospace',
@@ -50,13 +51,13 @@ export class GameOverScene extends Phaser.Scene {
 
     // Run stats
     const node = rm.getCurrentNode() + 1;
-    this.add.text(GAME_WIDTH / 2, 160, `Reached: Stage ${node}`, {
+    this.add.text(GAME_WIDTH / 2, 160, UI.gameOver.reached(node), {
       fontSize: '12px',
       color: '#aaaaaa',
       fontFamily: 'monospace',
     }).setOrigin(0.5);
 
-    this.add.text(GAME_WIDTH / 2, 182, `Gold earned: ${rm.getGold()}`, {
+    this.add.text(GAME_WIDTH / 2, 182, UI.gameOver.goldEarned(rm.getGold()), {
       fontSize: '12px',
       color: colorToString(Theme.colors.gold),
       fontFamily: 'monospace',
@@ -74,7 +75,7 @@ export class GameOverScene extends Phaser.Scene {
     }
 
     // Show meta reward
-    this.add.text(GAME_WIDTH / 2, 215, `Souls earned: +${metaReward}`, {
+    this.add.text(GAME_WIDTH / 2, 215, UI.gameOver.soulsEarned(metaReward), {
       fontSize: '12px',
       color: colorToString(Theme.colors.secondary),
       fontFamily: 'monospace',
@@ -85,7 +86,7 @@ export class GameOverScene extends Phaser.Scene {
 
     const maxDisplayedAchievements = 5;
     if (newAchievements.length > 0) {
-      this.add.text(GAME_WIDTH / 2, infoY, `Achievements Unlocked: ${newAchievements.length}`, {
+      this.add.text(GAME_WIDTH / 2, infoY, UI.gameOver.achievementsUnlocked(newAchievements.length), {
         fontSize: '11px',
         color: colorToString(Theme.colors.success),
         fontFamily: 'monospace',
@@ -107,7 +108,7 @@ export class GameOverScene extends Phaser.Scene {
 
       const remaining = newAchievements.length - maxDisplayedAchievements;
       if (remaining > 0) {
-        this.add.text(GAME_WIDTH / 2, infoY, `...and ${remaining} more`, {
+        this.add.text(GAME_WIDTH / 2, infoY, UI.gameOver.andMore(remaining), {
           fontSize: '9px',
           color: colorToString(Theme.colors.textDim),
           fontFamily: 'monospace',
@@ -122,7 +123,7 @@ export class GameOverScene extends Phaser.Scene {
       // Show unlocked heroes beyond defaults
       const nonDefault = meta.unlockedHeroes.filter(h => !['warrior', 'archer', 'mage'].includes(h));
       if (nonDefault.length > 0) {
-        this.add.text(GAME_WIDTH / 2, infoY + 5, `Unlocked heroes: ${nonDefault.join(', ')}`, {
+        this.add.text(GAME_WIDTH / 2, infoY + 5, UI.gameOver.unlockedHeroes(nonDefault.map(getHeroDisplayName).join(', ')), {
           fontSize: '9px',
           color: '#88cc88',
           fontFamily: 'monospace',
@@ -130,7 +131,7 @@ export class GameOverScene extends Phaser.Scene {
       }
     }
 
-    new Button(this, GAME_WIDTH / 2, GAME_HEIGHT - 50, 'Main Menu', 180, 45, () => {
+    new Button(this, GAME_WIDTH / 2, GAME_HEIGHT - 50, UI.gameOver.mainMenu, 180, 45, () => {
       SceneTransition.fadeTransition(this, 'MainMenuScene');
     }, Theme.colors.danger);
   }

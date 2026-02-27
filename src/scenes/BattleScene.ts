@@ -13,6 +13,7 @@ import { EventBus } from '../systems/EventBus';
 import { SaveManager } from '../managers/SaveManager';
 import { Theme, colorToString } from '../ui/Theme';
 import enemiesData from '../data/enemies.json';
+import { UI } from '../i18n';
 
 export class BattleScene extends Phaser.Scene {
   private battleSystem!: BattleSystem;
@@ -100,7 +101,7 @@ export class BattleScene extends Phaser.Scene {
       vignette.lineStyle(8, 0xff0000, 0.15);
       vignette.strokeRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
     }
-    const typeLabel = node.type === 'boss' ? 'BOSS' : node.type === 'elite' ? 'ELITE' : 'BATTLE';
+    const typeLabel = node.type === 'boss' ? UI.battle.boss : node.type === 'elite' ? UI.battle.elite : UI.battle.battle;
     const labelColor = node.type === 'boss' ? colorToString(Theme.colors.danger) : '#ffffff';
     this.add.text(GAME_WIDTH / 2, 12, typeLabel, {
       fontSize: '12px',
@@ -250,7 +251,7 @@ export class BattleScene extends Phaser.Scene {
     }
 
     // Victory/defeat text with animation
-    const text = isVictory ? 'VICTORY' : 'DEFEAT';
+    const text = isVictory ? UI.battle.victory : UI.battle.defeat;
     const color = isVictory ? colorToString(Theme.colors.success) : colorToString(Theme.colors.danger);
     const resultText = this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 - 30, text, {
       fontSize: '28px',

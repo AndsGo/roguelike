@@ -31,27 +31,27 @@ export interface ElementReaction {
 
 export const ELEMENT_REACTIONS: Record<string, ElementReaction> = {
   'fire+ice': {
-    name: 'Melt',
-    description: 'Fire meets ice, dealing bonus damage',
+    name: '融化',
+    description: '火焰与冰霜相遇，造成额外伤害',
     damageMultiplier: 1.5,
     statusEffect: 'wet',
     duration: 3,
   },
   'fire+lightning': {
-    name: 'Overload',
-    description: 'Explosive reaction dealing AoE damage',
+    name: '超载',
+    description: '爆炸性反应，造成范围伤害',
     damageMultiplier: 1.8,
   },
   'ice+lightning': {
-    name: 'Superconduct',
-    description: 'Reduces target defense',
+    name: '超导',
+    description: '降低目标防御',
     damageMultiplier: 1.2,
     statusEffect: 'defense_down',
     duration: 5,
   },
   'dark+holy': {
-    name: 'Annihilation',
-    description: 'Opposing forces cause massive damage',
+    name: '湮灭',
+    description: '对立之力引发毁灭性伤害',
     damageMultiplier: 2.0,
   },
 };

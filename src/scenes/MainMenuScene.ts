@@ -8,6 +8,7 @@ import { MetaManager } from '../managers/MetaManager';
 import { Theme, colorToString } from '../ui/Theme';
 import { SceneTransition } from '../systems/SceneTransition';
 import { ParticleManager } from '../systems/ParticleManager';
+import { UI, UPGRADE_NAMES } from '../i18n';
 
 export class MainMenuScene extends Phaser.Scene {
   private upgradePanel: Panel | null = null;
@@ -35,7 +36,7 @@ export class MainMenuScene extends Phaser.Scene {
     }
 
     // Title
-    const title = this.add.text(GAME_WIDTH / 2, 80, 'ROGUELIKE\nAUTO BATTLER', {
+    const title = this.add.text(GAME_WIDTH / 2, 80, UI.mainMenu.title, {
       fontSize: '32px',
       color: colorToString(Theme.colors.secondary),
       fontFamily: 'monospace',
@@ -56,7 +57,7 @@ export class MainMenuScene extends Phaser.Scene {
     });
 
     // Subtitle
-    this.add.text(GAME_WIDTH / 2, 155, 'Auto Battle  |  Strategy  |  Adventure', {
+    this.add.text(GAME_WIDTH / 2, 155, UI.mainMenu.subtitle, {
       fontSize: '11px',
       color: '#8899cc',
       fontFamily: 'monospace',
@@ -69,8 +70,8 @@ export class MainMenuScene extends Phaser.Scene {
     if (SaveManager.hasSave(0)) {
       const saveInfo = SaveManager.getSaveInfo(0);
       const saveLabel = saveInfo
-        ? `CONTINUE (Stage ${saveInfo.floor}, ${saveInfo.heroCount} heroes)`
-        : 'CONTINUE';
+        ? UI.mainMenu.continueBtn(saveInfo.floor, saveInfo.heroCount)
+        : UI.mainMenu.continue;
       new Button(this, GAME_WIDTH / 2, btnY, saveLabel, 280, 40, () => {
         SaveManager.loadGame(0);
         SceneTransition.fadeTransition(this, 'MapScene');
@@ -79,7 +80,7 @@ export class MainMenuScene extends Phaser.Scene {
     }
 
     // New Game button
-    new Button(this, GAME_WIDTH / 2, btnY, 'NEW GAME', 180, 40, () => {
+    new Button(this, GAME_WIDTH / 2, btnY, UI.mainMenu.newGame, 180, 40, () => {
       if (SaveManager.hasSave(0)) {
         this.showNewGameConfirmation();
       } else {
@@ -89,7 +90,7 @@ export class MainMenuScene extends Phaser.Scene {
     btnY += 50;
 
     // Upgrades button
-    new Button(this, GAME_WIDTH / 2, btnY, 'UPGRADES', 180, 40, () => {
+    new Button(this, GAME_WIDTH / 2, btnY, UI.mainMenu.upgrades, 180, 40, () => {
       this.showUpgradePanel();
     }, Theme.colors.panelBorder);
     btnY += 50;
@@ -97,7 +98,7 @@ export class MainMenuScene extends Phaser.Scene {
     // Meta stats at bottom
     const meta = MetaManager.getMetaData();
     const currency = MetaManager.getMetaCurrency();
-    const statsStr = `Runs: ${meta.totalRuns}  |  Victories: ${meta.totalVictories}  |  Heroes: ${meta.unlockedHeroes.length}/5  |  Souls: ${currency}`;
+    const statsStr = UI.mainMenu.stats(meta.totalRuns, meta.totalVictories, meta.unlockedHeroes.length, currency);
     this.add.text(GAME_WIDTH / 2, GAME_HEIGHT - 38, statsStr, {
       fontSize: '9px',
       color: '#666688',
@@ -105,7 +106,7 @@ export class MainMenuScene extends Phaser.Scene {
     }).setOrigin(0.5);
 
     // Version
-    this.add.text(GAME_WIDTH / 2, GAME_HEIGHT - 18, 'v0.3.0 - Phase B+', {
+    this.add.text(GAME_WIDTH / 2, GAME_HEIGHT - 18, UI.mainMenu.version, {
       fontSize: '9px',
       color: '#555577',
       fontFamily: 'monospace',
@@ -129,7 +130,7 @@ export class MainMenuScene extends Phaser.Scene {
     panelBg.lineStyle(2, Theme.colors.panelBorder, 0.8);
     panelBg.strokeRoundedRect(GAME_WIDTH / 2 - 160, GAME_HEIGHT / 2 - 55, 320, 110, 8);
 
-    const msg = this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 - 25, 'Existing save will be lost.\nContinue?', {
+    const msg = this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 - 25, UI.mainMenu.confirmOverwrite, {
       fontSize: '13px',
       color: colorToString(Theme.colors.danger),
       fontFamily: 'monospace',
@@ -138,14 +139,14 @@ export class MainMenuScene extends Phaser.Scene {
 
     const confirmElements = [overlay, panelBg, msg];
 
-    const yesBtn = new Button(this, GAME_WIDTH / 2 - 60, GAME_HEIGHT / 2 + 25, 'YES', 80, 30, () => {
+    const yesBtn = new Button(this, GAME_WIDTH / 2 - 60, GAME_HEIGHT / 2 + 25, UI.mainMenu.yes, 80, 30, () => {
       confirmElements.forEach(el => el.destroy());
       yesBtn.destroy();
       noBtn.destroy();
       this.startNewGame();
     }, Theme.colors.danger);
 
-    const noBtn = new Button(this, GAME_WIDTH / 2 + 60, GAME_HEIGHT / 2 + 25, 'NO', 80, 30, () => {
+    const noBtn = new Button(this, GAME_WIDTH / 2 + 60, GAME_HEIGHT / 2 + 25, UI.mainMenu.no, 80, 30, () => {
       confirmElements.forEach(el => el.destroy());
       yesBtn.destroy();
       noBtn.destroy();
@@ -159,7 +160,7 @@ export class MainMenuScene extends Phaser.Scene {
     }
 
     const panel = new Panel(this, GAME_WIDTH / 2, GAME_HEIGHT / 2, 500, 340, {
-      title: 'PERMANENT UPGRADES',
+      title: UI.mainMenu.upgradeTitle,
       animate: true,
     });
     this.upgradePanel = panel;
@@ -168,16 +169,7 @@ export class MainMenuScene extends Phaser.Scene {
   }
 
   private renderUpgradeContent(panel: Panel): void {
-    // Clear existing content by closing and recreating
-    // Instead we build fresh content each time
     const upgrades = MetaManager.PERMANENT_UPGRADES;
-    const UPGRADE_NAMES: Record<string, string> = {
-      starting_gold: 'Starting Gold',
-      starting_hp: 'Starting HP',
-      exp_bonus: 'EXP Bonus',
-      crit_bonus: 'Crit Bonus',
-      relic_chance: 'Relic Chance',
-    };
 
     const UPGRADE_COSTS: Record<string, number[]> = {
       starting_gold: [50, 100, 200, 400, 800],
@@ -190,7 +182,7 @@ export class MainMenuScene extends Phaser.Scene {
     const currency = MetaManager.getMetaCurrency();
 
     // Currency display
-    const currencyText = this.add.text(0, -130, `Souls: ${currency}`, {
+    const currencyText = this.add.text(0, -130, UI.mainMenu.souls(currency), {
       fontSize: '13px',
       color: colorToString(Theme.colors.gold),
       fontFamily: 'monospace',
@@ -230,7 +222,7 @@ export class MainMenuScene extends Phaser.Scene {
         const cost = costs ? costs[level] : 999;
         const canAfford = currency >= cost;
 
-        const costText = this.add.text(140, y, `${cost} Souls`, {
+        const costText = this.add.text(140, y, `${cost} 灵魂`, {
           fontSize: '9px',
           color: canAfford ? colorToString(Theme.colors.gold) : colorToString(Theme.colors.danger),
           fontFamily: 'monospace',
@@ -243,7 +235,7 @@ export class MainMenuScene extends Phaser.Scene {
         buyBg.fillRoundedRect(200, y - 8, 40, 20, 3);
         panel.addContent(buyBg);
 
-        const buyText = this.add.text(220, y + 2, 'BUY', {
+        const buyText = this.add.text(220, y + 2, UI.mainMenu.buy, {
           fontSize: '9px',
           color: canAfford ? '#ffffff' : '#888888',
           fontFamily: 'monospace',
@@ -266,7 +258,7 @@ export class MainMenuScene extends Phaser.Scene {
           panel.addContent(buyHit);
         }
       } else {
-        const maxText = this.add.text(180, y, 'MAX', {
+        const maxText = this.add.text(180, y, UI.mainMenu.max, {
           fontSize: '10px',
           color: colorToString(Theme.colors.success),
           fontFamily: 'monospace',
@@ -277,7 +269,7 @@ export class MainMenuScene extends Phaser.Scene {
     });
 
     // Close button — use zone for larger hit area
-    const closeText = this.add.text(0, 135, '[CLOSE]', {
+    const closeText = this.add.text(0, 135, UI.mainMenu.close, {
       fontSize: '10px',
       color: '#888888',
       fontFamily: 'monospace',

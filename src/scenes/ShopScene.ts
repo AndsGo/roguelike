@@ -7,6 +7,7 @@ import { Button } from '../ui/Button';
 import { Theme, colorToString } from '../ui/Theme';
 import { SceneTransition } from '../systems/SceneTransition';
 import { SaveManager } from '../managers/SaveManager';
+import { UI, formatStat, formatStatDiff, SLOT_LABELS } from '../i18n';
 
 export class ShopScene extends Phaser.Scene {
   private nodeIndex!: number;
@@ -37,7 +38,7 @@ export class ShopScene extends Phaser.Scene {
     this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, Theme.colors.background);
 
     // Title
-    this.add.text(GAME_WIDTH / 2, 22, 'SHOP', {
+    this.add.text(GAME_WIDTH / 2, 22, UI.shop.title, {
       fontSize: '20px',
       color: colorToString(Theme.colors.success),
       fontFamily: 'monospace',
@@ -52,7 +53,7 @@ export class ShopScene extends Phaser.Scene {
     }).setOrigin(1, 0);
 
     // Hero selection
-    this.add.text(20, 50, 'Select hero:', {
+    this.add.text(20, 50, UI.shop.selectHero, {
       fontSize: '10px',
       color: '#8899cc',
       fontFamily: 'monospace',
@@ -96,7 +97,7 @@ export class ShopScene extends Phaser.Scene {
     });
 
     // Leave button
-    new Button(this, GAME_WIDTH / 2, GAME_HEIGHT - 30, 'Leave Shop', 140, 35, () => {
+    new Button(this, GAME_WIDTH / 2, GAME_HEIGHT - 30, UI.shop.leaveShop, 140, 35, () => {
       rm.markNodeCompleted(this.nodeIndex);
       SaveManager.autoSave();
       SceneTransition.fadeTransition(this, 'MapScene');
@@ -138,7 +139,8 @@ export class ShopScene extends Phaser.Scene {
     container.add(nameText);
 
     // Slot tag
-    const slotTag = this.add.text(140, -34, `[${item.slot}]`, {
+    const slotLabel = SLOT_LABELS[item.slot] ?? item.slot;
+    const slotTag = this.add.text(140, -34, `[${slotLabel}]`, {
       fontSize: '8px',
       color: '#666688',
       fontFamily: 'monospace',
@@ -156,7 +158,7 @@ export class ShopScene extends Phaser.Scene {
 
     // Stats
     const statStr = Object.entries(item.stats)
-      .map(([k, v]) => `${k}:${(v as number) > 0 ? '+' : ''}${v}`)
+      .map(([k, v]) => formatStat(k, v as number))
       .join(' ');
     const statsText = this.add.text(-55, 2, statStr, {
       fontSize: '8px',
@@ -188,7 +190,7 @@ export class ShopScene extends Phaser.Scene {
     buyBg.fillRoundedRect(100, 22, 48, 22, 4);
     container.add(buyBg);
 
-    const buyLabel = this.add.text(124, 33, 'BUY', {
+    const buyLabel = this.add.text(124, 33, UI.shop.buy, {
       fontSize: '10px',
       color: '#ffffff',
       fontFamily: 'monospace',
@@ -218,7 +220,7 @@ export class ShopScene extends Phaser.Scene {
 
       const currentEquip = this.selectedHero.equipment[card.item.slot];
       if (!currentEquip) {
-        card.compareText.setText('vs: (empty slot)');
+        card.compareText.setText(UI.shop.vsEmpty);
         card.compareText.setColor('#888888');
         continue;
       }
@@ -229,15 +231,13 @@ export class ShopScene extends Phaser.Scene {
         const newVal = (card.item.stats as Record<string, number>)[k] ?? 0;
         const oldVal = (currentEquip.stats as Record<string, number>)[k] ?? 0;
         const diff = newVal - oldVal;
-        if (diff > 0) {
-          diffs.push(`${k}:+${diff}`);
-        } else if (diff < 0) {
-          diffs.push(`${k}:${diff}`);
+        if (diff !== 0) {
+          diffs.push(formatStatDiff(k, diff));
         }
       }
 
       if (diffs.length > 0) {
-        card.compareText.setText(`vs ${currentEquip.name}: ${diffs.join(' ')}`);
+        card.compareText.setText(`${UI.shop.vs(currentEquip.name)}${diffs.join(' ')}`);
         // Color based on whether it's mostly upgrades
         const hasUpgrade = diffs.some(d => d.includes('+'));
         const hasDowngrade = diffs.some(d => !d.includes('+'));
@@ -249,7 +249,7 @@ export class ShopScene extends Phaser.Scene {
           card.compareText.setColor(colorToString(Theme.colors.secondary));
         }
       } else {
-        card.compareText.setText(`vs ${currentEquip.name}: same stats`);
+        card.compareText.setText(UI.shop.vsSame(currentEquip.name));
         card.compareText.setColor('#888888');
       }
     }
@@ -259,12 +259,12 @@ export class ShopScene extends Phaser.Scene {
     const rm = RunManager.getInstance();
 
     if (!this.selectedHero) {
-      this.showMessage('Select a hero first!');
+      this.showMessage(UI.shop.selectFirst);
       return;
     }
 
     if (!rm.spendGold(item.cost)) {
-      this.showMessage('Not enough gold!');
+      this.showMessage(UI.shop.noGold);
       return;
     }
 
@@ -295,9 +295,9 @@ export class ShopScene extends Phaser.Scene {
     this.updateComparisonTexts();
 
     if (oldItem) {
-      this.showMessage(`Equipped ${item.name}, replaced ${oldItem.name}`);
+      this.showMessage(UI.shop.replaced(item.name, oldItem.name));
     } else {
-      this.showMessage(`Equipped ${item.name}!`);
+      this.showMessage(UI.shop.equipped(item.name));
     }
   }
 

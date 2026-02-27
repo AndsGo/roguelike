@@ -1,8 +1,8 @@
 [
   {
     "id": "act1_forest",
-    "name": "Enchanted Forest",
-    "description": "A mystical forest teeming with creatures",
+    "name": "魔法森林",
+    "description": "充满神秘生物的魔法森林",
     "nodeCount": 8,
     "enemyPool": ["slime", "goblin", "ice_wolf", "fire_lizard", "light_sprite"],
     "bossPool": ["frost_queen"],
@@ -12,8 +12,8 @@
   },
   {
     "id": "act2_volcano",
-    "name": "Volcanic Wastes",
-    "description": "Scorched lands ruled by demons and flame",
+    "name": "火山荒原",
+    "description": "被恶魔和烈焰统治的焦土",
     "nodeCount": 8,
     "enemyPool": ["fire_elemental", "flame_knight", "orc_warrior", "storm_hawk", "dark_cultist"],
     "bossPool": ["thunder_titan"],
@@ -23,8 +23,8 @@
   },
   {
     "id": "act3_abyss",
-    "name": "The Abyss",
-    "description": "Realm of shadow and undeath",
+    "name": "深渊",
+    "description": "暗影与亡灵的领域",
     "nodeCount": 8,
     "enemyPool": ["shadow_wraith", "dark_cultist", "skeleton_archer", "dark_mage", "thunder_golem"],
     "bossPool": ["shadow_lord"],

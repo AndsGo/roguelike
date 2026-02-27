@@ -6,6 +6,7 @@ import { Theme, colorToString } from '../ui/Theme';
 import { SceneTransition } from '../systems/SceneTransition';
 import { SaveManager } from '../managers/SaveManager';
 import { ParticleManager } from '../systems/ParticleManager';
+import { UI } from '../i18n';
 
 export class RestScene extends Phaser.Scene {
   private nodeIndex!: number;
@@ -27,14 +28,14 @@ export class RestScene extends Phaser.Scene {
     const particles = new ParticleManager(this);
     particles.createBuffEffect(GAME_WIDTH / 2, 80, 0xff6633);
 
-    this.add.text(GAME_WIDTH / 2, 55, 'REST', {
+    this.add.text(GAME_WIDTH / 2, 55, UI.rest.title, {
       fontSize: '20px',
       color: colorToString(Theme.colors.node.rest),
       fontFamily: 'monospace',
       fontStyle: 'bold',
     }).setOrigin(0.5);
 
-    this.add.text(GAME_WIDTH / 2, 100, 'Your team rests by the campfire...', {
+    this.add.text(GAME_WIDTH / 2, 100, UI.rest.campfireText, {
       fontSize: '11px',
       color: '#aaaacc',
       fontFamily: 'monospace',
@@ -42,7 +43,7 @@ export class RestScene extends Phaser.Scene {
 
     // Show current HP
     const heroes = rm.getHeroes();
-    this.add.text(GAME_WIDTH / 2, 140, 'Team Status:', {
+    this.add.text(GAME_WIDTH / 2, 140, UI.rest.teamStatus, {
       fontSize: '10px',
       color: '#8899cc',
       fontFamily: 'monospace',
@@ -61,7 +62,7 @@ export class RestScene extends Phaser.Scene {
       }).setOrigin(0.5);
     });
 
-    new Button(this, GAME_WIDTH / 2, 290, `Rest (Heal ${Math.round(REST_HEAL_PERCENT * 100)}% HP)`, 240, 40, () => {
+    new Button(this, GAME_WIDTH / 2, 290, UI.rest.restBtn(Math.round(REST_HEAL_PERCENT * 100)), 240, 40, () => {
       rm.healAllHeroes(REST_HEAL_PERCENT);
       rm.markNodeCompleted(this.nodeIndex);
       SaveManager.autoSave();
@@ -87,7 +88,7 @@ export class RestScene extends Phaser.Scene {
     const healParticles = new ParticleManager(this);
     healParticles.createHealEffect(GAME_WIDTH / 2, GAME_HEIGHT / 2 - 40);
 
-    const title = this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 - 40, 'Team Restored!', {
+    const title = this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 - 40, UI.rest.restored, {
       fontSize: '18px',
       color: colorToString(Theme.colors.success),
       fontFamily: 'monospace',
@@ -108,7 +109,7 @@ export class RestScene extends Phaser.Scene {
       fadeTargets.push(heroText);
     });
 
-    const btn = new Button(this, GAME_WIDTH / 2, GAME_HEIGHT - 50, 'Continue', 140, 40, () => {
+    const btn = new Button(this, GAME_WIDTH / 2, GAME_HEIGHT - 50, UI.rest.continueBtn, 140, 40, () => {
       SceneTransition.fadeTransition(this, 'MapScene');
     });
     btn.setAlpha(0);

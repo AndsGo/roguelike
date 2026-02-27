@@ -74,7 +74,7 @@ export class BattleHUD extends Phaser.GameObjects.Container {
     this.add(this.comboText);
 
     // Stats toggle button — use padded hit zone for easier clicking
-    const statsBtn = scene.add.text(GAME_WIDTH - 10, GAME_HEIGHT - 65, '[STATS]', {
+    const statsBtn = scene.add.text(GAME_WIDTH - 10, GAME_HEIGHT - 65, '[统计]', {
       fontSize: '8px',
       color: '#888888',
       fontFamily: 'monospace',
@@ -289,7 +289,7 @@ export class BattleHUD extends Phaser.GameObjects.Container {
     bg.strokeRoundedRect(0, 0, 120, Math.max(40, this.damageStats.size * 16 + 20), 4);
     this.statsPanel.add(bg);
 
-    const title = this.scene.add.text(60, 8, 'DMG Stats', {
+    const title = this.scene.add.text(60, 8, '伤害统计', {
       fontSize: '8px',
       color: '#aaaaaa',
       fontFamily: 'monospace',

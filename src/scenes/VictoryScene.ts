@@ -9,6 +9,7 @@ import { Button } from '../ui/Button';
 import { Theme, colorToString } from '../ui/Theme';
 import { SceneTransition } from '../systems/SceneTransition';
 import { ParticleManager } from '../systems/ParticleManager';
+import { UI, getHeroDisplayName } from '../i18n';
 
 export class VictoryScene extends Phaser.Scene {
   private rewardsApplied: boolean = false;
@@ -31,7 +32,7 @@ export class VictoryScene extends Phaser.Scene {
     particles.createLevelUpEffect(GAME_WIDTH / 2 - 100, 60);
     particles.createLevelUpEffect(GAME_WIDTH / 2 + 100, 60);
 
-    const title = this.add.text(GAME_WIDTH / 2, 55, 'VICTORY!', {
+    const title = this.add.text(GAME_WIDTH / 2, 55, UI.victory.title, {
       fontSize: '40px',
       color: colorToString(Theme.colors.gold),
       fontFamily: 'monospace',
@@ -59,7 +60,7 @@ export class VictoryScene extends Phaser.Scene {
       delay: 500,
     });
 
-    this.add.text(GAME_WIDTH / 2, 105, 'You defeated the final Boss!', {
+    this.add.text(GAME_WIDTH / 2, 105, UI.victory.subtitle, {
       fontSize: '13px',
       color: colorToString(Theme.colors.success),
       fontFamily: 'monospace',
@@ -77,7 +78,7 @@ export class VictoryScene extends Phaser.Scene {
     }
 
     // Final team
-    this.add.text(GAME_WIDTH / 2, 135, 'Final Team:', {
+    this.add.text(GAME_WIDTH / 2, 135, UI.victory.finalTeam, {
       fontSize: '11px',
       color: '#8899cc',
       fontFamily: 'monospace',
@@ -95,13 +96,13 @@ export class VictoryScene extends Phaser.Scene {
 
     const rewardY = 155 + heroes.length * 18 + 15;
 
-    this.add.text(GAME_WIDTH / 2, rewardY, `Final Gold: ${rm.getGold()}`, {
+    this.add.text(GAME_WIDTH / 2, rewardY, UI.victory.finalGold(rm.getGold()), {
       fontSize: '12px',
       color: colorToString(Theme.colors.gold),
       fontFamily: 'monospace',
     }).setOrigin(0.5);
 
-    this.add.text(GAME_WIDTH / 2, rewardY + 22, `Souls earned: +${metaReward}`, {
+    this.add.text(GAME_WIDTH / 2, rewardY + 22, UI.victory.soulsEarned(metaReward), {
       fontSize: '13px',
       color: colorToString(Theme.colors.secondary),
       fontFamily: 'monospace',
@@ -112,7 +113,7 @@ export class VictoryScene extends Phaser.Scene {
 
     const maxDisplayedAchievements = 5;
     if (newAchievements.length > 0) {
-      this.add.text(GAME_WIDTH / 2, infoY, `Achievements Unlocked: ${newAchievements.length}`, {
+      this.add.text(GAME_WIDTH / 2, infoY, UI.victory.achievementsUnlocked(newAchievements.length), {
         fontSize: '11px',
         color: colorToString(Theme.colors.success),
         fontFamily: 'monospace',
@@ -134,7 +135,7 @@ export class VictoryScene extends Phaser.Scene {
 
       const remaining = newAchievements.length - maxDisplayedAchievements;
       if (remaining > 0) {
-        this.add.text(GAME_WIDTH / 2, infoY, `...and ${remaining} more`, {
+        this.add.text(GAME_WIDTH / 2, infoY, UI.victory.andMore(remaining), {
           fontSize: '9px',
           color: colorToString(Theme.colors.textDim),
           fontFamily: 'monospace',
@@ -147,14 +148,14 @@ export class VictoryScene extends Phaser.Scene {
     const meta = MetaManager.getMetaData();
     const nonDefault = meta.unlockedHeroes.filter(h => !['warrior', 'archer', 'mage'].includes(h));
     if (nonDefault.length > 0) {
-      this.add.text(GAME_WIDTH / 2, infoY + 5, `Unlocked heroes: ${nonDefault.join(', ')}`, {
+      this.add.text(GAME_WIDTH / 2, infoY + 5, UI.victory.unlockedHeroes(nonDefault.map(getHeroDisplayName).join(', ')), {
         fontSize: '10px',
         color: '#88ff88',
         fontFamily: 'monospace',
       }).setOrigin(0.5);
     }
 
-    new Button(this, GAME_WIDTH / 2, GAME_HEIGHT - 40, 'Main Menu', 180, 45, () => {
+    new Button(this, GAME_WIDTH / 2, GAME_HEIGHT - 40, UI.victory.mainMenu, 180, 45, () => {
       SceneTransition.fadeTransition(this, 'MainMenuScene');
     }, Theme.colors.secondary);
   }

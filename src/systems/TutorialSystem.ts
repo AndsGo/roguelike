@@ -26,62 +26,62 @@ export class TutorialSystem {
     {
       id: 'first_battle',
       trigger: 'BattleScene',
-      title: 'Battle Basics',
-      message: 'Heroes fight automatically! Use the 1x/2x/3x buttons to adjust battle speed.',
+      title: '战斗基础',
+      message: '英雄会自动战斗！使用1x/2x/3x按钮调整战斗速度。',
     },
     {
       id: 'first_shop',
       trigger: 'ShopScene',
-      title: 'Shop',
-      message: 'Buy equipment with gold to boost your heroes\' stats.',
+      title: '商店',
+      message: '用金币购买装备来提升英雄的属性。',
     },
     {
       id: 'first_event',
       trigger: 'EventScene',
-      title: 'Events',
-      message: 'Make a choice! Each option has different risks and rewards.',
+      title: '事件',
+      message: '做出选择！每个选项都有不同的风险和奖励。',
     },
     {
       id: 'first_rest',
       trigger: 'RestScene',
-      title: 'Rest Site',
-      message: 'Rest to recover 30% of each hero\'s max HP.',
+      title: '休息站',
+      message: '休息可恢复每个英雄30%的最大生命值。',
     },
     {
       id: 'first_map',
       trigger: 'MapScene',
-      title: 'Adventure Map',
-      message: 'Select the next node to advance. Different node types offer battles, shops, events, and rest.',
+      title: '冒险地图',
+      message: '选择下一个节点前进。不同节点类型提供战斗、商店、事件和休息。',
     },
     {
       id: 'first_element',
       trigger: 'element:reaction',
-      title: 'Elemental Reactions',
-      message: 'Different elements can trigger powerful reactions when combined!',
+      title: '元素反应',
+      message: '不同元素组合可以触发强大的元素反应！',
     },
     {
       id: 'first_synergy',
       trigger: 'synergy_activated',
-      title: 'Synergies',
-      message: 'Heroes sharing a race or class activate synergy bonuses!',
+      title: '羁绊',
+      message: '拥有相同种族或职业的英雄可以激活羁绊加成！',
     },
     {
       id: 'first_relic',
       trigger: 'relic:acquire',
-      title: 'Relics',
-      message: 'Relics provide powerful passive effects that last the entire run!',
+      title: '遗物',
+      message: '遗物提供强大的被动效果，持续整个冒险！',
     },
     {
       id: 'first_elite',
       trigger: 'elite_battle',
-      title: 'Elite Battle',
-      message: 'Elite enemies are tougher but drop better rewards!',
+      title: '精英战斗',
+      message: '精英敌人更强大，但会掉落更好的奖励！',
     },
     {
       id: 'first_boss',
       trigger: 'boss_battle',
-      title: 'Boss Battle',
-      message: 'Boss fights are the ultimate challenge of each act. Prepare well!',
+      title: '首领战斗',
+      message: '首领战是每章的终极挑战，做好准备！',
     },
   ];
 
@@ -197,7 +197,7 @@ export class TutorialSystem {
     }).setOrigin(0.5).setDepth(902);
 
     // Close button / instruction
-    const closeText = scene.add.text(cx, cy + 45, '[ Click to continue ]', {
+    const closeText = scene.add.text(cx, cy + 45, '[ 点击继续 ]', {
       fontSize: '10px',
       color: '#888899',
       fontFamily: 'monospace',

@@ -3,8 +3,8 @@ import { DifficultyConfig } from '../types';
 export const DIFFICULTY_LEVELS: DifficultyConfig[] = [
   {
     id: 'normal',
-    name: 'Normal',
-    description: 'Standard difficulty for new players',
+    name: '普通',
+    description: '适合新手的标准难度',
     enemyStatMultiplier: 1.0,
     enemyCountBonus: 0,
     goldMultiplier: 1.0,
@@ -13,8 +13,8 @@ export const DIFFICULTY_LEVELS: DifficultyConfig[] = [
   },
   {
     id: 'hard',
-    name: 'Hard',
-    description: 'Tougher enemies, better rewards',
+    name: '困难',
+    description: '更强的敌人，更好的奖励',
     enemyStatMultiplier: 1.3,
     enemyCountBonus: 1,
     goldMultiplier: 1.2,
@@ -23,8 +23,8 @@ export const DIFFICULTY_LEVELS: DifficultyConfig[] = [
   },
   {
     id: 'nightmare',
-    name: 'Nightmare',
-    description: 'For experienced players only',
+    name: '噩梦',
+    description: '仅限经验丰富的玩家',
     enemyStatMultiplier: 1.6,
     enemyCountBonus: 2,
     goldMultiplier: 1.5,
@@ -33,8 +33,8 @@ export const DIFFICULTY_LEVELS: DifficultyConfig[] = [
   },
   {
     id: 'hell',
-    name: 'Hell',
-    description: 'The ultimate challenge',
+    name: '地狱',
+    description: '终极挑战',
     enemyStatMultiplier: 2.0,
     enemyCountBonus: 3,
     goldMultiplier: 2.0,

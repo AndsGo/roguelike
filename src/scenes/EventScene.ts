@@ -7,6 +7,7 @@ import { Theme, colorToString } from '../ui/Theme';
 import { SceneTransition } from '../systems/SceneTransition';
 import { SaveManager } from '../managers/SaveManager';
 import eventsData from '../data/events.json';
+import { UI } from '../i18n';
 
 export class EventScene extends Phaser.Scene {
   private nodeIndex!: number;
@@ -145,12 +146,12 @@ export class EventScene extends Phaser.Scene {
 
     const effectTexts = outcome.effects.map(e => {
       switch (e.type) {
-        case 'gold': return `Gold ${e.value > 0 ? '+' : ''}${e.value}`;
-        case 'heal': return `Heal ${Math.round(e.value * 100)}% HP`;
-        case 'damage': return `Damage ${Math.round(e.value * 100)}% HP`;
-        case 'stat_boost': return `Stat boost +${e.value}`;
-        case 'relic': return `Relic acquired: ${e.relicId ?? 'unknown'}`;
-        case 'item': return `Gold +${e.value || 30}`;
+        case 'gold': return UI.event.goldEffect(e.value);
+        case 'heal': return UI.event.healEffect(e.value);
+        case 'damage': return UI.event.damageEffect(e.value);
+        case 'stat_boost': return UI.event.statBoost(e.value);
+        case 'relic': return UI.event.relicAcquired(e.relicId ?? 'unknown');
+        case 'item': return UI.event.itemGold(e.value || 30);
         default: return '';
       }
     }).filter(Boolean);
@@ -167,7 +168,7 @@ export class EventScene extends Phaser.Scene {
       fadeTargets.push(effectLabel);
     }
 
-    const btn = new Button(this, GAME_WIDTH / 2, GAME_HEIGHT - 50, 'Continue', 140, 40, () => {
+    const btn = new Button(this, GAME_WIDTH / 2, GAME_HEIGHT - 50, UI.event.continueBtn, 140, 40, () => {
       SceneTransition.fadeTransition(this, 'MapScene');
     });
     btn.setAlpha(0);

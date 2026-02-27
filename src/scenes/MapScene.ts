@@ -7,6 +7,7 @@ import { Theme, colorToString } from '../ui/Theme';
 import { SceneTransition } from '../systems/SceneTransition';
 import { Button } from '../ui/Button';
 import actsData from '../data/acts.json';
+import { UI } from '../i18n';
 
 const NODE_COLORS: Record<NodeType, number> = Theme.colors.node as Record<NodeType, number>;
 
@@ -104,7 +105,7 @@ export class MapScene extends Phaser.Scene {
 
       // Act label at top
       const actLabelX = firstLayerX + actWidth / 2;
-      const actLabel = this.add.text(actLabelX, headerHeight + 8, `Act ${actIdx + 1}: ${acts[actIdx].name}`, {
+      const actLabel = this.add.text(actLabelX, headerHeight + 8, UI.map.actLabel(actIdx + 1, acts[actIdx].name), {
         fontSize: '11px',
         color: '#8899bb',
         fontFamily: 'monospace',
@@ -222,7 +223,7 @@ export class MapScene extends Phaser.Scene {
       this.mapContainer.add(label);
 
       // Type name below
-      const typeName = this.getNodeTypeName(node.type);
+      const typeName = UI.nodeType[node.type] ?? node.type;
       const typeLabel = this.add.text(pos.x, pos.y + radius + 6, typeName, {
         fontSize: '9px',
         color: '#7799aa',
@@ -254,7 +255,7 @@ export class MapScene extends Phaser.Scene {
     headerBg.lineBetween(0, headerHeight, GAME_WIDTH, headerHeight);
 
     // Title
-    this.add.text(GAME_WIDTH / 2, 16, 'ADVENTURE MAP', {
+    this.add.text(GAME_WIDTH / 2, 16, UI.map.title, {
       fontSize: '14px',
       color: '#ffffff',
       fontFamily: 'monospace',
@@ -263,14 +264,14 @@ export class MapScene extends Phaser.Scene {
 
     // Act + Floor indicator
     const currentAct = rm.getCurrentAct();
-    this.add.text(GAME_WIDTH / 2, 34, `Act ${currentAct + 1}: ${acts[currentAct]?.name ?? ''} - Floor ${rm.getFloor()}`, {
+    this.add.text(GAME_WIDTH / 2, 34, UI.map.floorLabel(currentAct + 1, acts[currentAct]?.name ?? '', rm.getFloor()), {
       fontSize: '9px',
       color: '#8899cc',
       fontFamily: 'monospace',
     }).setOrigin(0.5).setScrollFactor(0).setDepth(101);
 
     // Gold display
-    this.add.text(GAME_WIDTH - 15, 8, `${rm.getGold()}G`, {
+    this.add.text(GAME_WIDTH - 15, 8, UI.map.gold(rm.getGold()), {
       fontSize: '11px',
       color: colorToString(Theme.colors.gold),
       fontFamily: 'monospace',
@@ -485,7 +486,7 @@ export class MapScene extends Phaser.Scene {
     });
 
     // "Entering Act X" title
-    const title = this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 - 50, `Entering Act ${actIndex + 1}`, {
+    const title = this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 - 50, UI.map.enterAct(actIndex + 1), {
       fontSize: '22px',
       color: '#ffffff',
       fontFamily: 'monospace',
@@ -519,7 +520,7 @@ export class MapScene extends Phaser.Scene {
     this.time.delayedCall(600, () => {
       const btn = new Button(
         this, GAME_WIDTH / 2, GAME_HEIGHT / 2 + 65,
-        'Continue', 140, 36,
+        UI.map.continueBtn, 140, 36,
         () => {
           // Fade out everything
           this.tweens.add({
@@ -548,17 +549,6 @@ export class MapScene extends Phaser.Scene {
         ease: 'Sine.easeOut',
       });
     });
-  }
-
-  private getNodeTypeName(type: NodeType): string {
-    switch (type) {
-      case 'battle': return 'Battle';
-      case 'elite': return 'Elite';
-      case 'boss': return 'Boss';
-      case 'shop': return 'Shop';
-      case 'event': return 'Event';
-      case 'rest': return 'Rest';
-    }
   }
 
   private drawHeroSummary(rm: RunManager): void {
