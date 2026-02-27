@@ -172,7 +172,7 @@ export class TutorialSystem {
       GAME_WIDTH / 2, GAME_HEIGHT / 2,
       GAME_WIDTH, GAME_HEIGHT,
       0x000000, 0.4,
-    ).setDepth(900).setInteractive();
+    ).setDepth(900).setInteractive({ useHandCursor: true });
 
     // Panel background
     const panel = scene.add.rectangle(cx, cy, panelWidth, panelHeight, 0x1a1a2e, 0.95)
@@ -213,7 +213,7 @@ export class TutorialSystem {
     };
 
     backdrop.on('pointerdown', dismiss);
-    panel.setInteractive().on('pointerdown', dismiss);
+    panel.setInteractive({ useHandCursor: true }).on('pointerdown', dismiss);
 
     // Auto-dismiss after 8 seconds
     scene.time.delayedCall(8000, () => {
