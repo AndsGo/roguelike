@@ -3,8 +3,8 @@ import { ElementType } from '../types';
 /**
  * Element advantage table.
  * advantageTable[attacker] = list of elements the attacker is strong against.
- * Advantage multiplier: 1.3x damage
- * Disadvantage multiplier: 0.7x damage
+ * Advantage multiplier: 1.2x damage
+ * Disadvantage multiplier: 0.85x damage
  */
 export const ELEMENT_ADVANTAGE: Record<ElementType, ElementType[]> = {
   fire: ['ice'],

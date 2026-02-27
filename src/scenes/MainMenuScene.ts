@@ -80,7 +80,11 @@ export class MainMenuScene extends Phaser.Scene {
 
     // New Game button
     new Button(this, GAME_WIDTH / 2, btnY, 'NEW GAME', 180, 40, () => {
-      this.startNewGame();
+      if (SaveManager.hasSave(0)) {
+        this.showNewGameConfirmation();
+      } else {
+        this.startNewGame();
+      }
     }, Theme.colors.primary);
     btnY += 50;
 
@@ -112,6 +116,40 @@ export class MainMenuScene extends Phaser.Scene {
     const rm = RunManager.getInstance();
     rm.newRun();
     SceneTransition.fadeTransition(this, 'MapScene');
+  }
+
+  private showNewGameConfirmation(): void {
+    // Overlay background
+    const overlay = this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, 0x000000, 0.6)
+      .setInteractive(); // blocks clicks to elements behind
+
+    const panelBg = this.add.graphics();
+    panelBg.fillStyle(Theme.colors.panel, 0.95);
+    panelBg.fillRoundedRect(GAME_WIDTH / 2 - 160, GAME_HEIGHT / 2 - 55, 320, 110, 8);
+    panelBg.lineStyle(2, Theme.colors.panelBorder, 0.8);
+    panelBg.strokeRoundedRect(GAME_WIDTH / 2 - 160, GAME_HEIGHT / 2 - 55, 320, 110, 8);
+
+    const msg = this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 - 25, 'Existing save will be lost.\nContinue?', {
+      fontSize: '13px',
+      color: colorToString(Theme.colors.danger),
+      fontFamily: 'monospace',
+      align: 'center',
+    }).setOrigin(0.5);
+
+    const confirmElements = [overlay, panelBg, msg];
+
+    const yesBtn = new Button(this, GAME_WIDTH / 2 - 60, GAME_HEIGHT / 2 + 25, 'YES', 80, 30, () => {
+      confirmElements.forEach(el => el.destroy());
+      yesBtn.destroy();
+      noBtn.destroy();
+      this.startNewGame();
+    }, Theme.colors.danger);
+
+    const noBtn = new Button(this, GAME_WIDTH / 2 + 60, GAME_HEIGHT / 2 + 25, 'NO', 80, 30, () => {
+      confirmElements.forEach(el => el.destroy());
+      yesBtn.destroy();
+      noBtn.destroy();
+    }, Theme.colors.primary);
   }
 
   private showUpgradePanel(): void {
@@ -210,9 +248,13 @@ export class MainMenuScene extends Phaser.Scene {
           color: canAfford ? '#ffffff' : '#888888',
           fontFamily: 'monospace',
         }).setOrigin(0.5);
+        panel.addContent(buyText);
+
+        // Transparent hit area covering the full buy button background
         if (canAfford) {
-          buyText.setInteractive({ useHandCursor: true });
-          buyText.on('pointerdown', () => {
+          const buyHit = this.add.rectangle(220, y + 2, 40, 20, 0x000000, 0)
+            .setInteractive({ useHandCursor: true });
+          buyHit.on('pointerdown', () => {
             if (MetaManager.purchaseUpgrade(def.id)) {
               // Refresh panel
               this.upgradePanel?.close(() => {
@@ -221,8 +263,8 @@ export class MainMenuScene extends Phaser.Scene {
               });
             }
           });
+          panel.addContent(buyHit);
         }
-        panel.addContent(buyText);
       } else {
         const maxText = this.add.text(180, y, 'MAX', {
           fontSize: '10px',

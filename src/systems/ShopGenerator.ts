@@ -12,12 +12,12 @@ export class ShopGenerator {
   /**
    * Generate a shop inventory.
    * @param rng Seeded RNG
-   * @param nodeIndex Current map progress (0-14)
+   * @param actIndex Current act (0 = early, 1 = mid, 2+ = late)
    * @param itemCount Number of items to offer (4-6)
    */
-  static generate(rng: SeededRNG, nodeIndex: number, itemCount?: number): ItemData[] {
+  static generate(rng: SeededRNG, actIndex: number, itemCount?: number): ItemData[] {
     const count = itemCount ?? rng.nextInt(4, 6);
-    const stage = nodeIndex < 5 ? 'early' : nodeIndex < 10 ? 'mid' : 'late';
+    const stage = actIndex <= 0 ? 'early' : actIndex === 1 ? 'mid' : 'late';
     const weights = RARITY_WEIGHTS[stage];
 
     const allItems = itemsData as ItemData[];

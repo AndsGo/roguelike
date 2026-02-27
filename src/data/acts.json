@@ -19,7 +19,7 @@
     "bossPool": ["thunder_titan"],
     "eventPool": ["volcano_cave", "blacksmith", "mysterious_merchant", "thunder_peak", "trapped_chest"],
     "elementAffinity": "fire",
-    "difficultyMultiplier": 1.7
+    "difficultyMultiplier": 1.4
   },
   {
     "id": "act3_abyss",
@@ -30,6 +30,6 @@
     "bossPool": ["shadow_lord"],
     "eventPool": ["shadow_shrine", "holy_temple", "fortune_teller", "mysterious_portal", "goblin_camp"],
     "elementAffinity": "dark",
-    "difficultyMultiplier": 1.85
+    "difficultyMultiplier": 1.8
   }
 ]

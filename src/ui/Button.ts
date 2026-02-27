@@ -96,10 +96,9 @@ export class Button extends Phaser.GameObjects.Container {
       duration: 60,
       ease: 'Sine.easeOut',
     });
-    if (this.callback) this.callback();
   }
 
-  private onUp(): void {
+  private onUp(pointer: Phaser.Input.Pointer): void {
     if (!this.isEnabled) return;
     this.drawButton(this.baseColor, this.borderColor);
     this.scene.tweens.add({
@@ -109,6 +108,15 @@ export class Button extends Phaser.GameObjects.Container {
       duration: 60,
       ease: 'Sine.easeOut',
     });
+
+    // Fire callback only if pointer is still within button bounds
+    const localX = pointer.x - this.x;
+    const localY = pointer.y - this.y;
+    const halfW = this.btnWidth / 2;
+    const halfH = this.btnHeight / 2;
+    if (localX >= -halfW && localX <= halfW && localY >= -halfH && localY <= halfH) {
+      if (this.callback) this.callback();
+    }
   }
 
   setEnabled(enabled: boolean): void {

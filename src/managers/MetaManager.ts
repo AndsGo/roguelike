@@ -173,7 +173,7 @@ export class MetaManager {
 
   // ---- Run Statistics ----
 
-  static recordRunEnd(victory: boolean, floor: number): void {
+  static recordRunEnd(victory: boolean, floor: number): number {
     const inst = MetaManager.getInstance();
     inst.meta.totalRuns++;
     if (victory) {
@@ -199,6 +199,7 @@ export class MetaManager {
     EventBus.getInstance().emit('run:end', { victory, floor });
 
     inst.persist();
+    return baseReward;
   }
 
   // ---- Achievements ----

@@ -47,7 +47,7 @@ export class RewardScene extends Phaser.Scene {
 
     const expText = this.add.text(GAME_WIDTH / 2, 138, `EXP: +${result.expEarned}`, {
       fontSize: '14px',
-      color: '#88aaff',
+      color: colorToString(Theme.colors.primary),
       fontFamily: 'monospace',
     }).setOrigin(0.5).setAlpha(0);
 
@@ -57,7 +57,7 @@ export class RewardScene extends Phaser.Scene {
     // Survivors
     this.add.text(GAME_WIDTH / 2, 170, `Survivors: ${result.survivors.length}`, {
       fontSize: '11px',
-      color: '#aaaaaa',
+      color: colorToString(Theme.colors.textDim),
       fontFamily: 'monospace',
     }).setOrigin(0.5);
 
@@ -69,7 +69,7 @@ export class RewardScene extends Phaser.Scene {
       const alive = result.survivors.includes(hero.id);
       this.add.text(GAME_WIDTH / 2, 200 + i * 20, `${hd.name} Lv.${hero.level}  HP:${hero.currentHp}/${maxHp}`, {
         fontSize: '10px',
-        color: alive ? '#ffffff' : '#ff6666',
+        color: alive ? colorToString(Theme.colors.text) : colorToString(Theme.colors.danger),
         fontFamily: 'monospace',
       }).setOrigin(0.5);
     });

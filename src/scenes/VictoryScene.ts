@@ -11,8 +11,14 @@ import { SceneTransition } from '../systems/SceneTransition';
 import { ParticleManager } from '../systems/ParticleManager';
 
 export class VictoryScene extends Phaser.Scene {
+  private rewardsApplied: boolean = false;
+
   constructor() {
     super({ key: 'VictoryScene' });
+  }
+
+  init(): void {
+    this.rewardsApplied = false;
   }
 
   create(): void {
@@ -59,16 +65,16 @@ export class VictoryScene extends Phaser.Scene {
       fontFamily: 'monospace',
     }).setOrigin(0.5);
 
-    // Meta progression settlement
-    const metaReward = 100;
-    MetaManager.recordRunEnd(true, rm.getFloor());
-    StatsManager.finalizeRun(true);
-
-    // Check achievements
-    const newAchievements = AchievementManager.checkAchievements();
-
-    // Delete autosave on victory
-    SaveManager.deleteSave(0);
+    // Meta progression settlement (guard against re-entry)
+    let metaReward = 0;
+    let newAchievements: string[] = [];
+    if (!this.rewardsApplied) {
+      this.rewardsApplied = true;
+      metaReward = MetaManager.recordRunEnd(true, rm.getFloor());
+      StatsManager.finalizeRun(true);
+      newAchievements = AchievementManager.checkAchievements();
+      SaveManager.deleteSave(0);
+    }
 
     // Final team
     this.add.text(GAME_WIDTH / 2, 135, 'Final Team:', {
@@ -104,6 +110,7 @@ export class VictoryScene extends Phaser.Scene {
 
     let infoY = rewardY + 45;
 
+    const maxDisplayedAchievements = 5;
     if (newAchievements.length > 0) {
       this.add.text(GAME_WIDTH / 2, infoY, `Achievements Unlocked: ${newAchievements.length}`, {
         fontSize: '11px',
@@ -112,7 +119,8 @@ export class VictoryScene extends Phaser.Scene {
       }).setOrigin(0.5);
       infoY += 18;
 
-      for (const achId of newAchievements) {
+      const displayed = newAchievements.slice(0, maxDisplayedAchievements);
+      for (const achId of displayed) {
         const def = AchievementManager.getAll().find(a => a.id === achId);
         if (def) {
           this.add.text(GAME_WIDTH / 2, infoY, `- ${def.name}`, {
@@ -122,6 +130,16 @@ export class VictoryScene extends Phaser.Scene {
           }).setOrigin(0.5);
           infoY += 14;
         }
+      }
+
+      const remaining = newAchievements.length - maxDisplayedAchievements;
+      if (remaining > 0) {
+        this.add.text(GAME_WIDTH / 2, infoY, `...and ${remaining} more`, {
+          fontSize: '9px',
+          color: colorToString(Theme.colors.textDim),
+          fontFamily: 'monospace',
+        }).setOrigin(0.5);
+        infoY += 14;
       }
     }
 

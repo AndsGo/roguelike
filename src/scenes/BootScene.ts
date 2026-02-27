@@ -19,7 +19,7 @@ export class BootScene extends Phaser.Scene {
     const progressBar = this.add.rectangle(barX + 2, barY, 0, barHeight - 4, 0x4488ff);
     progressBar.setOrigin(0, 0.5);
 
-    const loadingText = this.add.text(GAME_WIDTH / 2, barY - 30, '加载中...', {
+    const loadingText = this.add.text(GAME_WIDTH / 2, barY - 30, 'Loading...', {
       fontSize: '14px',
       color: '#ffffff',
       fontFamily: 'monospace',
@@ -30,7 +30,7 @@ export class BootScene extends Phaser.Scene {
     });
 
     this.load.on('complete', () => {
-      loadingText.setText('加载完成！');
+      loadingText.setText('Loading complete!');
     });
 
     // No actual assets to load yet — using placeholder shapes

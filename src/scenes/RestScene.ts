@@ -29,7 +29,7 @@ export class RestScene extends Phaser.Scene {
 
     this.add.text(GAME_WIDTH / 2, 55, 'REST', {
       fontSize: '20px',
-      color: '#4488cc',
+      color: colorToString(Theme.colors.node.rest),
       fontFamily: 'monospace',
       fontStyle: 'bold',
     }).setOrigin(0.5);
@@ -66,34 +66,60 @@ export class RestScene extends Phaser.Scene {
       rm.markNodeCompleted(this.nodeIndex);
       SaveManager.autoSave();
 
-      // Show healed status
-      this.children.removeAll();
-      this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, Theme.colors.background);
-
-      const healParticles = new ParticleManager(this);
-      healParticles.createHealEffect(GAME_WIDTH / 2, GAME_HEIGHT / 2 - 40);
-
-      this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 - 40, 'Team Restored!', {
-        fontSize: '18px',
-        color: colorToString(Theme.colors.success),
-        fontFamily: 'monospace',
-        fontStyle: 'bold',
-      }).setOrigin(0.5);
-
-      const healedHeroes = rm.getHeroes();
-      healedHeroes.forEach((hero, i) => {
-        const data = rm.getHeroData(hero.id);
-        const maxHp = rm.getMaxHp(hero, data);
-        this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 + i * 22, `${data.name}: ${hero.currentHp}/${maxHp} HP`, {
-          fontSize: '10px',
-          color: colorToString(Theme.colors.success),
-          fontFamily: 'monospace',
-        }).setOrigin(0.5);
-      });
-
-      new Button(this, GAME_WIDTH / 2, GAME_HEIGHT - 50, 'Continue', 140, 40, () => {
-        SceneTransition.fadeTransition(this, 'MapScene');
+      // Fade out current content, then show healed status
+      const allChildren = this.children.getAll();
+      this.tweens.add({
+        targets: allChildren,
+        alpha: 0,
+        duration: 300,
+        ease: 'Sine.easeIn',
+        onComplete: () => {
+          this.children.removeAll();
+          this.showHealedStatus(rm);
+        },
       });
     }, Theme.colors.success);
+  }
+
+  private showHealedStatus(rm: RunManager): void {
+    this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, Theme.colors.background);
+
+    const healParticles = new ParticleManager(this);
+    healParticles.createHealEffect(GAME_WIDTH / 2, GAME_HEIGHT / 2 - 40);
+
+    const title = this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 - 40, 'Team Restored!', {
+      fontSize: '18px',
+      color: colorToString(Theme.colors.success),
+      fontFamily: 'monospace',
+      fontStyle: 'bold',
+    }).setOrigin(0.5).setAlpha(0);
+
+    const fadeTargets: Phaser.GameObjects.GameObject[] = [title];
+
+    const healedHeroes = rm.getHeroes();
+    healedHeroes.forEach((hero, i) => {
+      const data = rm.getHeroData(hero.id);
+      const maxHp = rm.getMaxHp(hero, data);
+      const heroText = this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 + i * 22, `${data.name}: ${hero.currentHp}/${maxHp} HP`, {
+        fontSize: '10px',
+        color: colorToString(Theme.colors.success),
+        fontFamily: 'monospace',
+      }).setOrigin(0.5).setAlpha(0);
+      fadeTargets.push(heroText);
+    });
+
+    const btn = new Button(this, GAME_WIDTH / 2, GAME_HEIGHT - 50, 'Continue', 140, 40, () => {
+      SceneTransition.fadeTransition(this, 'MapScene');
+    });
+    btn.setAlpha(0);
+    fadeTargets.push(btn);
+
+    // Fade in healed status content
+    this.tweens.add({
+      targets: fadeTargets,
+      alpha: 1,
+      duration: 300,
+      ease: 'Sine.easeOut',
+    });
   }
 }

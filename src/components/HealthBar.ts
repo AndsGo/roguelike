@@ -130,8 +130,16 @@ export class HealthBar extends Phaser.GameObjects.Container {
     if (this.shieldRatio <= 0) return;
 
     const w = this.barWidth * Math.min(1, this.shieldRatio);
-    this.shieldBar.fillStyle(Theme.colors.health.shield, 0.6);
-    this.shieldBar.fillRoundedRect(-this.barWidth / 2, -this.barHeight / 2 - 1, w, this.barHeight, 1);
+    const halfW = this.barWidth / 2;
+    const halfH = this.barHeight / 2;
+
+    // Draw shield as a bright cyan overlay on top of the health bar
+    this.shieldBar.fillStyle(0x00eeff, 0.45);
+    this.shieldBar.fillRoundedRect(-halfW, -halfH, w, this.barHeight, 1);
+
+    // Draw a bright outline around the entire bar to indicate shield is active
+    this.shieldBar.lineStyle(1, 0x00eeff, 0.9);
+    this.shieldBar.strokeRoundedRect(-halfW - 1, -halfH - 1, this.barWidth + 2, this.barHeight + 2, 2);
   }
 
   private getHealthColor(ratio: number): number {

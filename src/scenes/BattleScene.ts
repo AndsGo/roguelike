@@ -182,12 +182,12 @@ export class BattleScene extends Phaser.Scene {
     eb.on('unit:death', this.onDeath);
     eb.on('element:reaction', this.onReaction);
 
-    // Gold display
-    this.add.text(10, 10, `${rm.getGold()}G`, {
+    // Gold display (top-right, near battle type label)
+    this.add.text(GAME_WIDTH - 15, 10, `${rm.getGold()}G`, {
       fontSize: '10px',
       color: colorToString(Theme.colors.gold),
       fontFamily: 'monospace',
-    });
+    }).setOrigin(1, 0);
   }
 
   update(_time: number, delta: number): void {

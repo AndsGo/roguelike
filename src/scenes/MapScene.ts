@@ -105,8 +105,8 @@ export class MapScene extends Phaser.Scene {
       // Act label at top
       const actLabelX = firstLayerX + actWidth / 2;
       const actLabel = this.add.text(actLabelX, headerHeight + 8, `Act ${actIdx + 1}: ${acts[actIdx].name}`, {
-        fontSize: '8px',
-        color: '#667788',
+        fontSize: '11px',
+        color: '#8899bb',
         fontFamily: 'monospace',
       }).setOrigin(0.5);
       this.mapContainer.add(actLabel);
@@ -189,15 +189,19 @@ export class MapScene extends Phaser.Scene {
         g.lineStyle(2, 0xffffff, 0.8);
         g.strokeCircle(pos.x, pos.y, radius);
 
-        // Pulse animation
+        // Pulse animation - use a circle positioned at node center so scale pivots correctly
+        const pulseRing = this.add.circle(pos.x, pos.y, radius + 5)
+          .setStrokeStyle(2, color, 0.4)
+          .setFillStyle(0x000000, 0);
+        this.mapContainer.add(pulseRing);
         this.tweens.add({
-          targets: g,
-          scaleX: 1.1,
-          scaleY: 1.1,
-          duration: 600,
-          yoyo: true,
+          targets: pulseRing,
+          scaleX: 1.25,
+          scaleY: 1.25,
+          alpha: 0,
+          duration: 800,
           repeat: -1,
-          ease: 'Sine.easeInOut',
+          ease: 'Sine.easeOut',
         });
       } else {
         g.fillStyle(color, 0.25);
@@ -220,8 +224,8 @@ export class MapScene extends Phaser.Scene {
       // Type name below
       const typeName = this.getNodeTypeName(node.type);
       const typeLabel = this.add.text(pos.x, pos.y + radius + 6, typeName, {
-        fontSize: '7px',
-        color: '#556677',
+        fontSize: '9px',
+        color: '#7799aa',
         fontFamily: 'monospace',
       }).setOrigin(0.5).setAlpha(labelAlpha);
       this.mapContainer.add(typeLabel);
@@ -400,38 +404,42 @@ export class MapScene extends Phaser.Scene {
 
   private setupDragScroll(): void {
     const maxScroll = Math.max(0, this.totalMapWidth - GAME_WIDTH);
-    let pointerStartX = 0;
     let scrollStartX = 0;
-    let hasMoved = false;
 
     this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
       // Only start drag in map area (not header/hero panel)
       if (pointer.y > 55 && pointer.y < GAME_HEIGHT - 75) {
         this.isDragging = false;
-        hasMoved = false;
-        pointerStartX = pointer.x;
+        this.dragStartX = pointer.x;
         scrollStartX = this.scrollX;
       }
     });
 
     this.input.on('pointermove', (pointer: Phaser.Input.Pointer) => {
       if (pointer.isDown && pointer.y > 55 && pointer.y < GAME_HEIGHT - 75) {
-        const dx = pointer.x - pointerStartX;
+        const dx = pointer.x - this.dragStartX;
         if (Math.abs(dx) > 5) {
-          hasMoved = true;
           this.isDragging = true;
         }
-        if (hasMoved) {
+        if (this.isDragging) {
           this.scrollX = Phaser.Math.Clamp(scrollStartX - dx, 0, maxScroll);
           this.mapContainer.x = -this.scrollX;
         }
       }
     });
 
-    this.input.on('pointerup', () => {
-      // Delay resetting isDragging to prevent click-through
+    this.input.on('pointerup', (pointer: Phaser.Input.Pointer) => {
+      // Use distance-based check: isDragging stays true so node pointerup sees it,
+      // then reset immediately. No timer race condition.
+      const dist = Math.abs(pointer.x - this.dragStartX);
+      // Keep isDragging=true if we actually dragged, so node click guards work.
+      // Reset it synchronously after the current event cycle via next frame.
+      if (dist < 8) {
+        this.isDragging = false;
+      }
+      // For actual drags, reset on next frame so node pointerup (same event) sees isDragging=true
       if (this.isDragging) {
-        this.time.delayedCall(50, () => { this.isDragging = false; });
+        this.time.delayedCall(0, () => { this.isDragging = false; });
       }
     });
   }
@@ -604,7 +612,7 @@ export class MapScene extends Phaser.Scene {
 
       // HP text
       this.add.text(x, y + 43, `${hero.currentHp}/${maxHp}`, {
-        fontSize: '6px',
+        fontSize: '8px',
         color: '#aaaaaa',
         fontFamily: 'monospace',
       }).setOrigin(0.5).setScrollFactor(0).setDepth(101);

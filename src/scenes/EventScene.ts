@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import { GAME_WIDTH, GAME_HEIGHT } from '../constants';
 import { RunManager } from '../managers/RunManager';
-import { EventData, EventChoice, EventOutcome } from '../types';
+import { EventData, EventChoice, EventOutcome, EventNodeData } from '../types';
 import { Button } from '../ui/Button';
 import { Theme, colorToString } from '../ui/Theme';
 import { SceneTransition } from '../systems/SceneTransition';
@@ -25,14 +25,22 @@ export class EventScene extends Phaser.Scene {
 
     this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, Theme.colors.background);
 
-    // Pick a random event
+    // Use the event assigned by MapGenerator if available, otherwise random fallback
     const eventPool = eventsData as EventData[];
-    const event = rng.pick(eventPool);
+    const node = rm.getMap()[this.nodeIndex];
+    const eventNodeData = node?.data as EventNodeData | undefined;
+    let event: EventData | undefined;
+    if (eventNodeData?.eventId) {
+      event = eventPool.find(e => e.id === eventNodeData.eventId);
+    }
+    if (!event) {
+      event = rng.pick(eventPool);
+    }
 
     // Title
     this.add.text(GAME_WIDTH / 2, 38, event.title, {
       fontSize: '18px',
-      color: '#cc88ff',
+      color: colorToString(Theme.colors.node.event),
       fontFamily: 'monospace',
       fontStyle: 'bold',
     }).setOrigin(0.5);
@@ -107,19 +115,35 @@ export class EventScene extends Phaser.Scene {
       }
     }
 
-    // Show outcome
-    this.children.removeAll();
+    rm.markNodeCompleted(this.nodeIndex);
+    SaveManager.autoSave();
+
+    // Fade out current content, then show outcome
+    const allChildren = this.children.getAll();
+    this.tweens.add({
+      targets: allChildren,
+      alpha: 0,
+      duration: 300,
+      ease: 'Sine.easeIn',
+      onComplete: () => {
+        this.children.removeAll();
+        this.showOutcome(selectedOutcome);
+      },
+    });
+  }
+
+  private showOutcome(outcome: EventOutcome): void {
     this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, Theme.colors.background);
 
-    this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 - 40, selectedOutcome.description, {
+    const outcomeText = this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 - 40, outcome.description, {
       fontSize: '14px',
       color: '#ffffff',
       fontFamily: 'monospace',
       wordWrap: { width: 600 },
       align: 'center',
-    }).setOrigin(0.5);
+    }).setOrigin(0.5).setAlpha(0);
 
-    const effectTexts = selectedOutcome.effects.map(e => {
+    const effectTexts = outcome.effects.map(e => {
       switch (e.type) {
         case 'gold': return `Gold ${e.value > 0 ? '+' : ''}${e.value}`;
         case 'heal': return `Heal ${Math.round(e.value * 100)}% HP`;
@@ -131,20 +155,30 @@ export class EventScene extends Phaser.Scene {
       }
     }).filter(Boolean);
 
+    const fadeTargets: Phaser.GameObjects.GameObject[] = [outcomeText];
+
     if (effectTexts.length > 0) {
-      this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 + 10, effectTexts.join('\n'), {
+      const effectLabel = this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 + 10, effectTexts.join('\n'), {
         fontSize: '12px',
         color: '#aaccff',
         fontFamily: 'monospace',
         align: 'center',
-      }).setOrigin(0.5);
+      }).setOrigin(0.5).setAlpha(0);
+      fadeTargets.push(effectLabel);
     }
 
-    rm.markNodeCompleted(this.nodeIndex);
-    SaveManager.autoSave();
-
-    new Button(this, GAME_WIDTH / 2, GAME_HEIGHT - 50, 'Continue', 140, 40, () => {
+    const btn = new Button(this, GAME_WIDTH / 2, GAME_HEIGHT - 50, 'Continue', 140, 40, () => {
       SceneTransition.fadeTransition(this, 'MapScene');
+    });
+    btn.setAlpha(0);
+    fadeTargets.push(btn);
+
+    // Fade in outcome content
+    this.tweens.add({
+      targets: fadeTargets,
+      alpha: 1,
+      duration: 300,
+      ease: 'Sine.easeOut',
     });
   }
 }

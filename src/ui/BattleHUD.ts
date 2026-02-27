@@ -6,6 +6,7 @@ import { Hero } from '../entities/Hero';
 import { Enemy } from '../entities/Enemy';
 import { EventBus } from '../systems/EventBus';
 import { RunManager } from '../managers/RunManager';
+import { SYNERGY_DEFINITIONS } from '../config/synergies';
 
 /**
  * Battle HUD overlay showing:
@@ -26,6 +27,7 @@ export class BattleHUD extends Phaser.GameObjects.Container {
   private speedText: Phaser.GameObjects.Text;
   private currentSpeed: number = 1;
   private damageStats: Map<string, number> = new Map();
+  private unitNameMap: Map<string, string> = new Map();
   private statsPanel: Phaser.GameObjects.Container | null = null;
   private statsVisible: boolean = false;
   private onSpeedChange?: (speed: number) => void;
@@ -43,6 +45,10 @@ export class BattleHUD extends Phaser.GameObjects.Container {
     this.enemies = enemies;
     this.onSpeedChange = onSpeedChange;
     this.setDepth(100);
+
+    // Build unitId -> unitName lookup for stats display
+    for (const h of heroes) this.unitNameMap.set(h.unitId, h.unitName);
+    for (const e of enemies) this.unitNameMap.set(e.unitId, e.unitName);
 
     // Hero portraits (top-left)
     this.createHeroPortraits();
@@ -68,7 +74,7 @@ export class BattleHUD extends Phaser.GameObjects.Container {
     this.add(this.comboText);
 
     // Stats toggle button
-    const statsBtn = scene.add.text(GAME_WIDTH - 10, GAME_HEIGHT - 55, '[STATS]', {
+    const statsBtn = scene.add.text(GAME_WIDTH - 10, GAME_HEIGHT - 65, '[STATS]', {
       fontSize: '8px',
       color: '#888888',
       fontFamily: 'monospace',
@@ -207,6 +213,29 @@ export class BattleHUD extends Phaser.GameObjects.Container {
         fontFamily: 'monospace',
       }).setOrigin(0.5);
       this.add(label);
+
+      // Synergy tooltip on hover
+      const def = SYNERGY_DEFINITIONS.find(d => d.id === syn.synergyId);
+      if (def) {
+        const activeThreshold = def.thresholds.find(t => t.count <= syn.count);
+        const bonusText = activeThreshold ? activeThreshold.description : '';
+        const tooltipStr = `${def.name}\n${bonusText}`;
+
+        const tooltip = this.scene.add.text(x, y - 16, tooltipStr, {
+          fontSize: '7px',
+          color: '#ffffff',
+          fontFamily: 'monospace',
+          backgroundColor: '#222222',
+          padding: { left: 3, right: 3, top: 2, bottom: 2 },
+        }).setOrigin(0, 1).setAlpha(0).setDepth(110);
+        this.add(tooltip);
+
+        // Create invisible hit zone for pointer events
+        const hitZone = this.scene.add.zone(x, y, 18, 18).setInteractive({ useHandCursor: true });
+        hitZone.on('pointerover', () => tooltip.setAlpha(1));
+        hitZone.on('pointerout', () => tooltip.setAlpha(0));
+        this.add(hitZone);
+      }
     });
   }
 
@@ -261,7 +290,8 @@ export class BattleHUD extends Phaser.GameObjects.Container {
 
     let yOffset = 24;
     for (const [unitId, dmg] of this.damageStats) {
-      const label = this.scene.add.text(8, yOffset, `${unitId.substring(0, 8)}: ${dmg}`, {
+      const displayName = this.unitNameMap.get(unitId) ?? unitId.substring(0, 8);
+      const label = this.scene.add.text(8, yOffset, `${displayName}: ${dmg}`, {
         fontSize: '7px',
         color: '#cccccc',
         fontFamily: 'monospace',

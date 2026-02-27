@@ -31,7 +31,7 @@ export class ShopScene extends Phaser.Scene {
     const rm = RunManager.getInstance();
     const rng = rm.getRng();
 
-    this.shopItems = ShopGenerator.generate(rng, this.nodeIndex);
+    this.shopItems = ShopGenerator.generate(rng, rm.getCurrentAct());
 
     // Background
     this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, Theme.colors.background);
@@ -192,10 +192,15 @@ export class ShopScene extends Phaser.Scene {
       fontSize: '10px',
       color: '#ffffff',
       fontFamily: 'monospace',
-    }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+    }).setOrigin(0.5);
     container.add(buyLabel);
 
-    buyLabel.on('pointerdown', () => {
+    // Transparent hit area covering the full buy button region
+    const buyHit = this.add.rectangle(124, 33, 48, 22, 0x000000, 0)
+      .setInteractive({ useHandCursor: true });
+    container.add(buyHit);
+
+    buyHit.on('pointerdown', () => {
       this.buyItem(item, container, priceText);
     });
 
