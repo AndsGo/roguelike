@@ -4,6 +4,7 @@ import { RunManager } from '../managers/RunManager';
 import { Button } from '../ui/Button';
 import { Theme, colorToString } from '../ui/Theme';
 import { SceneTransition } from '../systems/SceneTransition';
+import { SaveManager } from '../managers/SaveManager';
 import { ParticleManager } from '../systems/ParticleManager';
 
 export class RestScene extends Phaser.Scene {
@@ -63,6 +64,7 @@ export class RestScene extends Phaser.Scene {
     new Button(this, GAME_WIDTH / 2, 290, `Rest (Heal ${Math.round(REST_HEAL_PERCENT * 100)}% HP)`, 240, 40, () => {
       rm.healAllHeroes(REST_HEAL_PERCENT);
       rm.markNodeCompleted(this.nodeIndex);
+      SaveManager.autoSave();
 
       // Show healed status
       this.children.removeAll();

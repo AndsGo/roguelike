@@ -82,6 +82,7 @@ export class ShopScene extends Phaser.Scene {
       btnContainer.on('pointerdown', () => {
         this.selectedHero = hero;
         this.highlightHeroButton(i);
+        this.updateComparisonTexts();
       });
 
       this.heroButtons.push(btnContainer);
@@ -90,7 +91,7 @@ export class ShopScene extends Phaser.Scene {
     // Shop items
     this.shopItems.forEach((item, i) => {
       const x = 70 + (i % 3) * 230;
-      const y = 135 + Math.floor(i / 3) * 110;
+      const y = 140 + Math.floor(i / 3) * 120;
       this.createItemCard(item, x, y, rm);
     });
 
@@ -117,9 +118,9 @@ export class ShopScene extends Phaser.Scene {
     // Card background
     const bg = this.add.graphics();
     bg.fillStyle(Theme.colors.panel, 0.9);
-    bg.fillRoundedRect(-60, -42, 210, 85, 6);
+    bg.fillRoundedRect(-60, -42, 210, 95, 6);
     bg.lineStyle(2, rarityColor, 0.7);
-    bg.strokeRoundedRect(-60, -42, 210, 85, 6);
+    bg.strokeRoundedRect(-60, -42, 210, 95, 6);
     container.add(bg);
 
     // Rarity indicator dot
@@ -164,9 +165,17 @@ export class ShopScene extends Phaser.Scene {
     });
     container.add(statsText);
 
+    // Comparison text (updated when hero is selected)
+    const compareText = this.add.text(-55, 14, '', {
+      fontSize: '7px',
+      color: '#888888',
+      fontFamily: 'monospace',
+    });
+    container.add(compareText);
+
     // Price
     const canAfford = rm.getGold() >= item.cost;
-    const priceText = this.add.text(-55, 22, `${item.cost}G`, {
+    const priceText = this.add.text(-55, 28, `${item.cost}G`, {
       fontSize: '10px',
       color: canAfford ? colorToString(Theme.colors.gold) : colorToString(Theme.colors.danger),
       fontFamily: 'monospace',
@@ -176,10 +185,10 @@ export class ShopScene extends Phaser.Scene {
     // Buy button
     const buyBg = this.add.graphics();
     buyBg.fillStyle(Theme.colors.primary, 0.8);
-    buyBg.fillRoundedRect(100, 16, 48, 22, 4);
+    buyBg.fillRoundedRect(100, 22, 48, 22, 4);
     container.add(buyBg);
 
-    const buyLabel = this.add.text(124, 27, 'BUY', {
+    const buyLabel = this.add.text(124, 33, 'BUY', {
       fontSize: '10px',
       color: '#ffffff',
       fontFamily: 'monospace',
@@ -190,7 +199,55 @@ export class ShopScene extends Phaser.Scene {
       this.buyItem(item, container, priceText);
     });
 
-    this.itemCards.push({ container, item, priceText, sold: false });
+    this.itemCards.push({ container, item, priceText, compareText, sold: false });
+  }
+
+  private updateComparisonTexts(): void {
+    for (const card of this.itemCards) {
+      if (card.sold) continue;
+
+      if (!this.selectedHero) {
+        card.compareText.setText('');
+        continue;
+      }
+
+      const currentEquip = this.selectedHero.equipment[card.item.slot];
+      if (!currentEquip) {
+        card.compareText.setText('vs: (empty slot)');
+        card.compareText.setColor('#888888');
+        continue;
+      }
+
+      const diffs: string[] = [];
+      const allKeys = new Set([...Object.keys(card.item.stats), ...Object.keys(currentEquip.stats)]);
+      for (const k of allKeys) {
+        const newVal = (card.item.stats as Record<string, number>)[k] ?? 0;
+        const oldVal = (currentEquip.stats as Record<string, number>)[k] ?? 0;
+        const diff = newVal - oldVal;
+        if (diff > 0) {
+          diffs.push(`${k}:+${diff}`);
+        } else if (diff < 0) {
+          diffs.push(`${k}:${diff}`);
+        }
+      }
+
+      if (diffs.length > 0) {
+        card.compareText.setText(`vs ${currentEquip.name}: ${diffs.join(' ')}`);
+        // Color based on whether it's mostly upgrades
+        const hasUpgrade = diffs.some(d => d.includes('+'));
+        const hasDowngrade = diffs.some(d => !d.includes('+'));
+        if (hasUpgrade && !hasDowngrade) {
+          card.compareText.setColor(colorToString(Theme.colors.success));
+        } else if (!hasUpgrade && hasDowngrade) {
+          card.compareText.setColor(colorToString(Theme.colors.danger));
+        } else {
+          card.compareText.setColor(colorToString(Theme.colors.secondary));
+        }
+      } else {
+        card.compareText.setText(`vs ${currentEquip.name}: same stats`);
+        card.compareText.setColor('#888888');
+      }
+    }
   }
 
   private buyItem(item: ItemData, container: Phaser.GameObjects.Container, priceText: Phaser.GameObjects.Text): void {
@@ -228,6 +285,9 @@ export class ShopScene extends Phaser.Scene {
       const canAfford = rm.getGold() >= ic.item.cost;
       ic.priceText.setColor(canAfford ? colorToString(Theme.colors.gold) : colorToString(Theme.colors.danger));
     }
+
+    // Refresh comparison since equipment changed
+    this.updateComparisonTexts();
 
     if (oldItem) {
       this.showMessage(`Equipped ${item.name}, replaced ${oldItem.name}`);
