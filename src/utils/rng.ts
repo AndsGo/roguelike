@@ -9,6 +9,18 @@ export class SeededRNG {
     this.state = seed;
   }
 
+  /** Get internal state for serialization */
+  getState(): number {
+    return this.state;
+  }
+
+  /** Restore RNG from a previously exported internal state */
+  static fromState(state: number): SeededRNG {
+    const rng = new SeededRNG(0);
+    rng.state = state;
+    return rng;
+  }
+
   /** Returns a float in [0, 1) */
   next(): number {
     this.state |= 0;

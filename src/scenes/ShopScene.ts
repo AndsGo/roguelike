@@ -20,8 +20,8 @@ export class ShopScene extends Phaser.Scene {
     super({ key: 'ShopScene' });
   }
 
-  init(data: { nodeIndex: number }): void {
-    this.nodeIndex = data.nodeIndex;
+  init(data?: { nodeIndex: number }): void {
+    this.nodeIndex = data?.nodeIndex ?? 0;
     this.selectedHero = null;
     this.itemCards = [];
     this.heroButtons = [];

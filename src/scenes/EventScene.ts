@@ -15,8 +15,8 @@ export class EventScene extends Phaser.Scene {
     super({ key: 'EventScene' });
   }
 
-  init(data: { nodeIndex: number }): void {
-    this.nodeIndex = data.nodeIndex;
+  init(data?: { nodeIndex: number }): void {
+    this.nodeIndex = data?.nodeIndex ?? 0;
   }
 
   create(): void {

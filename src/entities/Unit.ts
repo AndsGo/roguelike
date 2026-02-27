@@ -5,15 +5,6 @@ import { HEALTH_BAR_WIDTH, HEALTH_BAR_HEIGHT, Y_MOVEMENT_DAMPING } from '../cons
 import { EventBus } from '../systems/EventBus';
 import { Theme, darkenColor } from '../ui/Theme';
 
-/** Role-based fill colors for heroes */
-const HERO_ROLE_COLORS: Record<UnitRole, number> = {
-  tank: 0x4488ff,
-  melee_dps: 0xff8844,
-  ranged_dps: 0xff4488,
-  healer: 0x44ff88,
-  support: 0xaaaa44,
-};
-
 /** Default enemy color (no element) */
 const ENEMY_BASE_COLOR = 0xff4444;
 
@@ -50,8 +41,8 @@ export class Unit extends Phaser.GameObjects.Container {
   protected spriteWidth: number;
   protected spriteHeight: number;
   private nameLabel: Phaser.GameObjects.Text;
-  private statusIcons: Phaser.GameObjects.Text | null = null;
-  private statusOverlay: Phaser.GameObjects.Graphics | null = null;
+  private statusIcons: Phaser.GameObjects.Text;
+  private statusOverlay: Phaser.GameObjects.Graphics;
   private stunTween: Phaser.Tweens.Tween | null = null;
   isBoss: boolean = false;
 
@@ -103,12 +94,22 @@ export class Unit extends Phaser.GameObjects.Container {
     this.healthBar = new HealthBar(scene, 0, this.spriteHeight / 2 + 4, HEALTH_BAR_WIDTH, HEALTH_BAR_HEIGHT);
     this.add(this.healthBar);
 
+    // Status effect visuals (pre-created to avoid per-frame allocation)
+    this.statusOverlay = scene.add.graphics();
+    this.add(this.statusOverlay);
+    this.statusIcons = scene.add.text(0, -this.spriteHeight / 2 - 22, '', {
+      fontSize: '8px',
+      color: '#ffcc00',
+      fontFamily: 'monospace',
+    }).setOrigin(0.5).setVisible(false);
+    this.add(this.statusIcons);
+
     scene.add.existing(this);
   }
 
   private computeFillColor(): number {
     if (this.isHero) {
-      return HERO_ROLE_COLORS[this.role] ?? 0x4488ff;
+      return Theme.colors.role[this.role] ?? 0x4488ff;
     }
     // Enemy: use darkened element color, or base red
     if (this.element) {
@@ -239,7 +240,7 @@ export class Unit extends Phaser.GameObjects.Container {
       fontFamily: 'monospace',
       fontStyle: 'bold',
     });
-    this.nameLabel.setY(-this.spriteHeight / 2 - 14);
+    this.nameLabel.setY(-this.spriteHeight / 2 - 20);
 
     // Reposition health bar
     this.healthBar.setY(this.spriteHeight / 2 + 4);
@@ -340,9 +341,10 @@ export class Unit extends Phaser.GameObjects.Container {
   }
 
   flashHurt(): void {
+    if (!this.scene) return;
     this.drawShape(0xffffff);
     this.scene.time.delayedCall(100, () => {
-      if (this.isAlive) {
+      if (this.isAlive && this.scene) {
         this.drawShape();
       }
     });
@@ -350,9 +352,10 @@ export class Unit extends Phaser.GameObjects.Container {
 
   /** Flash a specific color (used by external systems like BattleEffects, SkillSystem) */
   flashColor(color: number, duration: number = 100): void {
+    if (!this.scene) return;
     this.drawShape(color);
     this.scene.time.delayedCall(duration, () => {
-      if (this.isAlive) {
+      if (this.isAlive && this.scene) {
         this.drawShape();
       }
     });
@@ -369,6 +372,7 @@ export class Unit extends Phaser.GameObjects.Container {
 
   /** Update visual indicators for active status effects */
   updateStatusVisuals(): void {
+    if (!this.scene) return;
     const hasBurn = this.statusEffects.some(e => e.type === 'dot' && e.element === 'fire');
     const hasFreeze = this.statusEffects.some(e => e.type === 'stun');
     const hasBuff = this.statusEffects.some(e => e.type === 'buff');
@@ -377,10 +381,6 @@ export class Unit extends Phaser.GameObjects.Container {
     const hasHot = this.statusEffects.some(e => e.type === 'hot');
 
     // Color overlay based on active effects (priority: freeze > burn > poison > debuff)
-    if (!this.statusOverlay) {
-      this.statusOverlay = this.scene.add.graphics();
-      this.add(this.statusOverlay);
-    }
     this.statusOverlay.clear();
 
     let overlayColor: number | null = null;
@@ -391,7 +391,7 @@ export class Unit extends Phaser.GameObjects.Container {
     } else if (hasPoison) {
       overlayColor = 0xcc44ff;
     } else if (hasDebuff) {
-      overlayColor = 0x888888;
+      overlayColor = 0xaa6666;
     }
 
     if (overlayColor !== null) {
@@ -411,17 +411,9 @@ export class Unit extends Phaser.GameObjects.Container {
     if (hasHot) icons.push('^');
 
     if (icons.length > 0) {
-      if (!this.statusIcons) {
-        this.statusIcons = this.scene.add.text(0, -this.spriteHeight / 2 - 22, '', {
-          fontSize: '8px',
-          color: '#ffcc00',
-          fontFamily: 'monospace',
-        }).setOrigin(0.5);
-        this.add(this.statusIcons);
-      }
       this.statusIcons.setText(icons.join(''));
       this.statusIcons.setVisible(true);
-    } else if (this.statusIcons) {
+    } else {
       this.statusIcons.setVisible(false);
     }
 

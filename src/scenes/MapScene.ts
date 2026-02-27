@@ -8,14 +8,7 @@ import { SceneTransition } from '../systems/SceneTransition';
 import { Button } from '../ui/Button';
 import actsData from '../data/acts.json';
 
-const NODE_COLORS: Record<NodeType, number> = {
-  battle: 0xcc4444,
-  elite: 0xff8844,
-  boss: 0xff2222,
-  shop: 0x44cc44,
-  event: 0x8844cc,
-  rest: 0x4488cc,
-};
+const NODE_COLORS: Record<NodeType, number> = Theme.colors.node as Record<NodeType, number>;
 
 const NODE_LABELS: Record<NodeType, string> = {
   battle: '\u2694',
@@ -93,11 +86,19 @@ export class MapScene extends Phaser.Scene {
       const actWidth = lastLayerX - firstLayerX;
 
       const actBg = this.add.graphics();
-      actBg.fillStyle(ACT_COLORS[actIdx % ACT_COLORS.length], 0.3);
+      actBg.fillStyle(ACT_COLORS[actIdx % ACT_COLORS.length], 0.45);
       actBg.fillRoundedRect(firstLayerX, headerHeight, actWidth, mapAreaHeight, 4);
 
+      // Subtle horizontal stripe texture for act distinction
+      const stripeG = this.add.graphics();
+      stripeG.lineStyle(1, ACT_COLORS[actIdx % ACT_COLORS.length], 0.15);
+      for (let sy = headerHeight + 20; sy < headerHeight + mapAreaHeight - 10; sy += 12) {
+        stripeG.lineBetween(firstLayerX + 4, sy, firstLayerX + actWidth - 4, sy);
+      }
+      this.mapContainer.add(stripeG);
+
       // Act border
-      actBg.lineStyle(1, ACT_COLORS[actIdx % ACT_COLORS.length], 0.4);
+      actBg.lineStyle(1, ACT_COLORS[actIdx % ACT_COLORS.length], 0.6);
       actBg.strokeRoundedRect(firstLayerX, headerHeight, actWidth, mapAreaHeight, 4);
       this.mapContainer.add(actBg);
 
@@ -231,8 +232,7 @@ export class MapScene extends Phaser.Scene {
           .setInteractive({ useHandCursor: true })
           .setAlpha(0.01);
         this.mapContainer.add(hitArea);
-        hitArea.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
-          // Only handle click if not dragging
+        hitArea.on('pointerup', () => {
           if (!this.isDragging) {
             this.selectNode(node.index);
           }
@@ -290,10 +290,17 @@ export class MapScene extends Phaser.Scene {
         const currentNode = map[currentNodeIdx];
         if (currentNode.type === 'boss' && currentNode.completed && accessibleNodes.length > 0) {
           const bossAct = rm.getNodeAct(currentNodeIdx);
-          const nextAct = rm.getNodeAct(accessibleNodes[0]);
-          if (nextAct > bossAct) {
-            this.pendingActTransition = nextAct;
-            rm.setCurrentAct(nextAct);
+          // Check all accessible nodes for a higher act
+          let highestAct = bossAct;
+          for (const nodeIdx of accessibleNodes) {
+            const nodeAct = rm.getNodeAct(nodeIdx);
+            if (nodeAct > highestAct) {
+              highestAct = nodeAct;
+            }
+          }
+          if (highestAct > bossAct) {
+            this.pendingActTransition = highestAct;
+            rm.setCurrentAct(highestAct);
           }
         }
       }
@@ -605,14 +612,7 @@ export class MapScene extends Phaser.Scene {
   }
 
   private getRoleColor(role: string): number {
-    switch (role) {
-      case 'tank': return 0x4488ff;
-      case 'melee_dps': return 0xff8844;
-      case 'ranged_dps': return 0xff4488;
-      case 'healer': return 0x44ff88;
-      case 'support': return 0xaaaa44;
-      default: return 0x888888;
-    }
+    return Theme.colors.role[role] ?? 0x888888;
   }
 
   private selectNode(index: number): void {

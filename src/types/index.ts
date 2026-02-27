@@ -302,6 +302,7 @@ export interface SaveData {
   version: number;
   timestamp: number;
   runState: RunState;
+  rngState?: number;
   metaProgression: MetaProgressionData;
 }
 

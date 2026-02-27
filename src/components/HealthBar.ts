@@ -20,9 +20,9 @@ export class HealthBar extends Phaser.GameObjects.Container {
     this.barWidth = width;
     this.barHeight = height;
 
-    // Background (dark gray)
+    // Background
     this.bgBar = scene.add.graphics();
-    this.bgBar.fillStyle(0x333333, 1);
+    this.bgBar.fillStyle(Theme.colors.health.bg, 1);
     this.bgBar.fillRoundedRect(-width / 2, -height / 2, width, height, 1);
     this.add(this.bgBar);
 
@@ -121,7 +121,7 @@ export class HealthBar extends Phaser.GameObjects.Container {
     if (this.delayedRatio <= this.currentRatio) return;
 
     const w = this.barWidth * this.delayedRatio;
-    this.delayBar.fillStyle(0xcc3333, 0.8);
+    this.delayBar.fillStyle(Theme.colors.health.delay, 0.8);
     this.delayBar.fillRoundedRect(-this.barWidth / 2, -this.barHeight / 2, w, this.barHeight, 1);
   }
 
@@ -130,13 +130,13 @@ export class HealthBar extends Phaser.GameObjects.Container {
     if (this.shieldRatio <= 0) return;
 
     const w = this.barWidth * Math.min(1, this.shieldRatio);
-    this.shieldBar.fillStyle(0x4488ff, 0.6);
+    this.shieldBar.fillStyle(Theme.colors.health.shield, 0.6);
     this.shieldBar.fillRoundedRect(-this.barWidth / 2, -this.barHeight / 2 - 1, w, this.barHeight, 1);
   }
 
   private getHealthColor(ratio: number): number {
-    if (ratio > 0.6) return 0x44ff44;
-    if (ratio > 0.3) return 0xffaa00;
-    return 0xff4444;
+    if (ratio > 0.6) return Theme.colors.health.high;
+    if (ratio > 0.3) return Theme.colors.health.medium;
+    return Theme.colors.health.low;
   }
 }

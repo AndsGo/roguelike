@@ -403,13 +403,18 @@ export class RunManager {
   serialize(): string {
     return JSON.stringify({
       state: this.state,
-      rngState: this.state.seed, // re-seed from original seed on load
+      rngState: this.rng.getState(),
     });
   }
 
   deserialize(json: string): void {
     const data = JSON.parse(json);
     this.state = data.state;
-    this.rng = new SeededRNG(data.rngState);
+    // Restore RNG internal state if available, fallback to seed for old saves
+    if (data.rngState != null) {
+      this.rng = SeededRNG.fromState(data.rngState);
+    } else {
+      this.rng = new SeededRNG(data.state.seed);
+    }
   }
 }

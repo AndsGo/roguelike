@@ -14,8 +14,8 @@ export class RestScene extends Phaser.Scene {
     super({ key: 'RestScene' });
   }
 
-  init(data: { nodeIndex: number }): void {
-    this.nodeIndex = data.nodeIndex;
+  init(data?: { nodeIndex: number }): void {
+    this.nodeIndex = data?.nodeIndex ?? 0;
   }
 
   create(): void {

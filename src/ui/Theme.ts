@@ -26,6 +26,39 @@ export const Theme = {
       epic: 0x9c27b0,
       legendary: 0xff9800,
     } as Record<string, number>,
+
+    role: {
+      tank: 0x4488ff,
+      melee_dps: 0xff8844,
+      ranged_dps: 0xff4488,
+      healer: 0x44ff88,
+      support: 0xaaaa44,
+    } as Record<string, number>,
+
+    node: {
+      battle: 0xcc4444,
+      elite: 0xff8844,
+      boss: 0xff2222,
+      shop: 0x44cc44,
+      event: 0x8844cc,
+      rest: 0x4488cc,
+    } as Record<string, number>,
+
+    health: {
+      high: 0x44ff44,
+      medium: 0xffaa00,
+      low: 0xff4444,
+      shield: 0x4488ff,
+      delay: 0xcc3333,
+      bg: 0x333333,
+    },
+
+    ui: {
+      accent: 0x8899cc,
+      muted: 0x556677,
+      label: 0xaaaaaa,
+      subtitle: 0x667788,
+    },
   },
 
   fonts: {

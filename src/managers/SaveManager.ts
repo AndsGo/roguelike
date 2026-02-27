@@ -22,6 +22,7 @@ export class SaveManager {
         version: SaveManager.SAVE_VERSION,
         timestamp: Date.now(),
         runState: rm.getState(),
+        rngState: rm.getRng().getState(),
         metaProgression: SaveManager.loadMeta(),
       };
 
@@ -58,7 +59,10 @@ export class SaveManager {
       }
 
       const rm = RunManager.getInstance();
-      rm.deserialize(JSON.stringify({ state: saveData.runState, rngState: saveData.runState.seed }));
+      rm.deserialize(JSON.stringify({
+        state: saveData.runState,
+        rngState: saveData.rngState ?? saveData.runState.seed,
+      }));
       return true;
     } catch {
       console.error('SaveManager: failed to load game from slot', slot);

@@ -7,12 +7,18 @@ import { Theme, colorToString } from '../ui/Theme';
 import { SceneTransition } from '../systems/SceneTransition';
 
 export class RewardScene extends Phaser.Scene {
+  private result!: BattleResult;
+
   constructor() {
     super({ key: 'RewardScene' });
   }
 
-  create(data: { result: BattleResult }): void {
-    const result = data.result;
+  init(data: { result: BattleResult }): void {
+    this.result = data.result;
+  }
+
+  create(): void {
+    const result = this.result;
     const rm = RunManager.getInstance();
 
     this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, Theme.colors.background);

@@ -33,8 +33,8 @@ export class BattleScene extends Phaser.Scene {
     super({ key: 'BattleScene' });
   }
 
-  init(data: { nodeIndex: number }): void {
-    this.nodeIndex = data.nodeIndex;
+  init(data?: { nodeIndex: number }): void {
+    this.nodeIndex = data?.nodeIndex ?? 0;
     this.battleEndHandled = false;
     this.allUnits = [];
   }
@@ -58,6 +58,7 @@ export class BattleScene extends Phaser.Scene {
 
     // Background decorations per act
     const bgDecor = this.add.graphics();
+    bgDecor.setDepth(-1);
     switch (actIndex) {
       case 0: // Forest
         bgDecor.fillStyle(0x1a3a1e, 0.5);
