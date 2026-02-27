@@ -195,8 +195,8 @@ export class ShopScene extends Phaser.Scene {
     }).setOrigin(0.5);
     container.add(buyLabel);
 
-    // Transparent hit area covering the full buy button region
-    const buyHit = this.add.rectangle(124, 33, 48, 22, 0x000000, 0)
+    // Transparent hit area covering the full buy button region (padded for easier clicking)
+    const buyHit = this.add.rectangle(124, 33, 64, 34, 0x000000, 0)
       .setInteractive({ useHandCursor: true });
     container.add(buyHit);
 

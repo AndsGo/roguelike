@@ -73,14 +73,18 @@ export class BattleHUD extends Phaser.GameObjects.Container {
     }).setOrigin(1, 1).setAlpha(0);
     this.add(this.comboText);
 
-    // Stats toggle button
+    // Stats toggle button — use padded hit zone for easier clicking
     const statsBtn = scene.add.text(GAME_WIDTH - 10, GAME_HEIGHT - 65, '[STATS]', {
       fontSize: '8px',
       color: '#888888',
       fontFamily: 'monospace',
-    }).setOrigin(1, 1).setInteractive({ useHandCursor: true });
-    statsBtn.on('pointerdown', () => this.toggleStats());
+    }).setOrigin(1, 1);
     this.add(statsBtn);
+
+    const statsHit = scene.add.rectangle(GAME_WIDTH - 30, GAME_HEIGHT - 70, 56, 24, 0x000000, 0)
+      .setInteractive({ useHandCursor: true });
+    statsHit.on('pointerdown', () => this.toggleStats());
+    this.add(statsHit);
 
     // Listen for combo events (store refs for cleanup)
     this.onComboHit = (data) => {
@@ -178,17 +182,21 @@ export class BattleHUD extends Phaser.GameObjects.Container {
       fontSize: '11px',
       color: '#ffffff',
       fontFamily: 'monospace',
-    }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+    }).setOrigin(0.5);
+    this.add(text);
 
-    text.on('pointerdown', () => {
+    // Padded hit zone covering the full speed button background
+    const speedHit = this.scene.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT - 15, 72, 30, 0x000000, 0)
+      .setInteractive({ useHandCursor: true });
+    speedHit.on('pointerdown', () => {
       const speeds = [1, 2, 3];
       const idx = speeds.indexOf(this.currentSpeed);
       this.currentSpeed = speeds[(idx + 1) % speeds.length];
       text.setText(`${this.currentSpeed}x`);
       if (this.onSpeedChange) this.onSpeedChange(this.currentSpeed);
     });
+    this.add(speedHit);
 
-    this.add(text);
     return text;
   }
 

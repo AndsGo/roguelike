@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { Theme, lightenColor, darkenColor } from './Theme';
 
 export class Button extends Phaser.GameObjects.Container {
+  private static readonly HIT_PADDING = 8;
   private bg: Phaser.GameObjects.Graphics;
   private label: Phaser.GameObjects.Text;
   private isEnabled: boolean = true;
@@ -43,11 +44,7 @@ export class Button extends Phaser.GameObjects.Container {
     this.add(this.label);
 
     this.setSize(width, height);
-    this.setInteractive({
-      hitArea: new Phaser.Geom.Rectangle(-width / 2, -height / 2, width, height),
-      hitAreaCallback: Phaser.Geom.Rectangle.Contains,
-      useHandCursor: true,
-    });
+    this.setInteractive(this.buildHitConfig());
 
     this.on('pointerover', this.onHover, this);
     this.on('pointerout', this.onOut, this);
@@ -55,6 +52,18 @@ export class Button extends Phaser.GameObjects.Container {
     this.on('pointerup', this.onUp, this);
 
     scene.add.existing(this);
+  }
+
+  private buildHitConfig(): Phaser.Types.Input.InputConfiguration {
+    const p = Button.HIT_PADDING;
+    return {
+      hitArea: new Phaser.Geom.Rectangle(
+        -this.btnWidth / 2 - p, -this.btnHeight / 2 - p,
+        this.btnWidth + p * 2, this.btnHeight + p * 2,
+      ),
+      hitAreaCallback: Phaser.Geom.Rectangle.Contains,
+      useHandCursor: true,
+    };
   }
 
   private drawButton(fill: number, border: number, alpha: number = 1): void {
@@ -130,11 +139,7 @@ export class Button extends Phaser.GameObjects.Container {
     if (enabled) {
       this.drawButton(this.baseColor, this.borderColor);
       this.label.setAlpha(1);
-      this.setInteractive({
-        hitArea: new Phaser.Geom.Rectangle(-this.btnWidth / 2, -this.btnHeight / 2, this.btnWidth, this.btnHeight),
-        hitAreaCallback: Phaser.Geom.Rectangle.Contains,
-        useHandCursor: true,
-      });
+      this.setInteractive(this.buildHitConfig());
     } else {
       this.drawButton(0x555555, 0x666666, 0.6);
       this.label.setAlpha(0.5);

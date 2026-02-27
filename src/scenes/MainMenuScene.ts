@@ -250,9 +250,9 @@ export class MainMenuScene extends Phaser.Scene {
         }).setOrigin(0.5);
         panel.addContent(buyText);
 
-        // Transparent hit area covering the full buy button background
+        // Transparent hit area covering the full buy button background (padded for easier clicking)
         if (canAfford) {
-          const buyHit = this.add.rectangle(220, y + 2, 40, 20, 0x000000, 0)
+          const buyHit = this.add.rectangle(220, y + 2, 56, 32, 0x000000, 0)
             .setInteractive({ useHandCursor: true });
           buyHit.on('pointerdown', () => {
             if (MetaManager.purchaseUpgrade(def.id)) {
@@ -276,16 +276,20 @@ export class MainMenuScene extends Phaser.Scene {
       }
     });
 
-    // Close button
+    // Close button — use zone for larger hit area
     const closeText = this.add.text(0, 135, '[CLOSE]', {
       fontSize: '10px',
       color: '#888888',
       fontFamily: 'monospace',
-    }).setOrigin(0.5).setInteractive({ useHandCursor: true });
-    closeText.on('pointerdown', () => {
+    }).setOrigin(0.5);
+    panel.addContent(closeText);
+
+    const closeHit = this.add.rectangle(0, 135, 80, 28, 0x000000, 0)
+      .setInteractive({ useHandCursor: true });
+    closeHit.on('pointerdown', () => {
       this.upgradePanel?.close(() => { this.upgradePanel = null; });
     });
-    panel.addContent(closeText);
+    panel.addContent(closeHit);
 
     panel.setContentHeight(upgrades.length * 48 + 80);
   }
