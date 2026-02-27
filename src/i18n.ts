@@ -1,4 +1,11 @@
 import heroesData from './data/heroes.json';
+import relicsData from './data/relics.json';
+
+/** Look up the Chinese display name of a relic by ID */
+function getRelicDisplayName(relicId: string): string {
+  const relic = (relicsData as { id: string; name: string }[]).find(r => r.id === relicId);
+  return relic?.name ?? relicId;
+}
 
 /**
  * Centralized Chinese localization strings for all UI text.
@@ -95,7 +102,7 @@ export const UI = {
     healEffect: (v: number) => `恢复 ${Math.round(v * 100)}% 生命`,
     damageEffect: (v: number) => `受到 ${Math.round(v * 100)}% 生命伤害`,
     statBoost: (v: number) => `属性提升 +${v}`,
-    relicAcquired: (id: string) => `获得遗物: ${id}`,
+    relicAcquired: (id: string) => `获得遗物: ${getRelicDisplayName(id)}`,
     itemGold: (v: number) => `金币 +${v}`,
     continueBtn: '继续',
   },
