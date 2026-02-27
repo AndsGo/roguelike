@@ -26,12 +26,12 @@ export const MAX_LEVEL = 20;
 
 // ============ Economy ============
 
-export const STARTING_GOLD = 100;
-export const NORMAL_BATTLE_GOLD_MIN = 15;
-export const NORMAL_BATTLE_GOLD_MAX = 25;
-export const ELITE_BATTLE_GOLD_MIN = 50;
-export const ELITE_BATTLE_GOLD_MAX = 100;
-export const BOSS_BATTLE_GOLD = 150;
+export const STARTING_GOLD = 80;
+export const NORMAL_BATTLE_GOLD_MIN = 12;
+export const NORMAL_BATTLE_GOLD_MAX = 22;
+export const ELITE_BATTLE_GOLD_MIN = 40;
+export const ELITE_BATTLE_GOLD_MAX = 80;
+export const BOSS_BATTLE_GOLD = 120;
 
 // ============ Map ============
 

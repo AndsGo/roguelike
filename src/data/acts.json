@@ -8,7 +8,7 @@
     "bossPool": ["frost_queen"],
     "eventPool": ["healing_spring", "wandering_warrior", "frozen_lake", "ancient_library", "mushroom_grove"],
     "elementAffinity": "ice",
-    "difficultyMultiplier": 1.0
+    "difficultyMultiplier": 1.1
   },
   {
     "id": "act2_volcano",
@@ -19,7 +19,7 @@
     "bossPool": ["thunder_titan"],
     "eventPool": ["volcano_cave", "blacksmith", "mysterious_merchant", "thunder_peak", "trapped_chest"],
     "elementAffinity": "fire",
-    "difficultyMultiplier": 1.3
+    "difficultyMultiplier": 1.7
   },
   {
     "id": "act3_abyss",
@@ -30,6 +30,6 @@
     "bossPool": ["shadow_lord"],
     "eventPool": ["shadow_shrine", "holy_temple", "fortune_teller", "mysterious_portal", "goblin_camp"],
     "elementAffinity": "dark",
-    "difficultyMultiplier": 1.6
+    "difficultyMultiplier": 1.85
   }
 ]

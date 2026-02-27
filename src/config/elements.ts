@@ -14,8 +14,8 @@ export const ELEMENT_ADVANTAGE: Record<ElementType, ElementType[]> = {
   holy: ['dark'],
 };
 
-export const ELEMENT_ADVANTAGE_MULTIPLIER = 1.3;
-export const ELEMENT_DISADVANTAGE_MULTIPLIER = 0.7;
+export const ELEMENT_ADVANTAGE_MULTIPLIER = 1.2;
+export const ELEMENT_DISADVANTAGE_MULTIPLIER = 0.85;
 
 /**
  * Element reaction table.

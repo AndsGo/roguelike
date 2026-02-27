@@ -6,12 +6,12 @@
     "element": null,
     "race": "beast",
     "baseStats": {
-      "maxHp": 150,
-      "hp": 150,
-      "attack": 15,
-      "defense": 5,
+      "maxHp": 220,
+      "hp": 220,
+      "attack": 22,
+      "defense": 10,
       "magicPower": 0,
-      "magicResist": 5,
+      "magicResist": 8,
       "speed": 50,
       "attackSpeed": 0.8,
       "attackRange": 35,
@@ -19,11 +19,11 @@
       "critDamage": 1.5
     },
     "scalingPerLevel": {
-      "maxHp": 30,
-      "attack": 3,
-      "defense": 2,
+      "maxHp": 40,
+      "attack": 4,
+      "defense": 3,
       "magicPower": 0,
-      "magicResist": 1
+      "magicResist": 2
     },
     "skills": [],
     "spriteKey": "enemy_slime",
@@ -37,12 +37,12 @@
     "element": null,
     "race": "beast",
     "baseStats": {
-      "maxHp": 120,
-      "hp": 120,
-      "attack": 25,
-      "defense": 8,
+      "maxHp": 180,
+      "hp": 180,
+      "attack": 32,
+      "defense": 12,
       "magicPower": 0,
-      "magicResist": 5,
+      "magicResist": 8,
       "speed": 100,
       "attackSpeed": 1.2,
       "attackRange": 40,
@@ -50,9 +50,9 @@
       "critDamage": 1.5
     },
     "scalingPerLevel": {
-      "maxHp": 20,
-      "attack": 5,
-      "defense": 1,
+      "maxHp": 28,
+      "attack": 6,
+      "defense": 2,
       "magicPower": 0,
       "magicResist": 1
     },
@@ -68,12 +68,12 @@
     "element": "dark",
     "race": "undead",
     "baseStats": {
-      "maxHp": 100,
-      "hp": 100,
-      "attack": 30,
-      "defense": 5,
+      "maxHp": 160,
+      "hp": 160,
+      "attack": 38,
+      "defense": 8,
       "magicPower": 0,
-      "magicResist": 3,
+      "magicResist": 6,
       "speed": 70,
       "attackSpeed": 1.0,
       "attackRange": 200,
@@ -81,9 +81,9 @@
       "critDamage": 1.8
     },
     "scalingPerLevel": {
-      "maxHp": 15,
-      "attack": 6,
-      "defense": 1,
+      "maxHp": 22,
+      "attack": 7,
+      "defense": 2,
       "magicPower": 0,
       "magicResist": 1
     },
@@ -99,12 +99,12 @@
     "element": "dark",
     "race": "undead",
     "baseStats": {
-      "maxHp": 90,
-      "hp": 90,
+      "maxHp": 150,
+      "hp": 150,
       "attack": 10,
-      "defense": 5,
-      "magicPower": 40,
-      "magicResist": 20,
+      "defense": 8,
+      "magicPower": 50,
+      "magicResist": 25,
       "speed": 60,
       "attackSpeed": 0.8,
       "attackRange": 200,
@@ -112,11 +112,11 @@
       "critDamage": 1.6
     },
     "scalingPerLevel": {
-      "maxHp": 15,
+      "maxHp": 20,
       "attack": 1,
-      "defense": 1,
-      "magicPower": 7,
-      "magicResist": 2
+      "defense": 2,
+      "magicPower": 8,
+      "magicResist": 3
     },
     "skills": ["dark_bolt"],
     "spriteKey": "enemy_dark_mage",
@@ -130,12 +130,12 @@
     "element": null,
     "race": "demon",
     "baseStats": {
-      "maxHp": 400,
-      "hp": 400,
-      "attack": 35,
-      "defense": 25,
+      "maxHp": 520,
+      "hp": 520,
+      "attack": 42,
+      "defense": 30,
       "magicPower": 0,
-      "magicResist": 10,
+      "magicResist": 15,
       "speed": 65,
       "attackSpeed": 0.7,
       "attackRange": 45,
@@ -143,15 +143,15 @@
       "critDamage": 1.5
     },
     "scalingPerLevel": {
-      "maxHp": 50,
-      "attack": 5,
-      "defense": 4,
+      "maxHp": 60,
+      "attack": 6,
+      "defense": 5,
       "magicPower": 0,
-      "magicResist": 2
+      "magicResist": 3
     },
     "skills": ["war_cry"],
     "spriteKey": "enemy_orc_warrior",
-    "goldReward": 20,
+    "goldReward": 18,
     "expReward": 40,
     "isBoss": false
   },
@@ -162,12 +162,12 @@
     "element": "fire",
     "race": "dragon",
     "baseStats": {
-      "maxHp": 1500,
-      "hp": 1500,
-      "attack": 60,
-      "defense": 40,
-      "magicPower": 80,
-      "magicResist": 40,
+      "maxHp": 1800,
+      "hp": 1800,
+      "attack": 70,
+      "defense": 45,
+      "magicPower": 90,
+      "magicResist": 45,
       "speed": 70,
       "attackSpeed": 0.6,
       "attackRange": 180,
@@ -175,11 +175,11 @@
       "critDamage": 2.0
     },
     "scalingPerLevel": {
-      "maxHp": 200,
-      "attack": 10,
-      "defense": 5,
-      "magicPower": 12,
-      "magicResist": 5
+      "maxHp": 220,
+      "attack": 12,
+      "defense": 6,
+      "magicPower": 14,
+      "magicResist": 6
     },
     "skills": ["fire_breath", "tail_sweep"],
     "spriteKey": "enemy_dragon",
@@ -194,12 +194,12 @@
     "element": "fire",
     "race": "beast",
     "baseStats": {
-      "maxHp": 180,
-      "hp": 180,
-      "attack": 28,
-      "defense": 12,
-      "magicPower": 15,
-      "magicResist": 15,
+      "maxHp": 250,
+      "hp": 250,
+      "attack": 35,
+      "defense": 16,
+      "magicPower": 18,
+      "magicResist": 18,
       "speed": 90,
       "attackSpeed": 1.1,
       "attackRange": 40,
@@ -207,9 +207,9 @@
       "critDamage": 1.6
     },
     "scalingPerLevel": {
-      "maxHp": 25,
-      "attack": 5,
-      "defense": 2,
+      "maxHp": 32,
+      "attack": 6,
+      "defense": 3,
       "magicPower": 3,
       "magicResist": 2
     },
@@ -225,12 +225,12 @@
     "element": "fire",
     "race": "demon",
     "baseStats": {
-      "maxHp": 200,
-      "hp": 200,
+      "maxHp": 280,
+      "hp": 280,
       "attack": 10,
-      "defense": 8,
-      "magicPower": 45,
-      "magicResist": 30,
+      "defense": 12,
+      "magicPower": 55,
+      "magicResist": 35,
       "speed": 75,
       "attackSpeed": 0.9,
       "attackRange": 180,
@@ -238,15 +238,15 @@
       "critDamage": 1.7
     },
     "scalingPerLevel": {
-      "maxHp": 25,
+      "maxHp": 32,
       "attack": 1,
-      "defense": 2,
-      "magicPower": 8,
-      "magicResist": 3
+      "defense": 3,
+      "magicPower": 9,
+      "magicResist": 4
     },
     "skills": ["fireball"],
     "spriteKey": "enemy_fire_elemental",
-    "goldReward": 18,
+    "goldReward": 16,
     "expReward": 35
   },
   {
@@ -256,12 +256,12 @@
     "element": "fire",
     "race": "human",
     "baseStats": {
-      "maxHp": 350,
-      "hp": 350,
-      "attack": 32,
-      "defense": 30,
-      "magicPower": 10,
-      "magicResist": 20,
+      "maxHp": 450,
+      "hp": 450,
+      "attack": 38,
+      "defense": 35,
+      "magicPower": 12,
+      "magicResist": 25,
       "speed": 70,
       "attackSpeed": 0.8,
       "attackRange": 45,
@@ -269,15 +269,15 @@
       "critDamage": 1.5
     },
     "scalingPerLevel": {
-      "maxHp": 45,
-      "attack": 5,
-      "defense": 4,
+      "maxHp": 55,
+      "attack": 6,
+      "defense": 5,
       "magicPower": 2,
-      "magicResist": 2
+      "magicResist": 3
     },
     "skills": ["flame_strike"],
     "spriteKey": "enemy_flame_knight",
-    "goldReward": 20,
+    "goldReward": 18,
     "expReward": 38
   },
   {
@@ -287,12 +287,12 @@
     "element": "ice",
     "race": "beast",
     "baseStats": {
-      "maxHp": 160,
-      "hp": 160,
-      "attack": 30,
-      "defense": 10,
-      "magicPower": 10,
-      "magicResist": 12,
+      "maxHp": 220,
+      "hp": 220,
+      "attack": 36,
+      "defense": 14,
+      "magicPower": 12,
+      "magicResist": 14,
       "speed": 120,
       "attackSpeed": 1.3,
       "attackRange": 40,
@@ -300,11 +300,11 @@
       "critDamage": 1.7
     },
     "scalingPerLevel": {
-      "maxHp": 22,
-      "attack": 5,
+      "maxHp": 28,
+      "attack": 6,
       "defense": 2,
       "magicPower": 2,
-      "magicResist": 1
+      "magicResist": 2
     },
     "skills": ["ice_bolt"],
     "spriteKey": "enemy_ice_wolf",
@@ -318,12 +318,12 @@
     "element": "ice",
     "race": "demon",
     "baseStats": {
-      "maxHp": 450,
-      "hp": 450,
-      "attack": 38,
-      "defense": 28,
-      "magicPower": 15,
-      "magicResist": 25,
+      "maxHp": 580,
+      "hp": 580,
+      "attack": 45,
+      "defense": 32,
+      "magicPower": 18,
+      "magicResist": 28,
       "speed": 50,
       "attackSpeed": 0.6,
       "attackRange": 50,
@@ -331,15 +331,15 @@
       "critDamage": 1.5
     },
     "scalingPerLevel": {
-      "maxHp": 55,
-      "attack": 5,
+      "maxHp": 65,
+      "attack": 6,
       "defense": 5,
-      "magicPower": 2,
-      "magicResist": 3
+      "magicPower": 3,
+      "magicResist": 4
     },
     "skills": ["frost_nova"],
     "spriteKey": "enemy_frost_giant",
-    "goldReward": 22,
+    "goldReward": 20,
     "expReward": 42
   },
   {
@@ -349,12 +349,12 @@
     "element": "ice",
     "race": "elf",
     "baseStats": {
-      "maxHp": 110,
-      "hp": 110,
+      "maxHp": 170,
+      "hp": 170,
       "attack": 10,
-      "defense": 6,
-      "magicPower": 42,
-      "magicResist": 22,
+      "defense": 10,
+      "magicPower": 52,
+      "magicResist": 28,
       "speed": 65,
       "attackSpeed": 0.85,
       "attackRange": 210,
@@ -362,15 +362,15 @@
       "critDamage": 1.7
     },
     "scalingPerLevel": {
-      "maxHp": 16,
+      "maxHp": 22,
       "attack": 1,
-      "defense": 1,
-      "magicPower": 7,
-      "magicResist": 2
+      "defense": 2,
+      "magicPower": 8,
+      "magicResist": 3
     },
     "skills": ["ice_bolt", "frost_nova"],
     "spriteKey": "enemy_ice_mage",
-    "goldReward": 16,
+    "goldReward": 14,
     "expReward": 34
   },
   {
@@ -380,12 +380,12 @@
     "element": "lightning",
     "race": "beast",
     "baseStats": {
-      "maxHp": 130,
-      "hp": 130,
-      "attack": 35,
-      "defense": 6,
-      "magicPower": 20,
-      "magicResist": 10,
+      "maxHp": 190,
+      "hp": 190,
+      "attack": 42,
+      "defense": 10,
+      "magicPower": 25,
+      "magicResist": 14,
       "speed": 140,
       "attackSpeed": 1.4,
       "attackRange": 180,
@@ -393,11 +393,11 @@
       "critDamage": 1.8
     },
     "scalingPerLevel": {
-      "maxHp": 18,
-      "attack": 6,
-      "defense": 1,
-      "magicPower": 3,
-      "magicResist": 1
+      "maxHp": 24,
+      "attack": 7,
+      "defense": 2,
+      "magicPower": 4,
+      "magicResist": 2
     },
     "skills": ["chain_lightning"],
     "spriteKey": "enemy_storm_hawk",
@@ -411,12 +411,12 @@
     "element": "lightning",
     "race": "demon",
     "baseStats": {
-      "maxHp": 500,
-      "hp": 500,
-      "attack": 30,
-      "defense": 35,
-      "magicPower": 25,
-      "magicResist": 30,
+      "maxHp": 650,
+      "hp": 650,
+      "attack": 38,
+      "defense": 40,
+      "magicPower": 30,
+      "magicResist": 35,
       "speed": 45,
       "attackSpeed": 0.5,
       "attackRange": 50,
@@ -424,15 +424,15 @@
       "critDamage": 1.5
     },
     "scalingPerLevel": {
-      "maxHp": 60,
-      "attack": 4,
-      "defense": 5,
-      "magicPower": 4,
-      "magicResist": 4
+      "maxHp": 70,
+      "attack": 5,
+      "defense": 6,
+      "magicPower": 5,
+      "magicResist": 5
     },
     "skills": ["thunder_strike"],
     "spriteKey": "enemy_thunder_golem",
-    "goldReward": 25,
+    "goldReward": 22,
     "expReward": 45
   },
   {
@@ -442,12 +442,12 @@
     "element": "dark",
     "race": "undead",
     "baseStats": {
-      "maxHp": 140,
-      "hp": 140,
-      "attack": 20,
-      "defense": 5,
-      "magicPower": 35,
-      "magicResist": 25,
+      "maxHp": 200,
+      "hp": 200,
+      "attack": 28,
+      "defense": 8,
+      "magicPower": 45,
+      "magicResist": 30,
       "speed": 110,
       "attackSpeed": 1.2,
       "attackRange": 45,
@@ -455,10 +455,10 @@
       "critDamage": 1.8
     },
     "scalingPerLevel": {
-      "maxHp": 18,
-      "attack": 3,
-      "defense": 1,
-      "magicPower": 6,
+      "maxHp": 24,
+      "attack": 4,
+      "defense": 2,
+      "magicPower": 7,
       "magicResist": 3
     },
     "skills": ["shadow_bolt", "shadow_drain"],
@@ -473,12 +473,12 @@
     "element": "dark",
     "race": "human",
     "baseStats": {
-      "maxHp": 170,
-      "hp": 170,
-      "attack": 12,
-      "defense": 10,
-      "magicPower": 38,
-      "magicResist": 22,
+      "maxHp": 240,
+      "hp": 240,
+      "attack": 15,
+      "defense": 14,
+      "magicPower": 48,
+      "magicResist": 28,
       "speed": 70,
       "attackSpeed": 0.8,
       "attackRange": 190,
@@ -486,10 +486,10 @@
       "critDamage": 1.6
     },
     "scalingPerLevel": {
-      "maxHp": 20,
+      "maxHp": 26,
       "attack": 2,
-      "defense": 2,
-      "magicPower": 6,
+      "defense": 3,
+      "magicPower": 7,
       "magicResist": 3
     },
     "skills": ["shadow_bolt"],
@@ -504,12 +504,12 @@
     "element": "holy",
     "race": "human",
     "baseStats": {
-      "maxHp": 380,
-      "hp": 380,
-      "attack": 28,
-      "defense": 35,
-      "magicPower": 20,
-      "magicResist": 30,
+      "maxHp": 480,
+      "hp": 480,
+      "attack": 34,
+      "defense": 38,
+      "magicPower": 25,
+      "magicResist": 35,
       "speed": 60,
       "attackSpeed": 0.7,
       "attackRange": 45,
@@ -517,15 +517,15 @@
       "critDamage": 1.5
     },
     "scalingPerLevel": {
-      "maxHp": 48,
-      "attack": 4,
+      "maxHp": 55,
+      "attack": 5,
       "defense": 5,
       "magicPower": 3,
       "magicResist": 4
     },
     "skills": ["holy_smite"],
     "spriteKey": "enemy_holy_guardian",
-    "goldReward": 20,
+    "goldReward": 18,
     "expReward": 38
   },
   {
@@ -535,12 +535,12 @@
     "element": "holy",
     "race": "elf",
     "baseStats": {
-      "maxHp": 90,
-      "hp": 90,
-      "attack": 10,
-      "defense": 5,
-      "magicPower": 35,
-      "magicResist": 20,
+      "maxHp": 140,
+      "hp": 140,
+      "attack": 12,
+      "defense": 8,
+      "magicPower": 42,
+      "magicResist": 25,
       "speed": 100,
       "attackSpeed": 1.0,
       "attackRange": 200,
@@ -548,11 +548,11 @@
       "critDamage": 1.5
     },
     "scalingPerLevel": {
-      "maxHp": 12,
+      "maxHp": 16,
       "attack": 1,
-      "defense": 1,
-      "magicPower": 6,
-      "magicResist": 2
+      "defense": 2,
+      "magicPower": 7,
+      "magicResist": 3
     },
     "skills": ["heal"],
     "spriteKey": "enemy_light_sprite",
@@ -566,12 +566,12 @@
     "element": "ice",
     "race": "elf",
     "baseStats": {
-      "maxHp": 2000,
-      "hp": 2000,
-      "attack": 25,
-      "defense": 30,
-      "magicPower": 90,
-      "magicResist": 45,
+      "maxHp": 2400,
+      "hp": 2400,
+      "attack": 30,
+      "defense": 35,
+      "magicPower": 100,
+      "magicResist": 50,
       "speed": 75,
       "attackSpeed": 0.7,
       "attackRange": 220,
@@ -579,15 +579,15 @@
       "critDamage": 1.8
     },
     "scalingPerLevel": {
-      "maxHp": 250,
-      "attack": 4,
-      "defense": 5,
-      "magicPower": 14,
-      "magicResist": 6
+      "maxHp": 280,
+      "attack": 5,
+      "defense": 6,
+      "magicPower": 15,
+      "magicResist": 7
     },
     "skills": ["ice_bolt", "frost_nova", "ice_armor"],
     "spriteKey": "enemy_frost_queen",
-    "goldReward": 180,
+    "goldReward": 160,
     "expReward": 250,
     "isBoss": true
   },
@@ -598,12 +598,12 @@
     "element": "lightning",
     "race": "demon",
     "baseStats": {
-      "maxHp": 2500,
-      "hp": 2500,
-      "attack": 55,
-      "defense": 45,
-      "magicPower": 70,
-      "magicResist": 35,
+      "maxHp": 3000,
+      "hp": 3000,
+      "attack": 65,
+      "defense": 50,
+      "magicPower": 80,
+      "magicResist": 40,
       "speed": 55,
       "attackSpeed": 0.5,
       "attackRange": 60,
@@ -611,15 +611,15 @@
       "critDamage": 2.0
     },
     "scalingPerLevel": {
-      "maxHp": 300,
-      "attack": 8,
-      "defense": 6,
-      "magicPower": 10,
-      "magicResist": 5
+      "maxHp": 340,
+      "attack": 10,
+      "defense": 7,
+      "magicPower": 12,
+      "magicResist": 6
     },
     "skills": ["chain_lightning", "thunder_strike"],
     "spriteKey": "enemy_thunder_titan",
-    "goldReward": 200,
+    "goldReward": 180,
     "expReward": 300,
     "isBoss": true
   },
@@ -630,12 +630,12 @@
     "element": "dark",
     "race": "undead",
     "baseStats": {
-      "maxHp": 3000,
-      "hp": 3000,
-      "attack": 50,
-      "defense": 35,
-      "magicPower": 100,
-      "magicResist": 50,
+      "maxHp": 3500,
+      "hp": 3500,
+      "attack": 55,
+      "defense": 40,
+      "magicPower": 110,
+      "magicResist": 55,
       "speed": 80,
       "attackSpeed": 0.8,
       "attackRange": 200,
@@ -643,15 +643,15 @@
       "critDamage": 2.0
     },
     "scalingPerLevel": {
-      "maxHp": 350,
-      "attack": 8,
-      "defense": 5,
-      "magicPower": 15,
-      "magicResist": 6
+      "maxHp": 380,
+      "attack": 10,
+      "defense": 6,
+      "magicPower": 16,
+      "magicResist": 7
     },
     "skills": ["shadow_bolt", "shadow_drain", "summon_skeleton"],
     "spriteKey": "enemy_shadow_lord",
-    "goldReward": 250,
+    "goldReward": 220,
     "expReward": 400,
     "isBoss": true
   }
