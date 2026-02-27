@@ -184,12 +184,7 @@ export class SkillSystem {
     }
 
     // Visual flash for skill use
-    unit.sprite.setFillStyle(0xffff88);
-    unit.scene.time.delayedCall(150, () => {
-      if (unit.isAlive) {
-        unit.sprite.setFillStyle(unit.isHero ? 0x4488ff : 0xff4444);
-      }
-    });
+    unit.flashColor(0xffff88, 150);
   }
 
   /**

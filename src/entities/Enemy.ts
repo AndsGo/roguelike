@@ -24,10 +24,9 @@ export class Enemy extends Unit {
     this.goldReward = enemyData.goldReward;
     this.expReward = enemyData.expReward;
 
-    // Boss units are larger
+    // Boss units get special visual treatment
     if (enemyData.isBoss) {
-      this.sprite.setSize(40, 44);
-      this.sprite.setFillStyle(0xff2222);
+      this.setBoss();
     }
   }
 

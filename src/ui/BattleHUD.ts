@@ -29,6 +29,8 @@ export class BattleHUD extends Phaser.GameObjects.Container {
   private statsPanel: Phaser.GameObjects.Container | null = null;
   private statsVisible: boolean = false;
   private onSpeedChange?: (speed: number) => void;
+  private onComboHit: (data: { unitId: string; comboCount: number }) => void;
+  private onUnitDamage: (data: { sourceId: string; targetId: string; amount: number }) => void;
 
   constructor(
     scene: Phaser.Scene,
@@ -74,16 +76,16 @@ export class BattleHUD extends Phaser.GameObjects.Container {
     statsBtn.on('pointerdown', () => this.toggleStats());
     this.add(statsBtn);
 
-    // Listen for combo events
-    EventBus.getInstance().on('combo:hit', (data) => {
+    // Listen for combo events (store refs for cleanup)
+    this.onComboHit = (data) => {
       this.showCombo(data.comboCount);
-    });
-
-    // Listen for damage events to track stats
-    EventBus.getInstance().on('unit:damage', (data) => {
+    };
+    this.onUnitDamage = (data) => {
       const current = this.damageStats.get(data.sourceId) ?? 0;
       this.damageStats.set(data.sourceId, current + data.amount);
-    });
+    };
+    EventBus.getInstance().on('combo:hit', this.onComboHit);
+    EventBus.getInstance().on('unit:damage', this.onUnitDamage);
 
     scene.add.existing(this);
   }
@@ -269,6 +271,13 @@ export class BattleHUD extends Phaser.GameObjects.Container {
     }
 
     this.add(this.statsPanel);
+  }
+
+  destroy(): void {
+    const eb = EventBus.getInstance();
+    eb.off('combo:hit', this.onComboHit);
+    eb.off('unit:damage', this.onUnitDamage);
+    super.destroy();
   }
 
   /** Call every frame to update HP displays */

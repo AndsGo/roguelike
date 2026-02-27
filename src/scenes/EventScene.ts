@@ -5,6 +5,7 @@ import { EventData, EventChoice, EventOutcome } from '../types';
 import { Button } from '../ui/Button';
 import { Theme, colorToString } from '../ui/Theme';
 import { SceneTransition } from '../systems/SceneTransition';
+import { SaveManager } from '../managers/SaveManager';
 import eventsData from '../data/events.json';
 
 export class EventScene extends Phaser.Scene {
@@ -95,8 +96,13 @@ export class EventScene extends Phaser.Scene {
             hero.exp += effect.value * 5;
           }
           break;
+        case 'relic':
+          if (effect.relicId) {
+            rm.addRelic(effect.relicId);
+          }
+          break;
         case 'item':
-          rm.addGold(30);
+          rm.addGold(effect.value || 30);
           break;
       }
     }
@@ -119,6 +125,8 @@ export class EventScene extends Phaser.Scene {
         case 'heal': return `Heal ${Math.round(e.value * 100)}% HP`;
         case 'damage': return `Damage ${Math.round(e.value * 100)}% HP`;
         case 'stat_boost': return `Stat boost +${e.value}`;
+        case 'relic': return `Relic acquired: ${e.relicId ?? 'unknown'}`;
+        case 'item': return `Gold +${e.value || 30}`;
         default: return '';
       }
     }).filter(Boolean);
@@ -133,6 +141,7 @@ export class EventScene extends Phaser.Scene {
     }
 
     rm.markNodeCompleted(this.nodeIndex);
+    SaveManager.autoSave();
 
     new Button(this, GAME_WIDTH / 2, GAME_HEIGHT - 50, 'Continue', 140, 40, () => {
       SceneTransition.fadeTransition(this, 'MapScene');

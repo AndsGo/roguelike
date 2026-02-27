@@ -1,7 +1,7 @@
 import {
   RunState, HeroState, MapNode, ItemData, BattleResult, HeroData,
   RelicState, ActiveSynergy, ElementType, RaceType, ClassType,
-  SynergyConfig, SynergyThreshold,
+  SynergyConfig, SynergyThreshold, ActConfig,
 } from '../types';
 import { SeededRNG } from '../utils/rng';
 import { STARTING_GOLD, MAX_TEAM_SIZE } from '../constants';
@@ -9,6 +9,7 @@ import { expForLevel } from '../utils/math';
 import { SYNERGY_DEFINITIONS } from '../config/synergies';
 import { EventBus } from '../systems/EventBus';
 import heroesData from '../data/heroes.json';
+import actsData from '../data/acts.json';
 
 /**
  * Singleton managing the state of the current run.
@@ -220,6 +221,112 @@ export class RunManager {
         nodeType: this.state.map[index].type,
       });
     }
+  }
+
+  /**
+   * Get all nodes that the player can currently move to.
+   * These are uncompleted nodes reachable from any completed node's connections,
+   * or the first node (index 0) if no nodes are completed yet.
+   */
+  getAccessibleNodes(): number[] {
+    const map = this.state.map;
+    if (map.length === 0) return [];
+
+    // If no node completed yet, the first node is accessible
+    const hasCompleted = map.some(n => n.completed);
+    if (!hasCompleted) {
+      return [0];
+    }
+
+    const accessible = new Set<number>();
+    for (const node of map) {
+      if (node.completed) {
+        for (const connIdx of node.connections) {
+          if (connIdx < map.length && !map[connIdx].completed) {
+            accessible.add(connIdx);
+          }
+        }
+      }
+    }
+    return Array.from(accessible);
+  }
+
+  /** Determine which act a node belongs to, based on act nodeCount boundaries */
+  getNodeAct(nodeIndex: number): number {
+    const acts = actsData as ActConfig[];
+    const map = this.state.map;
+
+    // Build layer structure per act to count actual nodes (not template nodeCount)
+    // Since MapGenerator generates with branching, actual node count per act varies.
+    // We reconstruct act boundaries by traversing from node 0.
+    let actStart = 0;
+    for (let actIdx = 0; actIdx < acts.length; actIdx++) {
+      // Find all nodes belonging to this act by BFS from actStart
+      const actNodes = this.getActNodeIndices(actStart, map);
+      if (actNodes.includes(nodeIndex)) {
+        return actIdx;
+      }
+      // Next act starts after this act's nodes
+      actStart = Math.max(...actNodes) + 1;
+      if (actStart >= map.length) break;
+    }
+    return 0;
+  }
+
+  /** Get all node indices belonging to the act starting at startIndex */
+  getActNodeIndices(startIndex: number, map: MapNode[]): number[] {
+    if (startIndex >= map.length) return [];
+    const visited = new Set<number>();
+    const queue = [startIndex];
+    visited.add(startIndex);
+
+    while (queue.length > 0) {
+      const idx = queue.shift()!;
+      const node = map[idx];
+      for (const connIdx of node.connections) {
+        if (connIdx < map.length && !visited.has(connIdx)) {
+          // Check if this connection is a boss -> next act boundary
+          // A boss node's connections to a higher-indexed node that starts a new act
+          // We detect this: if current node is boss and connIdx > idx, it's cross-act
+          if (node.type === 'boss' && connIdx > idx) {
+            // This is cross-act connection, skip
+            continue;
+          }
+          visited.add(connIdx);
+          queue.push(connIdx);
+        }
+      }
+    }
+    return Array.from(visited).sort((a, b) => a - b);
+  }
+
+  /** Get the starting node index for a given act */
+  getActStartIndex(actIndex: number): number {
+    const map = this.state.map;
+    let actStart = 0;
+    for (let i = 0; i < actIndex; i++) {
+      const actNodes = this.getActNodeIndices(actStart, map);
+      if (actNodes.length === 0) break;
+      actStart = Math.max(...actNodes) + 1;
+    }
+    return actStart;
+  }
+
+  setCurrentAct(act: number): void {
+    this.state.currentAct = act;
+  }
+
+  /** Check if the last act's boss is completed (game won) */
+  isRunComplete(): boolean {
+    const acts = actsData as ActConfig[];
+    const map = this.state.map;
+    // Find the last boss node
+    for (let i = map.length - 1; i >= 0; i--) {
+      if (map[i].type === 'boss') {
+        return map[i].completed;
+      }
+    }
+    return false;
   }
 
   // ---- Relics ----

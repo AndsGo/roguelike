@@ -20,13 +20,7 @@ export class BattleEffects {
   /** Flash unit white on hit */
   hitFlash(unit: Unit): void {
     if (!unit.isAlive || !unit.sprite) return;
-    unit.sprite.setFillStyle(0xffffff);
-    this.scene.time.delayedCall(50, () => {
-      if (unit.isAlive) {
-        const color = unit.isHero ? 0x4488ff : 0xff4444;
-        unit.sprite.setFillStyle(color);
-      }
-    });
+    unit.flashColor(0xffffff, 50);
   }
 
   /** Brief slow motion on crit */
