@@ -10,6 +10,8 @@ export class Button extends Phaser.GameObjects.Container {
   private baseColor: number;
   private borderColor: number;
   private callback?: () => void;
+  private pressX: number = 0;
+  private pressY: number = 0;
 
   constructor(
     scene: Phaser.Scene,
@@ -41,7 +43,10 @@ export class Button extends Phaser.GameObjects.Container {
     this.add(this.label);
 
     this.setSize(width, height);
-    this.setInteractive({ useHandCursor: true });
+    this.setInteractive(
+      new Phaser.Geom.Rectangle(-width / 2, -height / 2, width, height),
+      Phaser.Geom.Rectangle.Contains,
+    );
 
     this.on('pointerover', this.onHover, this);
     this.on('pointerout', this.onOut, this);
@@ -86,8 +91,10 @@ export class Button extends Phaser.GameObjects.Container {
     });
   }
 
-  private onDown(): void {
+  private onDown(pointer: Phaser.Input.Pointer): void {
     if (!this.isEnabled) return;
+    this.pressX = pointer.x;
+    this.pressY = pointer.y;
     this.drawButton(darkenColor(this.baseColor, 0.2), this.borderColor);
     this.scene.tweens.add({
       targets: this,
@@ -109,12 +116,10 @@ export class Button extends Phaser.GameObjects.Container {
       ease: 'Sine.easeOut',
     });
 
-    // Fire callback only if pointer is still within button bounds
-    const localX = pointer.x - this.x;
-    const localY = pointer.y - this.y;
-    const halfW = this.btnWidth / 2;
-    const halfH = this.btnHeight / 2;
-    if (localX >= -halfW && localX <= halfW && localY >= -halfH && localY <= halfH) {
+    // Fire callback if pointer didn't drag far from press position
+    const dx = pointer.x - this.pressX;
+    const dy = pointer.y - this.pressY;
+    if (dx * dx + dy * dy < 400) { // < 20px movement
       if (this.callback) this.callback();
     }
   }
