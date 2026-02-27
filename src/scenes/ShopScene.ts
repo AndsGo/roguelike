@@ -6,13 +6,14 @@ import { ItemData, HeroState } from '../types';
 import { Button } from '../ui/Button';
 import { Theme, colorToString } from '../ui/Theme';
 import { SceneTransition } from '../systems/SceneTransition';
+import { SaveManager } from '../managers/SaveManager';
 
 export class ShopScene extends Phaser.Scene {
   private nodeIndex!: number;
   private shopItems: ItemData[] = [];
   private goldText!: Phaser.GameObjects.Text;
   private selectedHero: HeroState | null = null;
-  private itemCards: { container: Phaser.GameObjects.Container; item: ItemData; priceText: Phaser.GameObjects.Text; sold: boolean }[] = [];
+  private itemCards: { container: Phaser.GameObjects.Container; item: ItemData; priceText: Phaser.GameObjects.Text; compareText: Phaser.GameObjects.Text; sold: boolean }[] = [];
   private heroButtons: Phaser.GameObjects.Container[] = [];
 
   constructor() {
@@ -96,6 +97,7 @@ export class ShopScene extends Phaser.Scene {
     // Leave button
     new Button(this, GAME_WIDTH / 2, GAME_HEIGHT - 30, 'Leave Shop', 140, 35, () => {
       rm.markNodeCompleted(this.nodeIndex);
+      SaveManager.autoSave();
       SceneTransition.fadeTransition(this, 'MapScene');
     });
   }
