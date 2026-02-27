@@ -43,10 +43,11 @@ export class Button extends Phaser.GameObjects.Container {
     this.add(this.label);
 
     this.setSize(width, height);
-    this.setInteractive(
-      new Phaser.Geom.Rectangle(-width / 2, -height / 2, width, height),
-      Phaser.Geom.Rectangle.Contains,
-    );
+    this.setInteractive({
+      hitArea: new Phaser.Geom.Rectangle(-width / 2, -height / 2, width, height),
+      hitAreaCallback: Phaser.Geom.Rectangle.Contains,
+      useHandCursor: true,
+    });
 
     this.on('pointerover', this.onHover, this);
     this.on('pointerout', this.onOut, this);
@@ -129,7 +130,11 @@ export class Button extends Phaser.GameObjects.Container {
     if (enabled) {
       this.drawButton(this.baseColor, this.borderColor);
       this.label.setAlpha(1);
-      this.setInteractive({ useHandCursor: true });
+      this.setInteractive({
+        hitArea: new Phaser.Geom.Rectangle(-this.btnWidth / 2, -this.btnHeight / 2, this.btnWidth, this.btnHeight),
+        hitAreaCallback: Phaser.Geom.Rectangle.Contains,
+        useHandCursor: true,
+      });
     } else {
       this.drawButton(0x555555, 0x666666, 0.6);
       this.label.setAlpha(0.5);
