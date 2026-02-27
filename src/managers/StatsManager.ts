@@ -38,6 +38,7 @@ export class StatsManager {
   private historyStats!: HistoryStats;
   private heroUsage!: Record<string, number>;
   private runStartTime: number = 0;
+  private initialized: boolean = false;
 
   private constructor() {}
 
@@ -45,15 +46,23 @@ export class StatsManager {
     if (!StatsManager.instance) {
       StatsManager.instance = new StatsManager();
     }
+    StatsManager.instance.ensureInitialized();
     return StatsManager.instance;
+  }
+
+  private ensureInitialized(): void {
+    if (!this.initialized) {
+      this.initialized = true;
+      this.loadHistory();
+      StatsManager.resetRunStats();
+      this.registerListeners();
+    }
   }
 
   /** Initialize the stats manager and register EventBus listeners */
   static init(): void {
     const inst = StatsManager.getInstance();
-    inst.loadHistory();
-    StatsManager.resetRunStats();
-    inst.registerListeners();
+    inst.ensureInitialized();
   }
 
   private loadHistory(): void {
