@@ -40,6 +40,8 @@ export const UI = {
     gold: (n: number) => `${n}G`,
     enterAct: (act: number) => `进入第${act}章`,
     continueBtn: '继续',
+    runStats: (heroes: number, relics: number, completed: number, total: number) =>
+      `英雄:${heroes}  遗物:${relics}  进度:${completed}/${total}`,
   },
 
   // Node types
@@ -59,6 +61,11 @@ export const UI = {
     battle: '战斗',
     victory: '胜利',
     defeat: '失败',
+    pause: '暂停',
+    pauseBtn: '[暂停]',
+    resume: '继续',
+    settings: '设置',
+    abandonBattle: '放弃战斗',
   },
 
   // RewardScene
@@ -69,6 +76,10 @@ export const UI = {
     survivors: (n: number) => `存活: ${n}`,
     totalGold: (n: number) => `总金币: ${n}`,
     continueBtn: '继续',
+    battleStatsHeader: '战斗统计',
+    dmg: '伤害',
+    heal: '治疗',
+    kills: '击杀',
   },
 
   // ShopScene
@@ -105,6 +116,7 @@ export const UI = {
     relicAcquired: (id: string) => `获得遗物: ${getRelicDisplayName(id)}`,
     itemGold: (v: number) => `金币 +${v}`,
     continueBtn: '继续',
+    probability: (pct: number) => `${pct}%`,
   },
 
   // GameOverScene
@@ -154,9 +166,79 @@ export const UI = {
     skills: (s: string) => `技能: ${s}`,
   },
 
+  // Hero unlock
+  heroUnlock: {
+    title: '英雄解锁',
+    unlocked: '已解锁',
+    locked: '未解锁',
+    default: '默认英雄',
+    victory: '通关1次',
+    runs3: '完成3次冒险',
+    element: (e: string) => `元素: ${e}`,
+    noElement: '无元素',
+  },
+
+  // Difficulty selection
+  difficulty: {
+    title: '选择难度',
+    locked: (req: string) => `需要: ${req}`,
+    victoryReq: (n: number) => `${n}次通关`,
+    multiplier: (n: number) => `敌人 ×${n}`,
+    rewardMultiplier: (n: number) => `奖励 ×${n}`,
+    start: '开始',
+  },
+
+  // Audio
+  audio: {
+    bgmOn: '音乐:开',
+    bgmOff: '音乐:关',
+    sfxOn: '音效:开',
+    sfxOff: '音效:关',
+    volume: '音量',
+  },
+
+  // SkillBar
+  skillBar: {
+    ready: '就绪',
+    cooldown: '冷却中',
+    auto: '自动',
+    manual: '手动',
+    semiAuto: '半自动',
+  },
+
+  // Act modifiers
+  actModifier: {
+    forest: '森林祝福: 每15秒全体治疗5%',
+    volcano: '火焰大地: 静止单位受灼烧伤害',
+    abyss: '深渊黑暗: 周期性降低攻击范围',
+  },
+
+  // Settings
+  settings: {
+    title: '设置',
+    bgmVolume: '音乐音量',
+    sfxVolume: '音效音量',
+    resetTutorials: '重置教程',
+    resetTutorialsDone: '已重置',
+    resetMeta: '重置永久进度',
+    resetMetaConfirm: '确认重置？所有升级和解锁将丢失！',
+    resetMetaDone: '已重置所有永久进度',
+    deleteSave: (slot: number) => `删除存档 ${slot + 1}`,
+    deleteSaveConfirm: (slot: number) => `确认删除存档 ${slot + 1}？`,
+    saveEmpty: (slot: number) => `存档 ${slot + 1}: 空`,
+    saveInfo: (slot: number, floor: number, heroes: number) =>
+      `存档 ${slot + 1}: 第${floor}关, ${heroes}英雄`,
+    back: '返回',
+    on: '开',
+    off: '关',
+    keybindings: '快捷键',
+  },
+
   // Tutorial
   tutorial: {
     clickToContinue: '[ 点击继续 ]',
+    skipAll: '[跳过教程]',
+    skipped: '已跳过所有教程',
   },
 };
 

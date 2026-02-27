@@ -6,7 +6,7 @@
     "nodeCount": 8,
     "enemyPool": ["slime", "goblin", "ice_wolf", "fire_lizard", "light_sprite"],
     "bossPool": ["frost_queen"],
-    "eventPool": ["healing_spring", "wandering_warrior", "frozen_lake", "ancient_library", "mushroom_grove"],
+    "eventPool": ["healing_spring", "wandering_warrior", "frozen_lake", "ancient_library", "mushroom_grove", "frozen_cavern", "wandering_ice_mage", "holy_spring"],
     "elementAffinity": "ice",
     "difficultyMultiplier": 1.1
   },
@@ -17,7 +17,7 @@
     "nodeCount": 8,
     "enemyPool": ["fire_elemental", "flame_knight", "orc_warrior", "storm_hawk", "dark_cultist"],
     "bossPool": ["thunder_titan"],
-    "eventPool": ["volcano_cave", "blacksmith", "mysterious_merchant", "thunder_peak", "trapped_chest"],
+    "eventPool": ["volcano_cave", "blacksmith", "mysterious_merchant", "thunder_peak", "trapped_chest", "thunder_dojo", "elemental_rift", "lost_training_ground"],
     "elementAffinity": "fire",
     "difficultyMultiplier": 1.4
   },
@@ -28,7 +28,7 @@
     "nodeCount": 8,
     "enemyPool": ["shadow_wraith", "dark_cultist", "skeleton_archer", "dark_mage", "thunder_golem"],
     "bossPool": ["shadow_lord"],
-    "eventPool": ["shadow_shrine", "holy_temple", "fortune_teller", "mysterious_portal", "goblin_camp"],
+    "eventPool": ["shadow_shrine", "holy_temple", "fortune_teller", "mysterious_portal", "goblin_camp", "dark_market", "ancient_battlefield"],
     "elementAffinity": "dark",
     "difficultyMultiplier": 1.8
   }

@@ -7,6 +7,9 @@ import { Enemy } from '../entities/Enemy';
 import { EventBus } from '../systems/EventBus';
 import { RunManager } from '../managers/RunManager';
 import { SYNERGY_DEFINITIONS } from '../config/synergies';
+import { SkillBar } from './SkillBar';
+import { SkillQueueSystem } from '../systems/SkillQueueSystem';
+import { SaveManager } from '../managers/SaveManager';
 
 /**
  * Battle HUD overlay showing:
@@ -25,7 +28,7 @@ export class BattleHUD extends Phaser.GameObjects.Container {
   private comboText: Phaser.GameObjects.Text;
   private comboCount: number = 0;
   private speedText: Phaser.GameObjects.Text;
-  private currentSpeed: number = 1;
+  private currentSpeed: number = SaveManager.loadData<number>('roguelike_battle_speed') ?? 1;
   private damageStats: Map<string, number> = new Map();
   private unitNameMap: Map<string, string> = new Map();
   private statsPanel: Phaser.GameObjects.Container | null = null;
@@ -33,12 +36,14 @@ export class BattleHUD extends Phaser.GameObjects.Container {
   private onSpeedChange?: (speed: number) => void;
   private onComboHit: (data: { unitId: string; comboCount: number }) => void;
   private onUnitDamage: (data: { sourceId: string; targetId: string; amount: number }) => void;
+  private skillBar: SkillBar | null = null;
 
   constructor(
     scene: Phaser.Scene,
     heroes: Hero[],
     enemies: Enemy[],
     onSpeedChange?: (speed: number) => void,
+    skillQueue?: SkillQueueSystem,
   ) {
     super(scene, 0, 0);
     this.heroes = heroes;
@@ -63,7 +68,7 @@ export class BattleHUD extends Phaser.GameObjects.Container {
     this.createSynergyIndicators();
 
     // Combo counter (bottom-right)
-    this.comboText = scene.add.text(GAME_WIDTH - 20, GAME_HEIGHT - 30, '', {
+    this.comboText = scene.add.text(GAME_WIDTH * 3 / 4, GAME_HEIGHT - 30, '', {
       fontSize: '20px',
       color: colorToString(Theme.colors.secondary),
       fontFamily: 'monospace',
@@ -75,7 +80,7 @@ export class BattleHUD extends Phaser.GameObjects.Container {
 
     // Stats toggle button — use padded hit zone for easier clicking
     const statsBtn = scene.add.text(GAME_WIDTH - 10, GAME_HEIGHT - 65, '[统计]', {
-      fontSize: '8px',
+      fontSize: '9px',
       color: '#888888',
       fontFamily: 'monospace',
     }).setOrigin(1, 1);
@@ -85,6 +90,11 @@ export class BattleHUD extends Phaser.GameObjects.Container {
       .setInteractive({ useHandCursor: true });
     statsHit.on('pointerdown', () => this.toggleStats());
     this.add(statsHit);
+
+    // Skill bar (if skill queue provided)
+    if (skillQueue) {
+      this.skillBar = new SkillBar(scene, heroes, skillQueue);
+    }
 
     // Listen for combo events (store refs for cleanup)
     this.onComboHit = (data) => {
@@ -113,7 +123,7 @@ export class BattleHUD extends Phaser.GameObjects.Container {
 
       // Name
       const name = this.scene.add.text(16, 0, hero.unitName.substring(0, 6), {
-        fontSize: '8px',
+        fontSize: '9px',
         color: '#ffffff',
         fontFamily: 'monospace',
       }).setOrigin(0, 0.5);
@@ -130,6 +140,9 @@ export class BattleHUD extends Phaser.GameObjects.Container {
       // Store reference for updates
       container.setData('hpFill', hpFill);
       container.setData('unit', hero);
+      container.setData('isHero', true);
+      container.setData('lastRatio', -1);
+      container.setData('lastAlive', true);
 
       this.heroPortraits.push(container);
       this.add(container);
@@ -150,10 +163,13 @@ export class BattleHUD extends Phaser.GameObjects.Container {
       container.add(hpFill);
       container.setData('hpFill', hpFill);
       container.setData('unit', enemy);
+      container.setData('isHero', false);
+      container.setData('lastRatio', -1);
+      container.setData('lastAlive', true);
 
       // Name
       const name = this.scene.add.text(44, 0, enemy.unitName.substring(0, 6), {
-        fontSize: '8px',
+        fontSize: '9px',
         color: '#ff8888',
         fontFamily: 'monospace',
       }).setOrigin(0, 0.5);
@@ -178,12 +194,17 @@ export class BattleHUD extends Phaser.GameObjects.Container {
     bg.strokeRoundedRect(GAME_WIDTH / 2 - 30, GAME_HEIGHT - 25, 60, 20, 4);
     this.add(bg);
 
-    const text = this.scene.add.text(GAME_WIDTH / 2, GAME_HEIGHT - 15, '1x', {
+    const text = this.scene.add.text(GAME_WIDTH / 2, GAME_HEIGHT - 15, `${this.currentSpeed}x`, {
       fontSize: '11px',
       color: '#ffffff',
       fontFamily: 'monospace',
     }).setOrigin(0.5);
     this.add(text);
+
+    // Apply saved speed on creation
+    if (this.currentSpeed !== 1 && this.onSpeedChange) {
+      this.onSpeedChange(this.currentSpeed);
+    }
 
     // Padded hit zone covering the full speed button background
     const speedHit = this.scene.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT - 15, 72, 30, 0x000000, 0)
@@ -193,6 +214,7 @@ export class BattleHUD extends Phaser.GameObjects.Container {
       const idx = speeds.indexOf(this.currentSpeed);
       this.currentSpeed = speeds[(idx + 1) % speeds.length];
       text.setText(`${this.currentSpeed}x`);
+      SaveManager.saveData('roguelike_battle_speed', this.currentSpeed);
       if (this.onSpeedChange) this.onSpeedChange(this.currentSpeed);
     });
     this.add(speedHit);
@@ -216,7 +238,7 @@ export class BattleHUD extends Phaser.GameObjects.Container {
       this.add(circle);
 
       const label = this.scene.add.text(x, y, `${syn.count}`, {
-        fontSize: '8px',
+        fontSize: '9px',
         color: '#ffffff',
         fontFamily: 'monospace',
       }).setOrigin(0.5);
@@ -230,7 +252,7 @@ export class BattleHUD extends Phaser.GameObjects.Container {
         const tooltipStr = `${def.name}\n${bonusText}`;
 
         const tooltip = this.scene.add.text(x, y - 16, tooltipStr, {
-          fontSize: '7px',
+          fontSize: '9px',
           color: '#ffffff',
           fontFamily: 'monospace',
           backgroundColor: '#222222',
@@ -290,7 +312,7 @@ export class BattleHUD extends Phaser.GameObjects.Container {
     this.statsPanel.add(bg);
 
     const title = this.scene.add.text(60, 8, '伤害统计', {
-      fontSize: '8px',
+      fontSize: '10px',
       color: '#aaaaaa',
       fontFamily: 'monospace',
     }).setOrigin(0.5, 0);
@@ -300,7 +322,7 @@ export class BattleHUD extends Phaser.GameObjects.Container {
     for (const [unitId, dmg] of this.damageStats) {
       const displayName = this.unitNameMap.get(unitId) ?? unitId.substring(0, 8);
       const label = this.scene.add.text(8, yOffset, `${displayName}: ${dmg}`, {
-        fontSize: '7px',
+        fontSize: '9px',
         color: '#cccccc',
         fontFamily: 'monospace',
       });
@@ -311,31 +333,48 @@ export class BattleHUD extends Phaser.GameObjects.Container {
     this.add(this.statsPanel);
   }
 
+  /** Fire a skill by hotkey index (1-8) */
+  fireSkillByHotkey(index: number): boolean {
+    return this.skillBar?.fireByHotkey(index) ?? false;
+  }
+
   destroy(): void {
     const eb = EventBus.getInstance();
     eb.off('combo:hit', this.onComboHit);
     eb.off('unit:damage', this.onUnitDamage);
+    this.skillBar?.destroy();
     super.destroy();
   }
 
-  /** Call every frame to update HP displays */
+  /** Call every frame to update HP displays and skill bar (conditional redraw) */
   updatePortraits(): void {
+    this.skillBar?.updateSlots();
     const updateList = [...this.heroPortraits, ...this.enemyPortraits];
     for (const container of updateList) {
       const hpFill = container.getData('hpFill') as Phaser.GameObjects.Graphics | null;
       const unit = container.getData('unit') as Unit | null;
       if (!hpFill || !unit) continue;
 
-      hpFill.clear();
       const ratio = Math.max(0, unit.currentHp / unit.currentStats.maxHp);
-      const color = ratio > 0.6 ? 0x44ff44 : ratio > 0.3 ? 0xffaa00 : 0xff4444;
-      const isHero = this.heroPortraits.includes(container);
-      const barX = isHero ? 60 : 0;
-      hpFill.fillStyle(color, 1);
-      hpFill.fillRect(barX, -3, 40 * ratio, 5);
+      const alive = unit.isAlive;
+      const lastRatio = container.getData('lastRatio') as number;
+      const lastAlive = container.getData('lastAlive') as boolean;
 
-      // Dim dead units
-      container.setAlpha(unit.isAlive ? 1 : 0.3);
+      // Only redraw if values changed
+      if (ratio !== lastRatio) {
+        hpFill.clear();
+        const color = ratio > 0.6 ? 0x44ff44 : ratio > 0.3 ? 0xffaa00 : 0xff4444;
+        const isHero = container.getData('isHero') as boolean;
+        const barX = isHero ? 60 : 0;
+        hpFill.fillStyle(color, 1);
+        hpFill.fillRect(barX, -3, 40 * ratio, 5);
+        container.setData('lastRatio', ratio);
+      }
+
+      if (alive !== lastAlive) {
+        container.setAlpha(alive ? 1 : 0.3);
+        container.setData('lastAlive', alive);
+      }
     }
   }
 }

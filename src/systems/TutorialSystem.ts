@@ -1,5 +1,7 @@
 import Phaser from 'phaser';
 import { EventBus } from './EventBus';
+import { ErrorHandler } from './ErrorHandler';
+import { SaveManager } from '../managers/SaveManager';
 import { GAME_WIDTH, GAME_HEIGHT } from '../config/balance';
 
 /** A tutorial tip shown once to the player */
@@ -9,6 +11,8 @@ export interface TutorialTip {
   title: string;
   message: string;
   position?: { x: number; y: number };
+  /** Optional highlight region — shows a spotlight cutout instead of full backdrop */
+  highlight?: { x: number; y: number; width: number; height: number };
 }
 
 const TIPS_KEY = 'roguelike_seen_tips';
@@ -28,12 +32,14 @@ export class TutorialSystem {
       trigger: 'BattleScene',
       title: '战斗基础',
       message: '英雄会自动战斗！使用1x/2x/3x按钮调整战斗速度。',
+      highlight: { x: GAME_WIDTH / 2 - 60, y: GAME_HEIGHT - 40, width: 120, height: 30 },
     },
     {
       id: 'first_shop',
       trigger: 'ShopScene',
       title: '商店',
       message: '用金币购买装备来提升英雄的属性。',
+      highlight: { x: 100, y: 100, width: 600, height: 250 },
     },
     {
       id: 'first_event',
@@ -52,6 +58,7 @@ export class TutorialSystem {
       trigger: 'MapScene',
       title: '冒险地图',
       message: '选择下一个节点前进。不同节点类型提供战斗、商店、事件和休息。',
+      highlight: { x: 50, y: 60, width: 200, height: 80 },
     },
     {
       id: 'first_element',
@@ -91,31 +98,20 @@ export class TutorialSystem {
     TutorialSystem.initialized = true;
 
     // Load persisted tips
-    try {
-      const raw = localStorage.getItem(TIPS_KEY);
-      if (raw) {
-        const arr = JSON.parse(raw) as string[];
-        TutorialSystem.seenTips = new Set(arr);
-      }
-    } catch {
-      TutorialSystem.seenTips = new Set();
+    const saved = SaveManager.loadData<string[]>(TIPS_KEY);
+    if (saved) {
+      TutorialSystem.seenTips = new Set(saved);
     }
 
     // Register EventBus listeners for event-triggered tips
     const bus = EventBus.getInstance();
     const eventTips = TutorialSystem.TIPS.filter(t => t.trigger.includes(':'));
     for (const tip of eventTips) {
-      // Only listen to known GameEventType triggers
       if (tip.trigger === 'element:reaction') {
-        bus.on('element:reaction', () => {
-          // We can't show the tip without a scene reference here,
-          // so we mark it as pending and let the scene check
-        });
+        bus.on('element:reaction', () => {});
       }
       if (tip.trigger === 'relic:acquire') {
-        bus.on('relic:acquire', () => {
-          // Same - scene must call showTipIfNeeded
-        });
+        bus.on('relic:acquire', () => {});
       }
     }
   }
@@ -137,11 +133,7 @@ export class TutorialSystem {
   /** Mark a tip as seen and persist */
   static markSeen(tipId: string): void {
     TutorialSystem.seenTips.add(tipId);
-    try {
-      localStorage.setItem(TIPS_KEY, JSON.stringify([...TutorialSystem.seenTips]));
-    } catch {
-      // Ignore storage errors
-    }
+    SaveManager.saveData(TIPS_KEY, [...TutorialSystem.seenTips]);
   }
 
   /** Check if a tip has been seen */
@@ -149,75 +141,140 @@ export class TutorialSystem {
     return TutorialSystem.seenTips.has(tipId);
   }
 
+  /** Mark all tips as seen (skip all tutorials) */
+  static skipAll(): void {
+    for (const tip of TutorialSystem.TIPS) {
+      TutorialSystem.seenTips.add(tip.id);
+    }
+    SaveManager.saveData(TIPS_KEY, [...TutorialSystem.seenTips]);
+  }
+
+  /** Check if all tips have been seen */
+  static allSkipped(): boolean {
+    return TutorialSystem.TIPS.every(t => TutorialSystem.seenTips.has(t.id));
+  }
+
   /** Reset all seen tips (e.g., from settings) */
   static resetTips(): void {
     TutorialSystem.seenTips.clear();
-    try {
-      localStorage.removeItem(TIPS_KEY);
-    } catch {
-      // Ignore
-    }
+    SaveManager.saveData(TIPS_KEY, []);
   }
 
   /** Render a tip as a Phaser overlay panel */
   private static renderTip(scene: Phaser.Scene, tip: TutorialTip): void {
-    const cx = tip.position?.x ?? GAME_WIDTH / 2;
-    const cy = tip.position?.y ?? GAME_HEIGHT / 2;
-
     const panelWidth = 320;
     const panelHeight = 120;
+    const allElements: Phaser.GameObjects.GameObject[] = [];
 
-    // Semi-transparent backdrop
-    const backdrop = scene.add.rectangle(
-      GAME_WIDTH / 2, GAME_HEIGHT / 2,
-      GAME_WIDTH, GAME_HEIGHT,
-      0x000000, 0.4,
-    ).setDepth(900).setInteractive({ useHandCursor: true });
+    if (tip.highlight) {
+      // Spotlight mode: 4 dark rectangles around the highlight region + border
+      const hl = tip.highlight;
+      const alpha = 0.5;
 
-    // Panel background
-    const panel = scene.add.rectangle(cx, cy, panelWidth, panelHeight, 0x1a1a2e, 0.95)
-      .setDepth(901)
-      .setStrokeStyle(2, 0x4488ff);
+      // Top
+      const top = scene.add.rectangle(GAME_WIDTH / 2, hl.y / 2, GAME_WIDTH, hl.y, 0x000000, alpha)
+        .setDepth(900).setInteractive({ useHandCursor: true });
+      // Bottom
+      const bottomY = hl.y + hl.height;
+      const bottom = scene.add.rectangle(GAME_WIDTH / 2, (bottomY + GAME_HEIGHT) / 2, GAME_WIDTH, GAME_HEIGHT - bottomY, 0x000000, alpha)
+        .setDepth(900).setInteractive({ useHandCursor: true });
+      // Left
+      const left = scene.add.rectangle(hl.x / 2, hl.y + hl.height / 2, hl.x, hl.height, 0x000000, alpha)
+        .setDepth(900).setInteractive({ useHandCursor: true });
+      // Right
+      const rightX = hl.x + hl.width;
+      const right = scene.add.rectangle((rightX + GAME_WIDTH) / 2, hl.y + hl.height / 2, GAME_WIDTH - rightX, hl.height, 0x000000, alpha)
+        .setDepth(900).setInteractive({ useHandCursor: true });
 
-    // Title
-    const title = scene.add.text(cx, cy - 35, tip.title, {
-      fontSize: '16px',
-      color: '#ffdd44',
-      fontFamily: 'monospace',
-      fontStyle: 'bold',
-    }).setOrigin(0.5).setDepth(902);
+      // Highlight border
+      const border = scene.add.graphics().setDepth(901);
+      border.lineStyle(2, 0x4488ff, 1);
+      border.strokeRect(hl.x, hl.y, hl.width, hl.height);
 
-    // Message
-    const message = scene.add.text(cx, cy + 5, tip.message, {
-      fontSize: '11px',
-      color: '#ccccdd',
-      fontFamily: 'monospace',
-      wordWrap: { width: panelWidth - 30 },
-      align: 'center',
-    }).setOrigin(0.5).setDepth(902);
+      allElements.push(top, bottom, left, right, border);
 
-    // Close button / instruction
-    const closeText = scene.add.text(cx, cy + 45, '[ 点击继续 ]', {
-      fontSize: '10px',
-      color: '#888899',
-      fontFamily: 'monospace',
-    }).setOrigin(0.5).setDepth(902);
+      // Position panel above or below the highlight
+      const panelAbove = hl.y > panelHeight + 20;
+      const panelCx = Math.min(Math.max(hl.x + hl.width / 2, panelWidth / 2 + 10), GAME_WIDTH - panelWidth / 2 - 10);
+      const panelCy = panelAbove
+        ? hl.y - panelHeight / 2 - 10
+        : hl.y + hl.height + panelHeight / 2 + 10;
 
-    // Click to dismiss
-    const dismiss = (): void => {
-      backdrop.destroy();
-      panel.destroy();
-      title.destroy();
-      message.destroy();
-      closeText.destroy();
-    };
+      const panelBg = scene.add.rectangle(panelCx, panelCy, panelWidth, panelHeight, 0x1a1a2e, 0.95)
+        .setDepth(901).setStrokeStyle(2, 0x4488ff);
+      allElements.push(panelBg);
 
-    backdrop.on('pointerdown', dismiss);
-    panel.setInteractive({ useHandCursor: true }).on('pointerdown', dismiss);
+      const title = scene.add.text(panelCx, panelCy - 35, tip.title, {
+        fontSize: '16px', color: '#ffdd44', fontFamily: 'monospace', fontStyle: 'bold',
+      }).setOrigin(0.5).setDepth(902);
+      allElements.push(title);
 
-    // Auto-dismiss after 8 seconds
-    scene.time.delayedCall(8000, () => {
-      if (backdrop.active) dismiss();
-    });
+      const message = scene.add.text(panelCx, panelCy + 5, tip.message, {
+        fontSize: '11px', color: '#ccccdd', fontFamily: 'monospace',
+        wordWrap: { width: panelWidth - 30 }, align: 'center',
+      }).setOrigin(0.5).setDepth(902);
+      allElements.push(message);
+
+      const closeText = scene.add.text(panelCx, panelCy + 45, '[ 点击继续 ]', {
+        fontSize: '10px', color: '#888899', fontFamily: 'monospace',
+      }).setOrigin(0.5).setDepth(902);
+      allElements.push(closeText);
+
+      // Dismiss on clicking any dark region
+      const dismiss = (): void => {
+        for (const el of allElements) el.destroy();
+      };
+      top.on('pointerdown', dismiss);
+      bottom.on('pointerdown', dismiss);
+      left.on('pointerdown', dismiss);
+      right.on('pointerdown', dismiss);
+      panelBg.setInteractive({ useHandCursor: true }).on('pointerdown', dismiss);
+
+      scene.time.delayedCall(8000, () => {
+        if (top.active) dismiss();
+      });
+    } else {
+      // Original full-screen mode
+      const cx = tip.position?.x ?? GAME_WIDTH / 2;
+      const cy = tip.position?.y ?? GAME_HEIGHT / 2;
+
+      const backdrop = scene.add.rectangle(
+        GAME_WIDTH / 2, GAME_HEIGHT / 2,
+        GAME_WIDTH, GAME_HEIGHT,
+        0x000000, 0.4,
+      ).setDepth(900).setInteractive({ useHandCursor: true });
+      allElements.push(backdrop);
+
+      const panel = scene.add.rectangle(cx, cy, panelWidth, panelHeight, 0x1a1a2e, 0.95)
+        .setDepth(901).setStrokeStyle(2, 0x4488ff);
+      allElements.push(panel);
+
+      const title = scene.add.text(cx, cy - 35, tip.title, {
+        fontSize: '16px', color: '#ffdd44', fontFamily: 'monospace', fontStyle: 'bold',
+      }).setOrigin(0.5).setDepth(902);
+      allElements.push(title);
+
+      const message = scene.add.text(cx, cy + 5, tip.message, {
+        fontSize: '11px', color: '#ccccdd', fontFamily: 'monospace',
+        wordWrap: { width: panelWidth - 30 }, align: 'center',
+      }).setOrigin(0.5).setDepth(902);
+      allElements.push(message);
+
+      const closeText = scene.add.text(cx, cy + 45, '[ 点击继续 ]', {
+        fontSize: '10px', color: '#888899', fontFamily: 'monospace',
+      }).setOrigin(0.5).setDepth(902);
+      allElements.push(closeText);
+
+      const dismiss = (): void => {
+        for (const el of allElements) el.destroy();
+      };
+
+      backdrop.on('pointerdown', dismiss);
+      panel.setInteractive({ useHandCursor: true }).on('pointerdown', dismiss);
+
+      scene.time.delayedCall(8000, () => {
+        if (backdrop.active) dismiss();
+      });
+    }
   }
 }

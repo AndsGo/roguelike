@@ -1,8 +1,9 @@
 import Phaser from 'phaser';
 import { HeroData, HeroState, EquipmentSlot } from '../types';
 import { RunManager } from '../managers/RunManager';
-import { Theme, colorToString } from './Theme';
+import { Theme, colorToString, getElementColor } from './Theme';
 import { UI } from '../i18n';
+import { HeroDetailPopup } from './HeroDetailPopup';
 
 export class HeroCard extends Phaser.GameObjects.Container {
   private bg: Phaser.GameObjects.Graphics;
@@ -34,15 +35,24 @@ export class HeroCard extends Phaser.GameObjects.Container {
     this.bg.strokeRoundedRect(-this.cardWidth / 2, -this.cardHeight / 2, this.cardWidth, this.cardHeight, 6);
     this.add(this.bg);
 
-    // Element icon (colored circle)
+    // Element icon (colored circle + symbol)
     if (heroData.element) {
-      const elColor = Theme.colors.element[heroData.element] ?? 0xffffff;
+      const elColor = getElementColor(heroData.element);
+      const elX = this.cardWidth / 2 - 16;
+      const elY = -this.cardHeight / 2 + 16;
       const elCircle = scene.add.graphics();
       elCircle.fillStyle(elColor, 1);
-      elCircle.fillCircle(this.cardWidth / 2 - 16, -this.cardHeight / 2 + 16, 8);
+      elCircle.fillCircle(elX, elY, 8);
       elCircle.lineStyle(1, 0xffffff, 0.5);
-      elCircle.strokeCircle(this.cardWidth / 2 - 16, -this.cardHeight / 2 + 16, 8);
+      elCircle.strokeCircle(elX, elY, 8);
       this.add(elCircle);
+      const elSym = Theme.colors.elementSymbol[heroData.element] ?? '';
+      if (elSym) {
+        const symText = scene.add.text(elX, elY, elSym, {
+          fontSize: '8px', color: '#000000', fontFamily: 'monospace', fontStyle: 'bold',
+        }).setOrigin(0.5);
+        this.add(symText);
+      }
     }
 
     // Hero icon placeholder (role-based color)
@@ -83,20 +93,29 @@ export class HeroCard extends Phaser.GameObjects.Container {
     this.drawMiniHpBar(scene, 0, 12, 100, 6, hpRatio);
 
     const hpText = scene.add.text(0, 24, `${heroState.currentHp}/${maxHp}`, {
-      fontSize: '8px',
+      fontSize: '9px',
       color: '#cccccc',
       fontFamily: 'monospace',
     }).setOrigin(0.5);
     this.add(hpText);
 
-    // Stats summary
+    // Stats summary (include equipment bonuses)
     const stats = heroData.baseStats;
     const scaling = heroData.scalingPerLevel;
     const lvl = heroState.level;
-    const atk = stats.attack + scaling.attack * (lvl - 1);
-    const def = stats.defense + scaling.defense * (lvl - 1);
+    const mainEqBonus: Record<string, number> = {};
+    for (const slot of ['weapon', 'armor', 'accessory'] as const) {
+      const equip = heroState.equipment[slot];
+      if (equip) {
+        for (const [k, v] of Object.entries(equip.stats)) {
+          mainEqBonus[k] = (mainEqBonus[k] ?? 0) + (v as number);
+        }
+      }
+    }
+    const atk = stats.attack + scaling.attack * (lvl - 1) + (mainEqBonus['attack'] ?? 0);
+    const def = stats.defense + scaling.defense * (lvl - 1) + (mainEqBonus['defense'] ?? 0);
     const statsText = scene.add.text(0, 38, UI.heroCard.atkDef(atk, def), {
-      fontSize: '8px',
+      fontSize: '9px',
       color: '#aaccff',
       fontFamily: 'monospace',
     }).setOrigin(0.5);
@@ -118,17 +137,23 @@ export class HeroCard extends Phaser.GameObjects.Container {
       this.add(slot);
 
       const slotLabel = scene.add.text(sx, sy, equipped ? slotIcons[i] : '-', {
-        fontSize: '8px',
+        fontSize: '9px',
         color: '#ffffff',
         fontFamily: 'monospace',
       }).setOrigin(0.5);
       this.add(slotLabel);
     }
 
-    // Click to expand details
+    // Click to expand details, right-click for full popup
     this.setSize(this.cardWidth, this.cardHeight);
     this.setInteractive({ useHandCursor: true });
-    this.on('pointerdown', () => this.toggleDetails());
+    this.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
+      if (pointer.rightButtonDown()) {
+        this.openDetailPopup();
+      } else {
+        this.toggleDetails();
+      }
+    });
 
     scene.add.existing(this);
   }
@@ -169,17 +194,28 @@ export class HeroCard extends Phaser.GameObjects.Container {
     const scaling = this.heroData.scalingPerLevel;
     const lvl = this.heroState.level;
 
+    // Include equipment bonuses in expanded stats
+    const eqBonus: Record<string, number> = {};
+    for (const slot of ['weapon', 'armor', 'accessory'] as const) {
+      const equip = this.heroState.equipment[slot];
+      if (equip) {
+        for (const [k, v] of Object.entries(equip.stats)) {
+          eqBonus[k] = (eqBonus[k] ?? 0) + (v as number);
+        }
+      }
+    }
+
     const lines = [
-      UI.heroCard.spdAspd(stats.speed, stats.attackSpeed),
-      UI.heroCard.crit(stats.critChance, stats.critDamage),
-      UI.heroCard.magicPow(stats.magicPower + scaling.magicPower * (lvl - 1)),
-      UI.heroCard.magicRes(stats.magicResist + scaling.magicResist * (lvl - 1)),
-      UI.heroCard.range(stats.attackRange),
+      UI.heroCard.spdAspd(stats.speed + (eqBonus['speed'] ?? 0), stats.attackSpeed + (eqBonus['attackSpeed'] ?? 0)),
+      UI.heroCard.crit(stats.critChance + (eqBonus['critChance'] ?? 0), stats.critDamage + (eqBonus['critDamage'] ?? 0)),
+      UI.heroCard.magicPow(stats.magicPower + scaling.magicPower * (lvl - 1) + (eqBonus['magicPower'] ?? 0)),
+      UI.heroCard.magicRes(stats.magicResist + scaling.magicResist * (lvl - 1) + (eqBonus['magicResist'] ?? 0)),
+      UI.heroCard.range(stats.attackRange + (eqBonus['attackRange'] ?? 0)),
     ];
 
     lines.forEach((line, i) => {
       const t = scene.add.text(-this.cardWidth / 2 + 8, 6 + i * 16, line, {
-        fontSize: '8px',
+        fontSize: '9px',
         color: '#bbbbbb',
         fontFamily: 'monospace',
       });
@@ -189,7 +225,7 @@ export class HeroCard extends Phaser.GameObjects.Container {
     // Skills list
     if (this.heroData.skills.length > 0) {
       const skillText = scene.add.text(-this.cardWidth / 2 + 8, 82, UI.heroCard.skills(this.heroData.skills.join(', ')), {
-        fontSize: '7px',
+        fontSize: '9px',
         color: '#8899cc',
         fontFamily: 'monospace',
         wordWrap: { width: this.cardWidth - 16 },
@@ -224,6 +260,10 @@ export class HeroCard extends Phaser.GameObjects.Container {
         },
       });
     }
+  }
+
+  private openDetailPopup(): void {
+    new HeroDetailPopup(this.scene, this.heroData, this.heroState);
   }
 
   private getRarityBorderColor(): number {

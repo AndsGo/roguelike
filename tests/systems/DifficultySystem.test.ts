@@ -16,7 +16,7 @@ describe('DifficultySystem', () => {
     it('returns hard difficulty by id', () => {
       const config = getDifficultyConfig('hard');
       expect(config.id).toBe('hard');
-      expect(config.enemyStatMultiplier).toBe(1.3);
+      expect(config.enemyStatMultiplier).toBe(1.15);
       expect(config.goldMultiplier).toBe(1.2);
       expect(config.expMultiplier).toBe(1.2);
     });
@@ -24,13 +24,13 @@ describe('DifficultySystem', () => {
     it('returns nightmare difficulty by id', () => {
       const config = getDifficultyConfig('nightmare');
       expect(config.id).toBe('nightmare');
-      expect(config.enemyStatMultiplier).toBe(1.6);
+      expect(config.enemyStatMultiplier).toBe(1.35);
     });
 
     it('returns hell difficulty by id', () => {
       const config = getDifficultyConfig('hell');
       expect(config.id).toBe('hell');
-      expect(config.enemyStatMultiplier).toBe(2.0);
+      expect(config.enemyStatMultiplier).toBe(1.6);
       expect(config.goldMultiplier).toBe(2.0);
       expect(config.expMultiplier).toBe(2.0);
     });
@@ -68,20 +68,20 @@ describe('DifficultySystem', () => {
       expect(scaled.defense).toBe(30);
     });
 
-    it('hard difficulty scales stats by 1.3x', () => {
+    it('hard difficulty scales stats by 1.15x', () => {
       const hard = getDifficultyConfig('hard');
       const scaled = DifficultySystem.scaleEnemyStats(baseStats, hard);
-      expect(scaled.maxHp).toBe(130);
-      expect(scaled.attack).toBe(65);
-      expect(scaled.defense).toBe(39);
+      expect(scaled.maxHp).toBe(Math.round(100 * 1.15));
+      expect(scaled.attack).toBe(Math.round(50 * 1.15));
+      expect(scaled.defense).toBe(Math.round(30 * 1.15));
     });
 
-    it('hell difficulty scales stats by 2.0x', () => {
+    it('hell difficulty scales stats by 1.6x', () => {
       const hell = getDifficultyConfig('hell');
       const scaled = DifficultySystem.scaleEnemyStats(baseStats, hell);
-      expect(scaled.maxHp).toBe(200);
-      expect(scaled.attack).toBe(100);
-      expect(scaled.defense).toBe(60);
+      expect(scaled.maxHp).toBe(160);
+      expect(scaled.attack).toBe(80);
+      expect(scaled.defense).toBe(48);
     });
 
     it('speed is NOT scaled', () => {

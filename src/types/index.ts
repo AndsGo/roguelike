@@ -63,6 +63,7 @@ export interface HeroState {
     armor: ItemData | null;
     accessory: ItemData | null;
   };
+  temporaryElement?: ElementType;
 }
 
 // ============ Enemy ============
@@ -185,10 +186,12 @@ export interface EventOutcome {
 }
 
 export interface EventEffect {
-  type: 'gold' | 'heal' | 'damage' | 'item' | 'stat_boost' | 'relic';
+  type: 'gold' | 'heal' | 'damage' | 'item' | 'stat_boost' | 'relic' | 'transform' | 'sacrifice' | 'recruit';
   value: number;
   target?: 'all' | 'random';
   relicId?: string;
+  heroId?: string;         // for recruit effect
+  element?: ElementType;   // for transform effect
 }
 
 export interface EventData {
@@ -314,6 +317,7 @@ export interface MetaProgressionData {
   unlockedRelics: string[];
   permanentUpgrades: PermanentUpgrade[];
   achievements: string[];   // achievement IDs
+  metaCurrency: number;     // soul currency for permanent upgrades
 }
 
 export interface PermanentUpgrade {
@@ -324,17 +328,37 @@ export interface PermanentUpgrade {
 
 // ============ Game Event Bus Types ============
 
+export type SkillMode = 'auto' | 'manual' | 'semi_auto';
+
+export interface SkillQueueEntry {
+  unitId: string;
+  skillId: string;
+  readyTime: number;
+  autoFireDelay: number; // ms until auto-fire in semi_auto mode
+}
+
+export interface SkillAdvancement {
+  skillId: string;
+  level: number;
+  requiredHeroLevel: number;
+  name: string;
+  description: string;
+  bonuses: Partial<{ baseDamage: number; scalingRatio: number; cooldown: number; range: number; aoeRadius: number; effectDuration: number }>;
+}
+
 export type GameEventType =
   | 'battle:start' | 'battle:end' | 'battle:turn'
   | 'unit:damage' | 'unit:heal' | 'unit:kill' | 'unit:death'
-  | 'skill:use' | 'skill:cooldown'
+  | 'unit:attack'
+  | 'skill:use' | 'skill:cooldown' | 'skill:ready' | 'skill:queue' | 'skill:manualFire' | 'skill:targetRequest' | 'skill:interrupt'
   | 'status:apply' | 'status:expire'
   | 'combo:hit' | 'combo:break'
   | 'element:reaction'
   | 'node:complete' | 'run:end'
   | 'item:equip' | 'item:unequip'
   | 'relic:acquire' | 'relic:trigger'
-  | 'achievement:unlock';
+  | 'achievement:unlock'
+  | 'error:report';
 
 export interface GameEventMap {
   'battle:start': { heroCount: number; enemyCount: number };
@@ -358,4 +382,11 @@ export interface GameEventMap {
   'relic:acquire': { relicId: string };
   'relic:trigger': { relicId: string; context: string };
   'achievement:unlock': { achievementId: string };
+  'error:report': { severity: string; source: string; message: string };
+  'unit:attack': { sourceId: string; targetId: string; damage: number };
+  'skill:ready': { unitId: string; skillId: string };
+  'skill:queue': { unitId: string; skillId: string };
+  'skill:manualFire': { unitId: string; skillId: string; targetId?: string };
+  'skill:targetRequest': { unitId: string; skillId: string; targetType: string };
+  'skill:interrupt': { unitId: string; skillId: string; reason: string };
 }

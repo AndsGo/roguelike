@@ -8,10 +8,17 @@ import { MetaManager } from '../managers/MetaManager';
 import { Theme, colorToString } from '../ui/Theme';
 import { SceneTransition } from '../systems/SceneTransition';
 import { ParticleManager } from '../systems/ParticleManager';
+import { TutorialSystem } from '../systems/TutorialSystem';
 import { UI, UPGRADE_NAMES } from '../i18n';
+import { AudioManager } from '../systems/AudioManager';
+import { AchievementPanel } from '../ui/AchievementPanel';
+import { HelpPanel } from '../ui/HelpPanel';
+import { DIFFICULTY_LEVELS } from '../config/difficulty';
 
 export class MainMenuScene extends Phaser.Scene {
   private upgradePanel: Panel | null = null;
+  private achievementPanel: AchievementPanel | null = null;
+  private helpPanel: HelpPanel | null = null;
 
   constructor() {
     super({ key: 'MainMenuScene' });
@@ -19,6 +26,8 @@ export class MainMenuScene extends Phaser.Scene {
 
   create(): void {
     this.upgradePanel = null;
+    this.achievementPanel = null;
+    this.helpPanel = null;
 
     // Background
     this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, 0x0a0a1e);
@@ -95,6 +104,70 @@ export class MainMenuScene extends Phaser.Scene {
     }, Theme.colors.panelBorder);
     btnY += 50;
 
+    // Achievements button
+    new Button(this, GAME_WIDTH / 2, btnY, '成就', 180, 40, () => {
+      this.showAchievementPanel();
+    }, Theme.colors.panelBorder);
+    btnY += 50;
+
+    // Help button
+    new Button(this, GAME_WIDTH / 2, btnY, '帮助', 180, 40, () => {
+      this.showHelpPanel();
+    }, Theme.colors.panelBorder);
+    btnY += 50;
+
+    // Audio toggle buttons (top-right corner)
+    const audio = AudioManager.getInstance();
+    const bgmLabel = audio.isBgmEnabled() ? UI.audio.bgmOn : UI.audio.bgmOff;
+    const bgmBtn = this.add.text(GAME_WIDTH - 15, 12, bgmLabel, {
+      fontSize: '9px',
+      color: audio.isBgmEnabled() ? '#88cc88' : '#888888',
+      fontFamily: 'monospace',
+    }).setOrigin(1, 0).setInteractive({ useHandCursor: true });
+    bgmBtn.on('pointerup', () => {
+      const enabled = audio.toggleBgm();
+      bgmBtn.setText(enabled ? UI.audio.bgmOn : UI.audio.bgmOff);
+      bgmBtn.setColor(enabled ? '#88cc88' : '#888888');
+    });
+
+    const sfxLabel = audio.isSfxEnabled() ? UI.audio.sfxOn : UI.audio.sfxOff;
+    const sfxBtn = this.add.text(GAME_WIDTH - 15, 26, sfxLabel, {
+      fontSize: '9px',
+      color: audio.isSfxEnabled() ? '#88cc88' : '#888888',
+      fontFamily: 'monospace',
+    }).setOrigin(1, 0).setInteractive({ useHandCursor: true });
+    sfxBtn.on('pointerup', () => {
+      const enabled = audio.toggleSfx();
+      sfxBtn.setText(enabled ? UI.audio.sfxOn : UI.audio.sfxOff);
+      sfxBtn.setColor(enabled ? '#88cc88' : '#888888');
+    });
+
+    // Settings gear button (top-right)
+    const settingsBtn = this.add.text(GAME_WIDTH - 15, 44, '[设置]', {
+      fontSize: '9px',
+      color: '#888888',
+      fontFamily: 'monospace',
+    }).setOrigin(1, 0).setInteractive({ useHandCursor: true });
+    settingsBtn.on('pointerup', () => {
+      SceneTransition.fadeTransition(this, 'SettingsScene', { returnScene: 'MainMenuScene' });
+    });
+
+    // Skip tutorial button (only shown if tutorials not yet skipped)
+    TutorialSystem.init();
+    if (!TutorialSystem.allSkipped()) {
+      const skipBtn = this.add.text(GAME_WIDTH - 15, btnY - 10, UI.tutorial.skipAll, {
+        fontSize: '9px',
+        color: '#666688',
+        fontFamily: 'monospace',
+      }).setOrigin(1, 0.5).setInteractive({ useHandCursor: true });
+      skipBtn.on('pointerup', () => {
+        TutorialSystem.skipAll();
+        skipBtn.setText(UI.tutorial.skipped);
+        skipBtn.setColor('#44aa44');
+        skipBtn.disableInteractive();
+      });
+    }
+
     // Meta stats at bottom
     const meta = MetaManager.getMetaData();
     const currency = MetaManager.getMetaCurrency();
@@ -114,9 +187,93 @@ export class MainMenuScene extends Phaser.Scene {
   }
 
   private startNewGame(): void {
-    const rm = RunManager.getInstance();
-    rm.newRun();
-    SceneTransition.fadeTransition(this, 'MapScene');
+    this.showDifficultySelection();
+  }
+
+  private showDifficultySelection(): void {
+    const meta = MetaManager.getMetaData();
+    const victories = meta.totalVictories;
+
+    // Overlay
+    const overlay = this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, 0x000000, 0.6)
+      .setInteractive();
+
+    const panelW = 400;
+    const panelH = 280;
+    const panelBg = this.add.graphics();
+    panelBg.fillStyle(Theme.colors.panel, 0.95);
+    panelBg.fillRoundedRect(GAME_WIDTH / 2 - panelW / 2, GAME_HEIGHT / 2 - panelH / 2, panelW, panelH, 8);
+    panelBg.lineStyle(2, Theme.colors.panelBorder, 0.8);
+    panelBg.strokeRoundedRect(GAME_WIDTH / 2 - panelW / 2, GAME_HEIGHT / 2 - panelH / 2, panelW, panelH, 8);
+
+    const titleText = this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 - panelH / 2 + 22, UI.difficulty.title, {
+      fontSize: '14px',
+      color: colorToString(Theme.colors.secondary),
+      fontFamily: 'monospace',
+      fontStyle: 'bold',
+    }).setOrigin(0.5);
+
+    const allElements: Phaser.GameObjects.GameObject[] = [overlay, panelBg, titleText];
+    const buttons: Button[] = [];
+
+    const startY = GAME_HEIGHT / 2 - panelH / 2 + 52;
+    const rowH = 48;
+
+    for (let i = 0; i < DIFFICULTY_LEVELS.length; i++) {
+      const diff = DIFFICULTY_LEVELS[i];
+      const y = startY + i * rowH;
+      const leftX = GAME_WIDTH / 2 - panelW / 2 + 20;
+
+      // Unlock requirements
+      const unlockReqs: Record<string, number> = { normal: 0, hard: 0, nightmare: 1, hell: 3 };
+      const reqVictories = unlockReqs[diff.id] ?? 0;
+      const isLocked = victories < reqVictories;
+
+      // Name
+      const nameColor = isLocked ? '#666666' : '#ffffff';
+      const nameText = this.add.text(leftX, y, diff.name, {
+        fontSize: '12px', color: nameColor, fontFamily: 'monospace', fontStyle: 'bold',
+      });
+      allElements.push(nameText);
+
+      // Description + multiplier
+      const descStr = isLocked
+        ? UI.difficulty.locked(UI.difficulty.victoryReq(reqVictories))
+        : `${diff.description}  ${UI.difficulty.multiplier(diff.enemyStatMultiplier)}  ${UI.difficulty.rewardMultiplier(diff.goldMultiplier)}`;
+      const descText = this.add.text(leftX, y + 16, descStr, {
+        fontSize: '8px',
+        color: isLocked ? '#555555' : '#8899aa',
+        fontFamily: 'monospace',
+      });
+      allElements.push(descText);
+
+      // Start button (right side)
+      if (!isLocked) {
+        const btn = new Button(this, GAME_WIDTH / 2 + panelW / 2 - 50, y + 10, UI.difficulty.start, 60, 26, () => {
+          // Clean up
+          allElements.forEach(el => el.destroy());
+          buttons.forEach(b => b.destroy());
+          // Start the game with selected difficulty
+          const rm = RunManager.getInstance();
+          rm.newRun(undefined, diff.id);
+          SceneTransition.fadeTransition(this, 'MapScene');
+        }, i === 0 ? Theme.colors.primary : Theme.colors.panelBorder);
+        buttons.push(btn);
+      } else {
+        // Locked indicator
+        const lockText = this.add.text(GAME_WIDTH / 2 + panelW / 2 - 50, y + 10, '\uD83D\uDD12', {
+          fontSize: '14px', color: '#555555', fontFamily: 'monospace',
+        }).setOrigin(0.5);
+        allElements.push(lockText);
+      }
+    }
+
+    // Cancel/close button
+    const cancelBtn = new Button(this, GAME_WIDTH / 2, startY + DIFFICULTY_LEVELS.length * rowH + 10, UI.mainMenu.close, 80, 26, () => {
+      allElements.forEach(el => el.destroy());
+      buttons.forEach(b => b.destroy());
+      cancelBtn.destroy();
+    }, 0x555555);
   }
 
   private showNewGameConfirmation(): void {
@@ -153,6 +310,26 @@ export class MainMenuScene extends Phaser.Scene {
     }, Theme.colors.primary);
   }
 
+  private showHelpPanel(): void {
+    if (this.helpPanel) {
+      this.helpPanel.close(() => { this.helpPanel = null; });
+      return;
+    }
+    this.helpPanel = new HelpPanel(this, () => {
+      this.helpPanel = null;
+    });
+  }
+
+  private showAchievementPanel(): void {
+    if (this.achievementPanel) {
+      this.achievementPanel.close(() => { this.achievementPanel = null; });
+      return;
+    }
+    this.achievementPanel = new AchievementPanel(this, () => {
+      this.achievementPanel = null;
+    });
+  }
+
   private showUpgradePanel(): void {
     if (this.upgradePanel) {
       this.upgradePanel.close(() => { this.upgradePanel = null; });
@@ -166,6 +343,10 @@ export class MainMenuScene extends Phaser.Scene {
     this.upgradePanel = panel;
 
     this.renderUpgradeContent(panel);
+  }
+
+  shutdown(): void {
+    this.tweens.killAll();
   }
 
   private renderUpgradeContent(panel: Panel): void {

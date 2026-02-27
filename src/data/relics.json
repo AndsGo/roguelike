@@ -114,10 +114,10 @@
   {
     "id": "berserker_mask",
     "name": "狂战士面具",
-    "description": "HP低于50%时攻击力+30%",
+    "description": "HP低于50%时攻击力+25%",
     "rarity": "rare",
     "triggerEvent": "unit:damage",
-    "effect": { "type": "passive", "stat": "attack", "value": 0.3 }
+    "effect": { "type": "passive", "stat": "attack", "value": 0.25 }
   },
   {
     "id": "elemental_catalyst",
@@ -138,10 +138,10 @@
   {
     "id": "soul_collector",
     "name": "灵魂收割者",
-    "description": "每次击杀永久+2攻击力（本场战斗）",
+    "description": "每次击杀永久+1攻击力（本场战斗）",
     "rarity": "rare",
     "triggerEvent": "unit:kill",
-    "effect": { "type": "on_kill", "stat": "attack", "value": 2 }
+    "effect": { "type": "on_kill", "stat": "attack", "value": 1 }
   },
   {
     "id": "shield_charm",
@@ -170,18 +170,18 @@
   {
     "id": "heart_of_dragon",
     "name": "龙之心",
-    "description": "+200HP，+20%所有伤害",
+    "description": "+150HP，+20%所有伤害",
     "rarity": "legendary",
     "triggerEvent": "battle:start",
-    "effect": { "type": "stat_boost", "stat": "maxHp", "value": 200 }
+    "effect": { "type": "stat_boost", "stat": "maxHp", "value": 150 }
   },
   {
     "id": "time_crystal",
     "name": "时间水晶",
-    "description": "战斗开始时所有技能冷却-30%",
+    "description": "战斗开始时所有技能冷却-20%",
     "rarity": "legendary",
     "triggerEvent": "battle:start",
-    "effect": { "type": "on_battle_start", "value": 0.3 }
+    "effect": { "type": "on_battle_start", "value": 0.2 }
   },
   {
     "id": "soul_mirror",
@@ -238,5 +238,45 @@
     "rarity": "rare",
     "triggerEvent": "unit:damage",
     "effect": { "type": "on_damage", "value": 0.2 }
+  },
+  {
+    "id": "frost_core",
+    "name": "冰霜之核",
+    "description": "受到攻击时25%概率冻结攻击者1s，+15法抗",
+    "rarity": "rare",
+    "triggerEvent": "unit:damage",
+    "effect": { "type": "on_damage", "value": 15, "chance": 0.25 }
+  },
+  {
+    "id": "thunder_amulet",
+    "name": "雷神护符",
+    "description": "攻击时15%概率对额外2个目标释放连锁闪电",
+    "rarity": "rare",
+    "triggerEvent": "unit:damage",
+    "effect": { "type": "on_damage", "value": 25, "chance": 0.15 }
+  },
+  {
+    "id": "elemental_fusion_stone",
+    "name": "元素融合石",
+    "description": "元素反应伤害+35%",
+    "rarity": "legendary",
+    "triggerEvent": "element:reaction",
+    "effect": { "type": "passive", "value": 0.35 }
+  },
+  {
+    "id": "life_spring",
+    "name": "生命之泉",
+    "description": "每场战斗开始时全队恢复8%最大生命",
+    "rarity": "rare",
+    "triggerEvent": "battle:start",
+    "effect": { "type": "on_battle_start", "value": 0.08 }
+  },
+  {
+    "id": "tactics_manual",
+    "name": "战术手册",
+    "description": "经验获取+20%",
+    "rarity": "rare",
+    "triggerEvent": "battle:end",
+    "effect": { "type": "passive", "value": 0.2 }
   }
 ]

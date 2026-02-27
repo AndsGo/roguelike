@@ -141,7 +141,7 @@ export class ShopScene extends Phaser.Scene {
     // Slot tag
     const slotLabel = SLOT_LABELS[item.slot] ?? item.slot;
     const slotTag = this.add.text(140, -34, `[${slotLabel}]`, {
-      fontSize: '8px',
+      fontSize: '9px',
       color: '#666688',
       fontFamily: 'monospace',
     }).setOrigin(1, 0);
@@ -149,7 +149,7 @@ export class ShopScene extends Phaser.Scene {
 
     // Description
     const desc = this.add.text(-55, -16, item.description, {
-      fontSize: '8px',
+      fontSize: '9px',
       color: '#888888',
       fontFamily: 'monospace',
       wordWrap: { width: 190 },
@@ -161,7 +161,7 @@ export class ShopScene extends Phaser.Scene {
       .map(([k, v]) => formatStat(k, v as number))
       .join(' ');
     const statsText = this.add.text(-55, 2, statStr, {
-      fontSize: '8px',
+      fontSize: '9px',
       color: '#aaccff',
       fontFamily: 'monospace',
     });
@@ -169,7 +169,7 @@ export class ShopScene extends Phaser.Scene {
 
     // Comparison text (updated when hero is selected)
     const compareText = this.add.text(-55, 14, '', {
-      fontSize: '7px',
+      fontSize: '9px',
       color: '#888888',
       fontFamily: 'monospace',
     });
@@ -225,22 +225,26 @@ export class ShopScene extends Phaser.Scene {
         continue;
       }
 
-      const diffs: string[] = [];
+      const diffs: { text: string; positive: boolean }[] = [];
       const allKeys = new Set([...Object.keys(card.item.stats), ...Object.keys(currentEquip.stats)]);
       for (const k of allKeys) {
         const newVal = (card.item.stats as Record<string, number>)[k] ?? 0;
         const oldVal = (currentEquip.stats as Record<string, number>)[k] ?? 0;
         const diff = newVal - oldVal;
         if (diff !== 0) {
-          diffs.push(formatStatDiff(k, diff));
+          const arrow = diff > 0 ? '▲' : '▼';
+          diffs.push({ text: `${arrow}${formatStatDiff(k, diff)}`, positive: diff > 0 });
         }
       }
 
       if (diffs.length > 0) {
-        card.compareText.setText(`${UI.shop.vs(currentEquip.name)}${diffs.join(' ')}`);
-        // Color based on whether it's mostly upgrades
-        const hasUpgrade = diffs.some(d => d.includes('+'));
-        const hasDowngrade = diffs.some(d => !d.includes('+'));
+        const prefix = UI.shop.vs(currentEquip.name);
+        const fullText = prefix + diffs.map(d => d.text).join(' ');
+        card.compareText.setText(fullText);
+
+        // Color based on overall direction with arrow indicators
+        const hasUpgrade = diffs.some(d => d.positive);
+        const hasDowngrade = diffs.some(d => !d.positive);
         if (hasUpgrade && !hasDowngrade) {
           card.compareText.setColor(colorToString(Theme.colors.success));
         } else if (!hasUpgrade && hasDowngrade) {
@@ -318,5 +322,9 @@ export class ShopScene extends Phaser.Scene {
       duration: 500,
       onComplete: () => msg.destroy(),
     });
+  }
+
+  shutdown(): void {
+    this.tweens.killAll();
   }
 }

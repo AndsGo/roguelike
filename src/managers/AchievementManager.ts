@@ -2,8 +2,20 @@ import { MetaProgressionData } from '../types';
 import { EventBus } from '../systems/EventBus';
 import { MetaManager } from './MetaManager';
 import { RunStats, StatsManager } from './StatsManager';
+import achievementsData from '../data/achievements.json';
 
-/** Definition of an achievement */
+/** JSON schema for achievement definitions */
+interface AchievementJson {
+  id: string;
+  name: string;
+  description: string;
+  icon: string;
+  reward?: { type: 'meta_currency' | 'unlock_hero' | 'unlock_relic'; value: string | number };
+  conditionType: string;
+  conditionParams: { threshold?: number; [key: string]: unknown };
+}
+
+/** Runtime achievement definition with resolved condition function */
 export interface AchievementDef {
   id: string;
   name: string;
@@ -15,252 +27,112 @@ export interface AchievementDef {
 
 /**
  * Singleton achievement system.
- * Checks conditions against RunStats and MetaProgressionData,
+ * Loads definitions from achievements.json, resolves conditions via a registry,
+ * checks conditions against RunStats and MetaProgressionData,
  * awards rewards, and persists unlocks via MetaManager.
  */
 export class AchievementManager {
   private static instance: AchievementManager;
 
-  // All achievement definitions
-  static ACHIEVEMENTS: AchievementDef[] = [
-    // ---- 进度 ----
-    {
-      id: 'first_victory',
-      name: '首次胜利',
-      description: '赢得第一次冒险',
-      icon: 'trophy',
-      condition: (_s, m) => m.totalVictories >= 1,
-      reward: { type: 'meta_currency', value: 100 },
-    },
-    {
-      id: 'veteran',
-      name: '老兵',
-      description: '完成10次冒险',
-      icon: 'medal',
-      condition: (_s, m) => m.totalRuns >= 10,
-      reward: { type: 'meta_currency', value: 200 },
-    },
-    {
-      id: 'speedrun',
-      name: '速通达人',
-      description: '在15个节点内赢得一次冒险',
-      icon: 'lightning',
-      condition: (s, m) => m.totalVictories >= 1 && s.nodesCompleted <= 15 && s.nodesCompleted > 0,
-      reward: { type: 'meta_currency', value: 300 },
-    },
-    {
-      id: 'no_death',
-      name: '完美无瑕',
-      description: '在零英雄阵亡的情况下赢得冒险',
-      icon: 'shield',
-      condition: (s, m) => {
-        if (m.totalVictories < 1) return false;
-        const heroStats = s.heroStats;
-        for (const key of Object.keys(heroStats)) {
-          if (heroStats[key].deaths > 0) return false;
-        }
-        return s.nodesCompleted > 0;
-      },
-      reward: { type: 'meta_currency', value: 500 },
-    },
-    {
-      id: 'all_heroes',
-      name: '收藏家',
-      description: '解锁所有英雄',
-      icon: 'star',
-      condition: (_s, m) => m.unlockedHeroes.length >= 5,
-      reward: { type: 'meta_currency', value: 500 },
-    },
-    {
-      id: 'floor_10',
-      name: '深入探索',
-      description: '到达第10层',
-      icon: 'map',
-      condition: (_s, m) => m.highestFloor >= 10,
-      reward: { type: 'meta_currency', value: 100 },
-    },
-    {
-      id: 'floor_15',
-      name: '地牢大师',
-      description: '到达第15层',
-      icon: 'crown',
-      condition: (_s, m) => m.highestFloor >= 15,
-      reward: { type: 'meta_currency', value: 200 },
-    },
-
-    // ---- 战斗 ----
-    {
-      id: 'combo_10',
-      name: '连击大师',
-      description: '达成10连击',
-      icon: 'fire',
-      condition: (s) => s.maxCombo >= 10,
-      reward: { type: 'meta_currency', value: 50 },
-    },
-    {
-      id: 'combo_20',
-      name: '连击之神',
-      description: '达成20连击',
-      icon: 'fire',
-      condition: (s) => s.maxCombo >= 20,
-      reward: { type: 'meta_currency', value: 150 },
-    },
-    {
-      id: 'overkill',
-      name: '过度杀伤',
-      description: '单次攻击造成500+伤害',
-      icon: 'sword',
-      condition: (s) => s.totalDamage >= 500,
-      reward: { type: 'meta_currency', value: 50 },
-    },
-    {
-      id: 'healer_1000',
-      name: '守护天使',
-      description: '单次冒险中治疗1000+',
-      icon: 'heart',
-      condition: (s) => s.totalHealing >= 1000,
-      reward: { type: 'meta_currency', value: 50 },
-    },
-    {
-      id: 'kill_100',
-      name: '屠戮者',
-      description: '单次冒险中击杀100个敌人',
-      icon: 'skull',
-      condition: (s) => s.totalKills >= 100,
-      reward: { type: 'meta_currency', value: 100 },
-    },
-    {
-      id: 'skill_50',
-      name: '法术连发',
-      description: '单次冒险中使用50个技能',
-      icon: 'magic',
-      condition: (s) => s.skillsUsed >= 50,
-      reward: { type: 'meta_currency', value: 50 },
-    },
-    {
-      id: 'elite_hunter',
-      name: '精英猎手',
-      description: '单次冒险中击杀5个精英敌人',
-      icon: 'target',
-      condition: (s) => s.eliteKills >= 5,
-      reward: { type: 'meta_currency', value: 100 },
-    },
-    {
-      id: 'boss_slayer',
-      name: '首领杀手',
-      description: '单次冒险中击杀3个首领',
-      icon: 'dragon',
-      condition: (s) => s.bossKills >= 3,
-      reward: { type: 'meta_currency', value: 150 },
-    },
-
-    // ---- 经济 ----
-    {
-      id: 'rich',
-      name: '黄金囤积者',
-      description: '单次冒险中获得500金币',
-      icon: 'coin',
-      condition: (s) => s.goldEarned >= 500,
-      reward: { type: 'meta_currency', value: 50 },
-    },
-    {
-      id: 'big_spender',
-      name: '挥金如土',
-      description: '单次冒险中花费300金币',
-      icon: 'bag',
-      condition: (s) => s.goldSpent >= 300,
-      reward: { type: 'meta_currency', value: 50 },
-    },
-
-    // ---- 收集 ----
-    {
-      id: 'relic_5',
-      name: '遗物猎人',
-      description: '单次冒险中收集5个遗物',
-      icon: 'gem',
-      condition: (_s, m) => m.unlockedRelics.length >= 5,
-      reward: { type: 'meta_currency', value: 100 },
-    },
-    {
-      id: 'relic_collector',
-      name: '遗物收藏家',
-      description: '解锁10种不同遗物',
-      icon: 'chest',
-      condition: (_s, m) => m.unlockedRelics.length >= 10,
-      reward: { type: 'meta_currency', value: 200 },
-    },
-
-    // ---- 挑战 ----
-    {
-      id: 'solo_victory',
-      name: '独狼',
-      description: '只用1名英雄赢得冒险',
-      icon: 'wolf',
-      condition: (s) => {
-        const heroIds = Object.keys(s.heroStats);
-        return heroIds.length === 1 && s.nodesCompleted >= 15;
-      },
-      reward: { type: 'meta_currency', value: 500 },
-    },
-    {
-      id: 'hell_victory',
-      name: '地狱征服者',
-      description: '在地狱难度下获胜',
-      icon: 'flame',
-      condition: (_s, m) => m.totalVictories >= 1,
-      reward: { type: 'meta_currency', value: 1000 },
-    },
-
-    // ---- 里程碑 ----
-    {
-      id: 'wins_5',
-      name: '冠军',
-      description: '赢得5次冒险',
-      icon: 'crown',
-      condition: (_s, m) => m.totalVictories >= 5,
-      reward: { type: 'meta_currency', value: 300 },
-    },
-    {
-      id: 'wins_10',
-      name: '传奇',
-      description: '赢得10次冒险',
-      icon: 'star',
-      condition: (_s, m) => m.totalVictories >= 10,
-      reward: { type: 'meta_currency', value: 500 },
-    },
-    {
-      id: 'damage_10k',
-      name: '伤害输出',
-      description: '单次冒险中造成10,000总伤害',
-      icon: 'explosion',
-      condition: (s) => s.totalDamage >= 10000,
-      reward: { type: 'meta_currency', value: 100 },
-    },
-    {
-      id: 'damage_50k',
-      name: '毁灭者',
-      description: '单次冒险中造成50,000总伤害',
-      icon: 'nuke',
-      condition: (s) => s.totalDamage >= 50000,
-      reward: { type: 'meta_currency', value: 300 },
-    },
-    {
-      id: 'upgrade_max',
-      name: '满级强化',
-      description: '将任意永久升级升到最高等级',
-      icon: 'arrow_up',
-      condition: (_s, m) => m.permanentUpgrades.some(u => u.level >= u.maxLevel),
-      reward: { type: 'meta_currency', value: 200 },
-    },
-  ];
+  // All achievement definitions (built from JSON at init time)
+  static ACHIEVEMENTS: AchievementDef[] = [];
 
   private constructor() {}
 
   static getInstance(): AchievementManager {
     if (!AchievementManager.instance) {
       AchievementManager.instance = new AchievementManager();
+      AchievementManager.loadFromJson();
     }
     return AchievementManager.instance;
+  }
+
+  /** Build ACHIEVEMENTS array from JSON data + condition registry */
+  private static loadFromJson(): void {
+    AchievementManager.ACHIEVEMENTS = (achievementsData as AchievementJson[]).map(json => ({
+      id: json.id,
+      name: json.name,
+      description: json.description,
+      icon: json.icon,
+      reward: json.reward,
+      condition: AchievementManager.resolveCondition(json.id, json.conditionType, json.conditionParams),
+    }));
+  }
+
+  /** Map conditionType + params to a runtime condition function */
+  private static resolveCondition(
+    id: string,
+    conditionType: string,
+    params: { threshold?: number; [key: string]: unknown },
+  ): (stats: RunStats, meta: MetaProgressionData) => boolean {
+    const t = params.threshold ?? 0;
+
+    switch (conditionType) {
+      case 'meta_victories':
+        return (_s, m) => m.totalVictories >= t;
+      case 'meta_runs':
+        return (_s, m) => m.totalRuns >= t;
+      case 'meta_floor':
+        return (_s, m) => m.highestFloor >= t;
+      case 'stat_combo':
+        return (s) => s.maxCombo >= t;
+      case 'stat_damage':
+        return (s) => s.totalDamage >= t;
+      case 'stat_kills':
+        return (s) => s.totalKills >= t;
+      case 'stat_healing':
+        return (s) => s.totalHealing >= t;
+      case 'stat_gold_earned':
+        return (s) => s.goldEarned >= t;
+      case 'stat_gold_spent':
+        return (s) => s.goldSpent >= t;
+      case 'stat_skills':
+        return (s) => s.skillsUsed >= t;
+      case 'stat_elite_kills':
+        return (s) => s.eliteKills >= t;
+      case 'stat_boss_kills':
+        return (s) => s.bossKills >= t;
+      case 'heroes_count':
+        return (_s, m) => m.unlockedHeroes.length >= t;
+      case 'relics_count':
+        return (_s, m) => m.unlockedRelics.length >= t;
+      case 'upgrades_maxed':
+        return (_s, m) => m.permanentUpgrades.some(u => u.level >= u.maxLevel);
+      case 'custom':
+        return AchievementManager.resolveCustomCondition(id);
+      default:
+        return () => false;
+    }
+  }
+
+  /** Handle the 4 complex custom conditions by achievement ID */
+  private static resolveCustomCondition(
+    id: string,
+  ): (stats: RunStats, meta: MetaProgressionData) => boolean {
+    switch (id) {
+      case 'speedrun':
+        return (s, m) => m.totalVictories >= 1 && s.nodesCompleted <= 15 && s.nodesCompleted > 0;
+      case 'no_death':
+        return (s, m) => {
+          if (m.totalVictories < 1) return false;
+          const heroStats = s.heroStats;
+          for (const key of Object.keys(heroStats)) {
+            if (heroStats[key].deaths > 0) return false;
+          }
+          return s.nodesCompleted > 0;
+        };
+      case 'solo_victory':
+        return (s) => {
+          const heroIds = Object.keys(s.heroStats);
+          return heroIds.length === 1 && s.nodesCompleted >= 15;
+        };
+      case 'hell_victory':
+        // This checks meta victories but should ideally check difficulty;
+        // preserved from original logic for backward compatibility
+        return (_s, m) => m.totalVictories >= 1;
+      default:
+        return () => false;
+    }
   }
 
   /** Register EventBus listeners for automatic checking */
@@ -279,6 +151,11 @@ export class AchievementManager {
    * Returns list of newly unlocked achievement IDs.
    */
   static checkAchievements(): string[] {
+    // Ensure achievements are loaded
+    if (AchievementManager.ACHIEVEMENTS.length === 0) {
+      AchievementManager.getInstance();
+    }
+
     const stats = StatsManager.getRunStats();
     const meta = MetaManager.getMetaData();
     const newlyUnlocked: string[] = [];
@@ -325,6 +202,10 @@ export class AchievementManager {
   }
 
   static getAll(): AchievementDef[] {
+    // Ensure loaded
+    if (AchievementManager.ACHIEVEMENTS.length === 0) {
+      AchievementManager.getInstance();
+    }
     return AchievementManager.ACHIEVEMENTS;
   }
 

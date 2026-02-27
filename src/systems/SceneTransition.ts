@@ -1,5 +1,14 @@
 import Phaser from 'phaser';
 import { GAME_WIDTH, GAME_HEIGHT } from '../constants';
+import { AudioManager } from './AudioManager';
+import { DEPTH } from '../config/visual';
+
+/** Standard transition durations (ms) */
+export const TRANSITION = {
+  FAST: 200,
+  NORMAL: 300,
+  SLOW: 500,
+} as const;
 
 /**
  * Scene transition utility.
@@ -13,14 +22,14 @@ export class SceneTransition {
     scene: Phaser.Scene,
     targetScene: string,
     data?: object,
-    duration: number = 400,
+    duration: number = TRANSITION.NORMAL,
   ): void {
     // Create black overlay
     const overlay = scene.add.rectangle(
       GAME_WIDTH / 2, GAME_HEIGHT / 2,
       GAME_WIDTH, GAME_HEIGHT,
       0x000000, 0,
-    ).setDepth(9999);
+    ).setDepth(DEPTH.SCENE_OVERLAY);
 
     // Fade to black
     scene.tweens.add({
@@ -29,6 +38,7 @@ export class SceneTransition {
       duration: duration / 2,
       ease: 'Sine.easeIn',
       onComplete: () => {
+        AudioManager.getInstance().onSceneStart(targetScene);
         scene.scene.start(targetScene, data);
       },
     });
@@ -42,13 +52,13 @@ export class SceneTransition {
     targetScene: string,
     direction: 'left' | 'right' | 'up' | 'down' = 'left',
     data?: object,
-    duration: number = 400,
+    duration: number = TRANSITION.NORMAL,
   ): void {
     const overlay = scene.add.rectangle(
       GAME_WIDTH / 2, GAME_HEIGHT / 2,
       GAME_WIDTH, GAME_HEIGHT,
       0x000000, 0,
-    ).setDepth(9999);
+    ).setDepth(DEPTH.SCENE_OVERLAY);
 
     let camX = 0;
     let camY = 0;
@@ -76,6 +86,7 @@ export class SceneTransition {
       onComplete: () => {
         scene.cameras.main.scrollX = 0;
         scene.cameras.main.scrollY = 0;
+        AudioManager.getInstance().onSceneStart(targetScene);
         scene.scene.start(targetScene, data);
       },
     });

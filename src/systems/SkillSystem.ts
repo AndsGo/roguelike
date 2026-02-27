@@ -1,11 +1,12 @@
 import { Unit } from '../entities/Unit';
-import { SkillData, SkillEffect, StatusEffect, StatusEffectType } from '../types';
+import { SkillData, SkillEffect, StatusEffect, StatusEffectType, SkillAdvancement } from '../types';
 import { DamageSystem } from './DamageSystem';
 import { DamageNumber } from '../components/DamageNumber';
 import { SeededRNG } from '../utils/rng';
 import { EventBus } from './EventBus';
 import { TargetingSystem } from './TargetingSystem';
 import skillsData from '../data/skills.json';
+import advancementsData from '../data/skill-advancements.json';
 
 export class SkillSystem {
   private rng: SeededRNG;
@@ -16,14 +17,38 @@ export class SkillSystem {
     this.damageSystem = damageSystem;
   }
 
-  /** Initialize skills for a unit from skill IDs */
-  initializeSkills(unit: Unit, skillIds: string[]): void {
+  /** Initialize skills for a unit from skill IDs, applying advancements based on unit level */
+  initializeSkills(unit: Unit, skillIds: string[], heroLevel?: number): void {
     unit.skills = skillIds
-      .map(id => (skillsData as SkillData[]).find(s => s.id === id) as SkillData)
-      .filter(Boolean);
+      .map(id => {
+        const base = (skillsData as SkillData[]).find(s => s.id === id);
+        if (!base) return null;
+        return heroLevel ? this.getAdvancedSkill(base, heroLevel) : { ...base };
+      })
+      .filter(Boolean) as SkillData[];
     for (const skill of unit.skills) {
       unit.skillCooldowns.set(skill.id, 0);
     }
+  }
+
+  /** Apply skill advancements based on hero level */
+  getAdvancedSkill(baseSkill: SkillData, heroLevel: number): SkillData {
+    const advancements = (advancementsData as SkillAdvancement[])
+      .filter(a => a.skillId === baseSkill.id && heroLevel >= a.requiredHeroLevel)
+      .sort((a, b) => a.level - b.level);
+
+    if (advancements.length === 0) return { ...baseSkill };
+
+    const advanced = { ...baseSkill };
+    for (const adv of advancements) {
+      if (adv.bonuses.baseDamage) advanced.baseDamage += adv.bonuses.baseDamage;
+      if (adv.bonuses.scalingRatio) advanced.scalingRatio += adv.bonuses.scalingRatio;
+      if (adv.bonuses.cooldown) advanced.cooldown = Math.max(0.5, advanced.cooldown + adv.bonuses.cooldown);
+      if (adv.bonuses.range) advanced.range += adv.bonuses.range;
+      if (adv.bonuses.aoeRadius) advanced.aoeRadius = (advanced.aoeRadius ?? 0) + adv.bonuses.aoeRadius;
+      if (adv.bonuses.effectDuration) advanced.effectDuration = (advanced.effectDuration ?? 0) + adv.bonuses.effectDuration;
+    }
+    return advanced;
   }
 
   /** Tick cooldowns for a unit */
@@ -34,6 +59,12 @@ export class SkillSystem {
         unit.skillCooldowns.set(id, Math.max(0, cd - dt));
       }
     }
+  }
+
+  /** Check if a specific skill is off cooldown for a unit */
+  isSkillReady(unit: Unit, skillId: string): boolean {
+    const cd = unit.skillCooldowns.get(skillId) ?? 0;
+    return cd <= 0;
   }
 
   /** Find a ready skill that can be used on the current target */

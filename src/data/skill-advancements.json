@@ -1,0 +1,64 @@
+[
+  { "skillId": "shield_bash", "level": 1, "requiredHeroLevel": 5, "name": "强化盾击", "description": "盾击伤害+20，冷却-1s", "bonuses": { "baseDamage": 20, "cooldown": -1 } },
+  { "skillId": "shield_bash", "level": 2, "requiredHeroLevel": 10, "name": "震荡盾击", "description": "盾击范围+30，伤害+30", "bonuses": { "baseDamage": 30, "range": 30 } },
+  { "skillId": "taunt_shout", "level": 1, "requiredHeroLevel": 5, "name": "威慑怒吼", "description": "效果持续+1s", "bonuses": { "effectDuration": 1 } },
+  { "skillId": "taunt_shout", "level": 2, "requiredHeroLevel": 10, "name": "战意怒吼", "description": "冷却-2s，范围+50", "bonuses": { "cooldown": -2, "range": 50 } },
+
+  { "skillId": "multi_shot", "level": 1, "requiredHeroLevel": 5, "name": "精准多重射击", "description": "伤害+15，冷却-0.5s", "bonuses": { "baseDamage": 15, "cooldown": -0.5 } },
+  { "skillId": "multi_shot", "level": 2, "requiredHeroLevel": 10, "name": "箭雨", "description": "AOE半径+40", "bonuses": { "aoeRadius": 40 } },
+  { "skillId": "piercing_arrow", "level": 1, "requiredHeroLevel": 5, "name": "穿甲箭", "description": "伤害+25", "bonuses": { "baseDamage": 25 } },
+  { "skillId": "piercing_arrow", "level": 2, "requiredHeroLevel": 10, "name": "致命穿甲", "description": "倍率+0.15，射程+30", "bonuses": { "scalingRatio": 0.15, "range": 30 } },
+
+  { "skillId": "fireball", "level": 1, "requiredHeroLevel": 5, "name": "强化火球", "description": "伤害+20，AOE+20", "bonuses": { "baseDamage": 20, "aoeRadius": 20 } },
+  { "skillId": "fireball", "level": 2, "requiredHeroLevel": 10, "name": "焚天火球", "description": "伤害+40，冷却-1s", "bonuses": { "baseDamage": 40, "cooldown": -1 } },
+  { "skillId": "flame_wave", "level": 1, "requiredHeroLevel": 5, "name": "烈焰冲击", "description": "倍率+0.1", "bonuses": { "scalingRatio": 0.1 } },
+  { "skillId": "flame_wave", "level": 2, "requiredHeroLevel": 10, "name": "灼热波动", "description": "效果持续+1s，伤害+30", "bonuses": { "baseDamage": 30, "effectDuration": 1 } },
+
+  { "skillId": "heal", "level": 1, "requiredHeroLevel": 5, "name": "强化治疗", "description": "治疗量+20", "bonuses": { "baseDamage": -20 } },
+  { "skillId": "heal", "level": 2, "requiredHeroLevel": 10, "name": "神圣治愈", "description": "冷却-1s，治疗+30", "bonuses": { "baseDamage": -30, "cooldown": -1 } },
+  { "skillId": "group_heal", "level": 1, "requiredHeroLevel": 5, "name": "祝福之环", "description": "治疗量+15", "bonuses": { "baseDamage": -15 } },
+  { "skillId": "group_heal", "level": 2, "requiredHeroLevel": 10, "name": "神恩庇护", "description": "倍率+0.1，冷却-1s", "bonuses": { "scalingRatio": 0.1, "cooldown": -1 } },
+
+  { "skillId": "backstab", "level": 1, "requiredHeroLevel": 5, "name": "致命背刺", "description": "伤害+30", "bonuses": { "baseDamage": 30 } },
+  { "skillId": "backstab", "level": 2, "requiredHeroLevel": 10, "name": "暗影背刺", "description": "冷却-1.5s，倍率+0.2", "bonuses": { "cooldown": -1.5, "scalingRatio": 0.2 } },
+  { "skillId": "shadow_strike", "level": 1, "requiredHeroLevel": 5, "name": "幻影突袭", "description": "伤害+20，冷却-0.5s", "bonuses": { "baseDamage": 20, "cooldown": -0.5 } },
+
+  { "skillId": "holy_smite", "level": 1, "requiredHeroLevel": 5, "name": "神圣惩击", "description": "伤害+25，冷却-1s", "bonuses": { "baseDamage": 25, "cooldown": -1 } },
+  { "skillId": "divine_shield", "level": 1, "requiredHeroLevel": 5, "name": "圣光壁垒", "description": "效果持续+2s", "bonuses": { "effectDuration": 2 } },
+
+  { "skillId": "chain_lightning", "level": 1, "requiredHeroLevel": 5, "name": "连锁闪电", "description": "伤害+20，AOE+25", "bonuses": { "baseDamage": 20, "aoeRadius": 25 } },
+  { "skillId": "thunder_strike", "level": 1, "requiredHeroLevel": 5, "name": "雷霆重击", "description": "伤害+30", "bonuses": { "baseDamage": 30 } },
+
+  { "skillId": "nature_heal", "level": 1, "requiredHeroLevel": 5, "name": "大自然治愈", "description": "治疗+20，冷却-0.5s", "bonuses": { "baseDamage": -20, "cooldown": -0.5 } },
+  { "skillId": "rejuvenation", "level": 1, "requiredHeroLevel": 5, "name": "生命绽放", "description": "效果持续+2s", "bonuses": { "effectDuration": 2 } },
+
+  { "skillId": "shadow_bolt", "level": 1, "requiredHeroLevel": 5, "name": "暗影爆裂", "description": "伤害+25，冷却-0.5s", "bonuses": { "baseDamage": 25, "cooldown": -0.5 } },
+  { "skillId": "summon_skeleton", "level": 1, "requiredHeroLevel": 5, "name": "骷髅军团", "description": "冷却-2s", "bonuses": { "cooldown": -2 } },
+
+  { "skillId": "berserk_rage", "level": 1, "requiredHeroLevel": 5, "name": "狂暴强化", "description": "效果持续+2s，倍率+0.1", "bonuses": { "effectDuration": 2, "scalingRatio": 0.1 } },
+  { "skillId": "flame_strike", "level": 1, "requiredHeroLevel": 5, "name": "烈焰斩击", "description": "伤害+25，AOE+20", "bonuses": { "baseDamage": 25, "aoeRadius": 20 } },
+
+  { "skillId": "ice_bolt", "level": 1, "requiredHeroLevel": 5, "name": "冰霜强化", "description": "伤害+20，冷却-0.5s", "bonuses": { "baseDamage": 20, "cooldown": -0.5 } },
+  { "skillId": "frost_nova", "level": 1, "requiredHeroLevel": 5, "name": "冰霜风暴", "description": "AOE+30，效果持续+1s", "bonuses": { "aoeRadius": 30, "effectDuration": 1 } },
+
+  { "skillId": "beast_charge", "level": 1, "requiredHeroLevel": 5, "name": "猛兽冲锋", "description": "伤害+25，射程+30", "bonuses": { "baseDamage": 25, "range": 30 } },
+  { "skillId": "primal_roar", "level": 1, "requiredHeroLevel": 5, "name": "原始咆哮", "description": "效果持续+2s，冷却-1s", "bonuses": { "effectDuration": 2, "cooldown": -1 } },
+  { "skillId": "dragon_breath", "level": 1, "requiredHeroLevel": 5, "name": "烈焰龙息", "description": "伤害+30，AOE+25", "bonuses": { "baseDamage": 30, "aoeRadius": 25 } },
+  { "skillId": "dragon_guard", "level": 1, "requiredHeroLevel": 5, "name": "龙鳞守护", "description": "效果持续+3s", "bonuses": { "effectDuration": 3 } },
+  { "skillId": "shadow_weave", "level": 1, "requiredHeroLevel": 5, "name": "暗影编织", "description": "伤害+20，冷却-1s", "bonuses": { "baseDamage": 20, "cooldown": -1 } },
+  { "skillId": "dark_mend", "level": 1, "requiredHeroLevel": 5, "name": "暗影治疗", "description": "治疗+20，冷却-0.5s", "bonuses": { "baseDamage": -20, "cooldown": -0.5 } },
+  { "skillId": "storm_arrow", "level": 1, "requiredHeroLevel": 5, "name": "风暴之箭", "description": "伤害+20，射程+30", "bonuses": { "baseDamage": 20, "range": 30 } },
+  { "skillId": "wind_wall", "level": 1, "requiredHeroLevel": 5, "name": "风暴壁障", "description": "效果持续+2s，冷却-1s", "bonuses": { "effectDuration": 2, "cooldown": -1 } },
+  { "skillId": "holy_barrier", "level": 1, "requiredHeroLevel": 5, "name": "圣光结界", "description": "效果持续+2s，冷却-1s", "bonuses": { "effectDuration": 2, "cooldown": -1 } },
+  { "skillId": "smite", "level": 1, "requiredHeroLevel": 5, "name": "圣裁", "description": "伤害+25，射程+20", "bonuses": { "baseDamage": 25, "range": 20 } },
+
+  { "skillId": "blizzard", "level": 1, "requiredHeroLevel": 5, "name": "冰暴强化", "description": "伤害+20，AOE+25", "bonuses": { "baseDamage": 20, "aoeRadius": 25 } },
+  { "skillId": "blizzard", "level": 2, "requiredHeroLevel": 10, "name": "永冻风暴", "description": "效果持续+1s，冷却-1s", "bonuses": { "effectDuration": 1, "cooldown": -1 } },
+  { "skillId": "ice_lance", "level": 1, "requiredHeroLevel": 5, "name": "穿冰之枪", "description": "伤害+25，倍率+0.1", "bonuses": { "baseDamage": 25, "scalingRatio": 0.1 } },
+  { "skillId": "ice_lance", "level": 2, "requiredHeroLevel": 10, "name": "极寒冰枪", "description": "伤害+35，冷却-1s", "bonuses": { "baseDamage": 35, "cooldown": -1 } },
+
+  { "skillId": "thunder_fist", "level": 1, "requiredHeroLevel": 5, "name": "雷拳强化", "description": "伤害+20，冷却-0.5s", "bonuses": { "baseDamage": 20, "cooldown": -0.5 } },
+  { "skillId": "thunder_fist", "level": 2, "requiredHeroLevel": 10, "name": "万雷拳", "description": "伤害+30，眩晕+0.5s", "bonuses": { "baseDamage": 30, "effectDuration": 0.5 } },
+  { "skillId": "static_field", "level": 1, "requiredHeroLevel": 5, "name": "强化力场", "description": "伤害+15，AOE+20", "bonuses": { "baseDamage": 15, "aoeRadius": 20 } },
+  { "skillId": "static_field", "level": 2, "requiredHeroLevel": 10, "name": "雷域", "description": "效果持续+2s，冷却-1s", "bonuses": { "effectDuration": 2, "cooldown": -1 } }
+]

@@ -1,5 +1,6 @@
 import { SaveData, MetaProgressionData } from '../types';
 import { RunManager } from './RunManager';
+import { ErrorHandler } from '../systems/ErrorHandler';
 
 /**
  * Handles localStorage persistence for save slots and meta progression.
@@ -33,7 +34,7 @@ export class SaveManager {
       localStorage.setItem(SaveManager.SAVE_KEY_PREFIX + slot, payload);
       return true;
     } catch {
-      console.error('SaveManager: failed to save game to slot', slot);
+      ErrorHandler.report('error', 'SaveManager', `failed to save game to slot ${slot}`);
       return false;
     }
   }
@@ -47,7 +48,7 @@ export class SaveManager {
 
       const payload = JSON.parse(raw) as { data: string; checksum: string };
       if (!SaveManager.validateChecksum(payload.data, payload.checksum)) {
-        console.error('SaveManager: checksum mismatch for slot', slot);
+        ErrorHandler.report('error', 'SaveManager', `checksum mismatch for slot ${slot}`);
         return false;
       }
 
@@ -55,7 +56,7 @@ export class SaveManager {
 
       // Version migration hook (for future use)
       if (saveData.version !== SaveManager.SAVE_VERSION) {
-        console.warn('SaveManager: save version mismatch, attempting load anyway');
+        ErrorHandler.report('warn', 'SaveManager', 'save version mismatch, attempting load anyway');
       }
 
       const rm = RunManager.getInstance();
@@ -65,7 +66,7 @@ export class SaveManager {
       }));
       return true;
     } catch {
-      console.error('SaveManager: failed to load game from slot', slot);
+      ErrorHandler.report('error', 'SaveManager', `failed to load game from slot ${slot}`);
       return false;
     }
   }
@@ -115,7 +116,7 @@ export class SaveManager {
       const payload = JSON.stringify({ data: json, checksum });
       localStorage.setItem(SaveManager.META_KEY, payload);
     } catch {
-      console.error('SaveManager: failed to save meta progression');
+      ErrorHandler.report('error', 'SaveManager', 'failed to save meta progression');
     }
   }
 
@@ -126,7 +127,7 @@ export class SaveManager {
 
       const payload = JSON.parse(raw) as { data: string; checksum: string };
       if (!SaveManager.validateChecksum(payload.data, payload.checksum)) {
-        console.error('SaveManager: meta checksum mismatch, using defaults');
+        ErrorHandler.report('error', 'SaveManager', 'meta checksum mismatch, using defaults');
         return SaveManager.defaultMeta();
       }
 
@@ -145,7 +146,61 @@ export class SaveManager {
       unlockedRelics: [],
       permanentUpgrades: [],
       achievements: [],
+      metaCurrency: 0,
     };
+  }
+
+  // ---- Generic Storage (with checksum) ----
+
+  /** Save arbitrary data with checksum protection */
+  static saveData(key: string, data: unknown): boolean {
+    try {
+      const json = JSON.stringify(data);
+      const checksum = SaveManager.generateChecksum(json);
+      const payload = JSON.stringify({ data: json, checksum });
+      localStorage.setItem(key, payload);
+      return true;
+    } catch {
+      ErrorHandler.report('warn', 'SaveManager', `failed to save data for key: ${key}`);
+      return false;
+    }
+  }
+
+  /** Load data with checksum validation. Returns null on failure or missing key. */
+  static loadData<T>(key: string): T | null {
+    try {
+      const raw = localStorage.getItem(key);
+      if (!raw) return null;
+
+      // Try checksummed format first
+      const parsed = JSON.parse(raw);
+      if (parsed && typeof parsed === 'object' && 'data' in parsed && 'checksum' in parsed) {
+        const payload = parsed as { data: string; checksum: string };
+        if (!SaveManager.validateChecksum(payload.data, payload.checksum)) {
+          ErrorHandler.report('warn', 'SaveManager', `checksum mismatch for key: ${key}`);
+          return null;
+        }
+        return JSON.parse(payload.data) as T;
+      }
+
+      // Fallback: accept legacy unchecksumed data (migration)
+      return parsed as T;
+    } catch {
+      ErrorHandler.report('warn', 'SaveManager', `failed to load data for key: ${key}`);
+      return null;
+    }
+  }
+
+  /** Check if localStorage is available */
+  static isStorageAvailable(): boolean {
+    try {
+      const testKey = '__storage_test__';
+      localStorage.setItem(testKey, '1');
+      localStorage.removeItem(testKey);
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   // ---- Checksum ----

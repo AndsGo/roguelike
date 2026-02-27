@@ -1,3 +1,50 @@
+import { SaveManager } from '../managers/SaveManager';
+
+const ACCESSIBILITY_KEY = 'roguelike_accessibility';
+
+export interface AccessibilitySettings {
+  colorblindMode: boolean;
+}
+
+const defaultAccessibility: AccessibilitySettings = {
+  colorblindMode: false,
+};
+
+let accessibilityCache: AccessibilitySettings | null = null;
+
+export function getAccessibility(): AccessibilitySettings {
+  if (!accessibilityCache) {
+    accessibilityCache = SaveManager.loadData<AccessibilitySettings>(ACCESSIBILITY_KEY) ?? { ...defaultAccessibility };
+  }
+  return accessibilityCache;
+}
+
+export function setAccessibility(settings: AccessibilitySettings): void {
+  accessibilityCache = settings;
+  SaveManager.saveData(ACCESSIBILITY_KEY, settings);
+}
+
+/**
+ * Colorblind-safe element palette (deuteranopia/protanopia friendly).
+ * Uses distinct hue + luminance so colors remain distinguishable
+ * without red-green discrimination.
+ */
+const COLORBLIND_ELEMENT: Record<string, number> = {
+  fire: 0xff9933,      // warm orange (was red-orange)
+  ice: 0x3399ff,       // bright blue (same family, higher contrast)
+  lightning: 0xffff00,  // pure yellow (unchanged)
+  dark: 0x8833cc,      // violet-purple (shifted from magenta)
+  holy: 0xffffff,      // white (unchanged)
+};
+
+/** Get the element color, respecting colorblind mode setting */
+export function getElementColor(element: string): number {
+  if (getAccessibility().colorblindMode) {
+    return COLORBLIND_ELEMENT[element] ?? Theme.colors.element[element] ?? 0xaaaaaa;
+  }
+  return Theme.colors.element[element] ?? 0xaaaaaa;
+}
+
 export const Theme = {
   colors: {
     primary: 0x4a90d9,
@@ -18,6 +65,15 @@ export const Theme = {
       dark: 0x9c27b0,
       holy: 0xffffff,
     } as Record<string, number>,
+
+    /** Unicode symbols for elements (colorblind-friendly indicators) */
+    elementSymbol: {
+      fire: '\u2666',       // ♦
+      ice: '\u25C6',        // ◆
+      lightning: '\u26A1',   // ⚡
+      dark: '\u25CF',        // ●
+      holy: '\u2606',        // ☆
+    } as Record<string, string>,
 
     rarity: {
       common: 0xbbbbbb,

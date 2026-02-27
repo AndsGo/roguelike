@@ -311,7 +311,7 @@
     "description": "传说中的雷神武器，蕴含毁天灭地之力",
     "slot": "weapon",
     "rarity": "legendary",
-    "cost": 400,
+    "cost": 340,
     "stats": { "attack": 55, "magicPower": 30, "attackSpeed": 0.1 }
   },
   {
@@ -320,7 +320,7 @@
     "description": "神界铸造的究极护甲，几乎刀枪不入",
     "slot": "armor",
     "rarity": "legendary",
-    "cost": 420,
+    "cost": 350,
     "stats": { "defense": 60, "magicResist": 45, "maxHp": 200 }
   },
   {
@@ -329,7 +329,7 @@
     "description": "蕴含无尽智慧的传说宝石，全面提升所有能力",
     "slot": "accessory",
     "rarity": "legendary",
-    "cost": 450,
+    "cost": 380,
     "stats": { "attack": 15, "defense": 15, "magicPower": 20, "magicResist": 15, "maxHp": 100, "speed": 10, "critChance": 0.05 }
   },
   {
@@ -394,5 +394,41 @@
     "rarity": "epic",
     "cost": 185,
     "stats": { "magicPower": 25, "defense": 12, "magicResist": 18 }
+  },
+  {
+    "id": "frostbound_heart",
+    "name": "永冬之心",
+    "description": "封印着永恒冬日之力的法杖，冰霜魔法的极致结晶",
+    "slot": "weapon",
+    "rarity": "legendary",
+    "cost": 360,
+    "stats": { "magicPower": 50, "magicResist": 20, "attackSpeed": 0.1 }
+  },
+  {
+    "id": "shadow_edge",
+    "name": "暗影之刃",
+    "description": "由纯粹暗影凝聚的双刃，每一击都能割裂敌人的灵魂",
+    "slot": "weapon",
+    "rarity": "legendary",
+    "cost": 345,
+    "stats": { "attack": 50, "critChance": 0.18, "critDamage": 0.6, "speed": 15 }
+  },
+  {
+    "id": "angel_wings",
+    "name": "天使之翼",
+    "description": "天界锻造的神圣铠甲，庇护穿戴者免受一切灾厄",
+    "slot": "armor",
+    "rarity": "legendary",
+    "cost": 370,
+    "stats": { "defense": 35, "magicResist": 40, "maxHp": 180, "magicPower": 25 }
+  },
+  {
+    "id": "ring_of_fate",
+    "name": "命运之环",
+    "description": "据说能扭转命运的神秘指环，佩戴者的一切能力都将得到提升",
+    "slot": "accessory",
+    "rarity": "legendary",
+    "cost": 400,
+    "stats": { "attack": 20, "defense": 20, "magicPower": 25, "maxHp": 120, "critChance": 0.08, "attackSpeed": 0.1 }
   }
 ]

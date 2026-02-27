@@ -3,7 +3,7 @@ import { UnitStats, UnitRole, StatusEffect, SkillData, ElementType } from '../ty
 import { HealthBar } from '../components/HealthBar';
 import { HEALTH_BAR_WIDTH, HEALTH_BAR_HEIGHT, Y_MOVEMENT_DAMPING } from '../constants';
 import { EventBus } from '../systems/EventBus';
-import { Theme, darkenColor } from '../ui/Theme';
+import { Theme, darkenColor, getElementColor } from '../ui/Theme';
 
 /** Default enemy color (no element) */
 const ENEMY_BASE_COLOR = 0xff4444;
@@ -84,7 +84,7 @@ export class Unit extends Phaser.GameObjects.Container {
     // Name label
     const displayName = name.length > 8 ? name.substring(0, 8) : name;
     this.nameLabel = scene.add.text(0, -this.spriteHeight / 2 - 12, displayName, {
-      fontSize: '7px',
+      fontSize: '9px',
       color: '#ffffff',
       fontFamily: 'monospace',
     }).setOrigin(0.5);
@@ -94,11 +94,31 @@ export class Unit extends Phaser.GameObjects.Container {
     this.healthBar = new HealthBar(scene, 0, this.spriteHeight / 2 + 4, HEALTH_BAR_WIDTH, HEALTH_BAR_HEIGHT);
     this.add(this.healthBar);
 
+    // Element indicator below health bar
+    if (this.element) {
+      const elementSymbols: Record<string, string> = {
+        fire: '火', ice: '冰', lightning: '雷', dark: '暗', holy: '光',
+      };
+      const shapeSym = Theme.colors.elementSymbol[this.element] ?? '';
+      const sym = `${shapeSym}${elementSymbols[this.element] ?? this.element[0].toUpperCase()}`;
+      const elColor = getElementColor(this.element);
+      const colorStr = elColor !== undefined ? '#' + elColor.toString(16).padStart(6, '0') : '#ffffff';
+      const elementLabel = scene.add.text(0, this.spriteHeight / 2 + 13, sym, {
+        fontSize: '8px',
+        color: colorStr,
+        fontFamily: 'monospace',
+        fontStyle: 'bold',
+        stroke: '#000000',
+        strokeThickness: 2,
+      }).setOrigin(0.5);
+      this.add(elementLabel);
+    }
+
     // Status effect visuals (pre-created to avoid per-frame allocation)
     this.statusOverlay = scene.add.graphics();
     this.add(this.statusOverlay);
     this.statusIcons = scene.add.text(0, -this.spriteHeight / 2 - 22, '', {
-      fontSize: '8px',
+      fontSize: '9px',
       color: '#ffcc00',
       fontFamily: 'monospace',
     }).setOrigin(0.5).setVisible(false);
@@ -113,7 +133,7 @@ export class Unit extends Phaser.GameObjects.Container {
     }
     // Enemy: use darkened element color, or base red
     if (this.element) {
-      const elementColor = Theme.colors.element[this.element];
+      const elementColor = getElementColor(this.element);
       if (elementColor !== undefined) {
         return darkenColor(elementColor, 0.4);
       }
@@ -123,7 +143,7 @@ export class Unit extends Phaser.GameObjects.Container {
 
   private computeBorderColor(): number {
     if (this.element) {
-      const elementColor = Theme.colors.element[this.element];
+      const elementColor = getElementColor(this.element);
       if (elementColor !== undefined) {
         return elementColor;
       }
@@ -229,7 +249,7 @@ export class Unit extends Phaser.GameObjects.Container {
     const sizeInfo = this.computeSize();
     this.spriteWidth = sizeInfo.w;
     this.spriteHeight = sizeInfo.h;
-    this.fillColor = this.isHero ? this.fillColor : (this.element ? Theme.colors.element[this.element] ?? 0xff2222 : 0xff2222);
+    this.fillColor = this.isHero ? this.fillColor : (this.element ? getElementColor(this.element) ?? 0xff2222 : 0xff2222);
     this.borderColor = 0xffaa00;
     this.drawShape();
 
@@ -330,13 +350,48 @@ export class Unit extends Phaser.GameObjects.Container {
       isHero: this.isHero,
     });
 
-    this.scene.tweens.add({
-      targets: this,
-      alpha: 0,
-      duration: 500,
-      onComplete: () => {
-        this.setVisible(false);
+    // Staged death animation: hit-stop → flash white 3x → shrink+fade
+    // Stage 1: Hit-stop (freeze briefly)
+    const scene = this.scene;
+    if (!scene) {
+      this.setVisible(false);
+      return;
+    }
+
+    // Stage 2: Flash white 3 times
+    let flashCount = 0;
+    const flashInterval = scene.time.addEvent({
+      delay: 80,
+      repeat: 5, // 6 calls = 3 flashes (on, off, on, off, on, off)
+      callback: () => {
+        if (!scene || !this.sprite) return;
+        flashCount++;
+        if (flashCount % 2 === 1) {
+          this.drawShape(0xffffff);
+        } else {
+          this.drawShape();
+        }
       },
+    });
+
+    // Stage 3: After flashing, shrink + rotate + fade
+    scene.time.delayedCall(580, () => {
+      if (!scene) return;
+      flashInterval.destroy();
+      this.drawShape();
+
+      scene.tweens.add({
+        targets: this,
+        alpha: 0,
+        scaleX: 0.2,
+        scaleY: 0.2,
+        angle: this.isHero ? -45 : 45,
+        duration: 400,
+        ease: 'Power2',
+        onComplete: () => {
+          this.setVisible(false);
+        },
+      });
     });
   }
 
@@ -401,18 +456,31 @@ export class Unit extends Phaser.GameObjects.Container {
       this.statusOverlay.fillRect(-w / 2, -h / 2, w, h);
     }
 
-    // Status icon text above unit
-    const icons: string[] = [];
-    if (hasBurn) icons.push('*');
-    if (hasFreeze) icons.push('#');
-    if (hasPoison) icons.push('~');
-    if (hasBuff) icons.push('+');
-    if (hasDebuff) icons.push('-');
-    if (hasHot) icons.push('^');
+    // Status icon text above unit — show type symbol + remaining duration
+    const parts: string[] = [];
+    for (const eff of this.statusEffects) {
+      let sym = '';
+      switch (eff.type) {
+        case 'dot': sym = eff.element === 'fire' ? '🔥' : '☠'; break;
+        case 'hot': sym = '♥'; break;
+        case 'stun': sym = '✦'; break;
+        case 'buff': sym = '▲'; break;
+        case 'debuff': sym = '▼'; break;
+        case 'taunt': sym = '⊕'; break;
+        default: sym = '?'; break;
+      }
+      const dur = Math.ceil(eff.duration);
+      parts.push(`${sym}${dur}`);
+    }
 
-    if (icons.length > 0) {
-      this.statusIcons.setText(icons.join(''));
+    if (parts.length > 0) {
+      // Show at most 3 effects to avoid clutter
+      this.statusIcons.setText(parts.slice(0, 3).join(' '));
       this.statusIcons.setVisible(true);
+      // Color: buffs green, debuffs red, mixed yellow
+      const hasOnlyBuff = hasBuff && !hasDebuff && !hasBurn && !hasPoison && !hasFreeze;
+      const hasOnlyDebuff = (hasDebuff || hasBurn || hasPoison || hasFreeze) && !hasBuff && !hasHot;
+      this.statusIcons.setColor(hasOnlyBuff ? '#88ff88' : hasOnlyDebuff ? '#ff8888' : '#ffcc00');
     } else {
       this.statusIcons.setVisible(false);
     }

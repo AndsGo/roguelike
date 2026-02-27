@@ -28,11 +28,12 @@ describe('AchievementManager', () => {
 
   describe('achievement definitions', () => {
     it('has at least 15 achievements defined', () => {
-      expect(AchievementManager.ACHIEVEMENTS.length).toBeGreaterThanOrEqual(15);
+      const all = AchievementManager.getAll();
+      expect(all.length).toBeGreaterThanOrEqual(15);
     });
 
     it('all achievements have required fields', () => {
-      for (const ach of AchievementManager.ACHIEVEMENTS) {
+      for (const ach of AchievementManager.getAll()) {
         expect(ach.id).toBeTruthy();
         expect(ach.name).toBeTruthy();
         expect(ach.description).toBeTruthy();
@@ -41,7 +42,7 @@ describe('AchievementManager', () => {
     });
 
     it('achievement IDs are unique', () => {
-      const ids = AchievementManager.ACHIEVEMENTS.map(a => a.id);
+      const ids = AchievementManager.getAll().map(a => a.id);
       const uniqueIds = new Set(ids);
       expect(uniqueIds.size).toBe(ids.length);
     });

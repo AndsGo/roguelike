@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { Theme, lightenColor, darkenColor } from './Theme';
+import { AudioManager } from '../systems/AudioManager';
 
 export class Button extends Phaser.GameObjects.Container {
   private static readonly HIT_PADDING = 8;
@@ -130,6 +131,7 @@ export class Button extends Phaser.GameObjects.Container {
     const dx = pointer.x - this.pressX;
     const dy = pointer.y - this.pressY;
     if (dx * dx + dy * dy < 400) { // < 20px movement
+      AudioManager.getInstance().playSfx('sfx_click');
       if (this.callback) this.callback();
     }
   }

@@ -5,6 +5,7 @@ import { Button } from '../ui/Button';
 import { RunManager } from '../managers/RunManager';
 import { Theme, colorToString } from '../ui/Theme';
 import { SceneTransition } from '../systems/SceneTransition';
+import { StatsManager } from '../managers/StatsManager';
 import { UI } from '../i18n';
 
 export class RewardScene extends Phaser.Scene {
@@ -75,6 +76,34 @@ export class RewardScene extends Phaser.Scene {
       }).setOrigin(0.5);
     });
 
+    // Per-hero battle stats
+    const runStats = StatsManager.getRunStats();
+    const statsY = 200 + heroes.length * 20 + 15;
+    this.add.text(GAME_WIDTH / 2, statsY, UI.reward.battleStatsHeader, {
+      fontSize: '9px',
+      color: '#8899bb',
+      fontFamily: 'monospace',
+    }).setOrigin(0.5);
+
+    // Column headers
+    const colX = { name: GAME_WIDTH / 2 - 140, dmg: GAME_WIDTH / 2 - 10, heal: GAME_WIDTH / 2 + 60, kills: GAME_WIDTH / 2 + 130 };
+    const headerY = statsY + 14;
+    this.add.text(colX.dmg, headerY, UI.reward.dmg, { fontSize: '8px', color: '#888888', fontFamily: 'monospace' }).setOrigin(0.5);
+    this.add.text(colX.heal, headerY, UI.reward.heal, { fontSize: '8px', color: '#888888', fontFamily: 'monospace' }).setOrigin(0.5);
+    this.add.text(colX.kills, headerY, UI.reward.kills, { fontSize: '8px', color: '#888888', fontFamily: 'monospace' }).setOrigin(0.5);
+
+    heroes.forEach((hero, i) => {
+      const hd = rm.getHeroData(hero.id);
+      const hs = runStats.heroStats[hero.id];
+      const rowY = headerY + 14 + i * 14;
+      const alive = result.survivors.includes(hero.id);
+      const nameColor = alive ? '#aaaaaa' : '#664444';
+      this.add.text(colX.name, rowY, hd.name, { fontSize: '8px', color: nameColor, fontFamily: 'monospace' });
+      this.add.text(colX.dmg, rowY, `${hs?.damage ?? 0}`, { fontSize: '8px', color: '#cc8888', fontFamily: 'monospace' }).setOrigin(0.5);
+      this.add.text(colX.heal, rowY, `${hs?.healing ?? 0}`, { fontSize: '8px', color: '#88cc88', fontFamily: 'monospace' }).setOrigin(0.5);
+      this.add.text(colX.kills, rowY, `${hs?.kills ?? 0}`, { fontSize: '8px', color: '#cccc88', fontFamily: 'monospace' }).setOrigin(0.5);
+    });
+
     this.add.text(GAME_WIDTH / 2, GAME_HEIGHT - 80, UI.reward.totalGold(rm.getGold()), {
       fontSize: '12px',
       color: colorToString(Theme.colors.gold),
@@ -84,5 +113,9 @@ export class RewardScene extends Phaser.Scene {
     new Button(this, GAME_WIDTH / 2, GAME_HEIGHT - 38, UI.reward.continueBtn, 160, 38, () => {
       SceneTransition.fadeTransition(this, 'MapScene');
     });
+  }
+
+  shutdown(): void {
+    this.tweens.killAll();
   }
 }

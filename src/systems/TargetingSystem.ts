@@ -9,7 +9,39 @@ export type TargetStrategy = 'default' | 'element_priority' | 'lowest_hp' | 'nea
  */
 const threatTable: Map<string, Map<string, number>> = new Map();
 
+// Target staleness cache: skip re-targeting if target is alive + in range
+const targetCache: Map<string, { targetId: string; expiry: number }> = new Map();
+const TARGET_STALE_MS = 500;
+
 export class TargetingSystem {
+  // Frame-level distance cache to avoid redundant sqrt calculations
+  private static frameId: number = 0;
+  private static distanceCache: Map<string, number> = new Map();
+  private static frameTime: number = 0;
+
+  /** Call at the start of each frame to reset the distance cache. */
+  static beginFrame(delta?: number): void {
+    TargetingSystem.frameId++;
+    TargetingSystem.distanceCache.clear();
+    if (delta !== undefined) {
+      TargetingSystem.frameTime += delta;
+    }
+  }
+
+  /** Cached distance between two units. Symmetric: dist(a,b) == dist(b,a). */
+  static cachedDistance(a: Unit, b: Unit): number {
+    // Sort IDs so a->b and b->a share the same cache key
+    const id1 = a.unitId < b.unitId ? a.unitId : b.unitId;
+    const id2 = a.unitId < b.unitId ? b.unitId : a.unitId;
+    const key = `${id1}_${id2}`;
+    let dist = TargetingSystem.distanceCache.get(key);
+    if (dist === undefined) {
+      dist = a.distanceTo(b);
+      TargetingSystem.distanceCache.set(key, dist);
+    }
+    return dist;
+  }
+
   /**
    * Register threat from an attacker to a target.
    * The target gains threat toward the attacker.
@@ -40,6 +72,7 @@ export class TargetingSystem {
    */
   static resetThreat(): void {
     threatTable.clear();
+    targetCache.clear();
   }
 
   /**
@@ -58,6 +91,15 @@ export class TargetingSystem {
       return tauntSource;
     }
 
+    // Target staleness: reuse cached target if alive and in range
+    const cached = targetCache.get(unit.unitId);
+    if (cached && TargetingSystem.frameTime < cached.expiry) {
+      const cachedTarget = enemies.find(e => e.unitId === cached.targetId && e.isAlive);
+      if (cachedTarget && unit.distanceTo(cachedTarget) <= unit.currentStats.attackRange * 1.5) {
+        return cachedTarget;
+      }
+    }
+
     const livingEnemies = enemies.filter(e => e.isAlive);
     const livingAllies = allies.filter(a => a.isAlive);
 
@@ -73,17 +115,31 @@ export class TargetingSystem {
     }
 
     // Default role-based targeting with element priority scoring
+    let result: Unit | null;
     switch (unit.role) {
       case 'tank':
       case 'support':
-        return this.selectWithElementWeight(unit, livingEnemies, 'nearest');
+        result = this.selectWithElementWeight(unit, livingEnemies, 'nearest');
+        break;
       case 'melee_dps':
-        return this.selectWithElementWeight(unit, livingEnemies, 'lowest_hp');
+        result = this.selectWithElementWeight(unit, livingEnemies, 'lowest_hp');
+        break;
       case 'ranged_dps':
-        return this.selectWithElementWeight(unit, livingEnemies, 'highest_threat');
+        result = this.selectWithElementWeight(unit, livingEnemies, 'highest_threat');
+        break;
       default:
-        return this.selectWithElementWeight(unit, livingEnemies, 'nearest');
+        result = this.selectWithElementWeight(unit, livingEnemies, 'nearest');
+        break;
     }
+
+    // Cache the selected target
+    if (result) {
+      targetCache.set(unit.unitId, {
+        targetId: result.unitId,
+        expiry: TargetingSystem.frameTime + TARGET_STALE_MS,
+      });
+    }
+    return result;
   }
 
   /**
@@ -109,8 +165,8 @@ export class TargetingSystem {
   }
 
   /**
-   * Combined selection: uses base strategy scores + element advantage weight (+30%).
-   * This blends role-based targeting with element advantage consideration.
+   * Combined single-pass selection: computes base score + element + threat in one loop.
+   * First pass collects raw values and maxima, second pass normalizes and selects best.
    */
   private static selectWithElementWeight(
     unit: Unit,
@@ -120,62 +176,72 @@ export class TargetingSystem {
     if (targets.length === 0) return null;
     if (targets.length === 1) return targets[0];
 
-    const scores: number[] = targets.map(() => 0);
+    const n = targets.length;
+    const rawBase = new Float64Array(n);
+    const rawThreat = new Float64Array(n);
+    const hasAdv = new Uint8Array(n);
+    let maxBase = 0;
+    let maxThreat = 0;
 
-    // Base strategy scoring (normalized to 0-1 range)
-    switch (baseStrategy) {
-      case 'nearest': {
-        const distances = targets.map(t => unit.distanceTo(t));
-        const maxDist = Math.max(...distances, 1);
-        for (let i = 0; i < targets.length; i++) {
-          scores[i] = 1 - (distances[i] / maxDist); // closer = higher score
-        }
-        break;
-      }
-      case 'lowest_hp': {
-        const hps = targets.map(t => t.currentHp);
-        const maxHp = Math.max(...hps, 1);
-        for (let i = 0; i < targets.length; i++) {
-          scores[i] = 1 - (hps[i] / maxHp); // lower HP = higher score
-        }
-        break;
-      }
-      case 'highest_threat': {
-        const threats = targets.map(t => this.calculateThreat(t));
-        const maxThreat = Math.max(...threats, 1);
-        for (let i = 0; i < targets.length; i++) {
-          scores[i] = threats[i] / maxThreat; // higher threat = higher score
-        }
-        break;
-      }
-    }
-
-    // Element advantage bonus: +30% weight if attacker has element advantage
-    if (unit.element) {
-      for (let i = 0; i < targets.length; i++) {
-        if (targets[i].element && hasElementAdvantage(unit.element, targets[i].element!)) {
-          scores[i] += 0.3;
-        }
-      }
-    }
-
-    // Threat level from being attacked: units that attack us more get slight priority
     const unitThreatTable = threatTable.get(unit.unitId);
-    if (unitThreatTable) {
-      const maxAccThreat = Math.max(...targets.map(t => unitThreatTable.get(t.unitId) ?? 0), 1);
-      for (let i = 0; i < targets.length; i++) {
-        const accThreat = unitThreatTable.get(targets[i].unitId) ?? 0;
-        scores[i] += (accThreat / maxAccThreat) * 0.15; // slight aggro weight
+
+    // Single pass: collect raw values for base strategy, element advantage, and threat
+    for (let i = 0; i < n; i++) {
+      const t = targets[i];
+
+      // Base strategy raw value
+      switch (baseStrategy) {
+        case 'nearest':
+          rawBase[i] = TargetingSystem.cachedDistance(unit, t);
+          break;
+        case 'lowest_hp':
+          rawBase[i] = t.currentHp;
+          break;
+        case 'highest_threat':
+          rawBase[i] = this.calculateThreat(t);
+          break;
+      }
+      if (rawBase[i] > maxBase) maxBase = rawBase[i];
+
+      // Element advantage
+      if (unit.element && t.element && hasElementAdvantage(unit.element, t.element)) {
+        hasAdv[i] = 1;
+      }
+
+      // Accumulated threat from being attacked by this target
+      if (unitThreatTable) {
+        rawThreat[i] = unitThreatTable.get(t.unitId) ?? 0;
+        if (rawThreat[i] > maxThreat) maxThreat = rawThreat[i];
       }
     }
 
-    // Select highest scoring target
+    // Second pass: normalize and score, track best
+    const invMaxBase = maxBase > 0 ? 1 / maxBase : 0;
+    const invMaxThreat = maxThreat > 0 ? 1 / maxThreat : 0;
     let bestIdx = 0;
-    for (let i = 1; i < scores.length; i++) {
-      if (scores[i] > scores[bestIdx]) {
+    let bestScore = -Infinity;
+
+    for (let i = 0; i < n; i++) {
+      // Normalized base score (for nearest/lowest_hp: invert so lower raw = higher score)
+      let score: number;
+      if (baseStrategy === 'highest_threat') {
+        score = rawBase[i] * invMaxBase;
+      } else {
+        score = 1 - rawBase[i] * invMaxBase;
+      }
+
+      // Element advantage bonus
+      if (hasAdv[i]) score += 0.3;
+
+      // Aggro weight
+      score += rawThreat[i] * invMaxThreat * 0.15;
+
+      if (score > bestScore) {
+        bestScore = score;
         bestIdx = i;
       }
     }
+
     return targets[bestIdx];
   }
 
@@ -198,9 +264,9 @@ export class TargetingSystem {
   private static selectNearest(unit: Unit, targets: Unit[]): Unit | null {
     if (targets.length === 0) return null;
     let nearest = targets[0];
-    let minDist = unit.distanceTo(targets[0]);
+    let minDist = TargetingSystem.cachedDistance(unit, targets[0]);
     for (let i = 1; i < targets.length; i++) {
-      const dist = unit.distanceTo(targets[i]);
+      const dist = TargetingSystem.cachedDistance(unit, targets[i]);
       if (dist < minDist) {
         minDist = dist;
         nearest = targets[i];

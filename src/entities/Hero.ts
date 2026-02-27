@@ -24,6 +24,10 @@ export class Hero extends Unit {
     this.healthBar.updateHealth(this.currentHp, stats.maxHp);
   }
 
+  get level(): number {
+    return this.heroState.level;
+  }
+
   static calculateStats(data: HeroData, state: HeroState): UnitStats {
     const level = state.level;
     const scaling = data.scalingPerLevel;

@@ -8,6 +8,7 @@ import { STARTING_GOLD, MAX_TEAM_SIZE } from '../constants';
 import { expForLevel } from '../utils/math';
 import { SYNERGY_DEFINITIONS } from '../config/synergies';
 import { EventBus } from '../systems/EventBus';
+import { GameLifecycle } from '../systems/GameLifecycle';
 import heroesData from '../data/heroes.json';
 import actsData from '../data/acts.json';
 
@@ -34,8 +35,9 @@ export class RunManager {
     const s = seed ?? Date.now();
     this.rng = new SeededRNG(s);
 
-    // Reset event bus for new run
-    EventBus.getInstance().reset();
+    // Unified teardown + re-init for new run
+    GameLifecycle.teardownAll();
+    GameLifecycle.prepareNewRun();
 
     // Start with warrior and archer
     const startingHeroes: HeroState[] = [
@@ -61,6 +63,7 @@ export class RunManager {
 
   private createHeroState(heroId: string): HeroState {
     const data = heroesData.find(h => h.id === heroId) as HeroData;
+    if (!data) throw new Error(`Hero data not found: ${heroId}`);
     return {
       id: heroId,
       level: 1,
@@ -89,7 +92,9 @@ export class RunManager {
   getCurrentAct(): number { return this.state.currentAct; }
 
   getHeroData(heroId: string): HeroData {
-    return heroesData.find(h => h.id === heroId) as HeroData;
+    const data = heroesData.find(h => h.id === heroId) as HeroData;
+    if (!data) throw new Error(`Hero data not found: ${heroId}`);
+    return data;
   }
 
   getHeroState(heroId: string): HeroState | undefined {
@@ -128,6 +133,34 @@ export class RunManager {
     this.state.heroes.push(this.createHeroState(heroId));
     this.calculateSynergies();
     return true;
+  }
+
+  /** Remove a hero from the party (sacrifice). Returns true if removed. */
+  removeHero(heroId: string): boolean {
+    const idx = this.state.heroes.findIndex(h => h.id === heroId);
+    if (idx === -1) return false;
+    if (this.state.heroes.length <= 1) return false; // can't sacrifice last hero
+    this.state.heroes.splice(idx, 1);
+    this.calculateSynergies();
+    return true;
+  }
+
+  /** Set a temporary element on a random hero */
+  setTemporaryElement(element: ElementType): string | null {
+    const eligible = this.state.heroes.filter(h => !h.temporaryElement);
+    if (eligible.length === 0) return null;
+    const hero = this.rng.pick(eligible);
+    hero.temporaryElement = element;
+    this.calculateSynergies();
+    return hero.id;
+  }
+
+  /** Clear all temporary elements (called at end of act) */
+  clearTemporaryElements(): void {
+    for (const hero of this.state.heroes) {
+      delete hero.temporaryElement;
+    }
+    this.calculateSynergies();
   }
 
   /** Apply battle results: sync HP, award gold/exp */
@@ -267,6 +300,7 @@ export class RunManager {
         return actIdx;
       }
       // Next act starts after this act's nodes
+      if (actNodes.length === 0) break;
       actStart = Math.max(...actNodes) + 1;
       if (actStart >= map.length) break;
     }

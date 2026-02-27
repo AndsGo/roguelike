@@ -136,4 +136,56 @@ export const SYNERGY_DEFINITIONS: SynergyConfig[] = [
       { count: 2, description: '防御+20，法抗+10', effects: [{ type: 'stat_boost', stat: 'defense', value: 20 }, { type: 'stat_boost', stat: 'magicResist', value: 10 }] },
     ],
   },
+
+  // ---- Element Synergies ----
+  {
+    id: 'synergy_fire',
+    name: '烈焰之心',
+    description: '火属性英雄增幅火焰伤害',
+    type: 'element',
+    key: 'fire',
+    thresholds: [
+      { count: 2, description: '火属性伤害+15%', effects: [{ type: 'damage_bonus', element: 'fire', value: 0.15 }] },
+    ],
+  },
+  {
+    id: 'synergy_dark',
+    name: '暗影亲和',
+    description: '暗属性英雄增幅暗影伤害',
+    type: 'element',
+    key: 'dark',
+    thresholds: [
+      { count: 2, description: '暗属性伤害+15%', effects: [{ type: 'damage_bonus', element: 'dark', value: 0.15 }] },
+    ],
+  },
+  {
+    id: 'synergy_holy',
+    name: '圣光共鸣',
+    description: '圣属性英雄增幅圣光伤害',
+    type: 'element',
+    key: 'holy',
+    thresholds: [
+      { count: 2, description: '圣属性伤害+15%', effects: [{ type: 'damage_bonus', element: 'holy', value: 0.15 }] },
+    ],
+  },
+  {
+    id: 'synergy_ice',
+    name: '永冬之力',
+    description: '冰属性英雄增幅冰霜伤害',
+    type: 'element',
+    key: 'ice',
+    thresholds: [
+      { count: 2, description: '冰属性伤害+15%', effects: [{ type: 'damage_bonus', element: 'ice', value: 0.15 }] },
+    ],
+  },
+  {
+    id: 'synergy_lightning',
+    name: '雷霆之怒',
+    description: '雷属性英雄增幅雷电伤害',
+    type: 'element',
+    key: 'lightning',
+    thresholds: [
+      { count: 2, description: '雷属性伤害+15%', effects: [{ type: 'damage_bonus', element: 'lightning', value: 0.15 }] },
+    ],
+  },
 ];

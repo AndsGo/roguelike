@@ -364,5 +364,434 @@
         ]
       }
     ]
+  },
+  {
+    "id": "dragon_egg",
+    "title": "龙蛋",
+    "description": "你在洞穴深处发现了一颗散发着温暖光芒的龙蛋，似乎即将孵化...",
+    "choices": [
+      {
+        "text": "用生命力温暖龙蛋（消耗15%HP）",
+        "outcomes": [
+          { "probability": 0.6, "description": "龙蛋孵化了！一位龙裔骑士加入了你的队伍！", "effects": [{ "type": "damage", "value": 0.15, "target": "all" }, { "type": "recruit", "value": 1, "heroId": "dragon_knight" }] },
+          { "probability": 0.4, "description": "龙蛋裂开了，但里面只有一些珍贵的龙鳞。", "effects": [{ "type": "damage", "value": 0.15, "target": "all" }, { "type": "gold", "value": 80 }] }
+        ]
+      },
+      {
+        "text": "将龙蛋出售给收藏家",
+        "outcomes": [
+          { "probability": 1.0, "description": "收藏家出了高价购买龙蛋。", "effects": [{ "type": "gold", "value": 120 }] }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "cursed_well",
+    "title": "诅咒之井",
+    "description": "一口散发着诡异紫光的古井，井水中映出扭曲的影像...",
+    "choices": [
+      {
+        "text": "饮用井水（随机英雄获得暗属性）",
+        "outcomes": [
+          { "probability": 0.7, "description": "暗影之力渗入你的队伍，一名英雄获得了暗属性！", "effects": [{ "type": "transform", "value": 1, "element": "dark", "target": "random" }] },
+          { "probability": 0.3, "description": "诅咒反噬！队伍受到伤害。", "effects": [{ "type": "damage", "value": 0.2, "target": "all" }] }
+        ]
+      },
+      {
+        "text": "向井中投入金币祈祷",
+        "outcomes": [
+          { "probability": 0.5, "description": "井水泛起金光，你感到被祝福了。", "effects": [{ "type": "gold", "value": -30 }, { "type": "heal", "value": 0.3, "target": "all" }] },
+          { "probability": 0.5, "description": "金币沉入水中，什么也没发生。", "effects": [{ "type": "gold", "value": -30 }] }
+        ]
+      },
+      {
+        "text": "远离这口井",
+        "outcomes": [
+          { "probability": 1.0, "description": "有些东西还是不要碰为好。", "effects": [] }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "blood_pact",
+    "title": "血之契约",
+    "description": "一位神秘的恶魔现身，提出以一名英雄的生命换取无上力量...",
+    "choices": [
+      {
+        "text": "接受契约（牺牲一名随机英雄）",
+        "outcomes": [
+          { "probability": 1.0, "description": "英雄被献祭了...但剩余队员获得了巨大力量！", "effects": [{ "type": "sacrifice", "value": 1, "target": "random" }, { "type": "stat_boost", "value": 30 }, { "type": "gold", "value": 150 }] }
+        ]
+      },
+      {
+        "text": "拒绝恶魔的诱惑",
+        "outcomes": [
+          { "probability": 0.7, "description": "恶魔不悦地离开了。", "effects": [] },
+          { "probability": 0.3, "description": "恶魔被你的勇气打动，给了你一些补偿。", "effects": [{ "type": "gold", "value": 50 }] }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "elemental_shrine",
+    "title": "元素神殿",
+    "description": "一座五色光芒交织的神殿，祭坛上放着代表不同元素的宝石...",
+    "choices": [
+      {
+        "text": "触碰火焰宝石",
+        "outcomes": [
+          { "probability": 0.8, "description": "火焰之力涌入体内！一名英雄获得火属性。", "effects": [{ "type": "transform", "value": 1, "element": "fire", "target": "random" }] },
+          { "probability": 0.2, "description": "火焰失控，灼伤了你的队伍。", "effects": [{ "type": "damage", "value": 0.15, "target": "all" }] }
+        ]
+      },
+      {
+        "text": "触碰圣光宝石",
+        "outcomes": [
+          { "probability": 0.8, "description": "圣光照耀全队！一名英雄获得圣属性。", "effects": [{ "type": "transform", "value": 1, "element": "holy", "target": "random" }, { "type": "heal", "value": 0.2, "target": "all" }] },
+          { "probability": 0.2, "description": "圣光太过强烈，暂时致盲了队伍。", "effects": [{ "type": "damage", "value": 0.1, "target": "all" }] }
+        ]
+      },
+      {
+        "text": "收集宝石碎片出售",
+        "outcomes": [
+          { "probability": 1.0, "description": "你小心地收集了一些宝石碎片。", "effects": [{ "type": "gold", "value": 60 }] }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "traveling_bard",
+    "title": "旅行吟游诗人",
+    "description": "一位快乐的吟游诗人坐在路边弹奏着美妙的旋律...",
+    "choices": [
+      {
+        "text": "欣赏表演并打赏（花费20金币）",
+        "outcomes": [
+          { "probability": 0.6, "description": "美妙的音乐治愈了你们的疲惫！", "effects": [{ "type": "gold", "value": -20 }, { "type": "heal", "value": 0.35, "target": "all" }] },
+          { "probability": 0.4, "description": "诗人被你的慷慨感动，分享了藏宝图的线索。", "effects": [{ "type": "gold", "value": -20 }, { "type": "gold", "value": 80 }] }
+        ]
+      },
+      {
+        "text": "请诗人加入队伍一段路程",
+        "outcomes": [
+          { "probability": 0.5, "description": "诗人的歌声鼓舞了士气！", "effects": [{ "type": "stat_boost", "value": 8 }, { "type": "heal", "value": 0.15, "target": "all" }] },
+          { "probability": 0.5, "description": "诗人婉拒了，但留下了一首励志歌曲。", "effects": [{ "type": "stat_boost", "value": 5 }] }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "ancient_golem",
+    "title": "远古魔像",
+    "description": "一座巨大的石制魔像挡住了去路，它的眼中闪烁着微弱的光芒...",
+    "choices": [
+      {
+        "text": "挑战魔像（全队损失10%HP）",
+        "outcomes": [
+          { "probability": 0.5, "description": "你们击败了魔像，在它体内发现了宝藏！", "effects": [{ "type": "damage", "value": 0.1, "target": "all" }, { "type": "gold", "value": 100 }, { "type": "stat_boost", "value": 10 }] },
+          { "probability": 0.3, "description": "魔像太强了，你们险些全灭。", "effects": [{ "type": "damage", "value": 0.25, "target": "all" }] },
+          { "probability": 0.2, "description": "魔像突然停止了活动，你们安全通过并获得遗物。", "effects": [{ "type": "damage", "value": 0.1, "target": "all" }, { "type": "relic", "value": 1, "relicId": "thick_skin" }] }
+        ]
+      },
+      {
+        "text": "寻找绕行的路",
+        "outcomes": [
+          { "probability": 0.7, "description": "你们找到了另一条路，途中发现了一些金币。", "effects": [{ "type": "gold", "value": 30 }] },
+          { "probability": 0.3, "description": "绕行路上遇到了伏击。", "effects": [{ "type": "damage", "value": 0.1, "target": "random" }] }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "merchant_caravan",
+    "title": "商人车队",
+    "description": "一支装满货物的商人车队停在路边休息，领队向你招手...",
+    "choices": [
+      {
+        "text": "购买补给（花费60金币）",
+        "outcomes": [
+          { "probability": 0.7, "description": "优质的补给恢复了队伍的元气！", "effects": [{ "type": "gold", "value": -60 }, { "type": "heal", "value": 0.5, "target": "all" }, { "type": "stat_boost", "value": 5 }] },
+          { "probability": 0.3, "description": "货物中还有一件珍稀物品！", "effects": [{ "type": "gold", "value": -60 }, { "type": "heal", "value": 0.3, "target": "all" }, { "type": "item", "value": 1 }] }
+        ]
+      },
+      {
+        "text": "帮商人护卫一段路（获得报酬）",
+        "outcomes": [
+          { "probability": 0.6, "description": "平安护送了车队，获得了丰厚报酬。", "effects": [{ "type": "gold", "value": 70 }] },
+          { "probability": 0.4, "description": "途中遭遇盗贼，但你们成功击退了他们。", "effects": [{ "type": "damage", "value": 0.1, "target": "random" }, { "type": "gold", "value": 90 }] }
+        ]
+      },
+      {
+        "text": "友好交谈后告别",
+        "outcomes": [
+          { "probability": 1.0, "description": "商人分享了一些旅途信息。", "effects": [{ "type": "gold", "value": 15 }] }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "mirror_pool",
+    "title": "镜之池",
+    "description": "一池完美平静的水面如同镜子一般，映射出你队伍的影像...",
+    "choices": [
+      {
+        "text": "触碰水面（复制金币效果）",
+        "outcomes": [
+          { "probability": 0.5, "description": "池水中的幻象变成了真正的金币！", "effects": [{ "type": "gold", "value": 80 }] },
+          { "probability": 0.3, "description": "幻象扭曲了，你失去了一些金币。", "effects": [{ "type": "gold", "value": -40 }] },
+          { "probability": 0.2, "description": "池水揭示了隐藏的宝藏！", "effects": [{ "type": "gold", "value": 120 }, { "type": "stat_boost", "value": 8 }] }
+        ]
+      },
+      {
+        "text": "凝视水面冥想",
+        "outcomes": [
+          { "probability": 0.6, "description": "冥想让你们的心灵得到了平静和力量。", "effects": [{ "type": "heal", "value": 0.25, "target": "all" }, { "type": "stat_boost", "value": 6 }] },
+          { "probability": 0.4, "description": "水面映出了未来的景象，让你们更加警觉。", "effects": [{ "type": "stat_boost", "value": 10 }] }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "spirit_guardian",
+    "title": "精灵守护者",
+    "description": "森林深处出现了一位发光的精灵守护者，她注视着你的队伍...",
+    "choices": [
+      {
+        "text": "请求守护者的祝福",
+        "outcomes": [
+          { "probability": 0.7, "description": "守护者施展了治愈之术！全队恢复并获得强化。", "effects": [{ "type": "heal", "value": 0.4, "target": "all" }, { "type": "stat_boost", "value": 10 }] },
+          { "probability": 0.3, "description": "守护者赐予了一件神圣遗物！", "effects": [{ "type": "heal", "value": 0.3, "target": "all" }, { "type": "relic", "value": 1, "relicId": "healers_blessing" }] }
+        ]
+      },
+      {
+        "text": "献上礼物（花费40金币）",
+        "outcomes": [
+          { "probability": 0.8, "description": "守护者被你的诚意打动，大幅强化了你的队伍！", "effects": [{ "type": "gold", "value": -40 }, { "type": "heal", "value": 0.5, "target": "all" }, { "type": "stat_boost", "value": 15 }] },
+          { "probability": 0.2, "description": "守护者温柔地微笑，归还了你的礼物。", "effects": [{ "type": "heal", "value": 0.3, "target": "all" }] }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "dark_bargain",
+    "title": "黑暗交易",
+    "description": "深渊裂缝中传来低沉的声音：\"献上你最强的战士，我赐予你毁灭之力...\"",
+    "choices": [
+      {
+        "text": "接受交易（牺牲最强英雄）",
+        "outcomes": [
+          { "probability": 0.7, "description": "英雄被深渊吞噬...但剩余队员获得了极大强化！", "effects": [{ "type": "sacrifice", "value": 1, "target": "random" }, { "type": "stat_boost", "value": 40 }, { "type": "relic", "value": 1, "relicId": "dark_grimoire" }] },
+          { "probability": 0.3, "description": "深渊背叛了你，英雄消失了但力量远不如预期。", "effects": [{ "type": "sacrifice", "value": 1, "target": "random" }, { "type": "stat_boost", "value": 15 }] }
+        ]
+      },
+      {
+        "text": "以金币替代（花费100金币）",
+        "outcomes": [
+          { "probability": 0.5, "description": "深渊勉强接受了金币，给了一些力量。", "effects": [{ "type": "gold", "value": -100 }, { "type": "stat_boost", "value": 20 }] },
+          { "probability": 0.5, "description": "金币被吞噬，深渊大笑着消失了。", "effects": [{ "type": "gold", "value": -100 }] }
+        ]
+      },
+      {
+        "text": "封闭裂缝离开",
+        "outcomes": [
+          { "probability": 1.0, "description": "你明智地选择远离深渊的诱惑。", "effects": [] }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "frozen_cavern",
+    "title": "冰封洞窟",
+    "description": "一个被永恒寒冰封印的洞窟，冰壁中隐约可见被封印的古老力量...",
+    "choices": [
+      {
+        "text": "破开冰壁探索深处",
+        "outcomes": [
+          { "probability": 0.4, "description": "你在冰层深处发现了一件冰霜遗物！", "effects": [{ "type": "relic", "value": 1, "relicId": "frost_core" }] },
+          { "probability": 0.3, "description": "冰层碎裂伤到了队伍，但你找到了冰晶宝石。", "effects": [{ "type": "damage", "value": 0.15, "target": "all" }, { "type": "gold", "value": 65 }] },
+          { "probability": 0.3, "description": "冰封的生物苏醒了，你被迫撤退！", "effects": [{ "type": "damage", "value": 0.2, "target": "all" }] }
+        ]
+      },
+      {
+        "text": "在洞口收集冰晶矿石",
+        "outcomes": [
+          { "probability": 0.7, "description": "你收集了不少珍贵的冰晶矿石。", "effects": [{ "type": "gold", "value": 45 }] },
+          { "probability": 0.3, "description": "冰晶散发的寒气恢复了你的伤势。", "effects": [{ "type": "heal", "value": 0.2, "target": "all" }, { "type": "gold", "value": 20 }] }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "thunder_dojo",
+    "title": "雷鸣道场",
+    "description": "山巅上一座古老的道场，雷电不断劈落在道场的避雷柱上，一位老者在此修炼...",
+    "choices": [
+      {
+        "text": "请求老者指导（消耗15%HP接受雷电试炼）",
+        "outcomes": [
+          { "probability": 0.6, "description": "你领悟了雷电之力！全队获得大幅强化。", "effects": [{ "type": "damage", "value": 0.15, "target": "all" }, { "type": "stat_boost", "value": 20 }] },
+          { "probability": 0.4, "description": "试炼太过艰难，但你也学到了一些。", "effects": [{ "type": "damage", "value": 0.15, "target": "all" }, { "type": "stat_boost", "value": 8 }] }
+        ]
+      },
+      {
+        "text": "在道场外观摩",
+        "outcomes": [
+          { "probability": 0.7, "description": "观察老者的修炼让你领悟了战斗技巧。", "effects": [{ "type": "stat_boost", "value": 10 }] },
+          { "probability": 0.3, "description": "老者注意到你，赠与一枚雷电护符。", "effects": [{ "type": "relic", "value": 1, "relicId": "thunder_amulet" }] }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "wandering_ice_mage",
+    "title": "流浪冰法师",
+    "description": "一位身披冰霜斗篷的法师在雪地中跋涉，她似乎正在寻找同伴...",
+    "choices": [
+      {
+        "text": "邀请她加入队伍",
+        "outcomes": [
+          { "probability": 0.6, "description": "冰霜法师被你的诚意打动，加入了队伍！", "effects": [{ "type": "recruit", "value": 1, "heroId": "ice_mage" }] },
+          { "probability": 0.4, "description": "她感谢你的好意，留下了一些补给后离开。", "effects": [{ "type": "heal", "value": 0.3, "target": "all" }, { "type": "gold", "value": 40 }] }
+        ]
+      },
+      {
+        "text": "与她交易（花费50金币获得冰霜知识）",
+        "outcomes": [
+          { "probability": 0.8, "description": "她传授了冰霜魔法的精髓！", "effects": [{ "type": "gold", "value": -50 }, { "type": "stat_boost", "value": 15 }] },
+          { "probability": 0.2, "description": "她额外赠与了一件冰霜饰品。", "effects": [{ "type": "gold", "value": -50 }, { "type": "stat_boost", "value": 15 }, { "type": "item", "value": 1 }] }
+        ]
+      },
+      {
+        "text": "友好地道别",
+        "outcomes": [
+          { "probability": 1.0, "description": "她微笑着点头，寒风中留下一丝冰晶。", "effects": [{ "type": "heal", "value": 0.1, "target": "all" }] }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "lost_training_ground",
+    "title": "失落的训练场",
+    "description": "一片被遗忘的古代训练场，训练用的魔法傀儡还在缓缓移动...",
+    "choices": [
+      {
+        "text": "利用傀儡进行训练",
+        "outcomes": [
+          { "probability": 0.5, "description": "高强度的训练让全队获得了大量经验！", "effects": [{ "type": "stat_boost", "value": 18 }] },
+          { "probability": 0.3, "description": "傀儡失控了！你们在混乱中学到了实战经验。", "effects": [{ "type": "damage", "value": 0.1, "target": "all" }, { "type": "stat_boost", "value": 25 }] },
+          { "probability": 0.2, "description": "训练平淡无奇，但也有所收获。", "effects": [{ "type": "stat_boost", "value": 8 }] }
+        ]
+      },
+      {
+        "text": "搜集训练场的魔法材料",
+        "outcomes": [
+          { "probability": 1.0, "description": "你拆解了一些魔法傀儡，获得了有价值的材料。", "effects": [{ "type": "gold", "value": 55 }] }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "dark_market",
+    "title": "暗黑集市",
+    "description": "一个隐藏在地下的非法集市，各种禁忌物品琳琅满目...",
+    "choices": [
+      {
+        "text": "购买禁忌药剂（花费70金币）",
+        "outcomes": [
+          { "probability": 0.5, "description": "强力药剂大幅提升了队伍的战斗力！", "effects": [{ "type": "gold", "value": -70 }, { "type": "stat_boost", "value": 22 }] },
+          { "probability": 0.3, "description": "药剂有副作用，但效果显著。", "effects": [{ "type": "gold", "value": -70 }, { "type": "damage", "value": 0.1, "target": "random" }, { "type": "stat_boost", "value": 30 }] },
+          { "probability": 0.2, "description": "假药！你被骗了。", "effects": [{ "type": "gold", "value": -70 }] }
+        ]
+      },
+      {
+        "text": "出售多余物品",
+        "outcomes": [
+          { "probability": 0.7, "description": "黑市商人给了你不错的价格。", "effects": [{ "type": "gold", "value": 60 }] },
+          { "probability": 0.3, "description": "商人非常满意，额外赠送了一件物品。", "effects": [{ "type": "gold", "value": 40 }, { "type": "item", "value": 1 }] }
+        ]
+      },
+      {
+        "text": "悄然离开",
+        "outcomes": [
+          { "probability": 1.0, "description": "这种地方还是少来为妙。", "effects": [] }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "elemental_rift",
+    "title": "元素裂隙",
+    "description": "一道不稳定的元素裂隙撕裂了空间，五种元素能量在其中翻涌...",
+    "choices": [
+      {
+        "text": "引导冰元素（随机英雄获得冰属性）",
+        "outcomes": [
+          { "probability": 0.8, "description": "冰之力量注入了一名英雄！", "effects": [{ "type": "transform", "value": 1, "element": "ice", "target": "random" }] },
+          { "probability": 0.2, "description": "元素失控，裂隙反噬！", "effects": [{ "type": "damage", "value": 0.15, "target": "all" }] }
+        ]
+      },
+      {
+        "text": "引导雷元素（随机英雄获得雷属性）",
+        "outcomes": [
+          { "probability": 0.8, "description": "雷之力量注入了一名英雄！", "effects": [{ "type": "transform", "value": 1, "element": "lightning", "target": "random" }] },
+          { "probability": 0.2, "description": "雷电失控，全队受到电击！", "effects": [{ "type": "damage", "value": 0.15, "target": "all" }] }
+        ]
+      },
+      {
+        "text": "收集裂隙中的元素碎片",
+        "outcomes": [
+          { "probability": 0.6, "description": "你安全地收集了大量元素碎片。", "effects": [{ "type": "gold", "value": 50 }, { "type": "stat_boost", "value": 8 }] },
+          { "probability": 0.4, "description": "碎片中蕴含的能量治愈了你的伤势。", "effects": [{ "type": "heal", "value": 0.25, "target": "all" }, { "type": "gold", "value": 30 }] }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "ancient_battlefield",
+    "title": "远古战场",
+    "description": "一片被遗忘的古代战场，到处散落着锈蚀的武器和残破的铠甲...",
+    "choices": [
+      {
+        "text": "搜刮战场遗物",
+        "outcomes": [
+          { "probability": 0.4, "description": "你找到了一件保存完好的遗物！", "effects": [{ "type": "item", "value": 1 }, { "type": "gold", "value": 30 }] },
+          { "probability": 0.4, "description": "大部分东西都生锈了，但还有一些值钱的。", "effects": [{ "type": "gold", "value": 65 }] },
+          { "probability": 0.2, "description": "亡灵被打扰了！", "effects": [{ "type": "damage", "value": 0.15, "target": "all" }, { "type": "gold", "value": 40 }] }
+        ]
+      },
+      {
+        "text": "在战场上举行祭祀（花费30金币）",
+        "outcomes": [
+          { "probability": 0.7, "description": "古代战士的灵魂被安抚，赐予你们祝福。", "effects": [{ "type": "gold", "value": -30 }, { "type": "stat_boost", "value": 15 }, { "type": "heal", "value": 0.2, "target": "all" }] },
+          { "probability": 0.3, "description": "祭祀非常成功！灵魂留下了珍贵的遗物。", "effects": [{ "type": "gold", "value": -30 }, { "type": "relic", "value": 1, "relicId": "warriors_belt" }] }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "holy_spring",
+    "title": "圣泉净化",
+    "description": "一处散发着圣洁光芒的泉水，传说能净化一切诅咒和伤痛...",
+    "choices": [
+      {
+        "text": "全队浸入圣泉净化",
+        "outcomes": [
+          { "probability": 0.7, "description": "圣泉的力量净化了你们的伤痛，全队完全恢复！", "effects": [{ "type": "heal", "value": 0.7, "target": "all" }] },
+          { "probability": 0.3, "description": "圣泉特别眷顾你们，不仅治愈还赐予了力量！", "effects": [{ "type": "heal", "value": 0.7, "target": "all" }, { "type": "stat_boost", "value": 12 }] }
+        ]
+      },
+      {
+        "text": "收集圣水出售",
+        "outcomes": [
+          { "probability": 1.0, "description": "圣水在外面能卖个好价钱。", "effects": [{ "type": "gold", "value": 50 }] }
+        ]
+      },
+      {
+        "text": "祈祷后离开",
+        "outcomes": [
+          { "probability": 1.0, "description": "短暂的祈祷让你心灵平静。", "effects": [{ "type": "heal", "value": 0.15, "target": "all" }] }
+        ]
+      }
+    ]
   }
 ]

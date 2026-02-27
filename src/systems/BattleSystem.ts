@@ -8,6 +8,8 @@ import { SkillSystem } from './SkillSystem';
 import { StatusEffectSystem } from './StatusEffectSystem';
 import { ComboSystem } from './ComboSystem';
 import { SynergySystem } from './SynergySystem';
+import { SkillQueueSystem } from './SkillQueueSystem';
+import { ActModifierSystem } from './ActModifierSystem';
 import { EventBus } from './EventBus';
 import { SeededRNG } from '../utils/rng';
 import { HeroData, HeroState, BattleResult } from '../types';
@@ -32,8 +34,11 @@ export class BattleSystem {
   skillSystem: SkillSystem;
   comboSystem: ComboSystem;
   synergySystem: SynergySystem;
+  skillQueue: SkillQueueSystem;
+  actModifier: ActModifierSystem | null = null;
   battleState: BattleState = 'fighting';
   speedMultiplier: number = 1;
+  isPaused: boolean = false;
   private rng: SeededRNG;
   private internalPhase: InternalPhase = 'preparing';
   private phaseTimer: number = 0;
@@ -46,6 +51,7 @@ export class BattleSystem {
     this.damageSystem = new DamageSystem(rng);
     this.damageSystem.comboSystem = this.comboSystem;
     this.skillSystem = new SkillSystem(rng, this.damageSystem);
+    this.skillQueue = new SkillQueueSystem();
   }
 
   /**
@@ -68,9 +74,9 @@ export class BattleSystem {
     TargetingSystem.resetThreat();
     this.comboSystem.reset();
 
-    // Initialize skills
+    // Initialize skills (with advancement for heroes based on level)
     for (const hero of heroes) {
-      this.skillSystem.initializeSkills(hero, hero.heroData.skills);
+      this.skillSystem.initializeSkills(hero, hero.heroData.skills, hero.level);
     }
     for (const enemy of enemies) {
       this.skillSystem.initializeSkills(enemy, enemy.enemyData.skills);
@@ -79,6 +85,11 @@ export class BattleSystem {
     // Calculate and apply synergy bonuses
     if (heroStates && heroDataMap) {
       this.applySynergies(heroStates, heroDataMap);
+    }
+
+    // Apply act modifiers if set
+    if (this.actModifier) {
+      this.actModifier.applyBattleStart(heroes, enemies);
     }
 
     // Emit battle:start event
@@ -117,7 +128,7 @@ export class BattleSystem {
    * Main battle update loop. Called every frame.
    */
   update(delta: number): void {
-    if (this.battleState !== 'fighting') return;
+    if (this.battleState !== 'fighting' || this.isPaused) return;
 
     const adjustedDelta = delta * this.speedMultiplier;
 
@@ -151,8 +162,17 @@ export class BattleSystem {
    * Core combat update loop.
    */
   private updateCombat(adjustedDelta: number): void {
+    // Reset per-frame distance cache
+    TargetingSystem.beginFrame(adjustedDelta);
+
     // Update combo timers
     this.comboSystem.update(adjustedDelta);
+
+    // Process auto-fired skills from queue
+    const autoFired = this.skillQueue.update(adjustedDelta);
+    for (const entry of autoFired) {
+      this.executeQueuedSkill(entry.unitId, entry.skillId);
+    }
 
     const allUnits: Unit[] = [...this.heroes, ...this.enemies];
 
@@ -166,8 +186,20 @@ export class BattleSystem {
       // 2. Tick skill cooldowns
       this.skillSystem.tickCooldowns(unit, adjustedDelta);
 
-      // 3. Skip if stunned
-      if (unit.isStunned()) continue;
+      // 3. Skip if stunned (emit interrupt if a skill was ready)
+      if (unit.isStunned()) {
+        for (const skill of unit.skills) {
+          if ((unit.skillCooldowns.get(skill.id) ?? 0) <= 0) {
+            EventBus.getInstance().emit('skill:interrupt', {
+              unitId: unit.unitId,
+              skillId: skill.id,
+              reason: 'stun',
+            });
+            break;
+          }
+        }
+        continue;
+      }
 
       // 4. Select target
       const isHeroUnit = unit.isHero;
@@ -185,7 +217,12 @@ export class BattleSystem {
         );
 
         if (readySkill) {
-          this.skillSystem.executeSkill(unit, readySkill, allies, enemies);
+          // Hero skills go through queue (semi_auto/manual), enemies fire directly
+          if (this.skillQueue.shouldQueueSkill(unit, readySkill)) {
+            // Skill was queued — don't execute yet
+          } else {
+            this.skillSystem.executeSkill(unit, readySkill, allies, enemies);
+          }
         } else {
           // Normal attack
           this.tickAttack(unit, adjustedDelta, enemies);
@@ -199,8 +236,43 @@ export class BattleSystem {
     // Separate overlapping units
     MovementSystem.separateUnits(allUnits);
 
+    // Tick act modifiers
+    if (this.actModifier) {
+      this.actModifier.tick(adjustedDelta, this.heroes, this.enemies);
+    }
+
     // Check win/lose
     this.checkBattleEnd();
+  }
+
+  /**
+   * Execute a skill from the queue by unitId + skillId lookup.
+   * Optionally override target by temporarily swapping unit.target.
+   */
+  executeQueuedSkill(unitId: string, skillId: string, targetId?: string): void {
+    const hero = this.heroes.find(h => h.unitId === unitId && h.isAlive);
+    if (!hero) return;
+
+    const skill = hero.skills.find(s => s.id === skillId);
+    if (!skill) return;
+
+    const allies = this.heroes as Unit[];
+    const enemies = this.enemies as Unit[];
+
+    // Override target if specified
+    if (targetId) {
+      const allUnits = [...allies, ...enemies];
+      const overrideTarget = allUnits.find(u => u.unitId === targetId && u.isAlive);
+      if (overrideTarget) {
+        const savedTarget = hero.target;
+        hero.target = overrideTarget;
+        this.skillSystem.executeSkill(hero, skill, allies, enemies);
+        hero.target = savedTarget;
+        return;
+      }
+    }
+
+    this.skillSystem.executeSkill(hero, skill, allies, enemies);
   }
 
   private tickAttack(unit: Unit, delta: number, enemies: Unit[]): void {

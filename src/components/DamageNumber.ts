@@ -1,7 +1,8 @@
 import Phaser from 'phaser';
 import { DAMAGE_NUMBER_DURATION, DAMAGE_NUMBER_RISE } from '../constants';
-import { Theme, colorToString } from '../ui/Theme';
+import { Theme, colorToString, getElementColor } from '../ui/Theme';
 import { ElementType } from '../types';
+import { ANIM, SCALE, PARTICLE, DEPTH, UI_THRESHOLDS } from '../config/visual';
 
 export interface DamageNumberConfig {
   isHeal?: boolean;
@@ -21,14 +22,15 @@ export class DamageNumber extends Phaser.GameObjects.Text {
     element?: ElementType,
     comboCount?: number,
   ) {
-    // Build display text
+    // Build display text with element symbol for accessibility
+    const elemSym = element ? (Theme.colors.elementSymbol[element] ?? '') : '';
     let displayText: string;
     if (isHeal) {
       displayText = `+${amount}`;
     } else if (isCrit) {
-      displayText = `CRIT! ${amount}`;
+      displayText = `CRIT! ${elemSym}${amount}`;
     } else {
-      displayText = `${amount}`;
+      displayText = elemSym ? `${elemSym}${amount}` : `${amount}`;
     }
 
     // Determine color
@@ -37,14 +39,14 @@ export class DamageNumber extends Phaser.GameObjects.Text {
       color = colorToString(Theme.colors.success);
     } else if (isCrit) {
       color = colorToString(Theme.colors.secondary);
-    } else if (element && Theme.colors.element[element]) {
-      color = colorToString(Theme.colors.element[element]);
+    } else if (element) {
+      color = colorToString(getElementColor(element));
     } else {
       color = '#ffffff';
     }
 
     // Font size: crit is 1.5x larger
-    const baseFontSize = isCrit ? 20 : 13;
+    const baseFontSize = isCrit ? 24 : 16;
     const fontSize = `${baseFontSize}px`;
 
     super(scene, x, y, displayText, {
@@ -75,22 +77,43 @@ export class DamageNumber extends Phaser.GameObjects.Text {
       },
     });
 
-    // Crit: extra scale punch
+    // Crit: extra scale punch + sparkle particles
     if (isCrit) {
-      this.setScale(1.4);
+      this.setScale(SCALE.CRIT_INITIAL);
       scene.tweens.add({
         targets: this,
         scaleX: 1,
         scaleY: 1,
-        duration: 200,
+        duration: ANIM.CRIT_SCALE,
         ease: 'Back.easeOut',
       });
+
+      // Sparkle particles around crit text
+      for (let s = 0; s < PARTICLE.SPARKLE_COUNT; s++) {
+        const sparkle = scene.add.text(
+          x + (Math.random() - 0.5) * 30,
+          y + (Math.random() - 0.5) * 20,
+          '*',
+          { fontSize: '12px', color: '#ffd700', fontFamily: 'monospace', stroke: '#000000', strokeThickness: 1 },
+        ).setOrigin(0.5).setDepth(DEPTH.DAMAGE_NUMBER);
+        scene.tweens.add({
+          targets: sparkle,
+          x: sparkle.x + (Math.random() - 0.5) * 40,
+          y: sparkle.y - 20 - Math.random() * 20,
+          alpha: 0,
+          scaleX: 0.3,
+          scaleY: 0.3,
+          duration: 400 + Math.random() * 200,
+          ease: 'Sine.easeOut',
+          onComplete: () => sparkle.destroy(),
+        });
+      }
     }
 
     // Combo display
-    if (comboCount && comboCount >= 5) {
+    if (comboCount && comboCount >= UI_THRESHOLDS.COMBO_DISPLAY_MIN) {
       const comboText = scene.add.text(x, y + 14, `x${comboCount} COMBO!`, {
-        fontSize: '9px',
+        fontSize: '10px',
         color: colorToString(Theme.colors.secondary),
         fontFamily: 'monospace',
         fontStyle: 'bold',

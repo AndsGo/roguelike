@@ -358,5 +358,215 @@
     },
     "skills": ["ice_bolt", "frost_nova"],
     "spriteKey": "hero_frost_ranger"
+  },
+  {
+    "id": "beast_warden",
+    "name": "野兽守护者",
+    "role": "tank",
+    "element": null,
+    "race": "beast",
+    "class": "warrior",
+    "baseStats": {
+      "maxHp": 880,
+      "hp": 880,
+      "attack": 40,
+      "defense": 42,
+      "magicPower": 0,
+      "magicResist": 28,
+      "speed": 85,
+      "attackSpeed": 0.8,
+      "attackRange": 45,
+      "critChance": 0.06,
+      "critDamage": 1.5
+    },
+    "scalingPerLevel": {
+      "maxHp": 75,
+      "attack": 4,
+      "defense": 6,
+      "magicPower": 0,
+      "magicResist": 3
+    },
+    "skills": ["beast_charge", "primal_roar"],
+    "spriteKey": "hero_beast_warden"
+  },
+  {
+    "id": "dragon_knight",
+    "name": "龙裔骑士",
+    "role": "melee_dps",
+    "element": "fire",
+    "race": "dragon",
+    "class": "paladin",
+    "baseStats": {
+      "maxHp": 620,
+      "hp": 620,
+      "attack": 52,
+      "defense": 30,
+      "magicPower": 35,
+      "magicResist": 25,
+      "speed": 90,
+      "attackSpeed": 1.0,
+      "attackRange": 50,
+      "critChance": 0.12,
+      "critDamage": 1.7
+    },
+    "scalingPerLevel": {
+      "maxHp": 40,
+      "attack": 7,
+      "defense": 3,
+      "magicPower": 4,
+      "magicResist": 2
+    },
+    "skills": ["dragon_breath", "dragon_guard"],
+    "spriteKey": "hero_dragon_knight"
+  },
+  {
+    "id": "shadow_weaver",
+    "name": "暗影织者",
+    "role": "ranged_dps",
+    "element": "dark",
+    "race": "undead",
+    "class": "mage",
+    "baseStats": {
+      "maxHp": 420,
+      "hp": 420,
+      "attack": 10,
+      "defense": 16,
+      "magicPower": 72,
+      "magicResist": 30,
+      "speed": 82,
+      "attackSpeed": 0.9,
+      "attackRange": 220,
+      "critChance": 0.1,
+      "critDamage": 1.8
+    },
+    "scalingPerLevel": {
+      "maxHp": 24,
+      "attack": 1,
+      "defense": 1,
+      "magicPower": 10,
+      "magicResist": 3
+    },
+    "skills": ["shadow_weave", "dark_mend"],
+    "spriteKey": "hero_shadow_weaver"
+  },
+  {
+    "id": "storm_caller",
+    "name": "风暴召唤师",
+    "role": "ranged_dps",
+    "element": "lightning",
+    "race": "beast",
+    "class": "ranger",
+    "baseStats": {
+      "maxHp": 440,
+      "hp": 440,
+      "attack": 55,
+      "defense": 16,
+      "magicPower": 45,
+      "magicResist": 18,
+      "speed": 112,
+      "attackSpeed": 1.3,
+      "attackRange": 250,
+      "critChance": 0.2,
+      "critDamage": 1.9
+    },
+    "scalingPerLevel": {
+      "maxHp": 28,
+      "attack": 7,
+      "defense": 1,
+      "magicPower": 5,
+      "magicResist": 2
+    },
+    "skills": ["storm_arrow", "wind_wall"],
+    "spriteKey": "hero_storm_caller"
+  },
+  {
+    "id": "holy_sentinel",
+    "name": "圣光哨兵",
+    "role": "healer",
+    "element": "holy",
+    "race": "human",
+    "class": "cleric",
+    "baseStats": {
+      "maxHp": 540,
+      "hp": 540,
+      "attack": 18,
+      "defense": 28,
+      "magicPower": 68,
+      "magicResist": 38,
+      "speed": 78,
+      "attackSpeed": 0.75,
+      "attackRange": 200,
+      "critChance": 0.06,
+      "critDamage": 1.5
+    },
+    "scalingPerLevel": {
+      "maxHp": 36,
+      "attack": 1,
+      "defense": 3,
+      "magicPower": 9,
+      "magicResist": 4
+    },
+    "skills": ["holy_barrier", "smite"],
+    "spriteKey": "hero_holy_sentinel"
+  },
+  {
+    "id": "ice_mage",
+    "name": "冰霜法师",
+    "role": "ranged_dps",
+    "element": "ice",
+    "race": "human",
+    "class": "mage",
+    "baseStats": {
+      "maxHp": 410,
+      "hp": 410,
+      "attack": 12,
+      "defense": 16,
+      "magicPower": 70,
+      "magicResist": 26,
+      "speed": 82,
+      "attackSpeed": 0.85,
+      "attackRange": 220,
+      "critChance": 0.1,
+      "critDamage": 1.7
+    },
+    "scalingPerLevel": {
+      "maxHp": 26,
+      "attack": 1,
+      "defense": 1,
+      "magicPower": 10,
+      "magicResist": 3
+    },
+    "skills": ["blizzard", "ice_lance"],
+    "spriteKey": "hero_ice_mage"
+  },
+  {
+    "id": "thunder_monk",
+    "name": "雷霆武僧",
+    "role": "melee_dps",
+    "element": "lightning",
+    "race": "demon",
+    "class": "warrior",
+    "baseStats": {
+      "maxHp": 550,
+      "hp": 550,
+      "attack": 50,
+      "defense": 24,
+      "magicPower": 30,
+      "magicResist": 20,
+      "speed": 110,
+      "attackSpeed": 1.3,
+      "attackRange": 50,
+      "critChance": 0.15,
+      "critDamage": 1.8
+    },
+    "scalingPerLevel": {
+      "maxHp": 35,
+      "attack": 7,
+      "defense": 2,
+      "magicPower": 3,
+      "magicResist": 2
+    },
+    "skills": ["thunder_fist", "static_field"],
+    "spriteKey": "hero_thunder_monk"
   }
 ]

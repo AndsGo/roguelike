@@ -28,9 +28,9 @@ export const MAX_LEVEL = 20;
 
 export const STARTING_GOLD = 80;
 export const NORMAL_BATTLE_GOLD_MIN = 12;
-export const NORMAL_BATTLE_GOLD_MAX = 22;
+export const NORMAL_BATTLE_GOLD_MAX = 18;
 export const ELITE_BATTLE_GOLD_MIN = 40;
-export const ELITE_BATTLE_GOLD_MAX = 80;
+export const ELITE_BATTLE_GOLD_MAX = 65;
 export const BOSS_BATTLE_GOLD = 120;
 
 // ============ Map ============

@@ -1,5 +1,7 @@
 import Phaser from 'phaser';
 import { GAME_WIDTH, GAME_HEIGHT } from '../constants';
+import { AudioManager, BGM_KEYS, SFX_KEYS } from '../systems/AudioManager';
+import { SaveManager } from '../managers/SaveManager';
 
 export class BootScene extends Phaser.Scene {
   constructor() {
@@ -33,12 +35,37 @@ export class BootScene extends Phaser.Scene {
       loadingText.setText('Loading complete!');
     });
 
-    // No actual assets to load yet — using placeholder shapes
-    // When we have real assets, load them here:
-    // this.load.spritesheet('hero_warrior', 'assets/sprites/heroes/warrior.png', { frameWidth: 32, frameHeight: 32 });
+    // Load audio assets (placeholder .ogg files)
+    for (const key of BGM_KEYS) {
+      this.load.audio(key, `audio/${key}.ogg`);
+    }
+    for (const key of SFX_KEYS) {
+      this.load.audio(key, `audio/${key}.ogg`);
+    }
   }
 
   create(): void {
+    // Check localStorage availability
+    if (!SaveManager.isStorageAvailable()) {
+      this.showStorageWarning();
+    }
+
+    // Initialize audio manager
+    AudioManager.getInstance().init(this.game);
+
     this.scene.start('MainMenuScene');
+  }
+
+  private showStorageWarning(): void {
+    const msg = this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 + 40,
+      '⚠ 存储不可用 - 游戏进度将无法保存', {
+        fontSize: '12px',
+        color: '#ff8844',
+        fontFamily: 'monospace',
+      }).setOrigin(0.5);
+
+    this.time.delayedCall(3000, () => {
+      msg.destroy();
+    });
   }
 }

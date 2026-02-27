@@ -188,6 +188,53 @@ describe('SynergySystem', () => {
     expect(synergy.getActiveSynergies()).toEqual([]);
   });
 
+  it('activates ice element synergy with 2 ice heroes', () => {
+    const heroes: HeroState[] = [makeHeroState('h1'), makeHeroState('h2')];
+    const dataMap = new Map<string, HeroData>([
+      ['h1', makeHeroData('h1', { element: 'ice' })],
+      ['h2', makeHeroData('h2', { element: 'ice' })],
+    ]);
+
+    const result = synergy.calculateActiveSynergies(heroes, dataMap);
+    const iceSynergy = result.activeSynergies.find(s => s.synergyId === 'synergy_ice');
+    expect(iceSynergy).toBeDefined();
+    expect(iceSynergy!.count).toBe(2);
+    expect(iceSynergy!.activeThreshold).toBe(2);
+
+    const dmgBonus = result.damageBonuses.get('ice');
+    expect(dmgBonus).toBe(0.15);
+  });
+
+  it('activates lightning element synergy with 2 lightning heroes', () => {
+    const heroes: HeroState[] = [makeHeroState('h1'), makeHeroState('h2')];
+    const dataMap = new Map<string, HeroData>([
+      ['h1', makeHeroData('h1', { element: 'lightning' })],
+      ['h2', makeHeroData('h2', { element: 'lightning' })],
+    ]);
+
+    const result = synergy.calculateActiveSynergies(heroes, dataMap);
+    const lightningSynergy = result.activeSynergies.find(s => s.synergyId === 'synergy_lightning');
+    expect(lightningSynergy).toBeDefined();
+    expect(lightningSynergy!.count).toBe(2);
+
+    const dmgBonus = result.damageBonuses.get('lightning');
+    expect(dmgBonus).toBe(0.15);
+  });
+
+  it('ice synergy damage multiplier applies correctly', () => {
+    const heroes: HeroState[] = [makeHeroState('h1'), makeHeroState('h2')];
+    const dataMap = new Map<string, HeroData>([
+      ['h1', makeHeroData('h1', { element: 'ice' })],
+      ['h2', makeHeroData('h2', { element: 'ice' })],
+    ]);
+
+    synergy.calculateActiveSynergies(heroes, dataMap);
+    const mult = synergy.getSynergyDamageMultiplier('ice');
+    expect(mult).toBeCloseTo(1.15);
+    // Non-ice element should be unaffected
+    expect(synergy.getSynergyDamageMultiplier('fire')).toBeCloseTo(1.0);
+  });
+
   it('getSynergyDamageMultiplier includes element-specific and all bonuses', () => {
     const heroes: HeroState[] = [
       makeHeroState('h1'), makeHeroState('h2'),

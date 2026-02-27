@@ -10,6 +10,7 @@ import { RestScene } from './scenes/RestScene';
 import { RewardScene } from './scenes/RewardScene';
 import { GameOverScene } from './scenes/GameOverScene';
 import { VictoryScene } from './scenes/VictoryScene';
+import { SettingsScene } from './scenes/SettingsScene';
 
 export const gameConfig: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO,
@@ -39,6 +40,7 @@ export const gameConfig: Phaser.Types.Core.GameConfig = {
     RewardScene,
     GameOverScene,
     VictoryScene,
+    SettingsScene,
   ],
   backgroundColor: '#1a1a2e',
 };

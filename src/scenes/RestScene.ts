@@ -82,6 +82,10 @@ export class RestScene extends Phaser.Scene {
     }, Theme.colors.success);
   }
 
+  shutdown(): void {
+    this.tweens.killAll();
+  }
+
   private showHealedStatus(rm: RunManager): void {
     this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, Theme.colors.background);
 

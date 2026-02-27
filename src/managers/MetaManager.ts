@@ -1,6 +1,7 @@
 import { MetaProgressionData, PermanentUpgrade } from '../types';
 import { SaveManager } from './SaveManager';
 import { EventBus } from '../systems/EventBus';
+import { ErrorHandler } from '../systems/ErrorHandler';
 
 /**
  * Singleton managing cross-run permanent progression.
@@ -12,11 +13,11 @@ export class MetaManager {
 
   /** Cost per level for each upgrade (meta currency) */
   private static UPGRADE_COSTS: Record<string, number[]> = {
-    starting_gold: [50, 100, 200, 400, 800],
-    starting_hp: [50, 100, 200, 400, 800],
-    exp_bonus: [50, 100, 200, 400, 800],
-    crit_bonus: [100, 300, 600],
-    relic_chance: [100, 300, 600],
+    starting_gold: [50, 80, 150, 300, 600],
+    starting_hp: [50, 80, 150, 300, 600],
+    exp_bonus: [50, 80, 150, 300, 600],
+    crit_bonus: [80, 200, 450],
+    relic_chance: [80, 200, 450],
   };
 
   /** Effect values per level for each upgrade */
@@ -51,7 +52,12 @@ export class MetaManager {
     if (!MetaManager.instance) {
       MetaManager.instance = new MetaManager();
       MetaManager.instance.meta = SaveManager.loadMeta();
+      // Ensure metaCurrency field exists (for old saves)
+      if (MetaManager.instance.meta.metaCurrency == null) {
+        MetaManager.instance.meta.metaCurrency = 0;
+      }
       MetaManager.instance.ensureUpgradeState();
+      MetaManager.instance.migrateLegacyCurrency();
     }
     return MetaManager.instance;
   }
@@ -150,25 +156,32 @@ export class MetaManager {
   }
 
   // ---- Meta Currency ----
-  // Stored in localStorage under a separate key since MetaProgressionData
-  // doesn't have a dedicated field. We piggyback on the meta save.
 
-  private static CURRENCY_KEY = 'roguelike_meta_currency';
+  private static LEGACY_CURRENCY_KEY = 'roguelike_meta_currency';
 
   static getMetaCurrency(): number {
-    try {
-      const raw = localStorage.getItem(MetaManager.CURRENCY_KEY);
-      if (!raw) return 0;
-      return parseInt(raw, 10) || 0;
-    } catch {
-      return 0;
-    }
+    return MetaManager.getInstance().meta.metaCurrency ?? 0;
   }
 
   static addMetaCurrency(amount: number): void {
-    const current = MetaManager.getMetaCurrency();
-    const newAmount = Math.max(0, current + amount);
-    localStorage.setItem(MetaManager.CURRENCY_KEY, newAmount.toString());
+    const inst = MetaManager.getInstance();
+    inst.meta.metaCurrency = Math.max(0, (inst.meta.metaCurrency ?? 0) + amount);
+    inst.persist();
+  }
+
+  /** Migrate legacy currency from separate localStorage key into meta object */
+  private migrateLegacyCurrency(): void {
+    try {
+      const raw = localStorage.getItem(MetaManager.LEGACY_CURRENCY_KEY);
+      if (raw) {
+        const legacy = parseInt(raw, 10) || 0;
+        this.meta.metaCurrency = (this.meta.metaCurrency ?? 0) + legacy;
+        localStorage.removeItem(MetaManager.LEGACY_CURRENCY_KEY);
+        this.persist();
+      }
+    } catch {
+      ErrorHandler.report('warn', 'MetaManager', 'failed to migrate legacy currency');
+    }
   }
 
   // ---- Run Statistics ----
@@ -218,5 +231,22 @@ export class MetaManager {
 
   static hasAchievement(achievementId: string): boolean {
     return MetaManager.getInstance().meta.achievements.includes(achievementId);
+  }
+
+  /** Reset all meta progression to defaults */
+  static resetAll(): void {
+    const inst = MetaManager.getInstance();
+    inst.meta = SaveManager.loadMeta();
+    // Override with defaults
+    inst.meta.totalRuns = 0;
+    inst.meta.totalVictories = 0;
+    inst.meta.highestFloor = 0;
+    inst.meta.unlockedHeroes = ['warrior', 'archer', 'mage'];
+    inst.meta.unlockedRelics = [];
+    inst.meta.permanentUpgrades = [];
+    inst.meta.achievements = [];
+    inst.meta.metaCurrency = 0;
+    inst.ensureUpgradeState();
+    inst.persist();
   }
 }

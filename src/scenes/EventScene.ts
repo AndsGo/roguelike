@@ -1,13 +1,13 @@
 import Phaser from 'phaser';
 import { GAME_WIDTH, GAME_HEIGHT } from '../constants';
 import { RunManager } from '../managers/RunManager';
-import { EventData, EventChoice, EventOutcome, EventNodeData } from '../types';
+import { EventData, EventChoice, EventOutcome, EventNodeData, ElementType } from '../types';
 import { Button } from '../ui/Button';
 import { Theme, colorToString } from '../ui/Theme';
 import { SceneTransition } from '../systems/SceneTransition';
 import { SaveManager } from '../managers/SaveManager';
 import eventsData from '../data/events.json';
-import { UI } from '../i18n';
+import { UI, getHeroDisplayName } from '../i18n';
 
 export class EventScene extends Phaser.Scene {
   private nodeIndex!: number;
@@ -38,22 +38,29 @@ export class EventScene extends Phaser.Scene {
       event = rng.pick(eventPool);
     }
 
-    // Title
-    this.add.text(GAME_WIDTH / 2, 38, event.title, {
+    // === Cinematic entry sequence ===
+
+    // Letterbox bars
+    const barHeight = 40;
+    const topBar = this.add.rectangle(GAME_WIDTH / 2, barHeight / 2, GAME_WIDTH, barHeight, 0x000000).setDepth(50);
+    const bottomBar = this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT - barHeight / 2, GAME_WIDTH, barHeight, 0x000000).setDepth(50);
+
+    // Title (starts invisible)
+    const title = this.add.text(GAME_WIDTH / 2, 38, event.title, {
       fontSize: '18px',
       color: colorToString(Theme.colors.node.event),
       fontFamily: 'monospace',
       fontStyle: 'bold',
-    }).setOrigin(0.5);
+    }).setOrigin(0.5).setAlpha(0);
 
-    // Description
-    this.add.text(GAME_WIDTH / 2, 85, event.description, {
+    // Description (starts invisible)
+    const desc = this.add.text(GAME_WIDTH / 2, 85, event.description, {
       fontSize: '11px',
       color: '#cccccc',
       fontFamily: 'monospace',
       wordWrap: { width: 600 },
       align: 'center',
-    }).setOrigin(0.5);
+    }).setOrigin(0.5).setAlpha(0);
 
     // Gold display
     this.add.text(GAME_WIDTH - 15, 12, `${rm.getGold()}G`, {
@@ -62,18 +69,116 @@ export class EventScene extends Phaser.Scene {
       fontFamily: 'monospace',
     }).setOrigin(1, 0);
 
-    // Choices
+    // Step 1: Title fade-in (200ms delay)
+    this.tweens.add({
+      targets: title,
+      alpha: 1,
+      duration: 400,
+      delay: 200,
+      ease: 'Sine.easeOut',
+    });
+
+    // Step 2: Description fade-in (400ms delay)
+    this.tweens.add({
+      targets: desc,
+      alpha: 1,
+      duration: 300,
+      delay: 400,
+      ease: 'Sine.easeOut',
+    });
+
+    // Step 3: Letterbox bars slide away (600ms delay)
+    this.tweens.add({
+      targets: topBar,
+      y: -barHeight / 2,
+      duration: 400,
+      delay: 600,
+      ease: 'Sine.easeInOut',
+      onComplete: () => topBar.destroy(),
+    });
+    this.tweens.add({
+      targets: bottomBar,
+      y: GAME_HEIGHT + barHeight / 2,
+      duration: 400,
+      delay: 600,
+      ease: 'Sine.easeInOut',
+      onComplete: () => bottomBar.destroy(),
+    });
+
+    // Step 4: Choices stagger in (700ms + i*120ms)
+    const choiceElements: Phaser.GameObjects.GameObject[] = [];
     event.choices.forEach((choice, i) => {
-      new Button(
+      const btnY = 165 + i * 55;
+      const btn = new Button(
         this,
         GAME_WIDTH / 2,
-        165 + i * 55,
+        btnY,
         choice.text,
         400,
         40,
         () => this.makeChoice(choice, rng, rm),
       );
+      btn.setAlpha(0);
+      choiceElements.push(btn);
+
+      this.tweens.add({
+        targets: btn,
+        alpha: 1,
+        y: { from: btnY + 15, to: btnY },
+        duration: 300,
+        delay: 700 + i * 120,
+        ease: 'Back.easeOut',
+      });
+
+      // Show probability hints for multi-outcome choices
+      if (choice.outcomes.length > 1) {
+        const hints = choice.outcomes.map(o => {
+          const pct = Math.round(o.probability * 100);
+          const label = this.getOutcomeSentiment(o);
+          return `${UI.event.probability(pct)} ${label}`;
+        });
+        const hintText = this.add.text(GAME_WIDTH / 2, btnY + 24, hints.join('  |  '), {
+          fontSize: '8px',
+          color: '#888899',
+          fontFamily: 'monospace',
+          align: 'center',
+        }).setOrigin(0.5).setAlpha(0);
+
+        this.tweens.add({
+          targets: hintText,
+          alpha: 1,
+          duration: 200,
+          delay: 800 + i * 120,
+          ease: 'Sine.easeOut',
+        });
+      }
     });
+  }
+
+  /** Classify an outcome as positive/negative/neutral based on its effects. */
+  private getOutcomeSentiment(outcome: EventOutcome): string {
+    let positive = 0;
+    let negative = 0;
+    for (const e of outcome.effects) {
+      switch (e.type) {
+        case 'gold':
+          if (e.value > 0) positive++; else if (e.value < 0) negative++;
+          break;
+        case 'heal': case 'stat_boost': case 'relic': case 'item': case 'recruit':
+          positive++;
+          break;
+        case 'damage': case 'sacrifice':
+          negative++;
+          break;
+        case 'transform':
+          positive++;
+          break;
+      }
+    }
+    if (positive > 0 && negative > 0) return '风险';
+    if (negative > 0) return '危险';
+    if (positive > 0) return '有利';
+    return '无事';
   }
 
   private makeChoice(choice: EventChoice, rng: ReturnType<RunManager['getRng']>, rm: RunManager): void {
@@ -113,6 +218,25 @@ export class EventScene extends Phaser.Scene {
         case 'item':
           rm.addGold(effect.value || 30);
           break;
+        case 'transform':
+          if (effect.element) {
+            rm.setTemporaryElement(effect.element as ElementType);
+          }
+          break;
+        case 'sacrifice': {
+          const heroes = rm.getHeroes();
+          if (heroes.length > 1) {
+            const rngLocal = rm.getRng();
+            const victim = rngLocal.pick(heroes);
+            rm.removeHero(victim.id);
+          }
+          break;
+        }
+        case 'recruit':
+          if (effect.heroId) {
+            rm.addHero(effect.heroId);
+          }
+          break;
       }
     }
 
@@ -133,8 +257,24 @@ export class EventScene extends Phaser.Scene {
     });
   }
 
+  shutdown(): void {
+    this.tweens.killAll();
+  }
+
   private showOutcome(outcome: EventOutcome): void {
     this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, Theme.colors.background);
+
+    // Brief sentiment flash
+    const sentiment = this.getOutcomeSentiment(outcome);
+    const flashColor = sentiment === '有利' ? 0x44ff44 : sentiment === '危险' ? 0xff4444 : sentiment === '风险' ? 0xffaa44 : 0xffffff;
+    const flash = this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, flashColor, 0.2).setDepth(10);
+    this.tweens.add({
+      targets: flash,
+      alpha: 0,
+      duration: 400,
+      ease: 'Sine.easeOut',
+      onComplete: () => flash.destroy(),
+    });
 
     const outcomeText = this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 - 40, outcome.description, {
       fontSize: '14px',
@@ -152,6 +292,9 @@ export class EventScene extends Phaser.Scene {
         case 'stat_boost': return UI.event.statBoost(e.value);
         case 'relic': return UI.event.relicAcquired(e.relicId ?? 'unknown');
         case 'item': return UI.event.itemGold(e.value || 30);
+        case 'transform': return `元素转化: ${e.element ?? '未知'}`;
+        case 'sacrifice': return '献祭了一名英雄';
+        case 'recruit': return `招募: ${getHeroDisplayName(e.heroId ?? '')}`;
         default: return '';
       }
     }).filter(Boolean);

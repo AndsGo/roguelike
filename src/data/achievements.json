@@ -1,0 +1,236 @@
+[
+  {
+    "id": "first_victory",
+    "name": "首次胜利",
+    "description": "赢得第一次冒险",
+    "icon": "trophy",
+    "reward": { "type": "meta_currency", "value": 100 },
+    "conditionType": "meta_victories",
+    "conditionParams": { "threshold": 1 }
+  },
+  {
+    "id": "veteran",
+    "name": "老兵",
+    "description": "完成10次冒险",
+    "icon": "medal",
+    "reward": { "type": "meta_currency", "value": 200 },
+    "conditionType": "meta_runs",
+    "conditionParams": { "threshold": 10 }
+  },
+  {
+    "id": "speedrun",
+    "name": "速通达人",
+    "description": "在15个节点内赢得一次冒险",
+    "icon": "lightning",
+    "reward": { "type": "meta_currency", "value": 300 },
+    "conditionType": "custom",
+    "conditionParams": {}
+  },
+  {
+    "id": "no_death",
+    "name": "完美无瑕",
+    "description": "在零英雄阵亡的情况下赢得冒险",
+    "icon": "shield",
+    "reward": { "type": "meta_currency", "value": 500 },
+    "conditionType": "custom",
+    "conditionParams": {}
+  },
+  {
+    "id": "all_heroes",
+    "name": "收藏家",
+    "description": "解锁所有英雄",
+    "icon": "star",
+    "reward": { "type": "meta_currency", "value": 500 },
+    "conditionType": "heroes_count",
+    "conditionParams": { "threshold": 5 }
+  },
+  {
+    "id": "floor_10",
+    "name": "深入探索",
+    "description": "到达第10层",
+    "icon": "map",
+    "reward": { "type": "meta_currency", "value": 100 },
+    "conditionType": "meta_floor",
+    "conditionParams": { "threshold": 10 }
+  },
+  {
+    "id": "floor_15",
+    "name": "地牢大师",
+    "description": "到达第15层",
+    "icon": "crown",
+    "reward": { "type": "meta_currency", "value": 200 },
+    "conditionType": "meta_floor",
+    "conditionParams": { "threshold": 15 }
+  },
+  {
+    "id": "combo_10",
+    "name": "连击大师",
+    "description": "达成10连击",
+    "icon": "fire",
+    "reward": { "type": "meta_currency", "value": 50 },
+    "conditionType": "stat_combo",
+    "conditionParams": { "threshold": 10 }
+  },
+  {
+    "id": "combo_20",
+    "name": "连击之神",
+    "description": "达成20连击",
+    "icon": "fire",
+    "reward": { "type": "meta_currency", "value": 150 },
+    "conditionType": "stat_combo",
+    "conditionParams": { "threshold": 20 }
+  },
+  {
+    "id": "overkill",
+    "name": "过度杀伤",
+    "description": "单次攻击造成500+伤害",
+    "icon": "sword",
+    "reward": { "type": "meta_currency", "value": 50 },
+    "conditionType": "stat_damage",
+    "conditionParams": { "threshold": 500 }
+  },
+  {
+    "id": "healer_1000",
+    "name": "守护天使",
+    "description": "单次冒险中治疗1000+",
+    "icon": "heart",
+    "reward": { "type": "meta_currency", "value": 50 },
+    "conditionType": "stat_healing",
+    "conditionParams": { "threshold": 1000 }
+  },
+  {
+    "id": "kill_100",
+    "name": "屠戮者",
+    "description": "单次冒险中击杀100个敌人",
+    "icon": "skull",
+    "reward": { "type": "meta_currency", "value": 100 },
+    "conditionType": "stat_kills",
+    "conditionParams": { "threshold": 100 }
+  },
+  {
+    "id": "skill_50",
+    "name": "法术连发",
+    "description": "单次冒险中使用50个技能",
+    "icon": "magic",
+    "reward": { "type": "meta_currency", "value": 50 },
+    "conditionType": "stat_skills",
+    "conditionParams": { "threshold": 50 }
+  },
+  {
+    "id": "elite_hunter",
+    "name": "精英猎手",
+    "description": "单次冒险中击杀5个精英敌人",
+    "icon": "target",
+    "reward": { "type": "meta_currency", "value": 100 },
+    "conditionType": "stat_elite_kills",
+    "conditionParams": { "threshold": 5 }
+  },
+  {
+    "id": "boss_slayer",
+    "name": "首领杀手",
+    "description": "单次冒险中击杀3个首领",
+    "icon": "dragon",
+    "reward": { "type": "meta_currency", "value": 150 },
+    "conditionType": "stat_boss_kills",
+    "conditionParams": { "threshold": 3 }
+  },
+  {
+    "id": "rich",
+    "name": "黄金囤积者",
+    "description": "单次冒险中获得500金币",
+    "icon": "coin",
+    "reward": { "type": "meta_currency", "value": 50 },
+    "conditionType": "stat_gold_earned",
+    "conditionParams": { "threshold": 500 }
+  },
+  {
+    "id": "big_spender",
+    "name": "挥金如土",
+    "description": "单次冒险中花费300金币",
+    "icon": "bag",
+    "reward": { "type": "meta_currency", "value": 50 },
+    "conditionType": "stat_gold_spent",
+    "conditionParams": { "threshold": 300 }
+  },
+  {
+    "id": "relic_5",
+    "name": "遗物猎人",
+    "description": "单次冒险中收集5个遗物",
+    "icon": "gem",
+    "reward": { "type": "meta_currency", "value": 100 },
+    "conditionType": "relics_count",
+    "conditionParams": { "threshold": 5 }
+  },
+  {
+    "id": "relic_collector",
+    "name": "遗物收藏家",
+    "description": "解锁10种不同遗物",
+    "icon": "chest",
+    "reward": { "type": "meta_currency", "value": 200 },
+    "conditionType": "relics_count",
+    "conditionParams": { "threshold": 10 }
+  },
+  {
+    "id": "solo_victory",
+    "name": "独狼",
+    "description": "只用1名英雄赢得冒险",
+    "icon": "wolf",
+    "reward": { "type": "meta_currency", "value": 500 },
+    "conditionType": "custom",
+    "conditionParams": {}
+  },
+  {
+    "id": "hell_victory",
+    "name": "地狱征服者",
+    "description": "在地狱难度下获胜",
+    "icon": "flame",
+    "reward": { "type": "meta_currency", "value": 1000 },
+    "conditionType": "custom",
+    "conditionParams": {}
+  },
+  {
+    "id": "wins_5",
+    "name": "冠军",
+    "description": "赢得5次冒险",
+    "icon": "crown",
+    "reward": { "type": "meta_currency", "value": 300 },
+    "conditionType": "meta_victories",
+    "conditionParams": { "threshold": 5 }
+  },
+  {
+    "id": "wins_10",
+    "name": "传奇",
+    "description": "赢得10次冒险",
+    "icon": "star",
+    "reward": { "type": "meta_currency", "value": 500 },
+    "conditionType": "meta_victories",
+    "conditionParams": { "threshold": 10 }
+  },
+  {
+    "id": "damage_10k",
+    "name": "伤害输出",
+    "description": "单次冒险中造成10,000总伤害",
+    "icon": "explosion",
+    "reward": { "type": "meta_currency", "value": 100 },
+    "conditionType": "stat_damage",
+    "conditionParams": { "threshold": 10000 }
+  },
+  {
+    "id": "damage_50k",
+    "name": "毁灭者",
+    "description": "单次冒险中造成50,000总伤害",
+    "icon": "nuke",
+    "reward": { "type": "meta_currency", "value": 300 },
+    "conditionType": "stat_damage",
+    "conditionParams": { "threshold": 50000 }
+  },
+  {
+    "id": "upgrade_max",
+    "name": "满级强化",
+    "description": "将任意永久升级升到最高等级",
+    "icon": "arrow_up",
+    "reward": { "type": "meta_currency", "value": 200 },
+    "conditionType": "upgrades_maxed",
+    "conditionParams": { "threshold": 1 }
+  }
+]

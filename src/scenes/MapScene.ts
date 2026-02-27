@@ -2,31 +2,14 @@ import Phaser from 'phaser';
 import { GAME_WIDTH, GAME_HEIGHT } from '../constants';
 import { RunManager } from '../managers/RunManager';
 import { MapGenerator } from '../systems/MapGenerator';
-import { NodeType, MapNode, ActConfig } from '../types';
+import { MapNode, ActConfig } from '../types';
 import { Theme, colorToString } from '../ui/Theme';
 import { SceneTransition } from '../systems/SceneTransition';
 import { Button } from '../ui/Button';
+import { MapRenderer, NODE_COLORS, NODE_LABELS, LayerInfo } from '../ui/MapRenderer';
 import actsData from '../data/acts.json';
 import { UI } from '../i18n';
-
-const NODE_COLORS: Record<NodeType, number> = Theme.colors.node as Record<NodeType, number>;
-
-const NODE_LABELS: Record<NodeType, string> = {
-  battle: '\u2694',
-  elite: '\u2605',
-  boss: '\u2620',
-  shop: '\u2666',
-  event: '?',
-  rest: '\u2665',
-};
-
-const ACT_COLORS: number[] = [0x1a2a1e, 0x2a1a1a, 0x1a1a2a];
-
-interface LayerInfo {
-  layerIndex: number;
-  actIndex: number;
-  nodes: MapNode[];
-}
+import { NodeTooltip } from '../ui/NodeTooltip';
 
 export class MapScene extends Phaser.Scene {
   private mapContainer!: Phaser.GameObjects.Container;
@@ -35,6 +18,10 @@ export class MapScene extends Phaser.Scene {
   private scrollX = 0;
   private totalMapWidth = 0;
   private pendingActTransition: number | null = null;
+  private activeTooltip: NodeTooltip | null = null;
+  private pathOverlay: Phaser.GameObjects.Graphics | null = null;
+  private nodePositions = new Map<number, { x: number; y: number }>();
+  private mapNodes: MapNode[] = [];
 
   constructor() {
     super({ key: 'MapScene' });
@@ -59,8 +46,8 @@ export class MapScene extends Phaser.Scene {
 
     // Build layer structure from node graph
     const map = rm.getMap();
-    const layers = this.buildLayers(map);
     const acts = actsData as ActConfig[];
+    const layers = MapRenderer.buildLayers(map, acts);
 
     // Layout constants
     const layerSpacing = 100;
@@ -78,47 +65,16 @@ export class MapScene extends Phaser.Scene {
     this.mapContainer = this.add.container(0, 0);
 
     // Draw act backgrounds
-    for (let actIdx = 0; actIdx < acts.length; actIdx++) {
-      const actLayers = layers.filter(l => l.actIndex === actIdx);
-      if (actLayers.length === 0) continue;
-
-      const firstLayerX = startX + actLayers[0].layerIndex * layerSpacing - layerSpacing / 2;
-      const lastLayerX = startX + actLayers[actLayers.length - 1].layerIndex * layerSpacing + layerSpacing / 2;
-      const actWidth = lastLayerX - firstLayerX;
-
-      const actBg = this.add.graphics();
-      actBg.fillStyle(ACT_COLORS[actIdx % ACT_COLORS.length], 0.45);
-      actBg.fillRoundedRect(firstLayerX, headerHeight, actWidth, mapAreaHeight, 4);
-
-      // Subtle horizontal stripe texture for act distinction
-      const stripeG = this.add.graphics();
-      stripeG.lineStyle(1, ACT_COLORS[actIdx % ACT_COLORS.length], 0.15);
-      for (let sy = headerHeight + 20; sy < headerHeight + mapAreaHeight - 10; sy += 12) {
-        stripeG.lineBetween(firstLayerX + 4, sy, firstLayerX + actWidth - 4, sy);
-      }
-      this.mapContainer.add(stripeG);
-
-      // Act border
-      actBg.lineStyle(1, ACT_COLORS[actIdx % ACT_COLORS.length], 0.6);
-      actBg.strokeRoundedRect(firstLayerX, headerHeight, actWidth, mapAreaHeight, 4);
-      this.mapContainer.add(actBg);
-
-      // Act label at top
-      const actLabelX = firstLayerX + actWidth / 2;
-      const actLabel = this.add.text(actLabelX, headerHeight + 8, UI.map.actLabel(actIdx + 1, acts[actIdx].name), {
-        fontSize: '11px',
-        color: '#8899bb',
-        fontFamily: 'monospace',
-      }).setOrigin(0.5);
-      this.mapContainer.add(actLabel);
-    }
+    MapRenderer.drawActBackgrounds(this, this.mapContainer, layers, acts, layerSpacing, startX, headerHeight, mapAreaHeight);
 
     // Draw connections first (behind nodes)
     const connGraphics = this.add.graphics();
     this.mapContainer.add(connGraphics);
 
     const accessibleNodes = rm.getAccessibleNodes();
-    const nodePositions = new Map<number, { x: number; y: number }>();
+    this.nodePositions = new Map<number, { x: number; y: number }>();
+    this.mapNodes = map;
+    const nodePositions = this.nodePositions;
 
     // Calculate all node positions
     for (const layer of layers) {
@@ -147,26 +103,28 @@ export class MapScene extends Phaser.Scene {
         if (isAccessiblePath) {
           // Glowing path to accessible nodes
           connGraphics.lineStyle(3, 0xffffff, 0.15);
-          this.drawCurvedLine(connGraphics, fromPos.x, fromPos.y, toPos.x, toPos.y);
+          MapRenderer.drawCurvedLine(connGraphics, fromPos.x, fromPos.y, toPos.x, toPos.y);
           connGraphics.lineStyle(2, 0x88aaff, 0.5);
-          this.drawCurvedLine(connGraphics, fromPos.x, fromPos.y, toPos.x, toPos.y);
+          MapRenderer.drawCurvedLine(connGraphics, fromPos.x, fromPos.y, toPos.x, toPos.y);
         } else if (isCompleted) {
           connGraphics.lineStyle(2, 0x444466, 0.4);
-          this.drawCurvedLine(connGraphics, fromPos.x, fromPos.y, toPos.x, toPos.y);
+          MapRenderer.drawCurvedLine(connGraphics, fromPos.x, fromPos.y, toPos.x, toPos.y);
         } else {
           connGraphics.lineStyle(1, 0x222244, 0.25);
-          this.drawCurvedLine(connGraphics, fromPos.x, fromPos.y, toPos.x, toPos.y);
+          MapRenderer.drawCurvedLine(connGraphics, fromPos.x, fromPos.y, toPos.x, toPos.y);
         }
       }
     }
 
     // Draw nodes
+    const currentNodeIdx = rm.getCurrentNode();
     for (const node of map) {
       const pos = nodePositions.get(node.index);
       if (!pos) continue;
 
       const isAccessible = accessibleNodes.includes(node.index);
       const isCompleted = node.completed;
+      const isCurrent = node.index === currentNodeIdx;
       const radius = node.type === 'boss' ? 16 : node.type === 'elite' ? 14 : 12;
       const color = NODE_COLORS[node.type];
 
@@ -213,6 +171,24 @@ export class MapScene extends Phaser.Scene {
 
       this.mapContainer.add(g);
 
+      // Current position marker (bright pulsing white ring)
+      if (isCurrent && isCompleted) {
+        const currentRing = this.add.circle(pos.x, pos.y, radius + 8)
+          .setStrokeStyle(3, 0xffffff, 0.6)
+          .setFillStyle(0x000000, 0);
+        this.mapContainer.add(currentRing);
+        this.tweens.add({
+          targets: currentRing,
+          alpha: { from: 0.6, to: 0.2 },
+          scaleX: { from: 1, to: 1.15 },
+          scaleY: { from: 1, to: 1.15 },
+          duration: 1000,
+          repeat: -1,
+          yoyo: true,
+          ease: 'Sine.easeInOut',
+        });
+      }
+
       // Node icon
       const labelAlpha = isCompleted ? 0.4 : isAccessible ? 1 : 0.25;
       const label = this.add.text(pos.x, pos.y, NODE_LABELS[node.type], {
@@ -231,16 +207,33 @@ export class MapScene extends Phaser.Scene {
       }).setOrigin(0.5).setAlpha(labelAlpha);
       this.mapContainer.add(typeLabel);
 
-      // Make accessible nodes clickable
-      if (isAccessible) {
+      // Make accessible nodes clickable + hover tooltip for all uncompleted
+      if (isAccessible || !isCompleted) {
         const hitArea = this.add.circle(pos.x, pos.y, radius + 6)
-          .setInteractive({ useHandCursor: true })
+          .setInteractive({ useHandCursor: isAccessible })
           .setAlpha(0.01);
         this.mapContainer.add(hitArea);
-        hitArea.on('pointerup', () => {
-          if (!this.isDragging) {
-            this.selectNode(node.index);
+
+        if (isAccessible) {
+          hitArea.on('pointerup', () => {
+            if (!this.isDragging) {
+              this.selectNode(node.index);
+            }
+          });
+        }
+
+        // Hover tooltip + path overlay
+        hitArea.on('pointerover', () => {
+          this.hideNodeTooltip();
+          this.activeTooltip = new NodeTooltip(this, pos.x, pos.y, node);
+          this.mapContainer.add(this.activeTooltip);
+          if (!isCompleted) {
+            this.showPathOverlay(node.index, accessibleNodes);
           }
+        });
+        hitArea.on('pointerout', () => {
+          this.hideNodeTooltip();
+          this.clearPathOverlay();
         });
       }
     }
@@ -277,8 +270,16 @@ export class MapScene extends Phaser.Scene {
       fontFamily: 'monospace',
     }).setOrigin(1, 0).setScrollFactor(0).setDepth(101);
 
+    // Run stats (hero count, relics, node progress)
+    const completedCount = map.filter(n => n.completed).length;
+    this.add.text(15, 8, UI.map.runStats(rm.getHeroes().length, rm.getRelics().length, completedCount, map.length), {
+      fontSize: '9px',
+      color: '#7788aa',
+      fontFamily: 'monospace',
+    }).setOrigin(0, 0).setScrollFactor(0).setDepth(101);
+
     // Hero summary at bottom
-    this.drawHeroSummary(rm);
+    MapRenderer.drawHeroSummary(this, rm.getHeroes(), (id) => rm.getHeroData(id), (h, d) => rm.getMaxHp(h, d));
 
     // Set up camera scrolling if map is wider than screen
     if (needsScroll) {
@@ -315,91 +316,6 @@ export class MapScene extends Phaser.Scene {
     if (this.pendingActTransition !== null) {
       this.showActTransition(this.pendingActTransition);
       this.pendingActTransition = null;
-    }
-  }
-
-  private buildLayers(map: MapNode[]): LayerInfo[] {
-    if (map.length === 0) return [];
-
-    const acts = actsData as ActConfig[];
-    const layers: LayerInfo[] = [];
-
-    // Assign layers via BFS from node 0
-    const nodeLayer = new Map<number, number>();
-    const nodeAct = new Map<number, number>();
-    const queue: { idx: number; layer: number; act: number }[] = [{ idx: 0, layer: 0, act: 0 }];
-    nodeLayer.set(0, 0);
-    nodeAct.set(0, 0);
-
-    while (queue.length > 0) {
-      const { idx, layer, act } = queue.shift()!;
-      const node = map[idx];
-
-      for (const connIdx of node.connections) {
-        if (connIdx < map.length && !nodeLayer.has(connIdx)) {
-          // Detect act boundary: boss connecting forward
-          let nextAct = act;
-          if (node.type === 'boss') {
-            nextAct = act + 1;
-          }
-          nodeLayer.set(connIdx, layer + 1);
-          nodeAct.set(connIdx, Math.min(nextAct, acts.length - 1));
-          queue.push({ idx: connIdx, layer: layer + 1, act: nextAct });
-        }
-      }
-    }
-
-    // Handle any unvisited nodes (shouldn't happen with valid graph)
-    for (let i = 0; i < map.length; i++) {
-      if (!nodeLayer.has(i)) {
-        nodeLayer.set(i, i);
-        nodeAct.set(i, 0);
-      }
-    }
-
-    // Group nodes by layer
-    const layerMap = new Map<number, MapNode[]>();
-    for (const node of map) {
-      const l = nodeLayer.get(node.index) ?? 0;
-      if (!layerMap.has(l)) layerMap.set(l, []);
-      layerMap.get(l)!.push(node);
-    }
-
-    // Sort layers and create LayerInfo
-    const sortedLayers = Array.from(layerMap.entries()).sort((a, b) => a[0] - b[0]);
-    for (const [layerIdx, nodes] of sortedLayers) {
-      const actIndex = nodeAct.get(nodes[0].index) ?? 0;
-      layers.push({ layerIndex: layerIdx, actIndex, nodes });
-    }
-
-    return layers;
-  }
-
-  private drawCurvedLine(g: Phaser.GameObjects.Graphics, x1: number, y1: number, x2: number, y2: number): void {
-    if (Math.abs(y1 - y2) < 2) {
-      // Straight horizontal line
-      g.lineBetween(x1, y1, x2, y2);
-    } else {
-      // Bezier curve
-      g.beginPath();
-      g.moveTo(x1, y1);
-      // Use quadratic bezier for gentle curve
-      const cp1x = x1 + (x2 - x1) * 0.4;
-      const cp2x = x1 + (x2 - x1) * 0.6;
-      // @ts-ignore - Phaser Graphics has lineTo/bezierCurveTo but types may be incomplete
-      if (typeof g['bezierCurveTo'] === 'function') {
-        (g as any).bezierCurveTo(cp1x, y1, cp2x, y2, x2, y2);
-      } else {
-        // Fallback: approximate with line segments
-        const steps = 8;
-        for (let t = 1; t <= steps; t++) {
-          const p = t / steps;
-          const px = (1 - p) * (1 - p) * (1 - p) * x1 + 3 * (1 - p) * (1 - p) * p * cp1x + 3 * (1 - p) * p * p * cp2x + p * p * p * x2;
-          const py = (1 - p) * (1 - p) * (1 - p) * y1 + 3 * (1 - p) * (1 - p) * p * y1 + 3 * (1 - p) * p * p * y2 + p * p * p * y2;
-          g.lineTo(px, py);
-        }
-      }
-      g.strokePath();
     }
   }
 
@@ -551,66 +467,11 @@ export class MapScene extends Phaser.Scene {
     });
   }
 
-  private drawHeroSummary(rm: RunManager): void {
-    const heroes = rm.getHeroes();
-    const totalWidth = heroes.length * 80;
-    const startX = GAME_WIDTH / 2 - totalWidth / 2;
-    const panelY = GAME_HEIGHT - 70;
-
-    // Panel background
-    const panelBg = this.add.graphics().setScrollFactor(0).setDepth(100);
-    panelBg.fillStyle(Theme.colors.panel, 0.85);
-    panelBg.fillRoundedRect(startX - 8, panelY, totalWidth + 16, 65, 6);
-    panelBg.lineStyle(1, Theme.colors.panelBorder, 0.5);
-    panelBg.strokeRoundedRect(startX - 8, panelY, totalWidth + 16, 65, 6);
-
-    heroes.forEach((hero, i) => {
-      const data = rm.getHeroData(hero.id);
-      const x = startX + i * 80 + 40;
-      const y = panelY + 12;
-
-      // Role color bar
-      const roleColor = this.getRoleColor(data.role);
-      const bar = this.add.graphics().setScrollFactor(0).setDepth(101);
-      bar.fillStyle(roleColor, 0.6);
-      bar.fillRoundedRect(x - 30, y, 60, 3, 2);
-
-      // Name
-      this.add.text(x, y + 10, data.name, {
-        fontSize: '9px',
-        color: '#ffffff',
-        fontFamily: 'monospace',
-      }).setOrigin(0.5).setScrollFactor(0).setDepth(101);
-
-      // Level
-      this.add.text(x, y + 22, `Lv.${hero.level}`, {
-        fontSize: '7px',
-        color: colorToString(Theme.colors.secondary),
-        fontFamily: 'monospace',
-      }).setOrigin(0.5).setScrollFactor(0).setDepth(101);
-
-      // HP bar
-      const maxHp = rm.getMaxHp(hero, data);
-      const hpRatio = hero.currentHp / maxHp;
-      const hpBarWidth = 54;
-      const hpG = this.add.graphics().setScrollFactor(0).setDepth(101);
-      hpG.fillStyle(0x333333, 1);
-      hpG.fillRoundedRect(x - hpBarWidth / 2, y + 32, hpBarWidth, 4, 2);
-      const hpColor = hpRatio > 0.6 ? 0x44ff44 : hpRatio > 0.3 ? 0xffaa00 : 0xff4444;
-      hpG.fillStyle(hpColor, 1);
-      hpG.fillRoundedRect(x - hpBarWidth / 2, y + 32, hpBarWidth * hpRatio, 4, 2);
-
-      // HP text
-      this.add.text(x, y + 43, `${hero.currentHp}/${maxHp}`, {
-        fontSize: '8px',
-        color: '#aaaaaa',
-        fontFamily: 'monospace',
-      }).setOrigin(0.5).setScrollFactor(0).setDepth(101);
-    });
-  }
-
-  private getRoleColor(role: string): number {
-    return Theme.colors.role[role] ?? 0x888888;
+  private hideNodeTooltip(): void {
+    if (this.activeTooltip) {
+      this.activeTooltip.destroy();
+      this.activeTooltip = null;
+    }
   }
 
   private selectNode(index: number): void {
@@ -642,5 +503,88 @@ export class MapScene extends Phaser.Scene {
     if (target) {
       SceneTransition.fadeTransition(this, target, { nodeIndex: index });
     }
+  }
+
+  /** BFS to find shortest path from any accessible node to targetIdx. */
+  private findPath(targetIdx: number, accessibleNodes: number[]): number[] | null {
+    if (accessibleNodes.includes(targetIdx)) return [targetIdx];
+
+    // Build reverse connection map
+    const reverseMap = new Map<number, number[]>();
+    for (const node of this.mapNodes) {
+      for (const conn of node.connections) {
+        if (!reverseMap.has(conn)) reverseMap.set(conn, []);
+        reverseMap.get(conn)!.push(node.index);
+      }
+    }
+
+    // BFS backwards from target to find an accessible node
+    const visited = new Set<number>([targetIdx]);
+    const parent = new Map<number, number>();
+    const queue = [targetIdx];
+
+    while (queue.length > 0) {
+      const current = queue.shift()!;
+      if (accessibleNodes.includes(current)) {
+        // Reconstruct path forward
+        const path: number[] = [current];
+        let c = current;
+        while (parent.has(c)) {
+          c = parent.get(c)!;
+          path.push(c);
+        }
+        return path;
+      }
+      for (const prev of (reverseMap.get(current) ?? [])) {
+        if (!visited.has(prev)) {
+          visited.add(prev);
+          parent.set(prev, current);
+          queue.push(prev);
+        }
+      }
+    }
+    return null;
+  }
+
+  private showPathOverlay(targetIdx: number, accessibleNodes: number[]): void {
+    this.clearPathOverlay();
+    const path = this.findPath(targetIdx, accessibleNodes);
+    if (!path || path.length < 2) return;
+
+    const g = this.add.graphics();
+    g.lineStyle(3, 0xffdd44, 0.5);
+
+    for (let i = 0; i < path.length - 1; i++) {
+      const from = this.nodePositions.get(path[i]);
+      const to = this.nodePositions.get(path[i + 1]);
+      if (from && to) {
+        MapRenderer.drawCurvedLine(g, from.x, from.y, to.x, to.y);
+      }
+    }
+
+    // Highlight intermediate nodes with a faint circle
+    for (let i = 1; i < path.length - 1; i++) {
+      const pos = this.nodePositions.get(path[i]);
+      if (pos) {
+        g.lineStyle(2, 0xffdd44, 0.35);
+        g.strokeCircle(pos.x, pos.y, 15);
+      }
+    }
+
+    this.pathOverlay = g;
+    this.mapContainer.add(g);
+  }
+
+  private clearPathOverlay(): void {
+    if (this.pathOverlay) {
+      this.pathOverlay.destroy();
+      this.pathOverlay = null;
+    }
+  }
+
+  shutdown(): void {
+    this.tweens.killAll();
+    this.hideNodeTooltip();
+    this.clearPathOverlay();
   }
 }
