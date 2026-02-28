@@ -25,11 +25,11 @@ export class StatusEffectSystem {
 
         if (currTicks < prevTicks) {
           if (effect.type === 'dot') {
-            const dmg = Math.round(effect.value);
+            const dmg = Math.max(1, Math.round(effect.value));
             unit.takeDamage(dmg);
             new DamageNumber(unit.scene, unit.x, unit.y - 20, dmg, false, false);
           } else {
-            const heal = Math.round(effect.value);
+            const heal = Math.max(1, Math.round(effect.value));
             unit.heal(heal);
             new DamageNumber(unit.scene, unit.x, unit.y - 20, heal, true, false);
           }

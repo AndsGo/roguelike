@@ -77,7 +77,7 @@ export class ActModifierSystem {
         const moved = Math.abs(unit.x - lastX);
         if (moved < ActModifierSystem.VOLCANO_MOVEMENT_THRESHOLD) {
           // Stationary — take fire ground damage
-          const dmg = Math.floor(unit.currentStats.maxHp * ActModifierSystem.VOLCANO_DAMAGE_PERCENT);
+          const dmg = Math.max(1, Math.floor(unit.currentStats.maxHp * ActModifierSystem.VOLCANO_DAMAGE_PERCENT));
           unit.takeDamage(dmg);
         }
         this.unitLastX.set(unit.unitId, unit.x);

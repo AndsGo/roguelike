@@ -306,6 +306,7 @@ export class Unit extends Phaser.GameObjects.Container {
 
   takeDamage(amount: number): number {
     const actual = Math.max(0, Math.round(amount));
+    if (actual === 0) return 0;
     this.currentHp = Math.max(0, this.currentHp - actual);
     this.healthBar.updateHealth(this.currentHp, this.currentStats.maxHp);
 
