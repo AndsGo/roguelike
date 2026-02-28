@@ -15,6 +15,7 @@ import { KeybindingConfig, KeyAction, ACTION_LABELS } from '../config/keybinding
  */
 export class SettingsScene extends Phaser.Scene {
   private returnScene: string = 'MainMenuScene';
+  private activeRebindHandler: ((event: KeyboardEvent) => void) | null = null;
 
   constructor() {
     super({ key: 'SettingsScene' });
@@ -302,6 +303,12 @@ export class SettingsScene extends Phaser.Scene {
 
   /** Enter rebind mode: next key press reassigns the action */
   private startRebind(action: KeyAction, keyText: Phaser.GameObjects.Text): void {
+    // Prevent concurrent rebind sessions
+    if (this.activeRebindHandler) {
+      this.game.canvas.removeEventListener('keydown', this.activeRebindHandler);
+      this.activeRebindHandler = null;
+    }
+
     const originalText = keyText.text;
     keyText.setText('[按键...]');
     keyText.setColor(colorToString(Theme.colors.danger));
@@ -317,18 +324,32 @@ export class SettingsScene extends Phaser.Scene {
       }
       keyText.setColor(colorToString(Theme.colors.gold));
       this.game.canvas.removeEventListener('keydown', handler);
+      this.activeRebindHandler = null;
     };
 
+    this.activeRebindHandler = handler;
     this.game.canvas.addEventListener('keydown', handler);
 
-    // Also cancel on ESC with a timeout fallback
+    // Timeout fallback
     this.time.delayedCall(5000, () => {
       keyText.setColor(colorToString(Theme.colors.gold));
       if (keyText.text === '[按键...]') {
         keyText.setText(originalText);
         this.game.canvas.removeEventListener('keydown', handler);
+        if (this.activeRebindHandler === handler) {
+          this.activeRebindHandler = null;
+        }
       }
     });
+  }
+
+  shutdown(): void {
+    // Clean up any active rebind listener
+    if (this.activeRebindHandler) {
+      this.game.canvas.removeEventListener('keydown', this.activeRebindHandler);
+      this.activeRebindHandler = null;
+    }
+    this.tweens.killAll();
   }
 
   private createMetaResetRow(leftCol: number, rightCol: number, y: number): void {

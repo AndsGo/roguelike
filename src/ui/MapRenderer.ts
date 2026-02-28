@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 import { GAME_WIDTH, GAME_HEIGHT } from '../constants';
 import { MapNode, NodeType, ActConfig, HeroState, HeroData } from '../types';
 import { Theme, colorToString } from './Theme';
-import { UI } from '../i18n';
+import { UI, SLOT_LABELS } from '../i18n';
 
 export const NODE_COLORS: Record<NodeType, number> = Theme.colors.node as Record<NodeType, number>;
 
@@ -192,5 +192,94 @@ export class MapRenderer {
         fontSize: '9px', color: '#aaaaaa', fontFamily: 'monospace',
       }).setOrigin(0.5).setScrollFactor(0).setDepth(101);
     });
+  }
+
+  /** Draw interactive hero panel at the bottom. Returns hit zones for scene management. */
+  static drawInteractiveHeroPanel(
+    scene: Phaser.Scene,
+    heroes: HeroState[],
+    getHeroData: (id: string) => HeroData,
+    getMaxHp: (hero: HeroState, data: HeroData) => number,
+    onHeroClick: (heroState: HeroState, heroData: HeroData) => void,
+  ): Phaser.GameObjects.GameObject[] {
+    const interactiveObjects: Phaser.GameObjects.GameObject[] = [];
+    const totalWidth = heroes.length * 80;
+    const startX = GAME_WIDTH / 2 - totalWidth / 2;
+    const panelY = GAME_HEIGHT - 70;
+
+    const panelBg = scene.add.graphics().setScrollFactor(0).setDepth(100);
+    panelBg.fillStyle(Theme.colors.panel, 0.85);
+    panelBg.fillRoundedRect(startX - 8, panelY, totalWidth + 16, 65, 6);
+    panelBg.lineStyle(1, Theme.colors.panelBorder, 0.5);
+    panelBg.strokeRoundedRect(startX - 8, panelY, totalWidth + 16, 65, 6);
+    interactiveObjects.push(panelBg);
+
+    heroes.forEach((hero, i) => {
+      const data = getHeroData(hero.id);
+      const x = startX + i * 80 + 40;
+      const y = panelY + 12;
+
+      // Role color bar
+      const roleColor = Theme.colors.role[data.role] ?? 0x888888;
+      const bar = scene.add.graphics().setScrollFactor(0).setDepth(101);
+      bar.fillStyle(roleColor, 0.6);
+      bar.fillRoundedRect(x - 30, y, 60, 3, 2);
+      interactiveObjects.push(bar);
+
+      // Name
+      scene.add.text(x, y + 10, data.name, {
+        fontSize: '9px', color: '#ffffff', fontFamily: 'monospace',
+      }).setOrigin(0.5).setScrollFactor(0).setDepth(101);
+
+      // Level
+      scene.add.text(x, y + 22, `Lv.${hero.level}`, {
+        fontSize: '9px', color: colorToString(Theme.colors.secondary), fontFamily: 'monospace',
+      }).setOrigin(0.5).setScrollFactor(0).setDepth(101);
+
+      // HP bar
+      const maxHp = getMaxHp(hero, data);
+      const hpRatio = hero.currentHp / maxHp;
+      const hpBarWidth = 54;
+      const hpG = scene.add.graphics().setScrollFactor(0).setDepth(101);
+      hpG.fillStyle(0x333333, 1);
+      hpG.fillRoundedRect(x - hpBarWidth / 2, y + 32, hpBarWidth, 4, 2);
+      const hpColor = hpRatio > 0.6 ? 0x44ff44 : hpRatio > 0.3 ? 0xffaa00 : 0xff4444;
+      hpG.fillStyle(hpColor, 1);
+      hpG.fillRoundedRect(x - hpBarWidth / 2, y + 32, hpBarWidth * hpRatio, 4, 2);
+
+      // Equipment indicators (3 small squares with Chinese labels)
+      const slots = ['weapon', 'armor', 'accessory'] as const;
+      const slotLabels = slots.map(s => (SLOT_LABELS[s] ?? s).charAt(0));
+      for (let s = 0; s < slots.length; s++) {
+        const sx = x - 20 + s * 14;
+        const sy = y + 42;
+        const hasEquip = hero.equipment[slots[s]] !== null;
+        const eqG = scene.add.graphics().setScrollFactor(0).setDepth(101);
+        eqG.fillStyle(hasEquip ? 0x44aa44 : 0x333333, hasEquip ? 0.8 : 0.5);
+        eqG.fillRoundedRect(sx, sy, 10, 10, 1);
+        const eqLabel = scene.add.text(sx + 5, sy + 5, slotLabels[s], {
+          fontSize: '7px', color: hasEquip ? '#ffffff' : '#666666', fontFamily: 'monospace',
+        }).setOrigin(0.5).setScrollFactor(0).setDepth(102);
+        interactiveObjects.push(eqG, eqLabel);
+      }
+
+      // Clickable hit zone
+      const hitZone = scene.add.rectangle(x, panelY + 32, 76, 60, 0x000000, 0)
+        .setScrollFactor(0).setDepth(103)
+        .setInteractive({ useHandCursor: true });
+      interactiveObjects.push(hitZone);
+
+      // Hover highlight
+      const highlight = scene.add.graphics().setScrollFactor(0).setDepth(100).setAlpha(0);
+      highlight.fillStyle(0xffffff, 0.08);
+      highlight.fillRoundedRect(x - 38, panelY + 2, 76, 61, 4);
+      interactiveObjects.push(highlight);
+
+      hitZone.on('pointerover', () => highlight.setAlpha(1));
+      hitZone.on('pointerout', () => highlight.setAlpha(0));
+      hitZone.on('pointerup', () => onHeroClick(hero, data));
+    });
+
+    return interactiveObjects;
   }
 }

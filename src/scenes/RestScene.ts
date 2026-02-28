@@ -10,6 +10,7 @@ import { UI } from '../i18n';
 
 export class RestScene extends Phaser.Scene {
   private nodeIndex!: number;
+  private resting = false;
 
   constructor() {
     super({ key: 'RestScene' });
@@ -17,6 +18,7 @@ export class RestScene extends Phaser.Scene {
 
   init(data?: { nodeIndex: number }): void {
     this.nodeIndex = data?.nodeIndex ?? 0;
+    this.resting = false;
   }
 
   create(): void {
@@ -63,6 +65,9 @@ export class RestScene extends Phaser.Scene {
     });
 
     new Button(this, GAME_WIDTH / 2, 290, UI.rest.restBtn(Math.round(REST_HEAL_PERCENT * 100)), 240, 40, () => {
+      if (this.resting) return;
+      this.resting = true;
+
       rm.healAllHeroes(REST_HEAL_PERCENT);
       rm.markNodeCompleted(this.nodeIndex);
       SaveManager.autoSave();
@@ -75,7 +80,7 @@ export class RestScene extends Phaser.Scene {
         duration: 300,
         ease: 'Sine.easeIn',
         onComplete: () => {
-          this.children.removeAll();
+          this.children.removeAll(true);
           this.showHealedStatus(rm);
         },
       });

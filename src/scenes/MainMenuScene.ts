@@ -2,7 +2,6 @@ import Phaser from 'phaser';
 import { GAME_WIDTH, GAME_HEIGHT } from '../constants';
 import { Button } from '../ui/Button';
 import { Panel } from '../ui/Panel';
-import { RunManager } from '../managers/RunManager';
 import { SaveManager } from '../managers/SaveManager';
 import { MetaManager } from '../managers/MetaManager';
 import { Theme, colorToString } from '../ui/Theme';
@@ -14,9 +13,11 @@ import { AudioManager } from '../systems/AudioManager';
 import { AchievementPanel } from '../ui/AchievementPanel';
 import { HelpPanel } from '../ui/HelpPanel';
 import { DIFFICULTY_LEVELS } from '../config/difficulty';
+import heroesData from '../data/heroes.json';
 
 export class MainMenuScene extends Phaser.Scene {
   private upgradePanel: Panel | null = null;
+  private upgradeOverlay: Phaser.GameObjects.Rectangle | null = null;
   private achievementPanel: AchievementPanel | null = null;
   private helpPanel: HelpPanel | null = null;
 
@@ -171,7 +172,7 @@ export class MainMenuScene extends Phaser.Scene {
     // Meta stats at bottom
     const meta = MetaManager.getMetaData();
     const currency = MetaManager.getMetaCurrency();
-    const statsStr = UI.mainMenu.stats(meta.totalRuns, meta.totalVictories, meta.unlockedHeroes.length, currency);
+    const statsStr = UI.mainMenu.stats(meta.totalRuns, meta.totalVictories, meta.unlockedHeroes.length, heroesData.length, currency);
     this.add.text(GAME_WIDTH / 2, GAME_HEIGHT - 38, statsStr, {
       fontSize: '9px',
       color: '#666688',
@@ -253,10 +254,8 @@ export class MainMenuScene extends Phaser.Scene {
           // Clean up
           allElements.forEach(el => el.destroy());
           buttons.forEach(b => b.destroy());
-          // Start the game with selected difficulty
-          const rm = RunManager.getInstance();
-          rm.newRun(undefined, diff.id);
-          SceneTransition.fadeTransition(this, 'MapScene');
+          // Go to hero draft scene with selected difficulty
+          SceneTransition.fadeTransition(this, 'HeroDraftScene', { difficulty: diff.id });
         }, i === 0 ? Theme.colors.primary : Theme.colors.panelBorder);
         buttons.push(btn);
       } else {
@@ -332,9 +331,14 @@ export class MainMenuScene extends Phaser.Scene {
 
   private showUpgradePanel(): void {
     if (this.upgradePanel) {
-      this.upgradePanel.close(() => { this.upgradePanel = null; });
+      this.upgradePanel.close(() => { this.upgradePanel = null; this.upgradeOverlay?.destroy(); this.upgradeOverlay = null; });
       return;
     }
+
+    // Full-screen overlay to block background interaction
+    this.upgradeOverlay = this.add.rectangle(
+      GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, 0x000000, 0.5,
+    ).setInteractive().setDepth(90);
 
     const panel = new Panel(this, GAME_WIDTH / 2, GAME_HEIGHT / 2, 500, 340, {
       title: UI.mainMenu.upgradeTitle,
@@ -432,6 +436,8 @@ export class MainMenuScene extends Phaser.Scene {
               // Refresh panel
               this.upgradePanel?.close(() => {
                 this.upgradePanel = null;
+                this.upgradeOverlay?.destroy();
+                this.upgradeOverlay = null;
                 this.showUpgradePanel();
               });
             }
@@ -460,7 +466,7 @@ export class MainMenuScene extends Phaser.Scene {
     const closeHit = this.add.rectangle(0, 135, 80, 28, 0x000000, 0)
       .setInteractive({ useHandCursor: true });
     closeHit.on('pointerdown', () => {
-      this.upgradePanel?.close(() => { this.upgradePanel = null; });
+      this.upgradePanel?.close(() => { this.upgradePanel = null; this.upgradeOverlay?.destroy(); this.upgradeOverlay = null; });
     });
     panel.addContent(closeHit);
 

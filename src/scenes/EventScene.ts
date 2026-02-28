@@ -7,10 +7,12 @@ import { Theme, colorToString } from '../ui/Theme';
 import { SceneTransition } from '../systems/SceneTransition';
 import { SaveManager } from '../managers/SaveManager';
 import eventsData from '../data/events.json';
+import { ShopGenerator } from '../systems/ShopGenerator';
 import { UI, getHeroDisplayName } from '../i18n';
 
 export class EventScene extends Phaser.Scene {
   private nodeIndex!: number;
+  private choiceMade = false;
 
   constructor() {
     super({ key: 'EventScene' });
@@ -18,6 +20,7 @@ export class EventScene extends Phaser.Scene {
 
   init(data?: { nodeIndex: number }): void {
     this.nodeIndex = data?.nodeIndex ?? 0;
+    this.choiceMade = false;
   }
 
   create(): void {
@@ -182,6 +185,9 @@ export class EventScene extends Phaser.Scene {
   }
 
   private makeChoice(choice: EventChoice, rng: ReturnType<RunManager['getRng']>, rm: RunManager): void {
+    if (this.choiceMade) return;
+    this.choiceMade = true;
+
     const roll = rng.next();
     let cumulative = 0;
     let selectedOutcome: EventOutcome = choice.outcomes[choice.outcomes.length - 1];
@@ -207,7 +213,7 @@ export class EventScene extends Phaser.Scene {
           break;
         case 'stat_boost':
           for (const hero of rm.getHeroes()) {
-            hero.exp += effect.value * 5;
+            rm.addExp(hero, effect.value * 5);
           }
           break;
         case 'relic':
@@ -215,9 +221,18 @@ export class EventScene extends Phaser.Scene {
             rm.addRelic(effect.relicId);
           }
           break;
-        case 'item':
-          rm.addGold(effect.value || 30);
+        case 'item': {
+          const heroes = rm.getHeroes();
+          if (heroes.length > 0) {
+            const items = ShopGenerator.generate(rng, rm.getCurrentAct());
+            if (items.length > 0) {
+              const item = items[0];
+              const hero = rng.pick(heroes);
+              rm.equipItem(hero.id, item);
+            }
+          }
           break;
+        }
         case 'transform':
           if (effect.element) {
             rm.setTemporaryElement(effect.element as ElementType);
@@ -251,7 +266,7 @@ export class EventScene extends Phaser.Scene {
       duration: 300,
       ease: 'Sine.easeIn',
       onComplete: () => {
-        this.children.removeAll();
+        this.children.removeAll(true);
         this.showOutcome(selectedOutcome);
       },
     });

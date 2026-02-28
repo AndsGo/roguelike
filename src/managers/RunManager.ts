@@ -30,8 +30,8 @@ export class RunManager {
     return RunManager.instance;
   }
 
-  /** Start a new run with optional seed */
-  newRun(seed?: number, difficulty: string = 'normal'): void {
+  /** Start a new run with optional seed, difficulty, and hero selection */
+  newRun(seed?: number, difficulty: string = 'normal', heroIds?: string[]): void {
     const s = seed ?? Date.now();
     this.rng = new SeededRNG(s);
 
@@ -39,11 +39,9 @@ export class RunManager {
     GameLifecycle.teardownAll();
     GameLifecycle.prepareNewRun();
 
-    // Start with warrior and archer
-    const startingHeroes: HeroState[] = [
-      this.createHeroState('warrior'),
-      this.createHeroState('archer'),
-    ];
+    // Use provided heroes or fall back to defaults
+    const ids = heroIds && heroIds.length >= 2 ? heroIds : ['warrior', 'archer'];
+    const startingHeroes: HeroState[] = ids.map(id => this.createHeroState(id));
 
     this.state = {
       seed: s,
@@ -88,7 +86,7 @@ export class RunManager {
   getFloor(): number { return this.state.floor; }
   getRelics(): RelicState[] { return this.state.relics; }
   getDifficulty(): string { return this.state.difficulty; }
-  getActiveSynergies(): ActiveSynergy[] { return this.state.activeSynergies; }
+  getActiveSynergies(): ActiveSynergy[] { return this.state?.activeSynergies ?? []; }
   getCurrentAct(): number { return this.state.currentAct; }
 
   getHeroData(heroId: string): HeroData {
@@ -233,7 +231,7 @@ export class RunManager {
     return maxHp;
   }
 
-  private addExp(hero: HeroState, amount: number): void {
+  addExp(hero: HeroState, amount: number): void {
     hero.exp += amount;
     let needed = expForLevel(hero.level);
     while (hero.exp >= needed && hero.level < 20) {

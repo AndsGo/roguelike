@@ -343,7 +343,7 @@
     "expReward": 42
   },
   {
-    "id": "ice_mage",
+    "id": "enemy_ice_mage",
     "name": "冰霜法师",
     "role": "ranged_dps",
     "element": "ice",

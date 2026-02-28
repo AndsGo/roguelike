@@ -37,13 +37,27 @@ export class MetaManager {
     { id: 'relic_chance', level: 0, maxLevel: 3 },
   ];
 
-  /** Unlock requirements: heroId -> { type, value } */
-  private static HERO_UNLOCK_CONDITIONS: Record<string, { type: string; description: string }> = {
+  /** Unlock requirements: heroId -> { type, threshold, description } */
+  private static HERO_UNLOCK_CONDITIONS: Record<string, { type: string; threshold?: number; description: string }> = {
     warrior: { type: 'default', description: 'Default hero' },
     archer: { type: 'default', description: 'Default hero' },
     mage: { type: 'default', description: 'Default hero' },
-    priest: { type: 'victory', description: 'Complete a run' },
-    rogue: { type: 'runs', description: 'Complete 3 runs' },
+    priest: { type: 'victory', threshold: 1, description: 'Win 1 run' },
+    rogue: { type: 'runs', threshold: 3, description: 'Complete 3 runs' },
+    knight: { type: 'runs', threshold: 5, description: 'Complete 5 runs' },
+    shadow_assassin: { type: 'victory', threshold: 2, description: 'Win 2 runs' },
+    elementalist: { type: 'floor', threshold: 15, description: 'Reach floor 15' },
+    druid: { type: 'runs', threshold: 8, description: 'Complete 8 runs' },
+    necromancer: { type: 'victory', threshold: 3, description: 'Win 3 runs' },
+    berserker: { type: 'floor', threshold: 25, description: 'Reach floor 25' },
+    frost_ranger: { type: 'runs', threshold: 10, description: 'Complete 10 runs' },
+    beast_warden: { type: 'victory', threshold: 5, description: 'Win 5 runs' },
+    dragon_knight: { type: 'floor', threshold: 35, description: 'Reach floor 35' },
+    shadow_weaver: { type: 'victory', threshold: 7, description: 'Win 7 runs' },
+    storm_caller: { type: 'runs', threshold: 15, description: 'Complete 15 runs' },
+    holy_sentinel: { type: 'victory', threshold: 10, description: 'Win 10 runs' },
+    ice_mage: { type: 'floor', threshold: 40, description: 'Reach floor 40' },
+    thunder_monk: { type: 'victory', threshold: 12, description: 'Win 12 runs' },
   };
 
   private constructor() {}
@@ -200,12 +214,18 @@ export class MetaManager {
     const baseReward = victory ? 100 : Math.floor(floor * 5);
     MetaManager.addMetaCurrency(baseReward);
 
-    // Check milestone unlocks
-    if (victory && !inst.meta.unlockedHeroes.includes('priest')) {
-      MetaManager.unlockHero('priest');
-    }
-    if (inst.meta.totalRuns >= 3 && !inst.meta.unlockedHeroes.includes('rogue')) {
-      MetaManager.unlockHero('rogue');
+    // Check all hero unlock conditions
+    for (const [heroId, cond] of Object.entries(MetaManager.HERO_UNLOCK_CONDITIONS)) {
+      if (inst.meta.unlockedHeroes.includes(heroId)) continue;
+      if (cond.type === 'default') continue;
+      const threshold = cond.threshold ?? 1;
+      let met = false;
+      switch (cond.type) {
+        case 'victory': met = inst.meta.totalVictories >= threshold; break;
+        case 'runs': met = inst.meta.totalRuns >= threshold; break;
+        case 'floor': met = inst.meta.highestFloor >= threshold; break;
+      }
+      if (met) MetaManager.unlockHero(heroId);
     }
 
     // Emit run end for achievement checking

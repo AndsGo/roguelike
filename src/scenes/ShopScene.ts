@@ -80,7 +80,7 @@ export class ShopScene extends Phaser.Scene {
 
       btnContainer.setSize(85, 22);
       btnContainer.setInteractive({ useHandCursor: true });
-      btnContainer.on('pointerdown', () => {
+      btnContainer.on('pointerup', () => {
         this.selectedHero = hero;
         this.highlightHeroButton(i);
         this.updateComparisonTexts();
@@ -260,6 +260,10 @@ export class ShopScene extends Phaser.Scene {
   }
 
   private buyItem(item: ItemData, container: Phaser.GameObjects.Container, priceText: Phaser.GameObjects.Text): void {
+    // Prevent double-purchase
+    const card = this.itemCards.find(c => c.item === item);
+    if (card?.sold) return;
+
     const rm = RunManager.getInstance();
 
     if (!this.selectedHero) {
@@ -275,10 +279,15 @@ export class ShopScene extends Phaser.Scene {
     const oldItem = rm.equipItem(this.selectedHero.id, item);
     this.goldText.setText(`${rm.getGold()}G`);
 
-    // Mark as sold
-    const card = this.itemCards.find(c => c.item === item);
+    // Mark as sold and disable interaction
     if (card) {
       card.sold = true;
+      try {
+        const children = container.getAll?.() ?? [];
+        for (const child of children) {
+          if (child.input) (child as Phaser.GameObjects.Rectangle).disableInteractive();
+        }
+      } catch { /* container mock may not support getAll */ }
       this.tweens.add({
         targets: container,
         alpha: 0.3,

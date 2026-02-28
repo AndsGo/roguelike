@@ -23,6 +23,18 @@ export class RewardScene extends Phaser.Scene {
     const result = this.result;
     const rm = RunManager.getInstance();
 
+    // Guard against missing battle result data
+    if (!result) {
+      this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, Theme.colors.background);
+      this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2, UI.reward.title, {
+        fontSize: '18px', color: '#ffffff', fontFamily: 'monospace',
+      }).setOrigin(0.5);
+      new Button(this, GAME_WIDTH / 2, GAME_HEIGHT - 38, UI.reward.continueBtn, 160, 38, () => {
+        SceneTransition.fadeTransition(this, 'MapScene');
+      });
+      return;
+    }
+
     this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, Theme.colors.background);
 
     const title = this.add.text(GAME_WIDTH / 2, 55, UI.reward.title, {

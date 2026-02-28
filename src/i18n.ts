@@ -20,8 +20,8 @@ export const UI = {
     newGame: '新游戏',
     upgrades: '升级',
     version: 'v0.3.0 - Phase B+',
-    stats: (runs: number, victories: number, heroCount: number, souls: number) =>
-      `冒险: ${runs}  |  胜利: ${victories}  |  英雄: ${heroCount}/5  |  灵魂: ${souls}`,
+    stats: (runs: number, victories: number, heroCount: number, totalHeroes: number, souls: number) =>
+      `冒险: ${runs}  |  胜利: ${victories}  |  英雄: ${heroCount}/${totalHeroes}  |  灵魂: ${souls}`,
     confirmOverwrite: '现有存档将丢失。\n是否继续？',
     yes: '是',
     no: '否',
@@ -186,6 +186,17 @@ export const UI = {
     multiplier: (n: number) => `敌人 ×${n}`,
     rewardMultiplier: (n: number) => `奖励 ×${n}`,
     start: '开始',
+  },
+
+  // HeroDraftScene
+  heroDraft: {
+    title: '选择初始英雄',
+    subtitle: '选择2-3名英雄开始冒险',
+    locked: '未解锁',
+    selected: (n: number, max: number) => `已选: ${n}/${max}`,
+    startBtn: '开始冒险',
+    needMore: '至少选择2名英雄',
+    backBtn: '返回',
   },
 
   // Audio
