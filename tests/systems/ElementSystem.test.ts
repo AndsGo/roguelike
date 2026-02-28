@@ -217,5 +217,102 @@ describe('ElementSystem', () => {
       );
       expect(reactionDmg).toBe(100); // round(100 * 1.0)
     });
+
+    it('Superconduct (ice+lightning) deals 20% bonus damage', () => {
+      const target = createMockUnit({ currentHp: 500, maxHp: 500 });
+      const reaction = ELEMENT_REACTIONS['ice+lightning']; // 1.2x
+      const reactionDmg = ElementSystem.applyElementReaction(
+        reaction, 'ice', 'lightning', target as any, 100,
+      );
+      expect(reactionDmg).toBe(20); // round(100 * 0.2)
+      expect(target.currentHp).toBe(480);
+    });
+
+    it('Superconduct applies defense_down status effect', () => {
+      const target = createMockUnit({ currentHp: 500, maxHp: 500 });
+      const reaction = ELEMENT_REACTIONS['ice+lightning'];
+      ElementSystem.applyElementReaction(
+        reaction, 'ice', 'lightning', target as any, 100,
+      );
+      expect(target.statusEffects.length).toBe(1);
+      const effect = target.statusEffects[0];
+      expect(effect.name).toBe('defense_down');
+      expect(effect.type).toBe('debuff');
+      expect(effect.stat).toBe('defense');
+      expect(effect.value).toBe(-15);
+      expect(effect.duration).toBe(5);
+    });
+
+    it('Melt applies wet status effect', () => {
+      const target = createMockUnit({ currentHp: 500, maxHp: 500 });
+      const reaction = ELEMENT_REACTIONS['fire+ice'];
+      ElementSystem.applyElementReaction(
+        reaction, 'fire', 'ice', target as any, 100,
+      );
+      expect(target.statusEffects.length).toBe(1);
+      expect(target.statusEffects[0].name).toBe('wet');
+      expect(target.statusEffects[0].duration).toBe(3);
+    });
+
+    it('Overload does not apply status effect', () => {
+      const target = createMockUnit({ currentHp: 500, maxHp: 500 });
+      const reaction = ELEMENT_REACTIONS['fire+lightning'];
+      ElementSystem.applyElementReaction(
+        reaction, 'fire', 'lightning', target as any, 100,
+      );
+      expect(target.statusEffects.length).toBe(0);
+    });
+
+    it('emits element:reaction event', () => {
+      const events: any[] = [];
+      EventBus.getInstance().on('element:reaction', (data: any) => events.push(data));
+
+      const target = createMockUnit({ currentHp: 500, maxHp: 500, unitId: 'target1' });
+      const reaction = ELEMENT_REACTIONS['fire+ice'];
+      ElementSystem.applyElementReaction(
+        reaction, 'fire', 'ice', target as any, 100,
+      );
+      expect(events.length).toBe(1);
+      expect(events[0].element1).toBe('fire');
+      expect(events[0].element2).toBe('ice');
+      expect(events[0].targetId).toBe('target1');
+      expect(events[0].reactionType).toBe('融化');
+    });
+
+    it('baseDamage=0 时 reactionDamage=0 且不调用 takeDamage', () => {
+      const target = createMockUnit({ currentHp: 500, maxHp: 500 });
+      const reaction = ELEMENT_REACTIONS['fire+ice'];
+      const reactionDmg = ElementSystem.applyElementReaction(
+        reaction, 'fire', 'ice', target as any, 0,
+      );
+      expect(reactionDmg).toBe(0);
+      expect(target.currentHp).toBe(500); // 无伤害
+    });
+  });
+
+  describe('checkElementReaction — 补充', () => {
+    it('非反应元素对返回 null (fire effect + dark incoming)', () => {
+      const target = createMockUnit({
+        statusEffects: [
+          { id: 'eff1', type: 'dot', name: 'burn', duration: 3, value: 5, element: 'fire' },
+        ],
+      });
+      const result = ElementSystem.checkElementReaction('dark', target as any);
+      expect(result).toBeNull();
+    });
+
+    it('target 有多个效果时匹配第一个可反应的', () => {
+      const target = createMockUnit({
+        statusEffects: [
+          { id: 'eff1', type: 'debuff', name: 'slow', duration: 3, value: -10, element: 'dark' },
+          { id: 'eff2', type: 'dot', name: 'freeze', duration: 3, value: 5, element: 'ice' },
+        ],
+      });
+      // incoming = fire, dark+fire = no reaction, ice+fire = 融化
+      const result = ElementSystem.checkElementReaction('fire', target as any);
+      expect(result).not.toBeNull();
+      expect(result!.reaction.name).toBe('融化');
+      expect(result!.existingElement).toBe('ice');
+    });
   });
 });

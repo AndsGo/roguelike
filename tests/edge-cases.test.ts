@@ -1,5 +1,10 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { createMockLocalStorage } from './mocks/phaser';
+
+// Mock DamageNumber — StatusEffectSystem 依赖
+vi.mock('../src/components/DamageNumber', () => ({
+  DamageNumber: vi.fn(),
+}));
 
 const mockStorage = createMockLocalStorage();
 Object.defineProperty(globalThis, 'localStorage', {
@@ -13,6 +18,7 @@ import { ComboSystem } from '../src/systems/ComboSystem';
 import { SynergySystem } from '../src/systems/SynergySystem';
 import { TargetingSystem } from '../src/systems/TargetingSystem';
 import { DifficultySystem } from '../src/systems/DifficultySystem';
+import { StatusEffectSystem } from '../src/systems/StatusEffectSystem';
 import { EventBus } from '../src/systems/EventBus';
 import { SeededRNG } from '../src/utils/rng';
 import { RunManager } from '../src/managers/RunManager';
@@ -188,6 +194,107 @@ describe('Edge Cases', () => {
       for (const e of elements) {
         expect(ElementSystem.getElementMultiplier(e, e)).toBe(1.0);
       }
+    });
+  });
+
+  describe('heal 边界', () => {
+    it('治疗不超过 maxHp', () => {
+      const unit = createMockUnit({ currentHp: 490, maxHp: 500 });
+      const healed = unit.heal(100);
+      expect(unit.currentHp).toBe(500);
+      expect(healed).toBe(10); // 实际治疗量
+    });
+
+    it('满血时治疗量为 0', () => {
+      const unit = createMockUnit({ currentHp: 500, maxHp: 500 });
+      const healed = unit.heal(50);
+      expect(healed).toBe(0);
+      expect(unit.currentHp).toBe(500);
+    });
+
+    it('死亡单位无法治疗', () => {
+      const unit = createMockUnit({ currentHp: 0, maxHp: 500 });
+      unit.isAlive = false;
+      const healed = unit.heal(100);
+      expect(healed).toBe(0);
+      expect(unit.currentHp).toBe(0);
+    });
+  });
+
+  describe('状态效果边界', () => {
+    it('duration=0 的效果在下次 tick 被立即移除', () => {
+      const unit = createMockUnit({ currentHp: 500, maxHp: 500 });
+      unit.statusEffects.push({
+        id: 'zero_dur', type: 'stun', name: 'stun',
+        duration: 0, value: 0,
+      });
+      StatusEffectSystem.tick(unit as any, 16); // 一帧
+      expect(unit.statusEffects.length).toBe(0);
+    });
+
+    it('重复状态效果独立存在', () => {
+      const unit = createMockUnit();
+      unit.statusEffects.push(
+        { id: 'dot_1', type: 'dot', name: 'burn', duration: 5, value: 10, tickInterval: 1 },
+        { id: 'dot_2', type: 'dot', name: 'burn', duration: 3, value: 20, tickInterval: 1 },
+      );
+      expect(unit.statusEffects.length).toBe(2);
+      // getEffectiveStats 不受 dot 影响
+      const stats = unit.getEffectiveStats();
+      expect(stats.attack).toBe(unit.currentStats.attack);
+    });
+  });
+
+  describe('combo 极端值', () => {
+    it('100+ 连击仍返回有效倍率', () => {
+      const combo = new ComboSystem();
+      for (let i = 0; i < 100; i++) {
+        combo.registerHit('attacker', 'target');
+      }
+      const mult = combo.getComboMultiplier('attacker');
+      expect(mult).toBeGreaterThan(1.0);
+      expect(Number.isFinite(mult)).toBe(true);
+    });
+  });
+
+  describe('takeDamage 边界', () => {
+    it('负伤害值被 clamp 到 0', () => {
+      const unit = createMockUnit({ currentHp: 500, maxHp: 500 });
+      const actual = unit.takeDamage(-50);
+      expect(actual).toBe(0);
+      expect(unit.currentHp).toBe(500);
+    });
+
+    it('小数伤害被四舍五入', () => {
+      const unit = createMockUnit({ currentHp: 500, maxHp: 500 });
+      const actual = unit.takeDamage(10.7);
+      expect(actual).toBe(11);
+      expect(unit.currentHp).toBe(489);
+    });
+  });
+
+  describe('getEffectiveStats buff/debuff 边界', () => {
+    it('多个 buff 叠加', () => {
+      const unit = createMockUnit({ stats: { attack: 50 } });
+      unit.statusEffects.push(
+        { id: 'b1', type: 'buff', name: 'atk_up', duration: 5, value: 10, stat: 'attack' } as any,
+        { id: 'b2', type: 'buff', name: 'atk_up2', duration: 5, value: 15, stat: 'attack' } as any,
+      );
+      expect(unit.getEffectiveStats().attack).toBe(75); // 50 + 10 + 15
+    });
+
+    it('debuff 可使属性变为负数', () => {
+      const unit = createMockUnit({ stats: { defense: 20 } });
+      unit.statusEffects.push(
+        { id: 'd1', type: 'debuff', name: 'def_down', duration: 5, value: -50, stat: 'defense' } as any,
+      );
+      expect(unit.getEffectiveStats().defense).toBe(-30); // 20 + (-50)
+    });
+
+    it('synergy bonuses 正确叠加', () => {
+      const unit = createMockUnit({ stats: { attack: 50 } });
+      unit.synergyBonuses = { attack: 20 };
+      expect(unit.getEffectiveStats().attack).toBe(70);
     });
   });
 });

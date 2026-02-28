@@ -1,5 +1,6 @@
 import { Unit } from '../entities/Unit';
 import { DamageNumber } from '../components/DamageNumber';
+import { EventBus } from './EventBus';
 
 export class StatusEffectSystem {
   /**
@@ -28,6 +29,23 @@ export class StatusEffectSystem {
             const dmg = Math.max(1, Math.round(effect.value));
             unit.takeDamage(dmg);
             new DamageNumber(unit.scene, unit.x, unit.y - 20, dmg, false, false);
+            // Emit damage event so AudioManager plays sfx_hit
+            const bus = EventBus.getInstance();
+            bus.emit('unit:damage', {
+              sourceId: effect.id,
+              targetId: unit.unitId,
+              amount: dmg,
+              damageType: 'magical' as const,
+              element: effect.element,
+              isCrit: false,
+            });
+            // Emit kill event for DoT kills (DamageSystem won't emit it)
+            if (!unit.isAlive) {
+              bus.emit('unit:kill', {
+                killerId: effect.id,
+                targetId: unit.unitId,
+              });
+            }
           } else {
             const heal = Math.max(1, Math.round(effect.value));
             unit.heal(heal);

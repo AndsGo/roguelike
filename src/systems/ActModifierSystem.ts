@@ -1,5 +1,6 @@
 import { Unit } from '../entities/Unit';
 import { DamageSystem } from './DamageSystem';
+import { EventBus } from './EventBus';
 
 /**
  * Applies act-specific modifiers to battles:
@@ -79,6 +80,22 @@ export class ActModifierSystem {
           // Stationary — take fire ground damage
           const dmg = Math.max(1, Math.floor(unit.currentStats.maxHp * ActModifierSystem.VOLCANO_DAMAGE_PERCENT));
           unit.takeDamage(dmg);
+          // Emit damage event so AudioManager plays sfx_hit
+          const bus = EventBus.getInstance();
+          bus.emit('unit:damage', {
+            sourceId: 'volcano',
+            targetId: unit.unitId,
+            amount: dmg,
+            damageType: 'magical' as const,
+            element: 'fire' as const,
+            isCrit: false,
+          });
+          if (!unit.isAlive) {
+            bus.emit('unit:kill', {
+              killerId: 'volcano',
+              targetId: unit.unitId,
+            });
+          }
         }
         this.unitLastX.set(unit.unitId, unit.x);
       }

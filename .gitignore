@@ -1,0 +1,9 @@
+node_modules/
+dist/
+*.local
+.vite/
+.DS_Store
+*.log
+analysis/
+PERFORMANCE_ANALYSIS.md
+tests/screenshots/

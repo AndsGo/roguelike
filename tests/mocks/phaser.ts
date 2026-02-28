@@ -156,6 +156,7 @@ export function createMockUnit(overrides: {
     skillCooldowns: new Map<string, number>(),
     scene: new MockScene(),
     sprite: new MockRectangle(),
+    flashColor: vi.fn(),
 
     getEffectiveStats() {
       const stats = { ...this.currentStats };

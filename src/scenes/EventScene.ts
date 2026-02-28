@@ -215,7 +215,7 @@ export class EventScene extends Phaser.Scene {
           break;
         case 'stat_boost':
           for (const hero of rm.getHeroes()) {
-            rm.addExp(hero, effect.value * 5);
+            rm.applyStatBoost(hero, effect.value);
           }
           break;
         case 'relic':

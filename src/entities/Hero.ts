@@ -59,6 +59,17 @@ export class Hero extends Unit {
       }
     }
 
+    // Apply permanent event stat bonuses
+    if (state.statBonuses) {
+      for (const [key, value] of Object.entries(state.statBonuses)) {
+        if (key in stats && typeof value === 'number') {
+          (stats[key as keyof UnitStats] as number) += value;
+        }
+      }
+      // Keep hp in sync with maxHp boost
+      stats.hp = stats.maxHp;
+    }
+
     return stats;
   }
 }

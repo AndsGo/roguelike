@@ -232,6 +232,20 @@ export class RunManager {
     return maxHp;
   }
 
+  /**
+   * Apply a flat stat boost to a hero (from events).
+   * Distributes value across attack, defense, and maxHp.
+   */
+  applyStatBoost(hero: HeroState, value: number): void {
+    if (!hero.statBonuses) hero.statBonuses = {};
+    // Distribute: attack gets value, defense gets floor(value*0.8), maxHp gets value*3
+    hero.statBonuses.attack = (hero.statBonuses.attack ?? 0) + value;
+    hero.statBonuses.defense = (hero.statBonuses.defense ?? 0) + Math.floor(value * 0.8);
+    hero.statBonuses.maxHp = (hero.statBonuses.maxHp ?? 0) + value * 3;
+    // Also bump currentHp by the maxHp gain so hero doesn't appear damaged
+    hero.currentHp += value * 3;
+  }
+
   addExp(hero: HeroState, amount: number): void {
     hero.exp += amount;
     const startLevel = hero.level;

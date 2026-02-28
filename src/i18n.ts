@@ -345,6 +345,7 @@ export const ELEMENT_NAMES: Record<string, string> = {
 /** Race name translations */
 export const RACE_NAMES: Record<string, string> = {
   human: '人类',
+  elf: '精灵',
   beast: '兽族',
   demon: '恶魔',
   undead: '亡灵',
@@ -357,9 +358,12 @@ export const CLASS_NAMES: Record<string, string> = {
   warrior: '战士',
   mage: '法师',
   rogue: '刺客',
+  assassin: '刺客',
   ranger: '游侠',
   priest: '牧师',
+  cleric: '牧师',
   knight: '骑士',
+  paladin: '圣骑士',
 };
 
 /** Role name translations */

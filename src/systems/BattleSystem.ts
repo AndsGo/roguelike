@@ -289,7 +289,14 @@ export class BattleSystem {
           const damageType = unit.getEffectiveStats().magicPower > unit.getEffectiveStats().attack
             ? 'magical' as const
             : 'physical' as const;
-          this.damageSystem.applyDamage(unit, unit.target, damageType);
+          const result = this.damageSystem.applyDamage(unit, unit.target, damageType);
+
+          // Emit unit:attack for animation system
+          EventBus.getInstance().emit('unit:attack', {
+            sourceId: unit.unitId,
+            targetId: unit.target.unitId,
+            damage: result.finalDamage,
+          });
 
           // Register threat from normal attacks
           TargetingSystem.registerThreat(

@@ -12,6 +12,7 @@ import { SceneTransition } from '../systems/SceneTransition';
 import { ActModifierSystem } from '../systems/ActModifierSystem';
 import { UnitAnimationSystem } from '../systems/UnitAnimationSystem';
 import { EventBus } from '../systems/EventBus';
+import { AudioManager } from '../systems/AudioManager';
 import { SaveManager } from '../managers/SaveManager';
 import { Theme, colorToString, getElementColor } from '../ui/Theme';
 import { hasElementAdvantage } from '../config/elements';
@@ -639,6 +640,10 @@ export class BattleScene extends Phaser.Scene {
         SceneTransition.fadeTransition(this, 'GameOverScene');
       });
     }
+
+    // Play victory/defeat SFX stinger
+    const audio = AudioManager.getInstance();
+    audio.playSfx(isVictory ? 'sfx_levelup' : 'sfx_event_bad');
 
     // Victory/defeat text with animation
     const text = isVictory ? UI.battle.victory : UI.battle.defeat;

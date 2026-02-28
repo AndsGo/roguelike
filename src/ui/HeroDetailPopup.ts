@@ -55,21 +55,21 @@ export class HeroDetailPopup extends Phaser.GameObjects.Container {
     const classLabel = heroData.class ? (CLASS_NAMES[heroData.class] ?? heroData.class) : '';
     const subtags = [raceLabel, classLabel].filter(Boolean).join(' / ');
 
-    scene.add.text(cx, topY, `${heroData.name}  Lv.${heroState.level}${elementLabel}`, {
+    const nameText = scene.add.text(cx, topY, `${heroData.name}  Lv.${heroState.level}${elementLabel}`, {
       fontSize: '14px',
       color: '#ffffff',
       fontFamily: 'monospace',
       fontStyle: 'bold',
     }).setOrigin(0.5).setDepth(801);
-    this.add(this.list[this.list.length - 1]);
+    this.add(nameText);
 
     if (subtags) {
-      scene.add.text(cx, topY + 16, subtags, {
+      const subtagText = scene.add.text(cx, topY + 16, subtags, {
         fontSize: '9px',
         color: '#aaaacc',
         fontFamily: 'monospace',
       }).setOrigin(0.5).setDepth(801);
-      this.add(this.list[this.list.length - 1]);
+      this.add(subtagText);
     }
 
     // ---- EXP Progress Bar ----
@@ -108,6 +108,9 @@ export class HeroDetailPopup extends Phaser.GameObjects.Container {
         }
       }
     }
+
+    // Get event stat bonuses
+    const eventBonus: Partial<Record<keyof UnitStats, number>> = heroState.statBonuses ?? {};
 
     // Compute synergy bonuses (stat_boost type only)
     const synergyBonus: Partial<UnitStats> = {};
@@ -153,7 +156,8 @@ export class HeroDetailPopup extends Phaser.GameObjects.Container {
     const renderStatLine = (x: number, y: number, label: string, key: keyof UnitStats, base: number, isPercent?: boolean, suffix?: string): void => {
       const eqb = (equipBonus as Record<string, number>)[key] ?? 0;
       const syb = (synergyBonus as Record<string, number>)[key] ?? 0;
-      const total = base + eqb + syb;
+      const evb = (eventBonus as Record<string, number>)[key] ?? 0;
+      const total = base + eqb + syb + evb;
 
       let valueStr: string;
       if (isPercent) {
@@ -177,17 +181,8 @@ export class HeroDetailPopup extends Phaser.GameObjects.Container {
       this.add(mainText);
 
       // Show bonus breakdown inline
-      const bonusParts: string[] = [];
-      if (eqb !== 0) {
-        const eqStr = isPercent ? `${Math.round(eqb * 100)}%` : suffix === 'x' ? eqb.toFixed(1) : `${Math.round(eqb)}`;
-        bonusParts.push(`+${eqStr}`);
-      }
-      if (syb !== 0) {
-        const syStr = isPercent ? `${Math.round(syb * 100)}%` : suffix === 'x' ? syb.toFixed(1) : `${Math.round(syb)}`;
-        bonusParts.push(`+${syStr}`);
-      }
-
-      if (bonusParts.length > 0) {
+      const hasBonuses = eqb !== 0 || syb !== 0 || evb !== 0;
+      if (hasBonuses) {
         let offsetX = mainText.width + 4;
         if (eqb !== 0) {
           const eqStr = isPercent ? `${Math.round(eqb * 100)}%` : suffix === 'x' ? eqb.toFixed(1) : `${Math.round(eqb)}`;
@@ -207,6 +202,16 @@ export class HeroDetailPopup extends Phaser.GameObjects.Container {
             fontFamily: 'monospace',
           }).setDepth(801);
           this.add(syText);
+          offsetX += syText.width + 2;
+        }
+        if (evb !== 0) {
+          const evStr = isPercent ? `${Math.round(evb * 100)}%` : suffix === 'x' ? evb.toFixed(1) : `${Math.round(evb)}`;
+          const evText = scene.add.text(x + offsetX, y, `+${evStr}`, {
+            fontSize: '9px',
+            color: '#88ddff',
+            fontFamily: 'monospace',
+          }).setDepth(801);
+          this.add(evText);
         }
       }
     };
@@ -342,12 +347,12 @@ export class HeroDetailPopup extends Phaser.GameObjects.Container {
     }
 
     // ---- Close instruction ----
-    scene.add.text(cx, cy + POPUP_HEIGHT / 2 - 14, '[ 点击关闭 ]', {
+    const closeText = scene.add.text(cx, cy + POPUP_HEIGHT / 2 - 14, '[ 点击关闭 ]', {
       fontSize: '9px',
       color: '#666677',
       fontFamily: 'monospace',
     }).setOrigin(0.5).setDepth(801);
-    this.add(this.list[this.list.length - 1]);
+    this.add(closeText);
 
     // Click backdrop to close
     this.backdrop.on('pointerdown', () => this.close());
