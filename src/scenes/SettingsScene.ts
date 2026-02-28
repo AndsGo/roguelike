@@ -39,28 +39,28 @@ export class SettingsScene extends Phaser.Scene {
 
     const leftCol = 160;
     const rightCol = 520;
-    let y = 75;
+    let y = 65;
 
     // ---- Audio Section ----
     y = this.createVolumeSlider(leftCol, y, UI.settings.bgmVolume,
       AudioManager.getInstance().getBgmVolume(),
       (v) => AudioManager.getInstance().setBgmVolume(v));
 
-    y += 10;
+    y += 6;
 
     y = this.createVolumeSlider(leftCol, y, UI.settings.sfxVolume,
       AudioManager.getInstance().getSfxVolume(),
       (v) => AudioManager.getInstance().setSfxVolume(v));
 
-    y += 20;
+    y += 10;
 
     // ---- Save Slots Section ----
     for (let slot = 0; slot < 3; slot++) {
       this.createSaveSlotRow(leftCol, y, slot);
-      y += 36;
+      y += 30;
     }
 
-    y += 10;
+    y += 5;
 
     // ---- Tutorial Reset ----
     const tutorialLabel = this.add.text(leftCol, y,
@@ -81,7 +81,7 @@ export class SettingsScene extends Phaser.Scene {
       // Still allow reset even if all skipped
     }
 
-    y += 44;
+    y += 36;
 
     // ---- Colorblind Mode ----
     const cbSettings = getAccessibility();
@@ -99,7 +99,7 @@ export class SettingsScene extends Phaser.Scene {
       cbBtn.setText(toggled.colorblindMode ? UI.settings.on : UI.settings.off);
     }, cbSettings.colorblindMode ? Theme.colors.success : Theme.colors.panelBorder);
 
-    y += 40;
+    y += 32;
 
     // ---- Keybindings Section ----
     this.add.text(leftCol, y, UI.settings.keybindings, {
@@ -111,31 +111,33 @@ export class SettingsScene extends Phaser.Scene {
 
     const resetKbBtn = new Button(this, rightCol, y, '重置', 60, 24, () => {
       KeybindingConfig.resetToDefaults();
-      // Refresh the scene to show updated bindings
       this.scene.restart({ returnScene: this.returnScene });
     }, Theme.colors.panelBorder);
 
-    y += 22;
+    y += 18;
 
-    // Show rebindable keybindings (compact: 2 columns for skills, then pause/cancel)
+    // Show rebindable keybindings (4 columns for compact layout)
     const rebindableActions: KeyAction[] = [
       'skill1', 'skill2', 'skill3', 'skill4',
       'skill5', 'skill6', 'skill7', 'skill8',
       'pause', 'cancel',
     ];
 
-    // Layout in 2 columns for skill keys
+    const kbCols = 4;
+    const kbColWidth = 110;
+    const kbRowHeight = 16;
+
     for (let i = 0; i < rebindableActions.length; i++) {
       const action = rebindableActions[i];
-      const col = i < 8 ? (i % 2 === 0 ? leftCol : leftCol + 180) : leftCol;
-      const row = i < 8 ? Math.floor(i / 2) : (4 + (i - 8));
-      const rowY = y + row * 18;
+      const col = leftCol + (i % kbCols) * kbColWidth;
+      const row = Math.floor(i / kbCols);
+      const rowY = y + row * kbRowHeight;
 
       this.add.text(col, rowY, ACTION_LABELS[action], {
         fontSize: '9px', color: '#aaaaaa', fontFamily: 'monospace',
       }).setOrigin(0, 0.5);
 
-      const keyText = this.add.text(col + 80, rowY,
+      const keyText = this.add.text(col + 65, rowY,
         `[${KeybindingConfig.getDisplayKey(action)}]`, {
           fontSize: '9px',
           color: colorToString(Theme.colors.gold),
@@ -147,8 +149,8 @@ export class SettingsScene extends Phaser.Scene {
       });
     }
 
-    const totalRows = 4 + 2; // 4 rows of skill pairs + pause + cancel
-    y += totalRows * 18 + 14;
+    const totalRows = Math.ceil(rebindableActions.length / kbCols);
+    y += totalRows * kbRowHeight + 10;
 
     // ---- Meta Reset ----
     this.createMetaResetRow(leftCol, rightCol, y);

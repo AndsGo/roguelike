@@ -6,7 +6,7 @@ import { ELEMENT_ADVANTAGE, ELEMENT_REACTIONS, ELEMENT_ADVANTAGE_MULTIPLIER, ELE
 import { SYNERGY_DEFINITIONS } from '../config/synergies';
 import { ElementType } from '../types';
 import { MetaManager } from '../managers/MetaManager';
-import { UI } from '../i18n';
+import { UI, RACE_NAMES, CLASS_NAMES } from '../i18n';
 import heroesData from '../data/heroes.json';
 
 const ELEMENT_NAMES: Record<ElementType, string> = {
@@ -19,14 +19,39 @@ const ELEMENT_NAMES: Record<ElementType, string> = {
 export class HelpPanel {
   private panel: Panel;
   private scene: Phaser.Scene;
+  private backdrop: Phaser.GameObjects.Rectangle;
+  private closeText: Phaser.GameObjects.Text;
+  private closeHit: Phaser.GameObjects.Rectangle;
+  private onCloseCallback: () => void;
+
+  private static readonly PANEL_WIDTH = 540;
+  private static readonly PANEL_HEIGHT = 400;
 
   constructor(scene: Phaser.Scene, onClose: () => void) {
     this.scene = scene;
+    this.onCloseCallback = onClose;
 
-    this.panel = new Panel(scene, GAME_WIDTH / 2, GAME_HEIGHT / 2, 540, 400, {
+    // Semi-transparent backdrop (click to close)
+    this.backdrop = scene.add.rectangle(
+      GAME_WIDTH / 2, GAME_HEIGHT / 2,
+      GAME_WIDTH, GAME_HEIGHT,
+      0x000000, 0.5,
+    ).setInteractive({ useHandCursor: true }).setDepth(799);
+    this.backdrop.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
+      // Only close when clicking outside the panel area
+      const hw = HelpPanel.PANEL_WIDTH / 2;
+      const hh = HelpPanel.PANEL_HEIGHT / 2;
+      if (pointer.x < GAME_WIDTH / 2 - hw || pointer.x > GAME_WIDTH / 2 + hw ||
+          pointer.y < GAME_HEIGHT / 2 - hh || pointer.y > GAME_HEIGHT / 2 + hh) {
+        this.close();
+      }
+    });
+
+    this.panel = new Panel(scene, GAME_WIDTH / 2, GAME_HEIGHT / 2, HelpPanel.PANEL_WIDTH, HelpPanel.PANEL_HEIGHT, {
       title: '帮助 / 参考',
       animate: true,
     });
+    this.panel.setDepth(800);
 
     let y = -165;
 
@@ -140,7 +165,9 @@ export class HelpPanel {
         : UI.heroUnlock.noElement;
       const condition = unlockConditions[hero.id] ?? UI.heroUnlock.default;
 
-      const line = `${hero.name}  ${elementStr}  ${hero.race}/${hero.class}  [${condition}]`;
+      const raceCn = RACE_NAMES[hero.race] ?? hero.race;
+      const classCn = CLASS_NAMES[hero.class] ?? hero.class;
+      const line = `${hero.name}  ${elementStr}  ${raceCn}/${classCn}  [${condition}]`;
       const t = scene.add.text(-240, y, line, {
         fontSize: '8px',
         color: isUnlocked ? '#99aabb' : '#666677',
@@ -157,23 +184,26 @@ export class HelpPanel {
     }
     y += 10;
 
-    // Close button
-    const closeText = scene.add.text(0, y, '[ 关闭 ]', {
-      fontSize: '10px', color: '#888888', fontFamily: 'monospace',
-    }).setOrigin(0.5);
-    this.panel.addContent(closeText);
-
-    const closeHit = scene.add.rectangle(0, y, 80, 28, 0x000000, 0)
-      .setInteractive({ useHandCursor: true });
-    closeHit.on('pointerdown', () => {
-      this.panel.close(onClose);
-    });
-    this.panel.addContent(closeHit);
-
     this.panel.setContentHeight(y + 40 + 165);
+
+    // Fixed close button (outside scrollable content, always visible)
+    this.closeText = scene.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 + HelpPanel.PANEL_HEIGHT / 2 - 16, '[ 关闭 ]', {
+      fontSize: '10px', color: '#888888', fontFamily: 'monospace',
+    }).setOrigin(0.5).setDepth(801);
+
+    this.closeHit = scene.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2 + HelpPanel.PANEL_HEIGHT / 2 - 16, 80, 24, 0x000000, 0)
+      .setInteractive({ useHandCursor: true })
+      .setDepth(801);
+    this.closeHit.on('pointerdown', () => this.close());
   }
 
   close(onComplete?: () => void): void {
-    this.panel.close(onComplete);
+    this.backdrop.destroy();
+    this.closeText.destroy();
+    this.closeHit.destroy();
+    this.panel.close(() => {
+      this.onCloseCallback();
+      if (onComplete) onComplete();
+    });
   }
 }

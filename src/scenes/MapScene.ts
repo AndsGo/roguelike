@@ -7,9 +7,11 @@ import { Theme, colorToString } from '../ui/Theme';
 import { SceneTransition } from '../systems/SceneTransition';
 import { Button } from '../ui/Button';
 import { MapRenderer, NODE_COLORS, NODE_LABELS, LayerInfo } from '../ui/MapRenderer';
+import { HeroDetailPopup } from '../ui/HeroDetailPopup';
 import actsData from '../data/acts.json';
 import { UI } from '../i18n';
 import { NodeTooltip } from '../ui/NodeTooltip';
+import { RunOverviewPanel } from '../ui/RunOverviewPanel';
 
 export class MapScene extends Phaser.Scene {
   private mapContainer!: Phaser.GameObjects.Container;
@@ -22,6 +24,9 @@ export class MapScene extends Phaser.Scene {
   private pathOverlay: Phaser.GameObjects.Graphics | null = null;
   private nodePositions = new Map<number, { x: number; y: number }>();
   private mapNodes: MapNode[] = [];
+  private heroPopup: HeroDetailPopup | null = null;
+  private heroPanelObjects: Phaser.GameObjects.GameObject[] = [];
+  private overviewPanel: RunOverviewPanel | null = null;
 
   constructor() {
     super({ key: 'MapScene' });
@@ -270,6 +275,21 @@ export class MapScene extends Phaser.Scene {
       fontFamily: 'monospace',
     }).setOrigin(1, 0).setScrollFactor(0).setDepth(101);
 
+    // Overview button
+    const overviewBtn = this.add.text(GAME_WIDTH - 15, 26, '[概览]', {
+      fontSize: '9px',
+      color: colorToString(Theme.colors.ui.accent),
+      fontFamily: 'monospace',
+    }).setOrigin(1, 0).setScrollFactor(0).setDepth(101);
+    const overviewHit = this.add.rectangle(overviewBtn.x - overviewBtn.width / 2, overviewBtn.y + 6, overviewBtn.width + 10, 16, 0x000000, 0)
+      .setInteractive({ useHandCursor: true })
+      .setScrollFactor(0).setDepth(101);
+    overviewHit.on('pointerup', () => {
+      if (!this.overviewPanel) {
+        this.overviewPanel = new RunOverviewPanel(this, () => { this.overviewPanel = null; });
+      }
+    });
+
     // Run stats (hero count, relics, node progress)
     const completedCount = map.filter(n => n.completed).length;
     this.add.text(15, 8, UI.map.runStats(rm.getHeroes().length, rm.getRelics().length, completedCount, map.length), {
@@ -278,8 +298,20 @@ export class MapScene extends Phaser.Scene {
       fontFamily: 'monospace',
     }).setOrigin(0, 0).setScrollFactor(0).setDepth(101);
 
-    // Hero summary at bottom
-    MapRenderer.drawHeroSummary(this, rm.getHeroes(), (id) => rm.getHeroData(id), (h, d) => rm.getMaxHp(h, d));
+    // Interactive hero panel at bottom
+    this.heroPanelObjects = MapRenderer.drawInteractiveHeroPanel(
+      this,
+      rm.getHeroes(),
+      (id) => rm.getHeroData(id),
+      (h, d) => rm.getMaxHp(h, d),
+      (heroState, heroData) => {
+        if (!this.heroPopup) {
+          this.heroPopup = new HeroDetailPopup(this, heroData, heroState);
+          // Clean up reference when popup closes
+          this.heroPopup.on('destroy', () => { this.heroPopup = null; });
+        }
+      },
+    );
 
     // Set up camera scrolling if map is wider than screen
     if (needsScroll) {
@@ -586,5 +618,13 @@ export class MapScene extends Phaser.Scene {
     this.tweens.killAll();
     this.hideNodeTooltip();
     this.clearPathOverlay();
+    if (this.heroPopup) {
+      this.heroPopup.destroy();
+      this.heroPopup = null;
+    }
+    if (this.overviewPanel) {
+      this.overviewPanel.close();
+      this.overviewPanel = null;
+    }
   }
 }

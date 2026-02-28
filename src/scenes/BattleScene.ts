@@ -21,6 +21,7 @@ import skillVisualsData from '../data/skill-visuals.json';
 import { Button } from '../ui/Button';
 import { UI } from '../i18n';
 import { KeybindingConfig } from '../config/keybindings';
+import { RunOverviewPanel } from '../ui/RunOverviewPanel';
 
 export class BattleScene extends Phaser.Scene {
   private battleSystem!: BattleSystem;
@@ -32,6 +33,7 @@ export class BattleScene extends Phaser.Scene {
   private allUnits: (Hero | Enemy)[] = [];
   private unitAnimations!: UnitAnimationSystem;
   private pauseElements: Phaser.GameObjects.GameObject[] = [];
+  private overviewPanel: RunOverviewPanel | null = null;
 
   // Target selection state
   private targetingMode: boolean = false;
@@ -395,6 +397,22 @@ export class BattleScene extends Phaser.Scene {
       } else {
         this.togglePause();
       }
+    });
+
+    // Tab key for run overview
+    const tabKey = this.input.keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.TAB);
+    tabKey?.on('down', () => {
+      if (this.overviewPanel) return;
+      if (!this.battleSystem.isPaused) {
+        this.battleSystem.isPaused = true;
+      }
+      this.overviewPanel = new RunOverviewPanel(this, () => {
+        this.overviewPanel = null;
+        // Resume if no pause menu is open
+        if (this.pauseElements.length === 0) {
+          this.battleSystem.isPaused = false;
+        }
+      });
     });
   }
 

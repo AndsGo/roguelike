@@ -187,7 +187,7 @@ export class BattleEffects {
 
   /** Combo break indicator text */
   showComboBreak(x: number, y: number): void {
-    const text = this.scene.add.text(x, y - 20, 'BREAK!', {
+    const text = this.scene.add.text(x, y - 20, '连击断!', {
       fontSize: '14px',
       color: '#ff6644',
       fontFamily: 'monospace',

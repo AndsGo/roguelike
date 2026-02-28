@@ -4,6 +4,7 @@ import { Panel } from './Panel';
 import { Theme, colorToString } from './Theme';
 import { AchievementManager, AchievementDef } from '../managers/AchievementManager';
 import { MetaManager } from '../managers/MetaManager';
+import { ACHIEVEMENT_ICONS } from '../i18n';
 
 const ROW_HEIGHT = 40;
 
@@ -14,14 +15,39 @@ const ROW_HEIGHT = 40;
 export class AchievementPanel {
   private panel: Panel;
   private scene: Phaser.Scene;
+  private backdrop: Phaser.GameObjects.Rectangle;
+  private closeText: Phaser.GameObjects.Text;
+  private closeHit: Phaser.GameObjects.Rectangle;
+  private onCloseCallback: () => void;
+
+  private static readonly PANEL_WIDTH = 520;
+  private static readonly PANEL_HEIGHT = 380;
 
   constructor(scene: Phaser.Scene, onClose: () => void) {
     this.scene = scene;
+    this.onCloseCallback = onClose;
 
-    this.panel = new Panel(scene, GAME_WIDTH / 2, GAME_HEIGHT / 2, 520, 380, {
+    // Semi-transparent backdrop (click to close)
+    this.backdrop = scene.add.rectangle(
+      GAME_WIDTH / 2, GAME_HEIGHT / 2,
+      GAME_WIDTH, GAME_HEIGHT,
+      0x000000, 0.5,
+    ).setInteractive({ useHandCursor: true }).setDepth(799);
+    this.backdrop.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
+      // Only close when clicking outside the panel area
+      const hw = AchievementPanel.PANEL_WIDTH / 2;
+      const hh = AchievementPanel.PANEL_HEIGHT / 2;
+      if (pointer.x < GAME_WIDTH / 2 - hw || pointer.x > GAME_WIDTH / 2 + hw ||
+          pointer.y < GAME_HEIGHT / 2 - hh || pointer.y > GAME_HEIGHT / 2 + hh) {
+        this.close();
+      }
+    });
+
+    this.panel = new Panel(scene, GAME_WIDTH / 2, GAME_HEIGHT / 2, AchievementPanel.PANEL_WIDTH, AchievementPanel.PANEL_HEIGHT, {
       title: '成就列表',
       animate: true,
     });
+    this.panel.setDepth(800);
 
     const achievements = AchievementManager.getAll();
     const unlocked = new Set(AchievementManager.getUnlocked());
@@ -46,22 +72,19 @@ export class AchievementPanel {
       y += ROW_HEIGHT;
     }
 
-    // Close button
-    const closeText = scene.add.text(0, y + 10, '[ 关闭 ]', {
+    this.panel.setContentHeight(achievements.length * ROW_HEIGHT + 80);
+
+    // Fixed close button (outside scrollable content, always visible)
+    this.closeText = scene.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 + AchievementPanel.PANEL_HEIGHT / 2 - 16, '[ 关闭 ]', {
       fontSize: '10px',
       color: '#888888',
       fontFamily: 'monospace',
-    }).setOrigin(0.5);
-    this.panel.addContent(closeText);
+    }).setOrigin(0.5).setDepth(801);
 
-    const closeHit = scene.add.rectangle(0, y + 10, 80, 28, 0x000000, 0)
-      .setInteractive({ useHandCursor: true });
-    closeHit.on('pointerdown', () => {
-      this.panel.close(onClose);
-    });
-    this.panel.addContent(closeHit);
-
-    this.panel.setContentHeight(achievements.length * ROW_HEIGHT + 80);
+    this.closeHit = scene.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2 + AchievementPanel.PANEL_HEIGHT / 2 - 16, 80, 24, 0x000000, 0)
+      .setInteractive({ useHandCursor: true })
+      .setDepth(801);
+    this.closeHit.on('pointerdown', () => this.close());
   }
 
   private renderRow(ach: AchievementDef, isUnlocked: boolean, y: number): void {
@@ -74,8 +97,9 @@ export class AchievementPanel {
     rowBg.fillRoundedRect(leftX, y - 6, 460, ROW_HEIGHT - 4, 3);
     this.panel.addContent(rowBg);
 
-    // Icon
-    const iconText = scene.add.text(leftX + 6, y + 2, ach.icon, {
+    // Icon (map text icon name to emoji)
+    const iconChar = ACHIEVEMENT_ICONS[ach.icon] ?? ach.icon;
+    const iconText = scene.add.text(leftX + 6, y + 2, iconChar, {
       fontSize: '16px',
       color: isUnlocked ? '#ffffff' : '#555555',
       fontFamily: 'monospace',
@@ -134,6 +158,12 @@ export class AchievementPanel {
   }
 
   close(onComplete?: () => void): void {
-    this.panel.close(onComplete);
+    this.backdrop.destroy();
+    this.closeText.destroy();
+    this.closeHit.destroy();
+    this.panel.close(() => {
+      this.onCloseCallback();
+      if (onComplete) onComplete();
+    });
   }
 }

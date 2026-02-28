@@ -57,9 +57,13 @@ export class Button extends Phaser.GameObjects.Container {
 
   private buildHitConfig(): Phaser.Types.Input.InputConfiguration {
     const p = Button.HIT_PADDING;
+    // Note: Phaser's setInteractive() on Containers sets origin to 0.5,
+    // which adds displayOriginX/Y (=width/2, height/2) to hit test coords.
+    // So hit area Rectangle(-p, -p, w+2p, h+2p) maps to world-space
+    // [-w/2-p, +w/2+p] centered on the Container's position.
     return {
       hitArea: new Phaser.Geom.Rectangle(
-        -this.btnWidth / 2 - p, -this.btnHeight / 2 - p,
+        -p, -p,
         this.btnWidth + p * 2, this.btnHeight + p * 2,
       ),
       hitAreaCallback: Phaser.Geom.Rectangle.Contains,

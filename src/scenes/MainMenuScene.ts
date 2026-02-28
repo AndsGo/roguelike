@@ -18,6 +18,8 @@ import heroesData from '../data/heroes.json';
 export class MainMenuScene extends Phaser.Scene {
   private upgradePanel: Panel | null = null;
   private upgradeOverlay: Phaser.GameObjects.Rectangle | null = null;
+  private upgradeCloseText: Phaser.GameObjects.Text | null = null;
+  private upgradeCloseHit: Phaser.GameObjects.Rectangle | null = null;
   private achievementPanel: AchievementPanel | null = null;
   private helpPanel: HelpPanel | null = null;
 
@@ -195,13 +197,14 @@ export class MainMenuScene extends Phaser.Scene {
     const meta = MetaManager.getMetaData();
     const victories = meta.totalVictories;
 
-    // Overlay
-    const overlay = this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, 0x000000, 0.6)
-      .setInteractive();
-
     const panelW = 400;
     const panelH = 280;
-    const panelBg = this.add.graphics();
+
+    // Overlay — click outside panel to close
+    const overlay = this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, 0x000000, 0.6)
+      .setInteractive().setDepth(799);
+
+    const panelBg = this.add.graphics().setDepth(800);
     panelBg.fillStyle(Theme.colors.panel, 0.95);
     panelBg.fillRoundedRect(GAME_WIDTH / 2 - panelW / 2, GAME_HEIGHT / 2 - panelH / 2, panelW, panelH, 8);
     panelBg.lineStyle(2, Theme.colors.panelBorder, 0.8);
@@ -212,10 +215,25 @@ export class MainMenuScene extends Phaser.Scene {
       color: colorToString(Theme.colors.secondary),
       fontFamily: 'monospace',
       fontStyle: 'bold',
-    }).setOrigin(0.5);
+    }).setOrigin(0.5).setDepth(800);
 
     const allElements: Phaser.GameObjects.GameObject[] = [overlay, panelBg, titleText];
     const buttons: Button[] = [];
+
+    const cleanup = () => {
+      allElements.forEach(el => el.destroy());
+      buttons.forEach(b => b.destroy());
+    };
+
+    // Click outside panel area to close
+    overlay.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
+      const hw = panelW / 2;
+      const hh = panelH / 2;
+      if (pointer.x < GAME_WIDTH / 2 - hw || pointer.x > GAME_WIDTH / 2 + hw ||
+          pointer.y < GAME_HEIGHT / 2 - hh || pointer.y > GAME_HEIGHT / 2 + hh) {
+        cleanup();
+      }
+    });
 
     const startY = GAME_HEIGHT / 2 - panelH / 2 + 52;
     const rowH = 48;
@@ -234,7 +252,7 @@ export class MainMenuScene extends Phaser.Scene {
       const nameColor = isLocked ? '#666666' : '#ffffff';
       const nameText = this.add.text(leftX, y, diff.name, {
         fontSize: '12px', color: nameColor, fontFamily: 'monospace', fontStyle: 'bold',
-      });
+      }).setDepth(800);
       allElements.push(nameText);
 
       // Description + multiplier
@@ -245,42 +263,42 @@ export class MainMenuScene extends Phaser.Scene {
         fontSize: '8px',
         color: isLocked ? '#555555' : '#8899aa',
         fontFamily: 'monospace',
-      });
+      }).setDepth(800);
       allElements.push(descText);
 
       // Start button (right side)
       if (!isLocked) {
         const btn = new Button(this, GAME_WIDTH / 2 + panelW / 2 - 50, y + 10, UI.difficulty.start, 60, 26, () => {
-          // Clean up
-          allElements.forEach(el => el.destroy());
-          buttons.forEach(b => b.destroy());
+          cleanup();
           // Go to hero draft scene with selected difficulty
           SceneTransition.fadeTransition(this, 'HeroDraftScene', { difficulty: diff.id });
         }, i === 0 ? Theme.colors.primary : Theme.colors.panelBorder);
+        btn.setDepth(801);
         buttons.push(btn);
       } else {
         // Locked indicator
         const lockText = this.add.text(GAME_WIDTH / 2 + panelW / 2 - 50, y + 10, '\uD83D\uDD12', {
           fontSize: '14px', color: '#555555', fontFamily: 'monospace',
-        }).setOrigin(0.5);
+        }).setOrigin(0.5).setDepth(800);
         allElements.push(lockText);
       }
     }
 
     // Cancel/close button
     const cancelBtn = new Button(this, GAME_WIDTH / 2, startY + DIFFICULTY_LEVELS.length * rowH + 10, UI.mainMenu.close, 80, 26, () => {
-      allElements.forEach(el => el.destroy());
-      buttons.forEach(b => b.destroy());
+      cleanup();
       cancelBtn.destroy();
     }, 0x555555);
+    cancelBtn.setDepth(801);
+    buttons.push(cancelBtn);
   }
 
   private showNewGameConfirmation(): void {
     // Overlay background
     const overlay = this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, 0x000000, 0.6)
-      .setInteractive(); // blocks clicks to elements behind
+      .setInteractive().setDepth(799);
 
-    const panelBg = this.add.graphics();
+    const panelBg = this.add.graphics().setDepth(800);
     panelBg.fillStyle(Theme.colors.panel, 0.95);
     panelBg.fillRoundedRect(GAME_WIDTH / 2 - 160, GAME_HEIGHT / 2 - 55, 320, 110, 8);
     panelBg.lineStyle(2, Theme.colors.panelBorder, 0.8);
@@ -291,22 +309,36 @@ export class MainMenuScene extends Phaser.Scene {
       color: colorToString(Theme.colors.danger),
       fontFamily: 'monospace',
       align: 'center',
-    }).setOrigin(0.5);
+    }).setOrigin(0.5).setDepth(800);
 
     const confirmElements = [overlay, panelBg, msg];
 
-    const yesBtn = new Button(this, GAME_WIDTH / 2 - 60, GAME_HEIGHT / 2 + 25, UI.mainMenu.yes, 80, 30, () => {
+    const cleanup = () => {
       confirmElements.forEach(el => el.destroy());
       yesBtn.destroy();
       noBtn.destroy();
+    };
+
+    // Click outside panel to close
+    overlay.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
+      const hw = 160;
+      const hh = 55;
+      if (pointer.x < GAME_WIDTH / 2 - hw || pointer.x > GAME_WIDTH / 2 + hw ||
+          pointer.y < GAME_HEIGHT / 2 - hh || pointer.y > GAME_HEIGHT / 2 + hh) {
+        cleanup();
+      }
+    });
+
+    const yesBtn = new Button(this, GAME_WIDTH / 2 - 60, GAME_HEIGHT / 2 + 25, UI.mainMenu.yes, 80, 30, () => {
+      cleanup();
       this.startNewGame();
     }, Theme.colors.danger);
+    yesBtn.setDepth(801);
 
     const noBtn = new Button(this, GAME_WIDTH / 2 + 60, GAME_HEIGHT / 2 + 25, UI.mainMenu.no, 80, 30, () => {
-      confirmElements.forEach(el => el.destroy());
-      yesBtn.destroy();
-      noBtn.destroy();
+      cleanup();
     }, Theme.colors.primary);
+    noBtn.setDepth(801);
   }
 
   private showHelpPanel(): void {
@@ -329,21 +361,43 @@ export class MainMenuScene extends Phaser.Scene {
     });
   }
 
+  private closeUpgradePanel(): void {
+    this.upgradeCloseText?.destroy();
+    this.upgradeCloseText = null;
+    this.upgradeCloseHit?.destroy();
+    this.upgradeCloseHit = null;
+    this.upgradePanel?.close(() => {
+      this.upgradePanel = null;
+      this.upgradeOverlay?.destroy();
+      this.upgradeOverlay = null;
+    });
+  }
+
   private showUpgradePanel(): void {
     if (this.upgradePanel) {
-      this.upgradePanel.close(() => { this.upgradePanel = null; this.upgradeOverlay?.destroy(); this.upgradeOverlay = null; });
+      this.closeUpgradePanel();
       return;
     }
 
-    // Full-screen overlay to block background interaction
+    // Full-screen overlay (click to close)
     this.upgradeOverlay = this.add.rectangle(
       GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, 0x000000, 0.5,
-    ).setInteractive().setDepth(90);
+    ).setInteractive({ useHandCursor: true }).setDepth(799);
+    this.upgradeOverlay.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
+      // Only close when clicking outside the panel area
+      const pw = 500 / 2;
+      const ph = 340 / 2;
+      if (pointer.x < GAME_WIDTH / 2 - pw || pointer.x > GAME_WIDTH / 2 + pw ||
+          pointer.y < GAME_HEIGHT / 2 - ph || pointer.y > GAME_HEIGHT / 2 + ph) {
+        this.closeUpgradePanel();
+      }
+    });
 
     const panel = new Panel(this, GAME_WIDTH / 2, GAME_HEIGHT / 2, 500, 340, {
       title: UI.mainMenu.upgradeTitle,
       animate: true,
     });
+    panel.setDepth(800);
     this.upgradePanel = panel;
 
     this.renderUpgradeContent(panel);
@@ -434,12 +488,8 @@ export class MainMenuScene extends Phaser.Scene {
           buyHit.on('pointerdown', () => {
             if (MetaManager.purchaseUpgrade(def.id)) {
               // Refresh panel
-              this.upgradePanel?.close(() => {
-                this.upgradePanel = null;
-                this.upgradeOverlay?.destroy();
-                this.upgradeOverlay = null;
-                this.showUpgradePanel();
-              });
+              this.closeUpgradePanel();
+              this.showUpgradePanel();
             }
           });
           panel.addContent(buyHit);
@@ -455,21 +505,19 @@ export class MainMenuScene extends Phaser.Scene {
       }
     });
 
-    // Close button — use zone for larger hit area
-    const closeText = this.add.text(0, 135, UI.mainMenu.close, {
+    panel.setContentHeight(upgrades.length * 48 + 80);
+
+    // Fixed close button (outside scrollable content, always visible)
+    const panelHeight = 340;
+    this.upgradeCloseText = this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 + panelHeight / 2 - 16, UI.mainMenu.close, {
       fontSize: '10px',
       color: '#888888',
       fontFamily: 'monospace',
-    }).setOrigin(0.5);
-    panel.addContent(closeText);
+    }).setOrigin(0.5).setDepth(801);
 
-    const closeHit = this.add.rectangle(0, 135, 80, 28, 0x000000, 0)
-      .setInteractive({ useHandCursor: true });
-    closeHit.on('pointerdown', () => {
-      this.upgradePanel?.close(() => { this.upgradePanel = null; this.upgradeOverlay?.destroy(); this.upgradeOverlay = null; });
-    });
-    panel.addContent(closeHit);
-
-    panel.setContentHeight(upgrades.length * 48 + 80);
+    this.upgradeCloseHit = this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2 + panelHeight / 2 - 16, 80, 24, 0x000000, 0)
+      .setInteractive({ useHandCursor: true })
+      .setDepth(801);
+    this.upgradeCloseHit.on('pointerdown', () => this.closeUpgradePanel());
   }
 }

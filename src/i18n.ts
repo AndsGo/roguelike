@@ -208,6 +208,22 @@ export const UI = {
     volume: '音量',
   },
 
+  // RunOverviewPanel
+  runOverview: {
+    title: '冒险概览',
+    teamHeroes: '队伍英雄',
+    relics: '获得遗物',
+    synergies: '激活羁绊',
+    runStats: '冒险信息',
+    noRelics: '(无)',
+    noSynergies: '(无)',
+    close: '[ 关闭 ]',
+    gold: (n: number) => `金币: ${n}`,
+    floor: (act: number, floor: number) => `第${act}章 第${floor}层`,
+    difficulty: (name: string) => `难度: ${name}`,
+    threshold: (current: number, required: number) => `${current}/${required}`,
+  },
+
   // SkillBar
   skillBar: {
     ready: '就绪',
@@ -316,3 +332,79 @@ export function getHeroDisplayName(heroId: string): string {
   const hero = (heroesData as { id: string; name: string }[]).find(h => h.id === heroId);
   return hero?.name ?? heroId;
 }
+
+/** Element name translations */
+export const ELEMENT_NAMES: Record<string, string> = {
+  fire: '火',
+  ice: '冰',
+  lightning: '雷',
+  dark: '暗',
+  holy: '光',
+};
+
+/** Race name translations */
+export const RACE_NAMES: Record<string, string> = {
+  human: '人类',
+  beast: '兽族',
+  demon: '恶魔',
+  undead: '亡灵',
+  dragon: '龙族',
+  angel: '天使',
+};
+
+/** Class name translations */
+export const CLASS_NAMES: Record<string, string> = {
+  warrior: '战士',
+  mage: '法师',
+  rogue: '刺客',
+  ranger: '游侠',
+  priest: '牧师',
+  knight: '骑士',
+};
+
+/** Role name translations */
+export const ROLE_NAMES: Record<string, string> = {
+  tank: '坦克',
+  melee_dps: '近战',
+  ranged_dps: '远程',
+  healer: '治疗',
+  support: '辅助',
+};
+
+/** Achievement icon text to emoji mapping */
+export const ACHIEVEMENT_ICONS: Record<string, string> = {
+  trophy: '\u{1F3C6}',
+  medal: '\u{1F3C5}',
+  lightning: '\u26A1',
+  shield: '\u{1F6E1}',
+  star: '\u2B50',
+  sword: '\u2694\uFE0F',
+  fire: '\u{1F525}',
+  flame: '\u{1F525}',
+  crown: '\u{1F451}',
+  gem: '\u{1F48E}',
+  scroll: '\u{1F4DC}',
+  skull: '\u{1F480}',
+  heart: '\u2764\uFE0F',
+  magic: '\u2728',
+  potion: '\u{1F9EA}',
+  coin: '\u{1FA99}',
+  book: '\u{1F4D6}',
+  target: '\u{1F3AF}',
+  muscle: '\u{1F4AA}',
+  crystal: '\u{1F52E}',
+  dragon: '\u{1F409}',
+  hourglass: '\u231B',
+  compass: '\u{1F9ED}',
+  flag: '\u{1F3C1}',
+  key: '\u{1F511}',
+  bolt: '\u26A1',
+  dice: '\u{1F3B2}',
+  map: '\u{1F5FA}\uFE0F',
+  arrow_up: '\u2B06\uFE0F',
+  bag: '\u{1F4B0}',
+  chest: '\u{1F4E6}',
+  explosion: '\u{1F4A5}',
+  nuke: '\u2622\uFE0F',
+  wolf: '\u{1F43A}',
+};

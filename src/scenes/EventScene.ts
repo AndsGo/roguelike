@@ -8,7 +8,7 @@ import { SceneTransition } from '../systems/SceneTransition';
 import { SaveManager } from '../managers/SaveManager';
 import eventsData from '../data/events.json';
 import { ShopGenerator } from '../systems/ShopGenerator';
-import { UI, getHeroDisplayName } from '../i18n';
+import { UI, getHeroDisplayName, ELEMENT_NAMES } from '../i18n';
 import { AudioManager } from '../systems/AudioManager';
 
 export class EventScene extends Phaser.Scene {
@@ -315,7 +315,10 @@ export class EventScene extends Phaser.Scene {
         case 'stat_boost': return UI.event.statBoost(e.value);
         case 'relic': return UI.event.relicAcquired(e.relicId ?? 'unknown');
         case 'item': return UI.event.itemGold(e.value || 30);
-        case 'transform': return `元素转化: ${e.element ?? '未知'}`;
+        case 'transform': {
+          const elName = e.element ? (ELEMENT_NAMES[e.element] ?? e.element) : '未知';
+          return `元素转化: ${elName}`;
+        }
         case 'sacrifice': return '献祭了一名英雄';
         case 'recruit': return `招募: ${getHeroDisplayName(e.heroId ?? '')}`;
         default: return '';

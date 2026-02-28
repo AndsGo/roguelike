@@ -3,7 +3,7 @@ import { HeroData, HeroState, EquipmentSlot, SkillAdvancement, UnitStats } from 
 import { RunManager } from '../managers/RunManager';
 import { Theme, colorToString } from './Theme';
 import { GAME_WIDTH, GAME_HEIGHT } from '../constants';
-import { STAT_LABELS, SLOT_LABELS, formatStat } from '../i18n';
+import { STAT_LABELS, SLOT_LABELS, formatStat, ELEMENT_NAMES, RACE_NAMES, CLASS_NAMES } from '../i18n';
 import { expForLevel } from '../utils/math';
 import { SYNERGY_DEFINITIONS } from '../config/synergies';
 import skillsData from '../data/skills.json';
@@ -50,9 +50,9 @@ export class HeroDetailPopup extends Phaser.GameObjects.Container {
     // ---- Header: Name / Level / Element / Race / Class ----
     const topY = cy - POPUP_HEIGHT / 2 + 18;
 
-    const elementLabel = heroData.element ? ` [${heroData.element}]` : '';
-    const raceLabel = heroData.race ?? '';
-    const classLabel = heroData.class ?? '';
+    const elementLabel = heroData.element ? ` [${ELEMENT_NAMES[heroData.element] ?? heroData.element}]` : '';
+    const raceLabel = heroData.race ? (RACE_NAMES[heroData.race] ?? heroData.race) : '';
+    const classLabel = heroData.class ? (CLASS_NAMES[heroData.class] ?? heroData.class) : '';
     const subtags = [raceLabel, classLabel].filter(Boolean).join(' / ');
 
     scene.add.text(cx, topY, `${heroData.name}  Lv.${heroState.level}${elementLabel}`, {

@@ -35,12 +35,12 @@ export class BootScene extends Phaser.Scene {
       loadingText.setText('Loading complete!');
     });
 
-    // Load audio assets (placeholder .ogg files)
+    // Load audio assets
     for (const key of BGM_KEYS) {
-      this.load.audio(key, `audio/${key}.ogg`);
+      this.load.audio(key, `audio/${key}.wav`);
     }
     for (const key of SFX_KEYS) {
-      this.load.audio(key, `audio/${key}.ogg`);
+      this.load.audio(key, `audio/${key}.wav`);
     }
   }
 
@@ -50,8 +50,10 @@ export class BootScene extends Phaser.Scene {
       this.showStorageWarning();
     }
 
-    // Initialize audio manager
-    AudioManager.getInstance().init(this.game);
+    // Initialize audio manager and start menu BGM
+    const audio = AudioManager.getInstance();
+    audio.init(this.game);
+    audio.onSceneStart('MainMenuScene');
 
     this.scene.start('MainMenuScene');
   }

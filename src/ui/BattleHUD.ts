@@ -187,14 +187,18 @@ export class BattleHUD extends Phaser.GameObjects.Container {
   }
 
   private createSpeedControl(): Phaser.GameObjects.Text {
+    // Place speed control in top-center area, right of the battle type label
+    const btnX = GAME_WIDTH / 2 + 55;
+    const btnY = 12;
+
     const bg = this.scene.add.graphics();
     bg.fillStyle(Theme.colors.panel, 0.7);
-    bg.fillRoundedRect(GAME_WIDTH / 2 - 30, GAME_HEIGHT - 25, 60, 20, 4);
+    bg.fillRoundedRect(btnX - 25, btnY - 9, 50, 18, 4);
     bg.lineStyle(1, Theme.colors.panelBorder, 0.5);
-    bg.strokeRoundedRect(GAME_WIDTH / 2 - 30, GAME_HEIGHT - 25, 60, 20, 4);
+    bg.strokeRoundedRect(btnX - 25, btnY - 9, 50, 18, 4);
     this.add(bg);
 
-    const text = this.scene.add.text(GAME_WIDTH / 2, GAME_HEIGHT - 15, `${this.currentSpeed}x`, {
+    const text = this.scene.add.text(btnX, btnY, `${this.currentSpeed}x`, {
       fontSize: '11px',
       color: '#ffffff',
       fontFamily: 'monospace',
@@ -207,7 +211,7 @@ export class BattleHUD extends Phaser.GameObjects.Container {
     }
 
     // Padded hit zone covering the full speed button background
-    const speedHit = this.scene.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT - 15, 72, 30, 0x000000, 0)
+    const speedHit = this.scene.add.rectangle(btnX, btnY, 62, 28, 0x000000, 0)
       .setInteractive({ useHandCursor: true });
     speedHit.on('pointerdown', () => {
       const speeds = [1, 2, 3];
@@ -226,9 +230,11 @@ export class BattleHUD extends Phaser.GameObjects.Container {
     const rm = RunManager.getInstance();
     const synergies = rm.getActiveSynergies();
 
+    // Place synergy indicators below hero portraits (left side)
+    const baseY = 32 + this.heroes.length * 22 + 10;
     synergies.forEach((syn, i) => {
       const x = 10 + i * 22;
-      const y = GAME_HEIGHT - 20;
+      const y = baseY;
 
       const circle = this.scene.add.graphics();
       circle.fillStyle(Theme.colors.primary, 0.7);

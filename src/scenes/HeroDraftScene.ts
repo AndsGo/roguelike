@@ -6,7 +6,7 @@ import { RunManager } from '../managers/RunManager';
 import { MetaManager } from '../managers/MetaManager';
 import { SceneTransition } from '../systems/SceneTransition';
 import { HeroDetailPopup } from '../ui/HeroDetailPopup';
-import { UI } from '../i18n';
+import { UI, RACE_NAMES, CLASS_NAMES } from '../i18n';
 import { HeroData } from '../types';
 import heroesData from '../data/heroes.json';
 import { AudioManager } from '../systems/AudioManager';
@@ -183,7 +183,9 @@ export class HeroDraftScene extends Phaser.Scene {
     container.add(tagText);
 
     // Race / Class
-    const raceClass = [hero.race ?? '', hero.class ?? ''].filter(Boolean).join('/');
+    const raceStr = hero.race ? (RACE_NAMES[hero.race] ?? hero.race) : '';
+    const classStr = hero.class ? (CLASS_NAMES[hero.class] ?? hero.class) : '';
+    const raceClass = [raceStr, classStr].filter(Boolean).join('/');
     const rcText = this.add.text(0, -CARD_H / 2 + 39, raceClass, {
       fontSize: '7px', color: '#667788', fontFamily: 'monospace',
     }).setOrigin(0.5);
