@@ -6,6 +6,7 @@ import { SeededRNG } from '../utils/rng';
 import { ElementSystem } from './ElementSystem';
 import { ComboSystem } from './ComboSystem';
 import { EventBus } from './EventBus';
+import { AudioManager } from './AudioManager';
 
 export interface DamageResult {
   rawDamage: number;
@@ -136,6 +137,11 @@ export class DamageSystem {
         false,
         false,
       );
+    }
+
+    // Play crit SFX for critical hits
+    if (result.isCrit) {
+      AudioManager.getInstance().playSfx('sfx_crit');
     }
 
     // Emit unit:damage event

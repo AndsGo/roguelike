@@ -9,6 +9,7 @@ import { HeroDetailPopup } from '../ui/HeroDetailPopup';
 import { UI } from '../i18n';
 import { HeroData } from '../types';
 import heroesData from '../data/heroes.json';
+import { AudioManager } from '../systems/AudioManager';
 
 const MAX_SELECTION = 3;
 const MIN_SELECTION = 2;
@@ -253,9 +254,11 @@ export class HeroDraftScene extends Phaser.Scene {
     const idx = this.selectedIds.indexOf(heroId);
     if (idx >= 0) {
       this.selectedIds.splice(idx, 1);
+      AudioManager.getInstance().playSfx('sfx_select');
     } else {
       if (this.selectedIds.length >= MAX_SELECTION) return;
       this.selectedIds.push(heroId);
+      AudioManager.getInstance().playSfx('sfx_select');
     }
     this.updateSelectionUI();
   }

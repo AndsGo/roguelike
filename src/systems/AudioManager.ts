@@ -17,8 +17,10 @@ interface AudioSettings {
 /** Scene key → BGM key mapping */
 const SCENE_BGM_MAP: Record<string, string> = {
   MainMenuScene: 'bgm_menu',
+  HeroDraftScene: 'bgm_menu',
   MapScene: 'bgm_map',
   BattleScene: 'bgm_battle',
+  RewardScene: 'bgm_victory',
   ShopScene: 'bgm_shop',
   RestScene: 'bgm_ambient',
   EventScene: 'bgm_event',
@@ -33,6 +35,8 @@ const SFX_EVENT_ENTRIES: [GameEventType, string][] = [
   ['unit:heal', 'sfx_heal'],
   ['skill:use', 'sfx_skill'],
   ['element:reaction', 'sfx_reaction'],
+  ['item:equip', 'sfx_equip'],
+  ['achievement:unlock', 'sfx_levelup'],
 ];
 
 /** All BGM keys for preloading */
@@ -45,6 +49,8 @@ export const BGM_KEYS = [
 export const SFX_KEYS = [
   'sfx_hit', 'sfx_kill', 'sfx_heal', 'sfx_skill',
   'sfx_reaction', 'sfx_click', 'sfx_buy', 'sfx_equip', 'sfx_levelup',
+  'sfx_select', 'sfx_coin', 'sfx_event_good', 'sfx_event_bad',
+  'sfx_crit', 'sfx_error',
 ];
 
 /**
@@ -171,7 +177,7 @@ export class AudioManager {
 
   // ---- SFX ----
 
-  /** Play a one-shot sound effect (fire-and-forget, with concurrency limit) */
+  /** Play a one-shot sound effect (fire-and-forget, with concurrency limit and pitch variation) */
   playSfx(key: string): void {
     if (!this.game || !this.settings.sfxEnabled) return;
     if (this.activeSfxCount >= MAX_CONCURRENT_SFX) return;
@@ -183,7 +189,9 @@ export class AudioManager {
 
     try {
       const volume = this.settings.masterVolume * this.settings.sfxVolume;
-      const sfx = scene.sound.add(key, { volume });
+      // Random detune ±50 cents for natural variation on repeated sounds
+      const detune = (Math.random() - 0.5) * 100;
+      const sfx = scene.sound.add(key, { volume, detune });
       this.activeSfxCount++;
       sfx.once('complete', () => {
         this.activeSfxCount--;

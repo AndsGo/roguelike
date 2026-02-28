@@ -9,6 +9,7 @@ import { SaveManager } from '../managers/SaveManager';
 import eventsData from '../data/events.json';
 import { ShopGenerator } from '../systems/ShopGenerator';
 import { UI, getHeroDisplayName } from '../i18n';
+import { AudioManager } from '../systems/AudioManager';
 
 export class EventScene extends Phaser.Scene {
   private nodeIndex!: number;
@@ -204,6 +205,7 @@ export class EventScene extends Phaser.Scene {
       switch (effect.type) {
         case 'gold':
           rm.addGold(effect.value);
+          if (effect.value > 0) AudioManager.getInstance().playSfx('sfx_coin');
           break;
         case 'heal':
           rm.healAllHeroes(effect.value);
@@ -279,8 +281,14 @@ export class EventScene extends Phaser.Scene {
   private showOutcome(outcome: EventOutcome): void {
     this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, Theme.colors.background);
 
-    // Brief sentiment flash
+    // Brief sentiment flash + outcome SFX
     const sentiment = this.getOutcomeSentiment(outcome);
+    const audio = AudioManager.getInstance();
+    if (sentiment === '有利') {
+      audio.playSfx('sfx_event_good');
+    } else if (sentiment === '危险' || sentiment === '风险') {
+      audio.playSfx('sfx_event_bad');
+    }
     const flashColor = sentiment === '有利' ? 0x44ff44 : sentiment === '危险' ? 0xff4444 : sentiment === '风险' ? 0xffaa44 : 0xffffff;
     const flash = this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, flashColor, 0.2).setDepth(10);
     this.tweens.add({

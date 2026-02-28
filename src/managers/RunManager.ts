@@ -8,6 +8,7 @@ import { STARTING_GOLD, MAX_TEAM_SIZE } from '../constants';
 import { expForLevel } from '../utils/math';
 import { SYNERGY_DEFINITIONS } from '../config/synergies';
 import { EventBus } from '../systems/EventBus';
+import { AudioManager } from '../systems/AudioManager';
 import { GameLifecycle } from '../systems/GameLifecycle';
 import heroesData from '../data/heroes.json';
 import actsData from '../data/acts.json';
@@ -233,6 +234,7 @@ export class RunManager {
 
   addExp(hero: HeroState, amount: number): void {
     hero.exp += amount;
+    const startLevel = hero.level;
     let needed = expForLevel(hero.level);
     while (hero.exp >= needed && hero.level < 20) {
       hero.exp -= needed;
@@ -241,6 +243,9 @@ export class RunManager {
       // Heal to full on level up
       const data = this.getHeroData(hero.id);
       hero.currentHp = this.getMaxHp(hero, data);
+    }
+    if (hero.level > startLevel) {
+      AudioManager.getInstance().playSfx('sfx_levelup');
     }
   }
 

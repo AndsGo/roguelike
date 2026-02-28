@@ -8,6 +8,7 @@ import { Theme, colorToString } from '../ui/Theme';
 import { SceneTransition } from '../systems/SceneTransition';
 import { SaveManager } from '../managers/SaveManager';
 import { UI, formatStat, formatStatDiff, SLOT_LABELS } from '../i18n';
+import { AudioManager } from '../systems/AudioManager';
 
 export class ShopScene extends Phaser.Scene {
   private nodeIndex!: number;
@@ -267,16 +268,19 @@ export class ShopScene extends Phaser.Scene {
     const rm = RunManager.getInstance();
 
     if (!this.selectedHero) {
+      AudioManager.getInstance().playSfx('sfx_error');
       this.showMessage(UI.shop.selectFirst);
       return;
     }
 
     if (!rm.spendGold(item.cost)) {
+      AudioManager.getInstance().playSfx('sfx_error');
       this.showMessage(UI.shop.noGold);
       return;
     }
 
     const oldItem = rm.equipItem(this.selectedHero.id, item);
+    AudioManager.getInstance().playSfx('sfx_buy');
     this.goldText.setText(`${rm.getGold()}G`);
 
     // Mark as sold and disable interaction
