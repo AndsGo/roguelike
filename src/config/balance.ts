@@ -5,10 +5,10 @@ export const GAME_HEIGHT = 450;
 
 // ============ Battle Layout ============
 
-export const BATTLE_GROUND_Y = 300;
-export const HERO_START_X = 100;
-export const ENEMY_START_X = 600;
-export const UNIT_SPACING_Y = 60;
+export const BATTLE_GROUND_Y = 260;
+export const HERO_START_X = 120;
+export const ENEMY_START_X = 620;
+export const UNIT_SPACING_Y = 70;
 
 // ============ Combat ============
 

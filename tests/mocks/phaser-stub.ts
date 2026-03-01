@@ -102,6 +102,7 @@ class Graphics extends MockGameObject {
   fillCircle() { return this; }
   fillPoints() { return this; }
   fillTriangle() { return this; }
+  strokeTriangle() { return this; }
   clear() { return this; }
   lineStyle() { return this; }
   strokeRect() { return this; }
@@ -109,13 +110,31 @@ class Graphics extends MockGameObject {
   strokeCircle() { return this; }
   strokePoints() { return this; }
   lineBetween() { return this; }
+  arc() { return this; }
   beginPath() { return this; }
   moveTo() { return this; }
   lineTo() { return this; }
   closePath() { return this; }
   strokePath() { return this; }
   fillPath() { return this; }
-  generateTexture() { return this; }
+  generateTexture(key: string) { (this.scene as any)?.textures?._keys?.add(key); return this; }
+}
+
+class Image extends MockGameObject {
+  private _textureKey = '';
+
+  constructor(scene?: any, x?: number, y?: number, key?: string) {
+    super();
+    this.scene = scene;
+    this.x = x ?? 0;
+    this.y = y ?? 0;
+    this._textureKey = key ?? '';
+  }
+
+  setTexture(key: string) { this._textureKey = key; return this; }
+  setTintFill(_color: number) { return this; }
+  clearTint() { return this; }
+  setTint(_color: number) { return this; }
 }
 
 class Particles extends MockGameObject {
@@ -159,7 +178,8 @@ class Scene {
   add = {
     rectangle: (x: number, y: number, w: number, h: number, color: number, alpha?: number) => { const o = new Rectangle(this, x, y, w, h, color); this._children.push(o); return o; },
     text: (x: number, y: number, text: string, _style?: object) => { const o = new Text(this, x, y, text); this._children.push(o); return o; },
-    graphics: () => { const o = new Graphics(); this._children.push(o); return o; },
+    graphics: () => { const o = new Graphics(); o.scene = this; this._children.push(o); return o; },
+    image: (x: number, y: number, key: string) => { const o = new Image(this, x, y, key); this._children.push(o); return o; },
     existing: (obj: any) => { this._children.push(obj); return obj; },
     container: (x: number, y: number) => { const o = new Container(this, x, y); this._children.push(o); return o; },
     particles: (_x: number, _y: number, _key: string, _config?: object) => { const o = new Particles(); this._children.push(o); return o; },
@@ -168,7 +188,8 @@ class Scene {
   };
 
   textures = {
-    exists: () => true,
+    _keys: new Set<string>(),
+    exists(key: string) { return this._keys.has(key); },
   };
 
   tweens = {
@@ -283,7 +304,7 @@ const Phaser = {
     Zone,
     GameObject: MockGameObject,
     Sprite: MockGameObject,
-    Image: MockGameObject,
+    Image,
     Particles: {
       ParticleEmitter: Particles,
     },
@@ -340,4 +361,4 @@ const Phaser = {
 };
 
 export default Phaser;
-export { Scene, Container, Rectangle, Text, Graphics };
+export { Scene, Container, Rectangle, Text, Graphics, Image };

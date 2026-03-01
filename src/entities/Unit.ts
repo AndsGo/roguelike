@@ -1,9 +1,10 @@
 import Phaser from 'phaser';
-import { UnitStats, UnitRole, StatusEffect, SkillData, ElementType } from '../types';
+import { UnitStats, UnitRole, StatusEffect, SkillData, ElementType, RaceType, ClassType } from '../types';
 import { HealthBar } from '../components/HealthBar';
 import { HEALTH_BAR_WIDTH, HEALTH_BAR_HEIGHT, Y_MOVEMENT_DAMPING } from '../constants';
 import { EventBus } from '../systems/EventBus';
 import { Theme, darkenColor, getElementColor } from '../ui/Theme';
+import { getOrCreateTexture, getDisplaySize, ChibiConfig } from '../systems/UnitRenderer';
 
 /** Default enemy color (no element) */
 const ENEMY_BASE_COLOR = 0xff4444;
@@ -13,6 +14,8 @@ export class Unit extends Phaser.GameObjects.Container {
   unitId: string;
   unitName: string;
   role: UnitRole;
+  race: RaceType;
+  classType: ClassType;
   isHero: boolean;
   element: ElementType | undefined;
 
@@ -34,7 +37,7 @@ export class Unit extends Phaser.GameObjects.Container {
   tauntTarget: Unit | null = null;
 
   // Visual
-  sprite: Phaser.GameObjects.Graphics;
+  sprite: Phaser.GameObjects.Image;
   healthBar: HealthBar;
   protected fillColor: number;
   protected borderColor: number;
@@ -56,11 +59,15 @@ export class Unit extends Phaser.GameObjects.Container {
     stats: UnitStats,
     isHero: boolean,
     element?: ElementType,
+    race: RaceType = 'human',
+    classType: ClassType = 'warrior',
   ) {
     super(scene, x, y);
     this.unitId = id;
     this.unitName = name;
     this.role = role;
+    this.race = race;
+    this.classType = classType;
     this.isHero = isHero;
     this.element = element;
     this.baseStats = { ...stats };
@@ -76,14 +83,15 @@ export class Unit extends Phaser.GameObjects.Container {
     this.spriteWidth = sizeInfo.w;
     this.spriteHeight = sizeInfo.h;
 
-    // Draw the shape-based sprite
-    this.sprite = scene.add.graphics();
-    this.drawShape();
+    // Create pixel-art texture and Image sprite
+    const textureKey = getOrCreateTexture(scene, this.buildChibiConfig());
+    this.sprite = scene.add.image(0, 0, textureKey);
+    this.sprite.setOrigin(0.5);
     this.add(this.sprite);
 
     // Name label
     const displayName = name.length > 8 ? name.substring(0, 8) : name;
-    this.nameLabel = scene.add.text(0, -this.spriteHeight / 2 - 12, displayName, {
+    this.nameLabel = scene.add.text(0, -this.spriteHeight / 2 - 14, displayName, {
       fontSize: '9px',
       color: '#ffffff',
       fontFamily: 'monospace',
@@ -117,7 +125,7 @@ export class Unit extends Phaser.GameObjects.Container {
     // Status effect visuals (pre-created to avoid per-frame allocation)
     this.statusOverlay = scene.add.graphics();
     this.add(this.statusOverlay);
-    this.statusIcons = scene.add.text(0, -this.spriteHeight / 2 - 22, '', {
+    this.statusIcons = scene.add.text(0, -this.spriteHeight / 2 - 24, '', {
       fontSize: '9px',
       color: '#ffcc00',
       fontFamily: 'monospace',
@@ -156,91 +164,26 @@ export class Unit extends Phaser.GameObjects.Container {
   }
 
   private computeSize(): { w: number; h: number } {
-    if (this.isBoss) {
-      return { w: 40, h: 44 };
-    }
-    switch (this.role) {
-      case 'tank': return { w: 30, h: 36 };
-      default: return { w: 24, h: 28 };
-    }
+    return getDisplaySize(this.role, this.isBoss);
   }
 
-  /** Draw the unit shape onto the Graphics object */
-  protected drawShape(overrideColor?: number): void {
-    const g = this.sprite;
-    g.clear();
-    const fill = overrideColor ?? this.fillColor;
-    const border = this.borderColor;
-    const w = this.spriteWidth;
-    const h = this.spriteHeight;
+  /** Build the ChibiConfig for texture generation */
+  protected buildChibiConfig(): ChibiConfig {
+    return {
+      role: this.role,
+      race: this.race,
+      classType: this.classType,
+      fillColor: this.fillColor,
+      borderColor: this.borderColor,
+      isHero: this.isHero,
+      isBoss: this.isBoss,
+    };
+  }
 
-    if (this.isBoss) {
-      // Boss: large square with double border
-      g.fillStyle(fill, 1);
-      g.fillRect(-w / 2, -h / 2, w, h);
-      g.lineStyle(3, border, 1);
-      g.strokeRect(-w / 2, -h / 2, w, h);
-      g.lineStyle(1, 0xffffff, 0.4);
-      g.strokeRect(-w / 2 + 3, -h / 2 + 3, w - 6, h - 6);
-      return;
-    }
-
-    switch (this.role) {
-      case 'tank':
-        g.fillStyle(fill, 1);
-        g.fillRect(-w / 2, -h / 2, w, h);
-        g.lineStyle(2, border, 1);
-        g.strokeRect(-w / 2, -h / 2, w, h);
-        break;
-
-      case 'melee_dps': {
-        // Diamond shape
-        const points = [
-          { x: 0, y: -h / 2 },
-          { x: w / 2, y: 0 },
-          { x: 0, y: h / 2 },
-          { x: -w / 2, y: 0 },
-        ];
-        g.fillStyle(fill, 1);
-        g.fillPoints(points, true);
-        g.lineStyle(2, border, 1);
-        g.strokePoints(points, true);
-        break;
-      }
-
-      case 'ranged_dps':
-        g.fillStyle(fill, 1);
-        g.fillCircle(0, 0, w / 2);
-        g.lineStyle(2, border, 1);
-        g.strokeCircle(0, 0, w / 2);
-        break;
-
-      case 'healer':
-        g.fillStyle(fill, 1);
-        g.fillCircle(0, 0, w / 2);
-        g.lineStyle(2, border, 1);
-        g.strokeCircle(0, 0, w / 2);
-        // Inner cross
-        g.lineStyle(2, 0xffffff, 0.6);
-        g.lineBetween(-5, 0, 5, 0);
-        g.lineBetween(0, -5, 0, 5);
-        break;
-
-      case 'support':
-        // Rounded rectangle approximation (small rect with outline)
-        g.fillStyle(fill, 1);
-        g.fillRoundedRect(-w / 2, -h / 2, w, h, 6);
-        g.lineStyle(2, border, 1);
-        g.strokeRoundedRect(-w / 2, -h / 2, w, h, 6);
-        break;
-
-      default:
-        g.fillStyle(fill, 1);
-        g.fillRect(-w / 2, -h / 2, w, h);
-        g.lineStyle(2, border, 1);
-        g.strokeRect(-w / 2, -h / 2, w, h);
-        break;
-    }
+  /** Regenerate the pixel-art texture (e.g. after boss upgrade) */
+  protected regenerateTexture(): void {
+    const key = getOrCreateTexture(this.scene, this.buildChibiConfig());
+    this.sprite.setTexture(key);
   }
 
   /** Configure for boss display */
@@ -251,7 +194,7 @@ export class Unit extends Phaser.GameObjects.Container {
     this.spriteHeight = sizeInfo.h;
     this.fillColor = this.isHero ? this.fillColor : (this.element ? getElementColor(this.element) ?? 0xff2222 : 0xff2222);
     this.borderColor = 0xffaa00;
-    this.drawShape();
+    this.regenerateTexture();
 
     // Boss name styling
     this.nameLabel.setStyle({
@@ -368,9 +311,9 @@ export class Unit extends Phaser.GameObjects.Container {
         if (!scene || !this.sprite) return;
         flashCount++;
         if (flashCount % 2 === 1) {
-          this.drawShape(0xffffff);
+          this.sprite.setTintFill(0xffffff);
         } else {
-          this.drawShape();
+          this.sprite.clearTint();
         }
       },
     });
@@ -379,7 +322,7 @@ export class Unit extends Phaser.GameObjects.Container {
     scene.time.delayedCall(580, () => {
       if (!scene) return;
       flashInterval.destroy();
-      this.drawShape();
+      this.sprite.clearTint();
 
       scene.tweens.add({
         targets: this,
@@ -398,10 +341,10 @@ export class Unit extends Phaser.GameObjects.Container {
 
   flashHurt(): void {
     if (!this.scene) return;
-    this.drawShape(0xffffff);
+    this.sprite.setTintFill(0xffffff);
     this.scene.time.delayedCall(100, () => {
       if (this.isAlive && this.scene) {
-        this.drawShape();
+        this.sprite.clearTint();
       }
     });
   }
@@ -409,10 +352,10 @@ export class Unit extends Phaser.GameObjects.Container {
   /** Flash a specific color (used by external systems like BattleEffects, SkillSystem) */
   flashColor(color: number, duration: number = 100): void {
     if (!this.scene) return;
-    this.drawShape(color);
+    this.sprite.setTintFill(color);
     this.scene.time.delayedCall(duration, () => {
       if (this.isAlive && this.scene) {
-        this.drawShape();
+        this.sprite.clearTint();
       }
     });
   }
