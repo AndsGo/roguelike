@@ -261,6 +261,26 @@ export const UI = {
     keybindings: '快捷键',
   },
 
+  // Codex
+  codex: {
+    title: '图鉴',
+    heroTab: '英雄图鉴',
+    monsterTab: '怪物图鉴',
+    locked: '未解锁',
+    unlockCondition: '解锁条件',
+    unknown: '???',
+    stats: '属性',
+    skills: '技能',
+    noSkills: '无技能',
+    encounterUnlock: '在战斗中遇见即解锁',
+    close: '[ 关闭 ]',
+    heroCount: (unlocked: number, total: number) => `已解锁: ${unlocked}/${total}`,
+    monsterCount: (seen: number, total: number) => `已发现: ${seen}/${total}`,
+    baseStats: '基础属性',
+    rewards: (gold: number, exp: number) => `奖励: ${gold}G / ${exp}EXP`,
+    boss: '首领',
+  },
+
   // Tutorial
   tutorial: {
     clickToContinue: '[ 点击继续 ]',
