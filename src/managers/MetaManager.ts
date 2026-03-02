@@ -115,6 +115,10 @@ export class MetaManager {
     return MetaManager.getInstance().meta.unlockedHeroes.includes(heroId);
   }
 
+  static getHeroUnlockCondition(heroId: string): { type: string; threshold?: number; description: string } | undefined {
+    return MetaManager.HERO_UNLOCK_CONDITIONS[heroId];
+  }
+
   // ---- Relic Unlocks ----
 
   static getUnlockedRelics(): string[] {

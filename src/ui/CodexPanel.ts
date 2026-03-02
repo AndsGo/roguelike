@@ -33,6 +33,7 @@ export class CodexPanel {
   private activeTab: TabType = 'hero';
   private tabButtons: Phaser.GameObjects.Text[] = [];
   private tabBgs: Phaser.GameObjects.Graphics[] = [];
+  private tabHits: Phaser.GameObjects.Rectangle[] = [];
   private detailPopup: CodexDetailPopup | null = null;
 
   constructor(scene: Phaser.Scene, onClose: () => void) {
@@ -109,6 +110,7 @@ export class CodexPanel {
       const hit = this.scene.add.rectangle(tx + tabWidth / 2, tabY, tabWidth, 20, 0x000000, 0)
         .setInteractive({ useHandCursor: true })
         .setDepth(801);
+      this.tabHits.push(hit);
       hit.on('pointerdown', () => {
         if (this.activeTab !== tab.key) {
           this.activeTab = tab.key;
@@ -305,7 +307,7 @@ export class CodexPanel {
       }).setOrigin(0.5);
       this.panel.addContent(unknownText);
 
-      const lockedLabel = scene.add.text(x, y + 32, isHero ? UI.codex.locked : UI.codex.locked, {
+      const lockedLabel = scene.add.text(x, y + 32, isHero ? UI.codex.locked : UI.codex.encounterUnlock, {
         fontSize: '8px',
         color: '#555566',
         fontFamily: 'monospace',
@@ -324,8 +326,10 @@ export class CodexPanel {
     // Clean up tabs
     for (const bg of this.tabBgs) bg.destroy();
     for (const btn of this.tabButtons) btn.destroy();
+    for (const hit of this.tabHits) hit.destroy();
     this.tabBgs = [];
     this.tabButtons = [];
+    this.tabHits = [];
 
     this.backdrop.destroy();
     this.closeText.destroy();

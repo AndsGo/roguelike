@@ -224,9 +224,7 @@ export class CodexDetailPopup extends Phaser.GameObjects.Container {
     // ---- Hero unlock condition (if locked) ----
     if (isHero && !MetaManager.isHeroUnlocked(data.id)) {
       infoY += 4;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const unlockConditions = (MetaManager as any).HERO_UNLOCK_CONDITIONS as Record<string, { description: string }> | undefined;
-      const cond = unlockConditions?.[data.id];
+      const cond = MetaManager.getHeroUnlockCondition(data.id);
       if (cond) {
         const unlockText = scene.add.text(infoX, infoY, `${UI.codex.unlockCondition}: ${cond.description}`, {
           fontSize: '9px',
