@@ -6,11 +6,11 @@
 
 | 项目 | 数据 |
 |------|------|
-| 开发周期 | 2026-02-26 ~ 2026-02-28 (3天) |
-| Claude 会话数 | 15+ 次 |
-| Git 提交数 | 27 |
-| 代码规模 | 171 文件, 28,370 行 |
-| 测试用例 | 500+ (37 个测试套件) |
+| 开发周期 | 2026-02-26 ~ 2026-03-02 (5天) |
+| Claude 会话数 | 20+ 次 |
+| Git 提交数 | 35+ |
+| 代码规模 | 180+ 文件, 30,000+ 行 |
+| 测试用例 | 615 (44 个测试套件) |
 | 技术栈 | TypeScript + Phaser 3 + Vite |
 
 ---
@@ -66,6 +66,22 @@ Day 3 (Feb 28)
  ├─ 战斗音效补全 + 事件属性加成逻辑修复
  ├─ GitHub Pages 部署
  └─ README + 开发文档
+
+Day 4-5 (Mar 01-02)
+ ├─ 像素矩阵 Chibi 渲染系统 (替代 Graphics 形状绘制)
+ │   ├─ 16×20 分层像素模板 (头/身/腿/脸/武器/皇冠)
+ │   ├─ 14 色调色板映射 (按种族/职业/元素动态着色)
+ │   ├─ generateTexture() 纹理缓存 (~40 张纹理)
+ │   └─ setTintFill()/clearTint() 闪烁特效
+ ├─ 图鉴系统 (Codex Feature)
+ │   ├─ CodexPanel: 双标签页 (英雄图鉴/怪物图鉴)
+ │   ├─ CodexDetailPopup: 详情弹窗 (属性/技能/解锁条件)
+ │   ├─ MetaManager: 怪物遭遇记录 + BattleScene 集成
+ │   └─ i18n: 图鉴相关中文字符串
+ ├─ GitHub Pages 构建修复 (3个未提交文件)
+ ├─ .gitignore 清理 (移除 node_modules/dist 追踪)
+ ├─ CLAUDE.md 项目指导文件
+ └─ 游戏截图更新 (Chrome MCP 自动化截图)
 ```
 
 ---
@@ -365,6 +381,72 @@ Day 3 (Feb 28)
 
 ---
 
+### 2.12 像素矩阵 Chibi 渲染系统 (Mar 01, Session #19)
+
+**用户输入：** "替换 Graphics 形状绘制，使用像素矩阵系统渲染角色"
+
+**Claude 输出：**
+
+**像素矩阵架构：**
+```
+PixelTemplates (data)     ChibiConfig (runtime)
+      │                         │
+      ▼                         ▼
+compositeGrid()  ────►  resolvePalette()
+      │                         │
+      └──────────┬──────────────┘
+                 ▼
+      renderToTexture() ─── Graphics.generateTexture(key)
+                 │
+                 ▼
+        Image(textureKey) ←── Unit.sprite
+                 │
+       setTintFill() / clearTint() ←── flash effects
+```
+
+- `pixel-templates.ts`: 16×20 像素网格，14 色调色板索引 (P.\_ 到 P.BR)
+- 分层模板: BODY (5 职业) + HEAD (6 种族) + FACE (英雄/敌人) + WEAPON (6 职业) + LEG + CROWN (Boss)
+- `UnitRenderer.ts`: compositePixelGrid → resolvePalette → renderToTexture，纹理缓存 (~40 张)
+- Unit.ts: sprite 从 Graphics 改为 Image，闪烁特效从全量重绘改为 setTintFill()/clearTint()
+- 缩放: 普通 2x (32×40), 坦克 2x+4 (36×44), Boss 3x (48×69 含皇冠)
+
+---
+
+### 2.13 图鉴系统 (Mar 02, Session #20)
+
+**用户输入：** "增加一个英雄图鉴和怪物图鉴的功能"
+
+**Claude 输出：** Subagent-Driven Development 执行 (10 个任务)
+
+**功能设计 (头脑风暴 → 设计文档 → 实施计划):**
+1. 入口: 主菜单新增 "图鉴" 按钮
+2. CodexPanel: 600×400 模态面板，双标签页 (英雄图鉴 / 怪物图鉴)
+3. 5 列卡片网格，chibi 精灵 + 名称
+4. CodexDetailPopup: 3x 精灵 + 属性表 + 技能列表
+5. 怪物解锁: 遭遇即解锁，BattleScene 自动记录
+6. MetaManager 扩展: encounteredEnemies 持久化
+
+**实施 (10 个子任务 + 双阶段审查):**
+| 任务 | 文件 | 说明 |
+|------|------|------|
+| 1 | i18n.ts | 图鉴 UI 字符串 |
+| 2 | MetaManager.ts | 怪物遭遇记录 API |
+| 3 | types/index.ts | MetaProgressionData 新字段 |
+| 4 | SaveManager.ts | 序列化/反序列化兼容 |
+| 5 | BattleScene.ts | 自动记录敌人遭遇 |
+| 6 | CodexPanel.ts | 主面板 + 标签页 + 卡片网格 |
+| 7 | CodexDetailPopup.ts | 详情弹窗 |
+| 8 | MainMenuScene.ts | 图鉴按钮入口 |
+| 9 | tests | 12 个新测试 (MetaManager + CodexPanel) |
+| 10 | 集成测试 | tsc + vitest → 615 测试全部通过 |
+
+**代码审查修复:**
+- Tab 命中区域内存泄漏 → tabHits 数组 + close() 销毁
+- 怪物锁定标签 "未解锁" → "在战斗中遇见即解锁"
+- `as any` 绕过私有静态 → 新增 `getHeroUnlockCondition()` 公开方法
+
+---
+
 ## 三、关键技术决策
 
 ### 3.1 Phaser Container Origin 陷阱
@@ -390,10 +472,19 @@ Day 3 (Feb 28)
 **实现：** `SeededRNG.getState()` / `fromState()` 保存 Mulberry32 内部状态
 **原因：** 存档/读档后商店和事件的随机性必须从同一点继续
 
-### 3.6 Phaser 全量 Mock
+### 3.6 像素矩阵渲染 vs Sprite Sheet
+**决策：** 使用 `generateTexture()` 动态生成像素纹理，而非预制 Sprite Sheet
+**原因：**
+- 角色外观由 5 个维度组合决定 (职业×种族×职业×元素×英雄/敌人)，组合数太大不适合预制
+- 分层模板 (body + head + face + weapon + crown) 可以用少量模板组合出大量不同外观
+- `generateTexture()` 已在 ParticleManager 中验证可行，测试 Mock 也已支持
+- 纹理缓存消除重复渲染，同配置共享纹理 (~40 张总计)
+- `setTintFill()`/`clearTint()` 比全量重绘高效得多
+
+### 3.7 Phaser 全量 Mock
 **方案：** `tests/mocks/phaser-stub.ts` 完整替代 Phaser 模块
 **配置：** Vitest alias `phaser` → mock 文件
-**好处：** 无浏览器环境的纯单元测试, 670ms 运行 258 个测试
+**好处：** 无浏览器环境的纯单元测试, ~1.7s 运行 615 个测试
 
 ---
 
@@ -486,7 +577,7 @@ src/
 │   ├── GameOverScene.ts      # 失败 (继承BaseEndScene)
 │   └── VictoryScene.ts       # 胜利 (继承BaseEndScene)
 │
-├── systems/ (23个)
+├── systems/ (24个)
 │   ├── BattleSystem.ts       # 战斗主循环
 │   ├── DamageSystem.ts       # 伤害计算管道
 │   ├── SkillSystem.ts        # 技能释放逻辑
@@ -498,6 +589,7 @@ src/
 │   ├── SynergySystem.ts      # 种族/职业/元素羁绊
 │   ├── SkillQueueSystem.ts   # 半自动技能队列
 │   ├── ActModifierSystem.ts  # 章节战斗修饰器
+│   ├── UnitRenderer.ts       # 像素矩阵 Chibi 渲染 + 纹理缓存
 │   ├── MapGenerator.ts       # 地图生成
 │   ├── ShopGenerator.ts      # 商店生成
 │   ├── AudioManager.ts       # BGM + SFX
@@ -529,6 +621,8 @@ src/
 │   ├── Button.ts             # 按钮 (pointerup+距离检测+手势)
 │   ├── HeroCard.ts           # 英雄卡片
 │   ├── HeroDetailPopup.ts    # 英雄详情弹窗
+│   ├── CodexPanel.ts         # 图鉴面板 (英雄/怪物双标签)
+│   ├── CodexDetailPopup.ts   # 图鉴详情弹窗
 │   ├── BattleHUD.ts          # 战斗界面
 │   ├── SkillBar.ts           # 技能栏
 │   ├── RunOverviewPanel.ts   # 冒险总览
@@ -538,12 +632,13 @@ src/
 │   ├── HelpPanel.ts          # 帮助面板
 │   └── MapRenderer.ts        # 地图渲染
 │
-├── data/ (JSON)
-│   ├── heroes.json (19)      ├── enemies.json (21)
-│   ├── skills.json (46)      ├── items.json (48)
-│   ├── events.json (34)      ├── relics.json (35)
-│   ├── acts.json (3)         ├── achievements.json (25)
-│   ├── skill-visuals.json    └── skill-advancements.json
+├── data/
+│   ├── heroes.ts (19)        ├── enemies.ts (21)
+│   ├── skills.ts (46)        ├── items.ts (48)
+│   ├── events.ts (34)        ├── relics.ts (35)
+│   ├── acts.ts (3)           ├── achievements.ts (25)
+│   ├── pixel-templates.ts    # 像素矩阵模板 + 调色板
+│   ├── skill-visuals.ts      └── skill-advancements.ts
 │
 ├── config/
 │   ├── balance.ts            ├── elements.ts
@@ -595,6 +690,12 @@ src/
 | 02-28 11:43 | `9cd930b` | UI大修: Panel滚动/拖拽, RunOverview, 本地化修复 | UI打磨 |
 | 02-28 20:54 | `9377197` | GitHub Pages部署 + 战斗音效/事件属性/UI修复 | 部署+修复 |
 | 02-28 21:06 | `78a63c6` | 添加 README.md + 游戏截图 | 文档 |
+| 02-28 21:17 | `9b49278` | 添加完整开发文档 | 文档 |
+| 03-01 | `a515ba9` | 添加微信博客文章 | 文档 |
+| 03-02 | `dc9b112` | 像素矩阵 Chibi 渲染系统 (替代 Graphics 形状绘制) | 视觉升级 |
+| 03-02 | — | 图鉴系统 (CodexPanel + CodexDetailPopup + MetaManager) | 新功能 |
+| 03-02 | — | 修复 GitHub Pages 构建 (3个未提交文件) | 修复 |
+| 03-02 | — | .gitignore 清理 + CLAUDE.md + 截图更新 | 维护 |
 
 ---
 
@@ -631,11 +732,11 @@ src/
 
 | 指标 | 数值 |
 |------|------|
-| 用户消息总数 | ~50条 |
-| Claude会话数 | 15+ |
-| Agent Swarm次数 | 8次 |
+| 用户消息总数 | ~60条 |
+| Claude会话数 | 20+ |
+| Agent Swarm次数 | 10次 |
 | 最大Agent数 | 5 (研究/测试) |
 | Bug发现总数 | 100+ |
-| 测试用例 | 500+ |
-| 代码行数 | 28,370 |
-| 开发耗时 | ~3天 |
+| 测试用例 | 615 (44套件) |
+| 代码行数 | 30,000+ |
+| 开发耗时 | ~5天 |
