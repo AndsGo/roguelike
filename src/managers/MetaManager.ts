@@ -253,6 +253,27 @@ export class MetaManager {
     return MetaManager.getInstance().meta.achievements.includes(achievementId);
   }
 
+  // ---- Enemy Encounters (Codex) ----
+
+  static getEncounteredEnemies(): string[] {
+    return MetaManager.getInstance().meta.encounteredEnemies ?? [];
+  }
+
+  static recordEnemyEncounter(enemyId: string): void {
+    const inst = MetaManager.getInstance();
+    if (!inst.meta.encounteredEnemies) {
+      inst.meta.encounteredEnemies = [];
+    }
+    if (!inst.meta.encounteredEnemies.includes(enemyId)) {
+      inst.meta.encounteredEnemies.push(enemyId);
+      inst.persist();
+    }
+  }
+
+  static hasEncounteredEnemy(enemyId: string): boolean {
+    return (MetaManager.getInstance().meta.encounteredEnemies ?? []).includes(enemyId);
+  }
+
   /** Reset all meta progression to defaults */
   static resetAll(): void {
     const inst = MetaManager.getInstance();
@@ -266,6 +287,7 @@ export class MetaManager {
     inst.meta.permanentUpgrades = [];
     inst.meta.achievements = [];
     inst.meta.metaCurrency = 0;
+    inst.meta.encounteredEnemies = [];
     inst.ensureUpgradeState();
     inst.persist();
   }
