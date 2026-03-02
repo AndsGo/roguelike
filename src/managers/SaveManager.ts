@@ -147,6 +147,7 @@ export class SaveManager {
       permanentUpgrades: [],
       achievements: [],
       metaCurrency: 0,
+      encounteredEnemies: [],
     };
   }
 

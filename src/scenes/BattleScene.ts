@@ -14,6 +14,7 @@ import { UnitAnimationSystem } from '../systems/UnitAnimationSystem';
 import { EventBus } from '../systems/EventBus';
 import { AudioManager } from '../systems/AudioManager';
 import { SaveManager } from '../managers/SaveManager';
+import { MetaManager } from '../managers/MetaManager';
 import { Theme, colorToString, getElementColor } from '../ui/Theme';
 import { hasElementAdvantage } from '../config/elements';
 import enemiesData from '../data/enemies.json';
@@ -167,6 +168,11 @@ export class BattleScene extends Phaser.Scene {
       .filter((e): e is Enemy => e !== null);
 
     this.battleSystem.setUnits(heroes, enemies);
+
+    // Record enemy encounters for codex
+    for (const enemy of enemies) {
+      MetaManager.recordEnemyEncounter(enemy.unitId);
+    }
 
     // Create HUD (with skill queue integration)
     this.hud = new BattleHUD(this, heroes, enemies, (speed) => {

@@ -236,6 +236,14 @@ export class Panel extends Phaser.GameObjects.Container {
     this.scrollbarGraphics.fillRoundedRect(trackX, thumbY, 4, thumbHeight, 2);
   }
 
+  /** Remove all content children (for tab switching / re-render) */
+  clearContent(): void {
+    this.contentContainer.removeAll(true);
+    this.scrollY = 0;
+    this.contentContainer.y = 0;
+    this.updateScrollbar();
+  }
+
   setContentHeight(h: number): void {
     this.contentHeight = h;
     this.updateScrollbar();
