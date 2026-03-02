@@ -109,6 +109,15 @@ export const Theme = {
       bg: 0x333333,
     },
 
+    raceAccent: {
+      human: 0xddccaa,
+      elf: 0xaaddaa,
+      undead: 0x889988,
+      demon: 0xcc4444,
+      beast: 0xbb8844,
+      dragon: 0x44aacc,
+    } as Record<string, number>,
+
     ui: {
       accent: 0x8899cc,
       muted: 0x556677,
