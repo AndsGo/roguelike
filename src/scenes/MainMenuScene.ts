@@ -12,6 +12,7 @@ import { UI, UPGRADE_NAMES } from '../i18n';
 import { AudioManager } from '../systems/AudioManager';
 import { AchievementPanel } from '../ui/AchievementPanel';
 import { HelpPanel } from '../ui/HelpPanel';
+import { CodexPanel } from '../ui/CodexPanel';
 import { DIFFICULTY_LEVELS } from '../config/difficulty';
 import heroesData from '../data/heroes.json';
 
@@ -22,6 +23,7 @@ export class MainMenuScene extends Phaser.Scene {
   private upgradeCloseHit: Phaser.GameObjects.Rectangle | null = null;
   private achievementPanel: AchievementPanel | null = null;
   private helpPanel: HelpPanel | null = null;
+  private codexPanel: CodexPanel | null = null;
 
   constructor() {
     super({ key: 'MainMenuScene' });
@@ -31,6 +33,7 @@ export class MainMenuScene extends Phaser.Scene {
     this.upgradePanel = null;
     this.achievementPanel = null;
     this.helpPanel = null;
+    this.codexPanel = null;
 
     // Background
     this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, 0x0a0a1e);
@@ -116,6 +119,12 @@ export class MainMenuScene extends Phaser.Scene {
     // Help button
     new Button(this, GAME_WIDTH / 2, btnY, '帮助', 180, 40, () => {
       this.showHelpPanel();
+    }, Theme.colors.panelBorder);
+    btnY += 50;
+
+    // Codex button
+    new Button(this, GAME_WIDTH / 2, btnY, UI.codex.title, 180, 40, () => {
+      this.showCodexPanel();
     }, Theme.colors.panelBorder);
     btnY += 50;
 
@@ -358,6 +367,16 @@ export class MainMenuScene extends Phaser.Scene {
     }
     this.achievementPanel = new AchievementPanel(this, () => {
       this.achievementPanel = null;
+    });
+  }
+
+  private showCodexPanel(): void {
+    if (this.codexPanel) {
+      this.codexPanel.close(() => { this.codexPanel = null; });
+      return;
+    }
+    this.codexPanel = new CodexPanel(this, () => {
+      this.codexPanel = null;
     });
   }
 
