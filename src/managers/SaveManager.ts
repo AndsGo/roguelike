@@ -148,6 +148,7 @@ export class SaveManager {
       achievements: [],
       metaCurrency: 0,
       encounteredEnemies: [],
+      defeatedBosses: [],
     };
   }
 

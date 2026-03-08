@@ -278,6 +278,25 @@ export class MetaManager {
     return (MetaManager.getInstance().meta.encounteredEnemies ?? []).includes(enemyId);
   }
 
+  // ---- Boss Kill Tracking ----
+
+  static getDefeatedBosses(): string[] {
+    return MetaManager.getInstance().meta.defeatedBosses ?? [];
+  }
+
+  static recordBossKill(bossId: string): void {
+    const inst = MetaManager.getInstance();
+    if (!inst.meta.defeatedBosses) inst.meta.defeatedBosses = [];
+    if (!inst.meta.defeatedBosses.includes(bossId)) {
+      inst.meta.defeatedBosses.push(bossId);
+      inst.persist();
+    }
+  }
+
+  static hasDefeatedBoss(bossId: string): boolean {
+    return (MetaManager.getInstance().meta.defeatedBosses ?? []).includes(bossId);
+  }
+
   /** Reset all meta progression to defaults */
   static resetAll(): void {
     const inst = MetaManager.getInstance();
@@ -292,6 +311,7 @@ export class MetaManager {
     inst.meta.achievements = [];
     inst.meta.metaCurrency = 0;
     inst.meta.encounteredEnemies = [];
+    inst.meta.defeatedBosses = [];
     inst.ensureUpgradeState();
     inst.persist();
   }

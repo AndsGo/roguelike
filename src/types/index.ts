@@ -327,6 +327,7 @@ export interface MetaProgressionData {
   achievements: string[];   // achievement IDs
   metaCurrency: number;     // soul currency for permanent upgrades
   encounteredEnemies: string[];   // enemy IDs seen in battle (codex tracking)
+  defeatedBosses: string[];       // boss IDs killed across all runs
 }
 
 export interface PermanentUpgrade {

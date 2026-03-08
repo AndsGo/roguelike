@@ -177,4 +177,21 @@ describe('MetaManager', () => {
       expect(MetaManager.getAchievements().length).toBe(1);
     });
   });
+
+  describe('boss kill tracking', () => {
+    it('recordBossKill stores boss ID', () => {
+      MetaManager.recordBossKill('frost_queen');
+      expect(MetaManager.hasDefeatedBoss('frost_queen')).toBe(true);
+    });
+
+    it('hasDefeatedBoss returns false for undefeated boss', () => {
+      expect(MetaManager.hasDefeatedBoss('shadow_lord')).toBe(false);
+    });
+
+    it('recordBossKill is idempotent', () => {
+      MetaManager.recordBossKill('frost_queen');
+      MetaManager.recordBossKill('frost_queen');
+      expect(MetaManager.getDefeatedBosses().length).toBe(1);
+    });
+  });
 });
