@@ -8,7 +8,7 @@ Object.defineProperty(globalThis, 'localStorage', {
   writable: true,
 });
 
-import { MetaManager } from '../../src/managers/MetaManager';
+import { MetaManager, RunEndContext } from '../../src/managers/MetaManager';
 import { EventBus } from '../../src/systems/EventBus';
 
 // Reset singleton between tests
@@ -175,6 +175,117 @@ describe('MetaManager', () => {
       MetaManager.addAchievement('test');
       MetaManager.addAchievement('test');
       expect(MetaManager.getAchievements().length).toBe(1);
+    });
+  });
+
+  describe('new unlock condition types', () => {
+    function makeContext(overrides: Partial<RunEndContext> = {}): RunEndContext {
+      return {
+        partyHeroIds: ['warrior', 'archer'],
+        partyElements: ['fire', 'fire'],
+        partyRoles: ['tank', 'ranged_dps'],
+        relicCount: 3,
+        difficulty: 'normal',
+        ...overrides,
+      };
+    }
+
+    it('element_wins: unlocks with enough element heroes on victory', () => {
+      // elementalist requires 2+ lightning heroes on victory
+      const ctx = makeContext({ partyElements: ['lightning', 'lightning', 'fire'] });
+      MetaManager.recordRunEnd(true, 15, ctx);
+      expect(MetaManager.isHeroUnlocked('elementalist')).toBe(true);
+    });
+
+    it('element_wins: does NOT unlock on defeat', () => {
+      const ctx = makeContext({ partyElements: ['lightning', 'lightning', 'fire'] });
+      MetaManager.recordRunEnd(false, 15, ctx);
+      expect(MetaManager.isHeroUnlocked('elementalist')).toBe(false);
+    });
+
+    it('boss_kill: unlocks when boss has been defeated', () => {
+      // necromancer requires defeating thunder_titan
+      MetaManager.recordBossKill('thunder_titan');
+      MetaManager.recordRunEnd(false, 5, makeContext());
+      expect(MetaManager.isHeroUnlocked('necromancer')).toBe(true);
+    });
+
+    it('boss_kill: does NOT unlock when boss not defeated', () => {
+      MetaManager.recordRunEnd(true, 15, makeContext());
+      expect(MetaManager.isHeroUnlocked('necromancer')).toBe(false);
+    });
+
+    it('no_healer_win: unlocks on victory without healer', () => {
+      // druid requires victory without healer
+      const ctx = makeContext({ partyRoles: ['tank', 'melee_dps'] });
+      MetaManager.recordRunEnd(true, 15, ctx);
+      expect(MetaManager.isHeroUnlocked('druid')).toBe(true);
+    });
+
+    it('no_healer_win: does NOT unlock with healer in party', () => {
+      const ctx = makeContext({ partyRoles: ['tank', 'healer'] });
+      MetaManager.recordRunEnd(true, 15, ctx);
+      expect(MetaManager.isHeroUnlocked('druid')).toBe(false);
+    });
+
+    it('no_healer_win with difficulty gate: does NOT unlock on normal', () => {
+      // holy_sentinel requires no healer win on hard+
+      const ctx = makeContext({ partyRoles: ['tank', 'melee_dps'], difficulty: 'normal' });
+      MetaManager.recordRunEnd(true, 15, ctx);
+      expect(MetaManager.isHeroUnlocked('holy_sentinel')).toBe(false);
+    });
+
+    it('no_healer_win with difficulty gate: DOES unlock on hard+', () => {
+      const ctx = makeContext({ partyRoles: ['tank', 'melee_dps'], difficulty: 'hard' });
+      MetaManager.recordRunEnd(true, 15, ctx);
+      expect(MetaManager.isHeroUnlocked('holy_sentinel')).toBe(true);
+    });
+
+    it('full_element_team: unlocks when all party share same element on victory', () => {
+      // dragon_knight requires mono-fire team
+      const ctx = makeContext({ partyElements: ['fire', 'fire', 'fire'] });
+      MetaManager.recordRunEnd(true, 15, ctx);
+      expect(MetaManager.isHeroUnlocked('dragon_knight')).toBe(true);
+    });
+
+    it('full_element_team: does NOT unlock with mixed elements', () => {
+      const ctx = makeContext({ partyElements: ['fire', 'ice', 'fire'] });
+      MetaManager.recordRunEnd(true, 15, ctx);
+      expect(MetaManager.isHeroUnlocked('dragon_knight')).toBe(false);
+    });
+
+    it('relic_count: unlocks with enough relics on victory', () => {
+      // berserker requires 8+ relics
+      const ctx = makeContext({ relicCount: 10 });
+      MetaManager.recordRunEnd(true, 15, ctx);
+      expect(MetaManager.isHeroUnlocked('berserker')).toBe(true);
+    });
+
+    it('relic_count: does NOT unlock with insufficient relics', () => {
+      const ctx = makeContext({ relicCount: 5 });
+      MetaManager.recordRunEnd(true, 15, ctx);
+      expect(MetaManager.isHeroUnlocked('berserker')).toBe(false);
+    });
+
+    it('hero_used: unlocks when specific hero in party on victory', () => {
+      // beast_warden requires winning with knight
+      const ctx = makeContext({ partyHeroIds: ['knight', 'warrior'] });
+      MetaManager.recordRunEnd(true, 15, ctx);
+      expect(MetaManager.isHeroUnlocked('beast_warden')).toBe(true);
+    });
+
+    it('hero_used: does NOT unlock without specific hero', () => {
+      const ctx = makeContext({ partyHeroIds: ['warrior', 'archer'] });
+      MetaManager.recordRunEnd(true, 15, ctx);
+      expect(MetaManager.isHeroUnlocked('beast_warden')).toBe(false);
+    });
+
+    it('backward compatible: recordRunEnd without context still works for runs/victory types', () => {
+      // knight requires 5 runs (no context needed)
+      for (let i = 0; i < 5; i++) {
+        MetaManager.recordRunEnd(false, 5);
+      }
+      expect(MetaManager.isHeroUnlocked('knight')).toBe(true);
     });
   });
 

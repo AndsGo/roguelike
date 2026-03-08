@@ -3,6 +3,14 @@ import { SaveManager } from './SaveManager';
 import { EventBus } from '../systems/EventBus';
 import { ErrorHandler } from '../systems/ErrorHandler';
 
+export interface RunEndContext {
+  partyHeroIds: string[];
+  partyElements: (string | undefined)[];
+  partyRoles: string[];
+  relicCount: number;
+  difficulty: string;
+}
+
 /**
  * Singleton managing cross-run permanent progression.
  * Handles hero unlocks, permanent upgrades, meta currency, and statistics.
@@ -37,8 +45,16 @@ export class MetaManager {
     { id: 'relic_chance', level: 0, maxLevel: 3 },
   ];
 
-  /** Unlock requirements: heroId -> { type, threshold, description } */
-  private static HERO_UNLOCK_CONDITIONS: Record<string, { type: string; threshold?: number; description: string }> = {
+  /** Unlock requirements: heroId -> { type, threshold, description, ... } */
+  private static HERO_UNLOCK_CONDITIONS: Record<string, {
+    type: string;
+    threshold?: number;
+    element?: string;
+    heroId?: string;
+    bossId?: string;
+    difficulty?: string;
+    description: string;
+  }> = {
     warrior: { type: 'default', description: 'Default hero' },
     archer: { type: 'default', description: 'Default hero' },
     mage: { type: 'default', description: 'Default hero' },
@@ -46,18 +62,18 @@ export class MetaManager {
     rogue: { type: 'default', description: 'Default hero' },
     knight: { type: 'runs', threshold: 5, description: 'Complete 5 runs' },
     shadow_assassin: { type: 'victory', threshold: 2, description: 'Win 2 runs' },
-    elementalist: { type: 'floor', threshold: 15, description: 'Reach floor 15' },
-    druid: { type: 'runs', threshold: 8, description: 'Complete 8 runs' },
-    necromancer: { type: 'victory', threshold: 3, description: 'Win 3 runs' },
-    berserker: { type: 'floor', threshold: 25, description: 'Reach floor 25' },
-    frost_ranger: { type: 'runs', threshold: 10, description: 'Complete 10 runs' },
-    beast_warden: { type: 'victory', threshold: 5, description: 'Win 5 runs' },
-    dragon_knight: { type: 'floor', threshold: 35, description: 'Reach floor 35' },
-    shadow_weaver: { type: 'victory', threshold: 7, description: 'Win 7 runs' },
-    storm_caller: { type: 'runs', threshold: 15, description: 'Complete 15 runs' },
-    holy_sentinel: { type: 'victory', threshold: 10, description: 'Win 10 runs' },
-    ice_mage: { type: 'floor', threshold: 40, description: 'Reach floor 40' },
-    thunder_monk: { type: 'victory', threshold: 12, description: 'Win 12 runs' },
+    elementalist: { type: 'element_wins', element: 'lightning', threshold: 2, description: 'Win with 2+ lightning heroes' },
+    druid: { type: 'no_healer_win', description: 'Win without a healer' },
+    necromancer: { type: 'boss_kill', bossId: 'thunder_titan', description: 'Defeat Thunder Titan' },
+    berserker: { type: 'relic_count', threshold: 8, description: 'Finish with 8+ relics' },
+    frost_ranger: { type: 'element_wins', element: 'ice', threshold: 2, description: 'Win with 2+ ice heroes' },
+    beast_warden: { type: 'hero_used', heroId: 'knight', description: 'Win using knight' },
+    dragon_knight: { type: 'full_element_team', element: 'fire', description: 'Win with mono-fire team' },
+    shadow_weaver: { type: 'hero_used', heroId: 'shadow_assassin', description: 'Win using shadow_assassin' },
+    storm_caller: { type: 'element_wins', element: 'lightning', threshold: 2, description: 'Win with 2+ lightning heroes' },
+    holy_sentinel: { type: 'no_healer_win', difficulty: 'hard', description: 'Win without healer on hard+' },
+    ice_mage: { type: 'boss_kill', bossId: 'shadow_lord', description: 'Defeat Shadow Lord' },
+    thunder_monk: { type: 'full_element_team', element: 'lightning', description: 'Win with mono-lightning team' },
   };
 
   private constructor() {}
@@ -115,7 +131,11 @@ export class MetaManager {
     return MetaManager.getInstance().meta.unlockedHeroes.includes(heroId);
   }
 
-  static getHeroUnlockCondition(heroId: string): { type: string; threshold?: number; description: string } | undefined {
+  static getHeroUnlockCondition(heroId: string): {
+    type: string; threshold?: number; element?: string;
+    heroId?: string; bossId?: string; difficulty?: string;
+    description: string;
+  } | undefined {
     return MetaManager.HERO_UNLOCK_CONDITIONS[heroId];
   }
 
@@ -204,7 +224,7 @@ export class MetaManager {
 
   // ---- Run Statistics ----
 
-  static recordRunEnd(victory: boolean, floor: number): number {
+  static recordRunEnd(victory: boolean, floor: number, context?: RunEndContext): number {
     const inst = MetaManager.getInstance();
     inst.meta.totalRuns++;
     if (victory) {
@@ -218,6 +238,8 @@ export class MetaManager {
     const baseReward = victory ? 100 : Math.floor(floor * 5);
     MetaManager.addMetaCurrency(baseReward);
 
+    const difficultyRank: Record<string, number> = { normal: 0, hard: 1, nightmare: 2, hell: 3 };
+
     // Check all hero unlock conditions
     for (const [heroId, cond] of Object.entries(MetaManager.HERO_UNLOCK_CONDITIONS)) {
       if (inst.meta.unlockedHeroes.includes(heroId)) continue;
@@ -228,6 +250,44 @@ export class MetaManager {
         case 'victory': met = inst.meta.totalVictories >= threshold; break;
         case 'runs': met = inst.meta.totalRuns >= threshold; break;
         case 'floor': met = inst.meta.highestFloor >= threshold; break;
+        case 'element_wins':
+          if (victory && context && cond.element) {
+            const count = context.partyElements.filter(e => e === cond.element).length;
+            met = count >= threshold;
+          }
+          break;
+        case 'boss_kill':
+          if (cond.bossId) {
+            met = MetaManager.hasDefeatedBoss(cond.bossId);
+          }
+          break;
+        case 'no_healer_win':
+          if (victory && context) {
+            const hasHealer = context.partyRoles.includes('healer');
+            met = !hasHealer;
+            if (met && cond.difficulty) {
+              const requiredRank = difficultyRank[cond.difficulty] ?? 0;
+              const currentRank = difficultyRank[context.difficulty] ?? 0;
+              met = currentRank >= requiredRank;
+            }
+          }
+          break;
+        case 'full_element_team':
+          if (victory && context && cond.element) {
+            met = context.partyElements.length > 0 &&
+                  context.partyElements.every(e => e === cond.element);
+          }
+          break;
+        case 'relic_count':
+          if (victory && context) {
+            met = context.relicCount >= threshold;
+          }
+          break;
+        case 'hero_used':
+          if (victory && context && cond.heroId) {
+            met = context.partyHeroIds.includes(cond.heroId);
+          }
+          break;
       }
       if (met) MetaManager.unlockHero(heroId);
     }
