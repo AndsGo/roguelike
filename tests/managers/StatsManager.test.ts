@@ -150,6 +150,54 @@ describe('StatsManager', () => {
     });
   });
 
+  describe('critical hits tracking', () => {
+    it('increments criticalHits on crit damage events', () => {
+      EventBus.getInstance().emit('unit:damage', {
+        sourceId: 'hero1', targetId: 'enemy1',
+        amount: 200, damageType: 'physical', isCrit: true,
+      });
+      EventBus.getInstance().emit('unit:damage', {
+        sourceId: 'hero1', targetId: 'enemy1',
+        amount: 100, damageType: 'physical', isCrit: false,
+      });
+      EventBus.getInstance().emit('unit:damage', {
+        sourceId: 'hero1', targetId: 'enemy1',
+        amount: 150, damageType: 'physical', isCrit: true,
+      });
+
+      expect(StatsManager.getRunStats().criticalHits).toBe(2);
+    });
+  });
+
+  describe('element reaction tracking', () => {
+    it('tracks element reactions by reactionType', () => {
+      EventBus.getInstance().emit('element:reaction', {
+        element1: 'fire', element2: 'ice', targetId: 'enemy1', reactionType: 'ignite',
+      });
+      EventBus.getInstance().emit('element:reaction', {
+        element1: 'ice', element2: 'lightning', targetId: 'enemy2', reactionType: 'freeze',
+      });
+      EventBus.getInstance().emit('element:reaction', {
+        element1: 'fire', element2: 'ice', targetId: 'enemy3', reactionType: 'ignite',
+      });
+
+      const stats = StatsManager.getRunStats();
+      expect(stats.elementReactions['ignite']).toBe(2);
+      expect(stats.elementReactions['freeze']).toBe(1);
+      expect(stats.elementReactions['shock']).toBeUndefined();
+    });
+  });
+
+  describe('run duration tracking', () => {
+    it('sets runDurationMs after finalizeRun', () => {
+      // finalizeRun computes elapsed from runStartTime
+      StatsManager.finalizeRun(false);
+
+      const stats = StatsManager.getRunStats();
+      expect(stats.runDurationMs).toBeGreaterThanOrEqual(0);
+    });
+  });
+
   describe('resetRunStats', () => {
     it('resets all stats to zero', () => {
       EventBus.getInstance().emit('unit:damage', {
