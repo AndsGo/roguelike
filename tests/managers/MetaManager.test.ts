@@ -30,19 +30,21 @@ describe('MetaManager', () => {
       expect(unlocked).toContain('warrior');
       expect(unlocked).toContain('archer');
       expect(unlocked).toContain('mage');
+      expect(unlocked).toContain('priest');
+      expect(unlocked).toContain('rogue');
     });
 
     it('unlockHero adds a new hero', () => {
-      MetaManager.unlockHero('priest');
-      expect(MetaManager.isHeroUnlocked('priest')).toBe(true);
+      MetaManager.unlockHero('knight');
+      expect(MetaManager.isHeroUnlocked('knight')).toBe(true);
     });
 
     it('unlockHero is idempotent', () => {
-      MetaManager.unlockHero('priest');
-      MetaManager.unlockHero('priest');
+      MetaManager.unlockHero('knight');
+      MetaManager.unlockHero('knight');
       const heroes = MetaManager.getUnlockedHeroes();
-      const priestCount = heroes.filter(h => h === 'priest').length;
-      expect(priestCount).toBe(1);
+      const knightCount = heroes.filter(h => h === 'knight').length;
+      expect(knightCount).toBe(1);
     });
 
     it('isHeroUnlocked returns false for locked hero', () => {
@@ -140,16 +142,16 @@ describe('MetaManager', () => {
       expect(MetaManager.getMetaData().highestFloor).toBe(7);
     });
 
-    it('unlocks priest on first victory', () => {
-      MetaManager.recordRunEnd(true, 15);
+    it('priest is a default hero (no unlock needed)', () => {
       expect(MetaManager.isHeroUnlocked('priest')).toBe(true);
+      const cond = MetaManager.getHeroUnlockCondition('priest');
+      expect(cond?.type).toBe('default');
     });
 
-    it('unlocks rogue after 3 runs', () => {
-      MetaManager.recordRunEnd(false, 5);
-      MetaManager.recordRunEnd(false, 5);
-      MetaManager.recordRunEnd(false, 5);
+    it('rogue is a default hero (no unlock needed)', () => {
       expect(MetaManager.isHeroUnlocked('rogue')).toBe(true);
+      const cond = MetaManager.getHeroUnlockCondition('rogue');
+      expect(cond?.type).toBe('default');
     });
 
     it('awards meta currency based on progress', () => {

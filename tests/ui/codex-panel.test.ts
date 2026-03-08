@@ -62,7 +62,7 @@ describe('Codex data integration', () => {
   it('codex counts match data sources', () => {
     const heroes = heroesData as { id: string }[];
     const enemies = enemiesData as { id: string }[];
-    expect(MetaManager.getUnlockedHeroes().length).toBe(3);
+    expect(MetaManager.getUnlockedHeroes().length).toBe(5);
     expect(MetaManager.getEncounteredEnemies().length).toBe(0);
     for (const e of enemies) {
       MetaManager.recordEnemyEncounter(e.id);
