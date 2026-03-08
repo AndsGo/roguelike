@@ -281,6 +281,28 @@ export const UI = {
     boss: '首领',
   },
 
+  // BuildReviewPanel
+  buildReview: {
+    title: '战斗回顾',
+    combatStats: '战斗数据',
+    heroPerformance: '英雄表现',
+    equipmentRelics: '装备与遗物',
+    totalDamage: '总伤害',
+    totalHealing: '总治疗',
+    kills: '击杀',
+    crits: '暴击',
+    reactions: '元素反应',
+    duration: '用时',
+    goldEarned: '获得金币',
+    goldSpent: '花费金币',
+    maxCombo: '最大连击',
+    skillsUsed: '使用技能',
+    equipment: '装备',
+    relics: '遗物',
+    noEquipment: '无装备',
+    close: '[关闭]',
+  },
+
   // Daily challenge
   daily: {
     title: '每日挑战',
