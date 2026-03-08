@@ -24,6 +24,7 @@ import skillVisualsData from '../data/skill-visuals.json';
 import { Button } from '../ui/Button';
 import { UI } from '../i18n';
 import { KeybindingConfig } from '../config/keybindings';
+import { BOSS_ENTRANCE } from '../config/visual';
 import { RunOverviewPanel } from '../ui/RunOverviewPanel';
 import { DailyChallengeManager, DailyRule } from '../managers/DailyChallengeManager';
 import { UltimateSystem } from '../systems/UltimateSystem';
@@ -206,6 +207,64 @@ export class BattleScene extends Phaser.Scene {
     // Record enemy encounters for codex
     for (const enemy of enemies) {
       MetaManager.recordEnemyEncounter(enemy.unitId);
+    }
+
+    // Boss entrance animation
+    const bossUnit = enemies.find(e => e.isBoss);
+    if (bossUnit) {
+      const finalX = bossUnit.x;
+      bossUnit.x = BOSS_ENTRANCE.START_X;
+
+      // Title card
+      const titleName = this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 - 15, bossUnit.unitName, {
+        fontSize: '20px',
+        color: '#ffaa00',
+        fontFamily: 'monospace',
+        fontStyle: 'bold',
+        stroke: '#000000',
+        strokeThickness: 4,
+      }).setOrigin(0.5).setDepth(BOSS_ENTRANCE.TITLE_DEPTH).setAlpha(0);
+
+      const titleSub = this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 + 12, 'BOSS', {
+        fontSize: '12px',
+        color: '#ff4444',
+        fontFamily: 'monospace',
+        fontStyle: 'bold',
+        stroke: '#000000',
+        strokeThickness: 3,
+      }).setOrigin(0.5).setDepth(BOSS_ENTRANCE.TITLE_DEPTH).setAlpha(0);
+
+      // Fade in title
+      this.tweens.add({
+        targets: [titleName, titleSub],
+        alpha: 1,
+        duration: BOSS_ENTRANCE.TITLE_FADE_IN,
+      });
+
+      // Slide boss in
+      this.tweens.add({
+        targets: bossUnit,
+        x: finalX,
+        duration: BOSS_ENTRANCE.SLIDE_DURATION,
+        ease: 'Cubic.easeOut',
+        onComplete: () => {
+          // Screen shake on landing
+          this.effects.screenShake(BOSS_ENTRANCE.SHAKE_INTENSITY, BOSS_ENTRANCE.SHAKE_DURATION);
+
+          // Fade out title after hold
+          this.time.delayedCall(BOSS_ENTRANCE.TITLE_HOLD, () => {
+            this.tweens.add({
+              targets: [titleName, titleSub],
+              alpha: 0,
+              duration: BOSS_ENTRANCE.TITLE_FADE_OUT,
+              onComplete: () => {
+                titleName.destroy();
+                titleSub.destroy();
+              },
+            });
+          });
+        },
+      });
     }
 
     // Create HUD (with skill queue integration)

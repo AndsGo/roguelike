@@ -84,6 +84,18 @@ export const PARTICLE = {
   LIFESPAN_SHORT: 300,
 } as const;
 
+// ─── Boss Entrance ───
+export const BOSS_ENTRANCE = {
+  START_X: 900,           // off-screen right
+  SLIDE_DURATION: 400,    // ms
+  TITLE_FADE_IN: 200,     // ms
+  TITLE_HOLD: 400,        // ms after slide
+  TITLE_FADE_OUT: 300,    // ms
+  SHAKE_INTENSITY: 0.01,
+  SHAKE_DURATION: 200,    // ms
+  TITLE_DEPTH: 500,
+} as const;
+
 // ─── Gameplay UI Thresholds ───
 export const UI_THRESHOLDS = {
   COMBO_DISPLAY_MIN: 5,
