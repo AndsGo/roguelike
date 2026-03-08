@@ -66,6 +66,8 @@ export const UI = {
     resume: '继续',
     settings: '设置',
     abandonBattle: '放弃战斗',
+    ultimateReady: '终极技就绪!',
+    ultimateUsed: '终极技释放!',
   },
 
   // RewardScene
