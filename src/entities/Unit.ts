@@ -3,6 +3,7 @@ import { UnitStats, UnitRole, StatusEffect, SkillData, ElementType, RaceType, Cl
 import { HealthBar } from '../components/HealthBar';
 import { HEALTH_BAR_WIDTH, HEALTH_BAR_HEIGHT, Y_MOVEMENT_DAMPING } from '../constants';
 import { EventBus } from '../systems/EventBus';
+import { RelicSystem } from '../systems/RelicSystem';
 import { Theme, darkenColor, getElementColor } from '../ui/Theme';
 import { getOrCreateTexture, getDisplaySize, ChibiConfig } from '../systems/UnitRenderer';
 
@@ -227,6 +228,16 @@ export class Unit extends Phaser.GameObjects.Container {
     for (const [key, value] of Object.entries(this.synergyBonuses)) {
       if (key in stats && typeof value === 'number') {
         (stats[key as keyof UnitStats] as number) += value;
+      }
+    }
+
+    // Apply relic stat modifiers (only for heroes)
+    if (this.isHero) {
+      const relicMods = RelicSystem.getStatModifiers(stats);
+      for (const [key, value] of Object.entries(relicMods)) {
+        if (key in stats && typeof value === 'number') {
+          (stats[key as keyof UnitStats] as number) += value;
+        }
       }
     }
 
