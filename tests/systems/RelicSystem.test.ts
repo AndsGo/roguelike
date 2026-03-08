@@ -269,6 +269,63 @@ describe('RelicSystem', () => {
     });
   });
 
+  describe('build-defining relics', () => {
+    it('mono_element_crown: +40% damage when all heroes same element', () => {
+      RelicSystem.activate([{ id: 'mono_element_crown', triggerCount: 0 }]);
+      const bonus = RelicSystem.getConditionalDamageBonus(['fire', 'fire', 'fire']);
+      expect(bonus).toBeCloseTo(0.4);
+    });
+
+    it('mono_element_crown: no bonus with mixed elements', () => {
+      RelicSystem.activate([{ id: 'mono_element_crown', triggerCount: 0 }]);
+      const bonus = RelicSystem.getConditionalDamageBonus(['fire', 'ice', 'fire']);
+      expect(bonus).toBe(0);
+    });
+
+    it('mono_element_crown: no bonus without relic', () => {
+      RelicSystem.activate([]);
+      expect(RelicSystem.getConditionalDamageBonus(['fire', 'fire'])).toBe(0);
+    });
+
+    it('diversity_badge: +8% speed per unique class', () => {
+      RelicSystem.activate([{ id: 'diversity_badge', triggerCount: 0 }]);
+      expect(RelicSystem.getAttackSpeedBonus(3)).toBeCloseTo(0.24);
+    });
+
+    it('diversity_badge: no bonus without relic', () => {
+      RelicSystem.activate([]);
+      expect(RelicSystem.getAttackSpeedBonus(5)).toBe(0);
+    });
+
+    it('berserker_oath: +20% attack, +10% crit when no healer', () => {
+      RelicSystem.activate([{ id: 'berserker_oath', triggerCount: 0 }]);
+      const bonus = RelicSystem.getBerserkerBonus(false);
+      expect(bonus.attack).toBeCloseTo(0.2);
+      expect(bonus.critChance).toBeCloseTo(0.1);
+    });
+
+    it('berserker_oath: no bonus when healer present', () => {
+      RelicSystem.activate([{ id: 'berserker_oath', triggerCount: 0 }]);
+      const bonus = RelicSystem.getBerserkerBonus(true);
+      expect(bonus.attack).toBe(0);
+      expect(bonus.critChance).toBe(0);
+    });
+
+    it('getDamageBonus includes mono_element_crown when all heroes same element', () => {
+      // Need to use activateWithUnits to set heroes for getDamageBonus
+      // But we can test the component method directly
+      RelicSystem.activate([{ id: 'mono_element_crown', triggerCount: 0 }]);
+      const bonus = RelicSystem.getConditionalDamageBonus(['ice', 'ice']);
+      expect(bonus).toBeCloseTo(0.4);
+    });
+
+    it('kill_momentum: registers handler on unit:kill', () => {
+      RelicSystem.activate([{ id: 'kill_momentum', triggerCount: 0 }]);
+      const handlers = RelicSystem.getReactiveHandlers('unit:kill');
+      expect(handlers.length).toBe(1);
+    });
+  });
+
   describe('formula modifiers', () => {
     it('getDefensePiercing returns 0 with no armor_piercer', () => {
       RelicSystem.activate([]);

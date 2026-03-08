@@ -175,6 +175,52 @@ export class RelicSystem {
     return total;
   }
 
+  /** mono_element_crown: +40% damage when all heroes share the same element */
+  static getConditionalDamageBonus(heroElements: (string | undefined)[]): number {
+    if (!RelicSystem.hasRelic('mono_element_crown')) return 0;
+    const elements = heroElements.filter(Boolean);
+    if (elements.length === 0) return 0;
+    const allSame = elements.every(e => e === elements[0]);
+    return allSame ? 0.4 : 0;
+  }
+
+  /** diversity_badge: +8% attackSpeed per unique class */
+  static getAttackSpeedBonus(uniqueClassCount: number): number {
+    if (!RelicSystem.hasRelic('diversity_badge')) return 0;
+    return uniqueClassCount * 0.08;
+  }
+
+  /** berserker_oath: +20% attack, +10% crit when no healer present */
+  static getBerserkerBonus(hasHealer: boolean): { attack: number; critChance: number } {
+    if (!RelicSystem.hasRelic('berserker_oath') || hasHealer) {
+      return { attack: 0, critChance: 0 };
+    }
+    return { attack: 0.2, critChance: 0.1 };
+  }
+
+  /** Combined conditional stat modifiers based on team composition */
+  static getConditionalStatMods(): Partial<Record<keyof UnitStats, number>> {
+    const inst = RelicSystem.getInstance();
+    const mods: Partial<Record<keyof UnitStats, number>> = {};
+    if (inst.heroes.length === 0) return mods;
+
+    // diversity_badge: +8% attackSpeed per unique class
+    const uniqueClasses = new Set(inst.heroes.map(h => h.classType)).size;
+    const speedBonus = RelicSystem.getAttackSpeedBonus(uniqueClasses);
+    if (speedBonus > 0) {
+      mods.attackSpeed = (mods.attackSpeed ?? 0) + speedBonus;
+    }
+
+    // berserker_oath: +10% critChance when no healer (the attack +20% is multiplicative, applied in getDamageBonus)
+    const hasHealer = inst.heroes.some(h => h.role === 'healer');
+    const berserk = RelicSystem.getBerserkerBonus(hasHealer);
+    if (berserk.critChance > 0) {
+      mods.critChance = (mods.critChance ?? 0) + berserk.critChance;
+    }
+
+    return mods;
+  }
+
   /** Get total damage multiplier bonus (glass_cannon +60%, heart_of_dragon +20%) */
   static getDamageBonus(): number {
     const inst = RelicSystem.getInstance();
@@ -182,6 +228,18 @@ export class RelicSystem {
     for (const relic of inst.relics) {
       if (relic.id === 'glass_cannon') total += 0.6;
       if (relic.id === 'heart_of_dragon') total += 0.2;
+    }
+    // mono_element_crown: +40% if all heroes same element
+    if (inst.heroes.length > 0) {
+      const heroElements = inst.heroes.map(h => h.element);
+      total += RelicSystem.getConditionalDamageBonus(heroElements);
+    }
+    // berserker_oath: +20% attack if no healer
+    if (inst.heroes.length > 0) {
+      const hasHealer = inst.heroes.some(h => h.role === 'healer');
+      if (!hasHealer && RelicSystem.hasRelic('berserker_oath')) {
+        total += 0.2;
+      }
     }
     return total;
   }
@@ -372,6 +430,15 @@ export class RelicSystem {
       case 'soul_collector':
         // Add val to killer's currentStats.attack
         killer.currentStats.attack += val;
+        break;
+
+      case 'kill_momentum':
+        // +3% attack per kill (cumulative, all heroes benefit)
+        for (const hero of this.heroes) {
+          if (hero.isAlive) {
+            hero.currentStats.attack = Math.round(hero.currentStats.attack * (1 + val));
+          }
+        }
         break;
     }
 

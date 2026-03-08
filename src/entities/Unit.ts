@@ -239,6 +239,14 @@ export class Unit extends Phaser.GameObjects.Container {
           (stats[key as keyof UnitStats] as number) += value;
         }
       }
+
+      // Conditional relic bonuses (build-defining relics based on team composition)
+      const conditionalMods = RelicSystem.getConditionalStatMods();
+      for (const [key, value] of Object.entries(conditionalMods)) {
+        if (key in stats && typeof value === 'number') {
+          (stats[key as keyof UnitStats] as number) += value;
+        }
+      }
     }
 
     return stats;
