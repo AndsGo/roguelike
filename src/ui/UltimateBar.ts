@@ -163,10 +163,15 @@ class UltimateSlot extends Phaser.GameObjects.Container {
     }).setOrigin(0.5);
     this.add(this.energyText);
 
-    // Interactive hit area
+    // Interactive hit area (pointerup with distance check per project convention)
     const hitArea = scene.add.rectangle(cx, cy, BUTTON_SIZE + 4, BUTTON_SIZE + 4, 0x000000, 0)
       .setInteractive({ useHandCursor: true });
-    hitArea.on('pointerdown', () => this.tryFire());
+    let downX = 0, downY = 0;
+    hitArea.on('pointerdown', (_p: unknown, x: number, y: number) => { downX = x; downY = y; });
+    hitArea.on('pointerup', (_p: unknown, x: number, y: number) => {
+      const dist = Math.sqrt((x - downX) ** 2 + (y - downY) ** 2);
+      if (dist < 20) this.tryFire();
+    });
     this.add(hitArea);
   }
 

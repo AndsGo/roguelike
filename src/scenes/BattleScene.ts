@@ -543,7 +543,20 @@ export class BattleScene extends Phaser.Scene {
     if (!this.targetingSkillInfo) return;
 
     const { unitId, skillId } = this.targetingSkillInfo;
-    this.battleSystem.skillQueue.fireSkill(unitId, skillId, targetId);
+
+    // Check if this is an ultimate skill (not in the skill queue)
+    const ultSkillId = this.ultimateSystem.getUltimateSkillId(unitId);
+    if (ultSkillId && skillId === ultSkillId) {
+      this.ultimateSystem.consumeEnergy(unitId);
+      EventBus.getInstance().emit('skill:manualFire', {
+        unitId,
+        skillId,
+        targetId,
+      });
+    } else {
+      this.battleSystem.skillQueue.fireSkill(unitId, skillId, targetId);
+    }
+
     this.cancelTargetingMode();
   }
 

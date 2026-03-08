@@ -17,15 +17,18 @@ interface HeroUltState {
 export class UltimateSystem {
   private heroStates: Map<string, HeroUltState> = new Map();
   private heroIds: Set<string> = new Set();
+  private heroRefs: { unitId: string; isAlive: boolean }[] = [];
 
   private onAttack!: (data: GameEventMap['unit:attack']) => void;
   private onSkillUse!: (data: GameEventMap['skill:use']) => void;
   private onDamage!: (data: GameEventMap['unit:damage']) => void;
   private onKill!: (data: GameEventMap['unit:kill']) => void;
 
-  activate(heroes: { unitId: string; isHero: boolean; skills: SkillData[] }[]): void {
+  activate(heroes: { unitId: string; isHero: boolean; isAlive: boolean; skills: SkillData[] }[]): void {
     this.heroStates.clear();
     this.heroIds.clear();
+
+    this.heroRefs = heroes;
 
     heroes.forEach((hero, index) => {
       const ultSkill = hero.skills.find(s => s.isUltimate);
@@ -78,12 +81,15 @@ export class UltimateSystem {
     if (this.onKill) eb.off('unit:kill', this.onKill);
     this.heroStates.clear();
     this.heroIds.clear();
+    this.heroRefs = [];
   }
 
   update(delta: number): void {
     const dt = delta / 1000;
     for (const [heroId, state] of this.heroStates) {
       if (state.energy < MAX_ENERGY) {
+        const hero = this.heroRefs.find(h => h.unitId === heroId);
+        if (hero && !hero.isAlive) continue;
         this.addEnergy(heroId, PASSIVE_RATE * dt);
       }
     }
