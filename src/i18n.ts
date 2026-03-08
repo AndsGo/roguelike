@@ -19,7 +19,7 @@ export const UI = {
     continue: '继续',
     newGame: '新游戏',
     upgrades: '升级',
-    version: 'v0.3.0 - Phase B+',
+    version: 'v1.2.0',
     stats: (runs: number, victories: number, heroCount: number, totalHeroes: number, souls: number) =>
       `冒险: ${runs}  |  胜利: ${victories}  |  英雄: ${heroCount}/${totalHeroes}  |  灵魂: ${souls}`,
     confirmOverwrite: '现有存档将丢失。\n是否继续？',
