@@ -6,6 +6,7 @@ import { SceneTransition, TRANSITION } from '../systems/SceneTransition';
 import { RunEndPanel, RunEndResult } from '../ui/RunEndPanel';
 import { DailyChallengeManager } from '../managers/DailyChallengeManager';
 import { RunManager } from '../managers/RunManager';
+import { BuildReviewPanel } from '../ui/BuildReviewPanel';
 import { UI } from '../i18n';
 
 /**
@@ -86,6 +87,13 @@ export abstract class BaseEndScene extends Phaser.Scene {
       fontFamily: 'monospace',
       fontStyle: 'bold',
     }).setOrigin(0.5);
+  }
+
+  /** Create a "build review" button that opens the BuildReviewPanel. */
+  protected createBuildReviewButton(y: number): void {
+    new Button(this, GAME_WIDTH / 2, y, UI.buildReview.title, 160, 36, () => {
+      new BuildReviewPanel(this, () => {});
+    }, Theme.colors.panelBorder);
   }
 
   /** Mark daily challenge complete and display score. Returns the daily score, or 0 if not a daily run. */

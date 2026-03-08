@@ -71,6 +71,8 @@ export class VictoryScene extends BaseEndScene {
     // Daily challenge completion
     this.settleDailyChallenge(true, rewardY + 70);
 
+    // Build review + main menu buttons
+    this.createBuildReviewButton(GAME_HEIGHT - 80);
     this.createMainMenuButton(GAME_HEIGHT - 40, UI.victory.mainMenu, Theme.colors.secondary);
   }
 

@@ -43,6 +43,8 @@ export class GameOverScene extends BaseEndScene {
     // Daily challenge completion
     this.settleDailyChallenge(false, 270);
 
+    // Build review + main menu buttons
+    this.createBuildReviewButton(GAME_HEIGHT - 90);
     this.createMainMenuButton(GAME_HEIGHT - 50, UI.gameOver.mainMenu, Theme.colors.danger);
   }
 
