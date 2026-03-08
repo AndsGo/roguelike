@@ -278,5 +278,69 @@
     "rarity": "rare",
     "triggerEvent": "battle:end",
     "effect": { "type": "passive", "value": 0.2 }
+  },
+  {
+    "id": "armor_piercer",
+    "name": "破甲之刃",
+    "description": "攻击无视目标30%防御",
+    "rarity": "legendary",
+    "triggerEvent": "unit:damage",
+    "effect": { "type": "formula_mod", "value": 0.3 }
+  },
+  {
+    "id": "overflow_shield",
+    "name": "溢疗护盾",
+    "description": "治疗溢出部分转为护盾(最多20%maxHP)",
+    "rarity": "legendary",
+    "triggerEvent": "unit:heal",
+    "effect": { "type": "formula_mod", "value": 0.2 }
+  },
+  {
+    "id": "chain_reaction",
+    "name": "连锁反应",
+    "description": "元素反应伤害+50%，反应后溅射30%伤害",
+    "rarity": "legendary",
+    "triggerEvent": "element:reaction",
+    "effect": { "type": "formula_mod", "value": 0.5 }
+  },
+  {
+    "id": "glass_cannon",
+    "name": "玻璃大炮",
+    "description": "攻击+60%，受到伤害+30%",
+    "rarity": "legendary",
+    "triggerEvent": "unit:damage",
+    "effect": { "type": "formula_mod", "value": 0.6 }
+  },
+  {
+    "id": "mono_element_crown",
+    "name": "元素统一王冠",
+    "description": "全队同元素时伤害+40%",
+    "rarity": "legendary",
+    "triggerEvent": "battle:start",
+    "effect": { "type": "passive", "value": 0.4 }
+  },
+  {
+    "id": "diversity_badge",
+    "name": "多元徽章",
+    "description": "队伍中每种不同职业+8%攻速",
+    "rarity": "rare",
+    "triggerEvent": "battle:start",
+    "effect": { "type": "passive", "value": 0.08 }
+  },
+  {
+    "id": "berserker_oath",
+    "name": "狂战士誓约",
+    "description": "无治疗者时全队攻击+20%暴击+10%",
+    "rarity": "rare",
+    "triggerEvent": "battle:start",
+    "effect": { "type": "passive", "value": 0.2 }
+  },
+  {
+    "id": "kill_momentum",
+    "name": "杀戮动能",
+    "description": "每次击杀永久+3%攻击(战斗内累计)",
+    "rarity": "rare",
+    "triggerEvent": "unit:kill",
+    "effect": { "type": "on_kill", "value": 0.03 }
   }
 ]

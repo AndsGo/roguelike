@@ -143,7 +143,7 @@ export interface RelicConfig {
 }
 
 export interface RelicEffect {
-  type: 'stat_boost' | 'on_damage' | 'on_heal' | 'on_kill' | 'on_battle_start' | 'on_battle_end' | 'passive';
+  type: 'stat_boost' | 'on_damage' | 'on_heal' | 'on_kill' | 'on_battle_start' | 'on_battle_end' | 'passive' | 'formula_mod';
   stat?: keyof UnitStats;
   value?: number;
   chance?: number; // 0-1 probability of triggering
