@@ -62,6 +62,14 @@ export class DamageSystem {
     const elementMod = ElementSystem.getElementMultiplier(attackerElement, target.element);
     raw *= elementMod;
 
+    // Relic element-specific damage bonus
+    if (attackerElement && attacker.isHero) {
+      const elBonus = RelicSystem.getElementDamageBonus(attackerElement);
+      if (elBonus > 0) {
+        raw *= (1 + elBonus);
+      }
+    }
+
     // Combo multiplier
     if (this.comboSystem) {
       const comboMod = this.comboSystem.getComboMultiplier(attacker.unitId);
@@ -73,6 +81,15 @@ export class DamageSystem {
       const relicDmgBonus = RelicSystem.getDamageBonus();
       if (relicDmgBonus > 0) {
         raw *= (1 + relicDmgBonus);
+      }
+    }
+
+    // Berserker mask: +25% attack when low HP
+    if (attacker.isHero) {
+      const hpRatio = attacker.currentHp / attacker.currentStats.maxHp;
+      const lowHpBonus = RelicSystem.getLowHpAttackBonus(hpRatio);
+      if (lowHpBonus > 0) {
+        raw *= (1 + lowHpBonus);
       }
     }
 

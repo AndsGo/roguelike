@@ -379,6 +379,51 @@ describe('RelicSystem', () => {
     });
   });
 
+  describe('element damage relics', () => {
+    it('fire_emblem: +20% fire damage bonus', () => {
+      RelicSystem.activate([{ id: 'fire_emblem', triggerCount: 0 }]);
+      expect(RelicSystem.getElementDamageBonus('fire')).toBeCloseTo(0.2);
+    });
+
+    it('fire_emblem: no bonus for non-fire', () => {
+      RelicSystem.activate([{ id: 'fire_emblem', triggerCount: 0 }]);
+      expect(RelicSystem.getElementDamageBonus('ice')).toBe(0);
+    });
+
+    it('crown_of_elements: +15% all element damage', () => {
+      RelicSystem.activate([{ id: 'crown_of_elements', triggerCount: 0 }]);
+      expect(RelicSystem.getElementDamageBonus('fire')).toBeCloseTo(0.15);
+      expect(RelicSystem.getElementDamageBonus('ice')).toBeCloseTo(0.15);
+      expect(RelicSystem.getElementDamageBonus('dark')).toBeCloseTo(0.15);
+    });
+
+    it('stacks element-specific + all-element bonuses', () => {
+      RelicSystem.activate([
+        { id: 'fire_emblem', triggerCount: 0 },
+        { id: 'crown_of_elements', triggerCount: 0 },
+      ]);
+      expect(RelicSystem.getElementDamageBonus('fire')).toBeCloseTo(0.35);
+      expect(RelicSystem.getElementDamageBonus('ice')).toBeCloseTo(0.15);
+    });
+  });
+
+  describe('berserker_mask', () => {
+    it('provides +25% bonus when HP < 50%', () => {
+      RelicSystem.activate([{ id: 'berserker_mask', triggerCount: 0 }]);
+      expect(RelicSystem.getLowHpAttackBonus(0.3)).toBeCloseTo(0.25);
+    });
+
+    it('provides no bonus when HP >= 50%', () => {
+      RelicSystem.activate([{ id: 'berserker_mask', triggerCount: 0 }]);
+      expect(RelicSystem.getLowHpAttackBonus(0.7)).toBe(0);
+    });
+
+    it('provides no bonus without relic', () => {
+      RelicSystem.activate([]);
+      expect(RelicSystem.getLowHpAttackBonus(0.3)).toBe(0);
+    });
+  });
+
   describe('overflow_shield relic', () => {
     it('hasOverflowShield returns true when active', () => {
       RelicSystem.activate([{ id: 'overflow_shield', triggerCount: 0 }]);

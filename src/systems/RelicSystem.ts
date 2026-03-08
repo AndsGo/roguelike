@@ -12,6 +12,15 @@ interface RelicDef {
   effect: RelicEffect;
 }
 
+/** Map element-specific relics to their element */
+const ELEMENT_RELIC_MAP: Record<string, string> = {
+  fire_emblem: 'fire',
+  ice_crystal_pendant: 'ice',
+  lightning_rod: 'lightning',
+  dark_grimoire: 'dark',
+  holy_scripture: 'holy',
+};
+
 /** Effect types that register reactive EventBus listeners */
 const REACTIVE_EFFECT_TYPES = new Set([
   'on_battle_start',
@@ -207,6 +216,32 @@ export class RelicSystem {
   static getAttackSpeedBonus(uniqueClassCount: number): number {
     if (!RelicSystem.hasRelic('diversity_badge')) return 0;
     return uniqueClassCount * 0.08;
+  }
+
+  /** Get element-specific damage bonus for a given element */
+  static getElementDamageBonus(element: string): number {
+    const inst = RelicSystem.getInstance();
+    let total = 0;
+    for (const relic of inst.relics) {
+      // Element-specific relics
+      const relicElement = ELEMENT_RELIC_MAP[relic.id];
+      if (relicElement === element) {
+        const def = inst.relicDefs.get(relic.id);
+        total += def?.effect.value ?? 0;
+      }
+      // crown_of_elements: all elements +15%
+      if (relic.id === 'crown_of_elements') {
+        const def = inst.relicDefs.get(relic.id);
+        total += def?.effect.value ?? 0;
+      }
+    }
+    return total;
+  }
+
+  /** berserker_mask: +25% attack when HP ratio < 50% */
+  static getLowHpAttackBonus(hpRatio: number): number {
+    if (!RelicSystem.hasRelic('berserker_mask')) return 0;
+    return hpRatio < 0.5 ? 0.25 : 0;
   }
 
   /** berserker_oath: +20% attack, +10% crit when no healer present */
