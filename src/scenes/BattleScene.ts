@@ -16,6 +16,7 @@ import { AudioManager } from '../systems/AudioManager';
 import { RelicSystem } from '../systems/RelicSystem';
 import { SaveManager } from '../managers/SaveManager';
 import { MetaManager } from '../managers/MetaManager';
+import { Unit } from '../entities/Unit';
 import { Theme, colorToString, getElementColor } from '../ui/Theme';
 import { hasElementAdvantage } from '../config/elements';
 import enemiesData from '../data/enemies.json';
@@ -66,6 +67,8 @@ export class BattleScene extends Phaser.Scene {
   private onComboBreak!: (data: { unitId: string }) => void;
   private onSkillInterrupt!: (data: { unitId: string; skillId: string; reason: string }) => void;
   private onBossKill!: (data: { killerId: string; targetId: string }) => void;
+  private onAttackShowName!: (data: { sourceId: string; targetId: string; damage: number }) => void;
+  private lastShownEnemy: Unit | null = null;
 
   constructor() {
     super({ key: 'BattleScene' });
@@ -207,6 +210,13 @@ export class BattleScene extends Phaser.Scene {
     // Record enemy encounters for codex
     for (const enemy of enemies) {
       MetaManager.recordEnemyEncounter(enemy.unitId);
+    }
+
+    // Hide regular enemy names by default (boss names always visible)
+    for (const enemy of enemies) {
+      if (!enemy.isBoss) {
+        enemy.setNameVisible(false);
+      }
     }
 
     // Boss entrance animation
@@ -455,6 +465,21 @@ export class BattleScene extends Phaser.Scene {
       }
     };
     eb.on('unit:kill', this.onBossKill);
+
+    // Show enemy name when attacked/targeted
+    this.onAttackShowName = (data) => {
+      // Hide previous
+      if (this.lastShownEnemy && !this.lastShownEnemy.isBoss) {
+        this.lastShownEnemy.setNameVisible(false);
+      }
+      // Show current target if it's an enemy
+      const target = enemies.find(e => e.unitId === data.targetId);
+      if (target && !target.isBoss) {
+        target.setNameVisible(true);
+        this.lastShownEnemy = target;
+      }
+    };
+    eb.on('unit:attack', this.onAttackShowName);
 
     // Threat & healer indicator graphics (single reusable objects, cleared each frame)
     this.threatGraphics = this.add.graphics().setDepth(5);
@@ -842,6 +867,8 @@ export class BattleScene extends Phaser.Scene {
     eb.off('unit:kill', this.onBossKill);
     eb.off('skill:targetRequest', this.onTargetRequest);
     eb.off('skill:manualFire', this.onManualFire);
+    eb.off('unit:attack', this.onAttackShowName);
+    this.lastShownEnemy = null;
     this.ultimateSystem.deactivate();
     this.ultimateBar.destroy();
     RelicSystem.deactivate();

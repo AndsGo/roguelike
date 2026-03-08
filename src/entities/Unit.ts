@@ -493,4 +493,9 @@ export class Unit extends Phaser.GameObjects.Container {
   isInRange(other: Unit): boolean {
     return this.distanceTo(other) <= this.getEffectiveStats().attackRange;
   }
+
+  /** Show or hide the unit name label */
+  setNameVisible(visible: boolean): void {
+    this.nameLabel.setVisible(visible);
+  }
 }
