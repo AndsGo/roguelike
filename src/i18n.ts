@@ -288,6 +288,8 @@ export const UI = {
     start: '开始挑战',
     rules: '今日规则',
     info: '每天一次固定挑战，全球同步种子',
+    score: (n: number) => `得分: ${n}`,
+    challengeComplete: '每日挑战完成!',
   },
 
   // Tutorial

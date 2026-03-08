@@ -68,6 +68,9 @@ export class VictoryScene extends BaseEndScene {
 
     RunEndPanel.renderRewards(this, GAME_WIDTH / 2, rewardY + 45, newAchievements, UI.victory);
 
+    // Daily challenge completion
+    this.settleDailyChallenge(true, rewardY + 70);
+
     this.createMainMenuButton(GAME_HEIGHT - 40, UI.victory.mainMenu, Theme.colors.secondary);
   }
 

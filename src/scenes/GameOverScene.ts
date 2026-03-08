@@ -40,6 +40,9 @@ export class GameOverScene extends BaseEndScene {
 
     RunEndPanel.renderRewards(this, GAME_WIDTH / 2, 240, newAchievements, UI.gameOver);
 
+    // Daily challenge completion
+    this.settleDailyChallenge(false, 270);
+
     this.createMainMenuButton(GAME_HEIGHT - 50, UI.gameOver.mainMenu, Theme.colors.danger);
   }
 
