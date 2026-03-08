@@ -1,10 +1,11 @@
 import Phaser from 'phaser';
-import { MapNode, BattleNodeData, EventNodeData, ShopNodeData } from '../types';
+import { MapNode, BattleNodeData, EventNodeData, ShopNodeData, EventData } from '../types';
 import { Theme, colorToString } from './Theme';
 import { UI } from '../i18n';
 import enemiesData from '../data/enemies.json';
 import eventsData from '../data/events.json';
 import { ShopGenerator } from '../systems/ShopGenerator';
+import { getChoiceRiskLevel } from '../scenes/EventScene';
 
 const TOOLTIP_MAX_WIDTH = 180;
 const PADDING = 6;
@@ -86,9 +87,18 @@ export class NodeTooltip extends Phaser.GameObjects.Container {
       case 'event': {
         const eventData = node.data as EventNodeData | undefined;
         if (eventData?.eventId) {
-          const eventDef = (eventsData as { id: string; title: string }[]).find(ed => ed.id === eventData.eventId);
+          const eventDef = (eventsData as EventData[]).find(ed => ed.id === eventData.eventId);
           if (eventDef) {
-            lines.push(`  ${eventDef.title}`);
+            // Find highest risk among all choices
+            let worstLabel = UI.event.riskLow;
+            const riskOrder = [UI.event.riskLow, UI.event.riskMedium, UI.event.riskHigh];
+            for (const choice of eventDef.choices ?? []) {
+              const risk = getChoiceRiskLevel(choice);
+              if (riskOrder.indexOf(risk.label) > riskOrder.indexOf(worstLabel)) {
+                worstLabel = risk.label;
+              }
+            }
+            lines.push(`  ${eventDef.title} [${worstLabel}]`);
           }
         }
         break;
