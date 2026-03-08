@@ -122,6 +122,7 @@ export class SkillQueueSystem {
    */
   shouldQueueSkill(unit: Unit, skill: SkillData): boolean {
     if (!unit.isHero) return false;
+    if (skill.isUltimate) return false;
     if (this.mode === 'auto') return false;
     this.enqueueSkill(unit.unitId, skill);
     return true;

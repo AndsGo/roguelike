@@ -70,6 +70,7 @@ export class SkillSystem {
   /** Find a ready skill that can be used on the current target */
   findReadySkill(unit: Unit, allies: Unit[], enemies: Unit[]): SkillData | null {
     for (const skill of unit.skills) {
+      if (skill.isUltimate) continue;
       const cd = unit.skillCooldowns.get(skill.id) ?? 0;
       if (cd > 0) continue;
 
