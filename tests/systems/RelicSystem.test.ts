@@ -181,4 +181,91 @@ describe('RelicSystem', () => {
       expect(RelicSystem.hasRelic('thick_skin')).toBe(true);
     });
   });
+
+  describe('reactive relics', () => {
+    it('blood_vial: registers handler on unit:kill', () => {
+      RelicSystem.activate([{ id: 'blood_vial', triggerCount: 0 }]);
+      const handlers = RelicSystem.getReactiveHandlers('unit:kill');
+      expect(handlers.length).toBeGreaterThan(0);
+    });
+
+    it('vampiric_fang: registers handler on unit:damage', () => {
+      RelicSystem.activate([{ id: 'vampiric_fang', triggerCount: 0 }]);
+      const handlers = RelicSystem.getReactiveHandlers('unit:damage');
+      expect(handlers.length).toBeGreaterThan(0);
+    });
+
+    it('stat_boost relics do not register handlers', () => {
+      RelicSystem.activate([{ id: 'quick_boots', triggerCount: 0 }]);
+      // quick_boots has triggerEvent battle:start but is stat_boost type
+      const all = RelicSystem.getReactiveHandlers('battle:start');
+      expect(all.length).toBe(0);
+    });
+
+    it('deactivate removes all listeners', () => {
+      RelicSystem.activate([{ id: 'blood_vial', triggerCount: 0 }]);
+      expect(RelicSystem.getReactiveHandlers('unit:kill').length).toBe(1);
+      RelicSystem.deactivate();
+      expect(RelicSystem.getReactiveHandlers('unit:kill').length).toBe(0);
+    });
+
+    it('iron_heart: registers handler on battle:start', () => {
+      RelicSystem.activate([{ id: 'iron_heart', triggerCount: 0 }]);
+      const handlers = RelicSystem.getReactiveHandlers('battle:start');
+      expect(handlers.length).toBe(1);
+    });
+
+    it('soul_collector: registers handler on unit:kill', () => {
+      RelicSystem.activate([{ id: 'soul_collector', triggerCount: 0 }]);
+      const handlers = RelicSystem.getReactiveHandlers('unit:kill');
+      expect(handlers.length).toBe(1);
+    });
+
+    it('soul_mirror: registers handler on unit:damage', () => {
+      RelicSystem.activate([{ id: 'soul_mirror', triggerCount: 0 }]);
+      const handlers = RelicSystem.getReactiveHandlers('unit:damage');
+      expect(handlers.length).toBe(1);
+    });
+
+    it('time_crystal: registers handler on battle:start', () => {
+      RelicSystem.activate([{ id: 'time_crystal', triggerCount: 0 }]);
+      const handlers = RelicSystem.getReactiveHandlers('battle:start');
+      expect(handlers.length).toBe(1);
+    });
+
+    it('herb_pouch: registers handler on battle:start', () => {
+      RelicSystem.activate([{ id: 'herb_pouch', triggerCount: 0 }]);
+      const handlers = RelicSystem.getReactiveHandlers('battle:start');
+      expect(handlers.length).toBe(1);
+    });
+
+    it('life_spring: registers handler on battle:start', () => {
+      RelicSystem.activate([{ id: 'life_spring', triggerCount: 0 }]);
+      const handlers = RelicSystem.getReactiveHandlers('battle:start');
+      expect(handlers.length).toBe(1);
+    });
+
+    it('multiple reactive relics register multiple handlers', () => {
+      RelicSystem.activate([
+        { id: 'blood_vial', triggerCount: 0 },
+        { id: 'soul_collector', triggerCount: 0 },
+      ]);
+      const handlers = RelicSystem.getReactiveHandlers('unit:kill');
+      expect(handlers.length).toBe(2);
+    });
+
+    it('re-activate clears previous listeners and registers new ones', () => {
+      RelicSystem.activate([{ id: 'blood_vial', triggerCount: 0 }]);
+      expect(RelicSystem.getReactiveHandlers('unit:kill').length).toBe(1);
+      RelicSystem.activate([{ id: 'vampiric_fang', triggerCount: 0 }]);
+      expect(RelicSystem.getReactiveHandlers('unit:kill').length).toBe(0);
+      expect(RelicSystem.getReactiveHandlers('unit:damage').length).toBe(1);
+    });
+
+    it('passive relics do not register handlers', () => {
+      RelicSystem.activate([{ id: 'lucky_coin', triggerCount: 0 }]);
+      const handlers = RelicSystem.getReactiveHandlers('battle:end');
+      expect(handlers.length).toBe(0);
+    });
+  });
 });

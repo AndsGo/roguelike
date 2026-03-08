@@ -13,6 +13,7 @@ import { ActModifierSystem } from '../systems/ActModifierSystem';
 import { UnitAnimationSystem } from '../systems/UnitAnimationSystem';
 import { EventBus } from '../systems/EventBus';
 import { AudioManager } from '../systems/AudioManager';
+import { RelicSystem } from '../systems/RelicSystem';
 import { SaveManager } from '../managers/SaveManager';
 import { MetaManager } from '../managers/MetaManager';
 import { Theme, colorToString, getElementColor } from '../ui/Theme';
@@ -169,6 +170,7 @@ export class BattleScene extends Phaser.Scene {
       .filter((e): e is Enemy => e !== null);
 
     this.battleSystem.setUnits(heroes, enemies);
+    RelicSystem.activateWithUnits(rm.getRelics(), heroes, enemies);
 
     // Apply daily challenge rules
     const runState = rm.getState();
@@ -714,6 +716,7 @@ export class BattleScene extends Phaser.Scene {
     eb.off('skill:interrupt', this.onSkillInterrupt);
     eb.off('skill:targetRequest', this.onTargetRequest);
     eb.off('skill:manualFire', this.onManualFire);
+    RelicSystem.deactivate();
     this.cancelTargetingMode();
     this.threatGraphics?.destroy();
     this.healerGraphics?.destroy();

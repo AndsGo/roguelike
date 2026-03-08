@@ -1,5 +1,6 @@
 import { RelicState, RelicEffect, UnitStats } from '../types';
 import { EventBus } from './EventBus';
+import { Unit } from '../entities/Unit';
 import relicsData from '../data/relics.json';
 
 interface RelicDef {
@@ -11,6 +12,15 @@ interface RelicDef {
   effect: RelicEffect;
 }
 
+/** Effect types that register reactive EventBus listeners */
+const REACTIVE_EFFECT_TYPES = new Set([
+  'on_battle_start',
+  'on_damage',
+  'on_kill',
+  'on_heal',
+  'on_battle_end',
+]);
+
 /** All numeric keys on UnitStats */
 const STAT_KEYS: (keyof UnitStats)[] = [
   'maxHp', 'hp', 'attack', 'defense', 'magicPower', 'magicResist',
@@ -19,13 +29,16 @@ const STAT_KEYS: (keyof UnitStats)[] = [
 
 /**
  * RelicSystem — singleton that evaluates relic effects during battle.
- * Task 1 implements stat_boost relics only.
+ * Handles stat_boost relics (getStatModifiers) and reactive relics (EventBus listeners).
  */
 export class RelicSystem {
   private static instance: RelicSystem;
 
   private relics: RelicState[] = [];
   private relicDefs: Map<string, RelicDef> = new Map();
+  private heroes: Unit[] = [];
+  private enemies: Unit[] = [];
+  private listeners: Array<{ event: string; handler: (...args: any[]) => void }> = [];
 
   private constructor() {
     // Load relic definitions from data
@@ -44,7 +57,18 @@ export class RelicSystem {
   /** Activate relics for the current battle */
   static activate(relics: RelicState[]): void {
     const inst = RelicSystem.getInstance();
+    inst.unregisterListeners();
     inst.relics = [...relics];
+    inst.registerListeners();
+  }
+
+  /** Activate relics with unit references for reactive effects */
+  static activateWithUnits(relics: RelicState[], heroes: Unit[], enemies: Unit[]): void {
+    const inst = RelicSystem.getInstance();
+    inst.unregisterListeners();
+    inst.relics = [...relics];
+    inst.heroes = heroes;
+    inst.enemies = enemies;
     inst.registerListeners();
   }
 
@@ -53,6 +77,8 @@ export class RelicSystem {
     const inst = RelicSystem.getInstance();
     inst.unregisterListeners();
     inst.relics = [];
+    inst.heroes = [];
+    inst.enemies = [];
   }
 
   /** Reset singleton — for testing */
@@ -60,6 +86,8 @@ export class RelicSystem {
     if (RelicSystem.instance) {
       RelicSystem.instance.unregisterListeners();
       RelicSystem.instance.relics = [];
+      RelicSystem.instance.heroes = [];
+      RelicSystem.instance.enemies = [];
     }
   }
 
@@ -109,13 +137,174 @@ export class RelicSystem {
     return inst.relicDefs.get(relicId);
   }
 
-  /** Stub for Task 2 — register EventBus listeners for reactive relics */
-  private registerListeners(): void {
-    // Will be implemented in Task 2
+  /** Test helper: get reactive handlers registered for a given event */
+  static getReactiveHandlers(event: string): Array<{ event: string; handler: any }> {
+    return RelicSystem.getInstance().listeners.filter(l => l.event === event);
   }
 
-  /** Remove all EventBus listeners */
+  /** Find a unit by id across heroes and enemies */
+  private findUnit(unitId: string): Unit | undefined {
+    return [...this.heroes, ...this.enemies].find(u => u.unitId === unitId);
+  }
+
+  /** Register EventBus listeners for reactive (non-stat_boost, non-passive) relics */
+  private registerListeners(): void {
+    const eb = EventBus.getInstance();
+
+    for (const relicState of this.relics) {
+      const def = this.relicDefs.get(relicState.id);
+      if (!def) continue;
+
+      // Skip stat_boost and passive relics — they don't use EventBus listeners
+      if (!REACTIVE_EFFECT_TYPES.has(def.effect.type)) continue;
+
+      const handler = this.createHandler(relicState, def);
+      if (!handler) continue;
+
+      eb.on(def.triggerEvent as any, handler);
+      this.listeners.push({ event: def.triggerEvent, handler });
+    }
+  }
+
+  /** Remove all registered EventBus listeners */
   private unregisterListeners(): void {
-    // Will be implemented in Task 2
+    const eb = EventBus.getInstance();
+    for (const { event, handler } of this.listeners) {
+      eb.off(event as any, handler);
+    }
+    this.listeners = [];
+  }
+
+  /** Create a handler function for a reactive relic based on its effect type */
+  private createHandler(relic: RelicState, def: RelicDef): ((data: any) => void) | null {
+    switch (def.effect.type) {
+      case 'on_battle_start':
+        return (data: any) => this.handleBattleStart(relic, def, data);
+      case 'on_damage':
+        return (data: any) => this.handleOnDamage(relic, def, data);
+      case 'on_kill':
+        return (data: any) => this.handleOnKill(relic, def, data);
+      case 'on_heal':
+        return (data: any) => this.handleOnHeal(relic, def, data);
+      case 'on_battle_end':
+        return (data: any) => this.handleBattleEnd(relic, def, data);
+      default:
+        return null;
+    }
+  }
+
+  /** Handle battle:start relics */
+  private handleBattleStart(relic: RelicState, def: RelicDef, _data: any): void {
+    const val = def.effect.value ?? 0;
+
+    switch (def.id) {
+      case 'iron_heart':
+        // Add val HP to each hero (increase both maxHp and currentHp)
+        for (const hero of this.heroes) {
+          if (!hero.isAlive) continue;
+          hero.currentStats.maxHp += val;
+          hero.currentHp = Math.min(hero.currentHp + val, hero.currentStats.maxHp);
+        }
+        break;
+
+      case 'herb_pouch':
+      case 'life_spring':
+        // Heal each hero by val * maxHp
+        for (const hero of this.heroes) {
+          if (!hero.isAlive) continue;
+          const healAmount = val * hero.currentStats.maxHp;
+          hero.heal(healAmount);
+        }
+        break;
+
+      case 'time_crystal':
+        // Reduce each hero's skill cooldowns by val fraction
+        for (const hero of this.heroes) {
+          if (!hero.isAlive) continue;
+          for (const [skillId, cd] of hero.skillCooldowns) {
+            hero.skillCooldowns.set(skillId, cd * (1 - val));
+          }
+        }
+        break;
+    }
+
+    relic.triggerCount++;
+  }
+
+  /** Handle unit:damage relics */
+  private handleOnDamage(relic: RelicState, def: RelicDef, data: any): void {
+    const val = def.effect.value ?? 0;
+    const chance = def.effect.chance ?? 1;
+
+    // Roll chance check
+    if (Math.random() > chance) return;
+
+    const source = this.findUnit(data.sourceId);
+    const target = this.findUnit(data.targetId);
+    const damage = data.amount ?? 0;
+
+    switch (def.id) {
+      case 'vampiric_fang':
+        // If source is hero, heal source for val * damage
+        if (source && source.isHero && source.isAlive) {
+          const healAmount = val * damage;
+          source.heal(healAmount);
+        }
+        break;
+
+      case 'soul_mirror':
+        // If target is hero, reflect val * damage back to source
+        if (target && target.isHero && source && source.isAlive) {
+          const reflectAmount = val * damage;
+          source.takeDamage(reflectAmount);
+        }
+        break;
+
+      case 'thunder_emblem':
+        // If source is hero, deal val damage to a random other enemy
+        if (source && source.isHero) {
+          const otherEnemies = this.enemies.filter(
+            e => e.isAlive && e.unitId !== data.targetId
+          );
+          if (otherEnemies.length > 0) {
+            const randomEnemy = otherEnemies[Math.floor(Math.random() * otherEnemies.length)];
+            randomEnemy.takeDamage(val);
+          }
+        }
+        break;
+    }
+
+    relic.triggerCount++;
+  }
+
+  /** Handle unit:kill relics */
+  private handleOnKill(relic: RelicState, def: RelicDef, data: any): void {
+    const val = def.effect.value ?? 0;
+    const killer = this.findUnit(data.killerId);
+    if (!killer || !killer.isAlive) return;
+
+    switch (def.id) {
+      case 'blood_vial':
+        // Heal killer by val * killer's maxHp
+        killer.heal(val * killer.currentStats.maxHp);
+        break;
+
+      case 'soul_collector':
+        // Add val to killer's currentStats.attack
+        killer.currentStats.attack += val;
+        break;
+    }
+
+    relic.triggerCount++;
+  }
+
+  /** Handle unit:heal relics — triggerCount increment (actual behavior in later tasks) */
+  private handleOnHeal(relic: RelicState, _def: RelicDef, _data: any): void {
+    relic.triggerCount++;
+  }
+
+  /** Handle battle:end relics — triggerCount increment (actual behavior in later tasks) */
+  private handleBattleEnd(relic: RelicState, _def: RelicDef, _data: any): void {
+    relic.triggerCount++;
   }
 }
