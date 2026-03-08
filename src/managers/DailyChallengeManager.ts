@@ -121,6 +121,20 @@ export class DailyChallengeManager {
     return Math.round(baseHP * rule.value);
   }
 
+  private static BEST_SCORE_KEY = 'roguelike_daily_best';
+
+  /** Get the personal best daily challenge score */
+  static getBestScore(): number {
+    return SaveManager.loadData<number>(DailyChallengeManager.BEST_SCORE_KEY) ?? 0;
+  }
+
+  /** Update best score if new score is higher */
+  static updateBestScore(score: number): void {
+    if (score > DailyChallengeManager.getBestScore()) {
+      SaveManager.saveData(DailyChallengeManager.BEST_SCORE_KEY, score);
+    }
+  }
+
   /** Get enemy element bonus string, or null if no element rule */
   static getEnemyElementBonus(rules: DailyRule[]): string | null {
     const rule = rules.find(r => r.type === 'enemy_element');

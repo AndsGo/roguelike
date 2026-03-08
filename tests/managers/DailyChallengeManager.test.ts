@@ -112,4 +112,19 @@ describe('DailyChallengeManager', () => {
     ];
     expect(DailyChallengeManager.getEnemyElementBonus(rulesWithout)).toBeNull();
   });
+
+  it('should track and update best score', () => {
+    expect(DailyChallengeManager.getBestScore()).toBe(0);
+
+    DailyChallengeManager.updateBestScore(300);
+    expect(DailyChallengeManager.getBestScore()).toBe(300);
+
+    // Higher score should update
+    DailyChallengeManager.updateBestScore(500);
+    expect(DailyChallengeManager.getBestScore()).toBe(500);
+
+    // Lower score should not update
+    DailyChallengeManager.updateBestScore(200);
+    expect(DailyChallengeManager.getBestScore()).toBe(500);
+  });
 });

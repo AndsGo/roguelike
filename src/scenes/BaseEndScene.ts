@@ -101,6 +101,7 @@ export abstract class BaseEndScene extends Phaser.Scene {
     const goldScore = rm.getGold();
     const victoryBonus = victory ? 500 : 0;
     const totalScore = floorScore + goldScore + victoryBonus;
+    DailyChallengeManager.updateBestScore(totalScore);
 
     // Display daily challenge completion banner
     this.add.text(GAME_WIDTH / 2, baseY, `[ ${UI.daily.challengeComplete} ]`, {
