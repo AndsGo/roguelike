@@ -117,6 +117,7 @@ export interface SkillData {
   effectDuration?: number;
   element?: ElementType;
   effects?: SkillEffect[]; // chain-capable effect list
+  isUltimate?: boolean;
 }
 
 // ============ Items ============
@@ -366,7 +367,8 @@ export type GameEventType =
   | 'item:equip' | 'item:unequip'
   | 'relic:acquire' | 'relic:trigger'
   | 'achievement:unlock'
-  | 'error:report';
+  | 'error:report'
+  | 'ultimate:ready' | 'ultimate:used';
 
 export interface GameEventMap {
   'battle:start': { heroCount: number; enemyCount: number };
@@ -397,4 +399,6 @@ export interface GameEventMap {
   'skill:manualFire': { unitId: string; skillId: string; targetId?: string };
   'skill:targetRequest': { unitId: string; skillId: string; targetType: string };
   'skill:interrupt': { unitId: string; skillId: string; reason: string };
+  'ultimate:ready': { unitId: string; heroIndex: number };
+  'ultimate:used': { unitId: string; skillId: string };
 }

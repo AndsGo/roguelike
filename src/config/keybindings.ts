@@ -6,7 +6,8 @@ const KEYBINDINGS_KEY = 'roguelike_keybindings';
 export type KeyAction =
   | 'skill1' | 'skill2' | 'skill3' | 'skill4'
   | 'skill5' | 'skill6' | 'skill7' | 'skill8'
-  | 'pause' | 'cancel';
+  | 'pause' | 'cancel'
+  | 'ultimate1' | 'ultimate2' | 'ultimate3' | 'ultimate4';
 
 /** Display label for each action (Chinese) */
 export const ACTION_LABELS: Record<KeyAction, string> = {
@@ -20,6 +21,10 @@ export const ACTION_LABELS: Record<KeyAction, string> = {
   skill8: '技能 8',
   pause: '暂停/继续',
   cancel: '取消选择',
+  ultimate1: '终极技 1',
+  ultimate2: '终极技 2',
+  ultimate3: '终极技 3',
+  ultimate4: '终极技 4',
 };
 
 /** Phaser key name → display string */
@@ -51,6 +56,10 @@ const DEFAULT_BINDINGS: Record<KeyAction, string> = {
   skill8: 'EIGHT',
   pause: 'SPACE',
   cancel: 'ESC',
+  ultimate1: 'Q',
+  ultimate2: 'W',
+  ultimate3: 'E',
+  ultimate4: 'R',
 };
 
 /** Reverse map from Phaser keyCode → key name */
@@ -138,6 +147,14 @@ export class KeybindingConfig {
     return [
       bindings.skill1, bindings.skill2, bindings.skill3, bindings.skill4,
       bindings.skill5, bindings.skill6, bindings.skill7, bindings.skill8,
+    ];
+  }
+
+  /** Get all ultimate keybindings in order (ultimate1..ultimate4) */
+  static getUltimateKeys(): string[] {
+    const bindings = KeybindingConfig.getBindings();
+    return [
+      bindings.ultimate1, bindings.ultimate2, bindings.ultimate3, bindings.ultimate4,
     ];
   }
 }
