@@ -120,6 +120,9 @@ export const UI = {
     itemGold: (v: number) => `金币 +${v}`,
     continueBtn: '继续',
     probability: (pct: number) => `${pct}%`,
+    riskLow: '低风险',
+    riskMedium: '中风险',
+    riskHigh: '高风险',
   },
 
   // GameOverScene

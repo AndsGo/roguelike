@@ -11,6 +11,36 @@ import { ShopGenerator } from '../systems/ShopGenerator';
 import { UI, getHeroDisplayName, ELEMENT_NAMES } from '../i18n';
 import { AudioManager } from '../systems/AudioManager';
 
+/** Classify the risk level of an event choice based on worst-case effects. */
+export function getChoiceRiskLevel(choice: EventChoice): { label: string; color: string } {
+  let worstSeverity = 0; // 0=low, 1=medium, 2=high
+  for (const outcome of choice.outcomes) {
+    for (const effect of outcome.effects) {
+      switch (effect.type) {
+        case 'sacrifice':
+          worstSeverity = Math.max(worstSeverity, 2);
+          break;
+        case 'damage':
+          if (effect.value > 40) worstSeverity = Math.max(worstSeverity, 2);
+          else if (effect.value > 15) worstSeverity = Math.max(worstSeverity, 1);
+          break;
+        case 'gold':
+          if (effect.value < -20) worstSeverity = Math.max(worstSeverity, 1);
+          break;
+        case 'stat_boost':
+          if (effect.value < 0) worstSeverity = Math.max(worstSeverity, 1);
+          break;
+        case 'transform':
+          worstSeverity = Math.max(worstSeverity, 1);
+          break;
+      }
+    }
+  }
+  if (worstSeverity === 2) return { label: UI.event.riskHigh, color: '#ff4444' };
+  if (worstSeverity === 1) return { label: UI.event.riskMedium, color: '#ffcc00' };
+  return { label: UI.event.riskLow, color: '#44ff44' };
+}
+
 export class EventScene extends Phaser.Scene {
   private nodeIndex!: number;
   private choiceMade = false;
@@ -156,6 +186,22 @@ export class EventScene extends Phaser.Scene {
           ease: 'Sine.easeOut',
         });
       }
+
+      // Risk level tag
+      const risk = getChoiceRiskLevel(choice);
+      const riskTag = this.add.text(GAME_WIDTH / 2 + 215, btnY, `[${risk.label}]`, {
+        fontSize: '9px',
+        color: risk.color,
+        fontFamily: 'monospace',
+      }).setOrigin(0, 0.5).setAlpha(0);
+
+      this.tweens.add({
+        targets: riskTag,
+        alpha: 1,
+        duration: 200,
+        delay: 800 + i * 120,
+        ease: 'Sine.easeOut',
+      });
     });
   }
 
