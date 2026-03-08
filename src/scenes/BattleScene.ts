@@ -24,6 +24,7 @@ import { Button } from '../ui/Button';
 import { UI } from '../i18n';
 import { KeybindingConfig } from '../config/keybindings';
 import { RunOverviewPanel } from '../ui/RunOverviewPanel';
+import { DailyChallengeManager, DailyRule } from '../managers/DailyChallengeManager';
 
 export class BattleScene extends Phaser.Scene {
   private battleSystem!: BattleSystem;
@@ -168,6 +169,31 @@ export class BattleScene extends Phaser.Scene {
       .filter((e): e is Enemy => e !== null);
 
     this.battleSystem.setUnits(heroes, enemies);
+
+    // Apply daily challenge rules
+    const runState = rm.getState();
+    if (runState.isDaily && runState.dailyModifiers?.rules) {
+      const rules = runState.dailyModifiers.rules as DailyRule[];
+
+      // HP modifier: reduce hero max HP and current HP
+      for (const hero of heroes) {
+        const newMaxHp = DailyChallengeManager.applyHPModifier(hero.currentStats.maxHp, rules);
+        if (newMaxHp !== hero.currentStats.maxHp) {
+          hero.currentStats.maxHp = newMaxHp;
+          hero.currentHp = Math.min(hero.currentHp, newMaxHp);
+        }
+      }
+
+      // Enemy element bonus: +20% attack for enemies matching the boosted element
+      const bonusElement = DailyChallengeManager.getEnemyElementBonus(rules);
+      if (bonusElement) {
+        for (const enemy of enemies) {
+          if (enemy.element === bonusElement) {
+            enemy.currentStats.attack = Math.round(enemy.currentStats.attack * 1.2);
+          }
+        }
+      }
+    }
 
     // Record enemy encounters for codex
     for (const enemy of enemies) {
@@ -609,7 +635,11 @@ export class BattleScene extends Phaser.Scene {
     const isVictory = this.battleSystem.battleState === 'victory';
 
     if (isVictory) {
-      const goldEarned = this.battleSystem.getTotalGoldReward();
+      let goldEarned = this.battleSystem.getTotalGoldReward();
+      const endRunState = rm.getState();
+      if (endRunState.isDaily && endRunState.dailyModifiers?.rules) {
+        goldEarned = DailyChallengeManager.applyGoldModifier(goldEarned, endRunState.dailyModifiers.rules as DailyRule[]);
+      }
       const expEarned = this.battleSystem.getTotalExpReward();
       const survivors = this.battleSystem.heroes
         .filter(h => h.isAlive)

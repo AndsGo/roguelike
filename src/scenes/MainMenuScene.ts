@@ -14,6 +14,8 @@ import { AchievementPanel } from '../ui/AchievementPanel';
 import { HelpPanel } from '../ui/HelpPanel';
 import { CodexPanel } from '../ui/CodexPanel';
 import { DIFFICULTY_LEVELS } from '../config/difficulty';
+import { DailyChallengeManager } from '../managers/DailyChallengeManager';
+import { RunManager } from '../managers/RunManager';
 import heroesData from '../data/heroes.json';
 
 export class MainMenuScene extends Phaser.Scene {
@@ -79,7 +81,8 @@ export class MainMenuScene extends Phaser.Scene {
     }).setOrigin(0.5);
 
     // Button layout
-    let btnY = 210;
+    const btnSpacing = 44;
+    let btnY = 200;
 
     // Continue button (if save exists)
     if (SaveManager.hasSave(0)) {
@@ -87,46 +90,58 @@ export class MainMenuScene extends Phaser.Scene {
       const saveLabel = saveInfo
         ? UI.mainMenu.continueBtn(saveInfo.floor, saveInfo.heroCount)
         : UI.mainMenu.continue;
-      new Button(this, GAME_WIDTH / 2, btnY, saveLabel, 280, 40, () => {
+      new Button(this, GAME_WIDTH / 2, btnY, saveLabel, 280, 36, () => {
         SaveManager.loadGame(0);
         SceneTransition.fadeTransition(this, 'MapScene');
       }, Theme.colors.success);
-      btnY += 50;
+      btnY += btnSpacing;
     }
 
     // New Game button
-    new Button(this, GAME_WIDTH / 2, btnY, UI.mainMenu.newGame, 180, 40, () => {
+    new Button(this, GAME_WIDTH / 2, btnY, UI.mainMenu.newGame, 180, 36, () => {
       if (SaveManager.hasSave(0)) {
         this.showNewGameConfirmation();
       } else {
         this.startNewGame();
       }
     }, Theme.colors.primary);
-    btnY += 50;
+    btnY += btnSpacing;
+
+    // Daily Challenge button
+    const dailyCompleted = DailyChallengeManager.isCompletedToday();
+    const dailyLabel = dailyCompleted ? UI.daily.completed : UI.daily.title;
+    const dailyBtn = new Button(this, GAME_WIDTH / 2, btnY, dailyLabel, 180, 36, () => {
+      if (dailyCompleted) return;
+      this.startDailyChallenge();
+    }, dailyCompleted ? 0x555555 : Theme.colors.gold);
+    if (dailyCompleted) {
+      dailyBtn.setAlpha(0.6);
+    }
+    btnY += btnSpacing;
 
     // Upgrades button
-    new Button(this, GAME_WIDTH / 2, btnY, UI.mainMenu.upgrades, 180, 40, () => {
+    new Button(this, GAME_WIDTH / 2, btnY, UI.mainMenu.upgrades, 180, 36, () => {
       this.showUpgradePanel();
     }, Theme.colors.panelBorder);
-    btnY += 50;
+    btnY += btnSpacing;
 
     // Achievements button
-    new Button(this, GAME_WIDTH / 2, btnY, '成就', 180, 40, () => {
+    new Button(this, GAME_WIDTH / 2, btnY, '成就', 180, 36, () => {
       this.showAchievementPanel();
     }, Theme.colors.panelBorder);
-    btnY += 50;
+    btnY += btnSpacing;
 
     // Help button
-    new Button(this, GAME_WIDTH / 2, btnY, '帮助', 180, 40, () => {
+    new Button(this, GAME_WIDTH / 2, btnY, '帮助', 180, 36, () => {
       this.showHelpPanel();
     }, Theme.colors.panelBorder);
-    btnY += 50;
+    btnY += btnSpacing;
 
     // Codex button
-    new Button(this, GAME_WIDTH / 2, btnY, UI.codex.title, 180, 40, () => {
+    new Button(this, GAME_WIDTH / 2, btnY, UI.codex.title, 180, 36, () => {
       this.showCodexPanel();
     }, Theme.colors.panelBorder);
-    btnY += 50;
+    btnY += btnSpacing;
 
     // Audio toggle buttons (top-right corner)
     const audio = AudioManager.getInstance();
@@ -200,6 +215,20 @@ export class MainMenuScene extends Phaser.Scene {
 
   private startNewGame(): void {
     this.showDifficultySelection();
+  }
+
+  private startDailyChallenge(): void {
+    const seed = DailyChallengeManager.getTodaysSeed();
+    const modifiers = DailyChallengeManager.getDailyModifiers(seed);
+    const rm = RunManager.getInstance();
+    rm.newRun(seed, modifiers.difficulty, undefined, {
+      title: modifiers.title,
+      rules: modifiers.rules,
+    });
+    SceneTransition.fadeTransition(this, 'HeroDraftScene', {
+      difficulty: modifiers.difficulty,
+      isDaily: true,
+    });
   }
 
   private showDifficultySelection(): void {

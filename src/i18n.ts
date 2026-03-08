@@ -19,7 +19,7 @@ export const UI = {
     continue: '继续',
     newGame: '新游戏',
     upgrades: '升级',
-    version: 'v0.3.0 - Phase B+',
+    version: 'v1.2.0',
     stats: (runs: number, victories: number, heroCount: number, totalHeroes: number, souls: number) =>
       `冒险: ${runs}  |  胜利: ${victories}  |  英雄: ${heroCount}/${totalHeroes}  |  灵魂: ${souls}`,
     confirmOverwrite: '现有存档将丢失。\n是否继续？',
@@ -279,6 +279,40 @@ export const UI = {
     baseStats: '基础属性',
     rewards: (gold: number, exp: number) => `奖励: ${gold}G / ${exp}EXP`,
     boss: '首领',
+  },
+
+  // BuildReviewPanel
+  buildReview: {
+    title: '战斗回顾',
+    combatStats: '战斗数据',
+    heroPerformance: '英雄表现',
+    equipmentRelics: '装备与遗物',
+    totalDamage: '总伤害',
+    totalHealing: '总治疗',
+    kills: '击杀',
+    crits: '暴击',
+    reactions: '元素反应',
+    duration: '用时',
+    goldEarned: '获得金币',
+    goldSpent: '花费金币',
+    maxCombo: '最大连击',
+    skillsUsed: '使用技能',
+    equipment: '装备',
+    relics: '遗物',
+    deaths: '阵亡',
+    noEquipment: '无装备',
+    close: '[关闭]',
+  },
+
+  // Daily challenge
+  daily: {
+    title: '每日挑战',
+    completed: '今日已完成',
+    start: '开始挑战',
+    rules: '今日规则',
+    info: '每天一次固定挑战，全球同步种子',
+    score: (n: number) => `得分: ${n}`,
+    challengeComplete: '每日挑战完成!',
   },
 
   // Tutorial

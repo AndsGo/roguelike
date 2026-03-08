@@ -70,7 +70,7 @@ export class RunEndPanel {
 
     // Hero unlocks
     const meta = MetaManager.getMetaData();
-    const nonDefault = meta.unlockedHeroes.filter(h => !['warrior', 'archer', 'mage'].includes(h));
+    const nonDefault = meta.unlockedHeroes.filter(h => !['warrior', 'archer', 'mage', 'priest', 'rogue'].includes(h));
     if (nonDefault.length > 0) {
       scene.add.text(x, infoY + 5, ui.unlockedHeroes(nonDefault.map(getHeroDisplayName).join(', ')), {
         fontSize: '9px',

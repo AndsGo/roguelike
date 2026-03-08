@@ -16,6 +16,9 @@ export interface RunStats {
   eliteKills: number;
   bossKills: number;
   heroStats: Record<string, { damage: number; healing: number; kills: number; deaths: number }>;
+  criticalHits: number;
+  elementReactions: Record<string, number>;
+  runDurationMs: number;
 }
 
 /** Lifetime history stats persisted across runs */
@@ -52,6 +55,7 @@ export class StatsManager {
   private onCombo: ((data: GameEventMap['combo:hit']) => void) | null = null;
   private onSkillUse: ((data: GameEventMap['skill:use']) => void) | null = null;
   private onNodeComplete: ((data: GameEventMap['node:complete']) => void) | null = null;
+  private onReaction: ((data: GameEventMap['element:reaction']) => void) | null = null;
 
   private constructor() {}
 
@@ -124,6 +128,9 @@ export class StatsManager {
       this.currentRunStats.totalDamage += data.amount;
       this.ensureHeroStats(data.sourceId);
       this.currentRunStats.heroStats[data.sourceId].damage += data.amount;
+      if (data.isCrit) {
+        this.currentRunStats.criticalHits++;
+      }
     };
 
     this.onHeal = (data) => {
@@ -164,6 +171,12 @@ export class StatsManager {
       }
     };
 
+    this.onReaction = (data) => {
+      const key = data.reactionType;
+      this.currentRunStats.elementReactions[key] =
+        (this.currentRunStats.elementReactions[key] ?? 0) + 1;
+    };
+
     bus.on('unit:damage', this.onDamage);
     bus.on('unit:heal', this.onHeal);
     bus.on('unit:kill', this.onKill);
@@ -171,6 +184,7 @@ export class StatsManager {
     bus.on('combo:hit', this.onCombo);
     bus.on('skill:use', this.onSkillUse);
     bus.on('node:complete', this.onNodeComplete);
+    bus.on('element:reaction', this.onReaction);
   }
 
   unregisterListeners(): void {
@@ -185,6 +199,7 @@ export class StatsManager {
     if (this.onCombo) bus.off('combo:hit', this.onCombo);
     if (this.onSkillUse) bus.off('skill:use', this.onSkillUse);
     if (this.onNodeComplete) bus.off('node:complete', this.onNodeComplete);
+    if (this.onReaction) bus.off('element:reaction', this.onReaction);
   }
 
   private ensureHeroStats(unitId: string): void {
@@ -228,6 +243,7 @@ export class StatsManager {
   static finalizeRun(victory: boolean): void {
     const inst = StatsManager.getInstance();
     const elapsed = Date.now() - inst.runStartTime;
+    inst.currentRunStats.runDurationMs = elapsed;
 
     inst.historyStats.totalRuns++;
     if (victory) {
@@ -274,6 +290,9 @@ export class StatsManager {
       eliteKills: 0,
       bossKills: 0,
       heroStats: {},
+      criticalHits: 0,
+      elementReactions: {},
+      runDurationMs: 0,
     };
   }
 }

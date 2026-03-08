@@ -31,8 +31,8 @@ export class RunManager {
     return RunManager.instance;
   }
 
-  /** Start a new run with optional seed, difficulty, and hero selection */
-  newRun(seed?: number, difficulty: string = 'normal', heroIds?: string[]): void {
+  /** Start a new run with optional seed, difficulty, hero selection, and daily modifiers */
+  newRun(seed?: number, difficulty: string = 'normal', heroIds?: string[], dailyModifiers?: { title: string; rules: Array<{ type: string; label: string; value: any }> }): void {
     const s = seed ?? Date.now();
     this.rng = new SeededRNG(s);
 
@@ -56,6 +56,11 @@ export class RunManager {
       activeSynergies: [],
       currentAct: 0,
     };
+
+    if (dailyModifiers) {
+      this.state.isDaily = true;
+      this.state.dailyModifiers = dailyModifiers;
+    }
 
     this.calculateSynergies();
   }

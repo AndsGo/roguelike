@@ -142,7 +142,7 @@ export class SaveManager {
       totalRuns: 0,
       totalVictories: 0,
       highestFloor: 0,
-      unlockedHeroes: ['warrior', 'archer', 'mage'],
+      unlockedHeroes: ['warrior', 'archer', 'mage', 'priest', 'rogue'],
       unlockedRelics: [],
       permanentUpgrades: [],
       achievements: [],

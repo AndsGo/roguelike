@@ -4,6 +4,10 @@ import { Button } from '../ui/Button';
 import { Theme, colorToString } from '../ui/Theme';
 import { SceneTransition, TRANSITION } from '../systems/SceneTransition';
 import { RunEndPanel, RunEndResult } from '../ui/RunEndPanel';
+import { DailyChallengeManager } from '../managers/DailyChallengeManager';
+import { RunManager } from '../managers/RunManager';
+import { BuildReviewPanel } from '../ui/BuildReviewPanel';
+import { UI } from '../i18n';
 
 /**
  * Base class for GameOverScene and VictoryScene.
@@ -83,5 +87,44 @@ export abstract class BaseEndScene extends Phaser.Scene {
       fontFamily: 'monospace',
       fontStyle: 'bold',
     }).setOrigin(0.5);
+  }
+
+  /** Create a "build review" button that opens the BuildReviewPanel. */
+  protected createBuildReviewButton(y: number): void {
+    new Button(this, GAME_WIDTH / 2, y, UI.buildReview.title, 160, 36, () => {
+      new BuildReviewPanel(this, () => {});
+    }, Theme.colors.panelBorder);
+  }
+
+  /** Mark daily challenge complete and display score. Returns the daily score, or 0 if not a daily run. */
+  protected settleDailyChallenge(victory: boolean, baseY: number): number {
+    const rm = RunManager.getInstance();
+    const state = rm.getState();
+    if (!state.isDaily) return 0;
+
+    DailyChallengeManager.markCompleted();
+
+    // Calculate score: floor progress * 10 + gold + (victory ? 500 : 0)
+    const floorScore = rm.getFloor() * 10;
+    const goldScore = rm.getGold();
+    const victoryBonus = victory ? 500 : 0;
+    const totalScore = floorScore + goldScore + victoryBonus;
+    DailyChallengeManager.updateBestScore(totalScore);
+
+    // Display daily challenge completion banner
+    this.add.text(GAME_WIDTH / 2, baseY, `[ ${UI.daily.challengeComplete} ]`, {
+      fontSize: '13px',
+      color: '#ffcc00',
+      fontFamily: 'monospace',
+      fontStyle: 'bold',
+    }).setOrigin(0.5);
+
+    this.add.text(GAME_WIDTH / 2, baseY + 18, UI.daily.score(totalScore), {
+      fontSize: '11px',
+      color: '#ffffff',
+      fontFamily: 'monospace',
+    }).setOrigin(0.5);
+
+    return totalScore;
   }
 }

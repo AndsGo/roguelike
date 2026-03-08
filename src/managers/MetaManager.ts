@@ -42,8 +42,8 @@ export class MetaManager {
     warrior: { type: 'default', description: 'Default hero' },
     archer: { type: 'default', description: 'Default hero' },
     mage: { type: 'default', description: 'Default hero' },
-    priest: { type: 'victory', threshold: 1, description: 'Win 1 run' },
-    rogue: { type: 'runs', threshold: 3, description: 'Complete 3 runs' },
+    priest: { type: 'default', description: 'Default hero' },
+    rogue: { type: 'default', description: 'Default hero' },
     knight: { type: 'runs', threshold: 5, description: 'Complete 5 runs' },
     shadow_assassin: { type: 'victory', threshold: 2, description: 'Win 2 runs' },
     elementalist: { type: 'floor', threshold: 15, description: 'Reach floor 15' },
@@ -286,7 +286,7 @@ export class MetaManager {
     inst.meta.totalRuns = 0;
     inst.meta.totalVictories = 0;
     inst.meta.highestFloor = 0;
-    inst.meta.unlockedHeroes = ['warrior', 'archer', 'mage'];
+    inst.meta.unlockedHeroes = ['warrior', 'archer', 'mage', 'priest', 'rogue'];
     inst.meta.unlockedRelics = [];
     inst.meta.permanentUpgrades = [];
     inst.meta.achievements = [];
