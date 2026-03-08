@@ -15,6 +15,32 @@ export class ShopGenerator {
    * @param actIndex Current act (0 = early, 1 = mid, 2+ = late)
    * @param itemCount Number of items to offer (4-6)
    */
+  /**
+   * Compute a shop hint (category + price range) from a list of items.
+   */
+  static computeShopHint(items: ItemData[]): { category: string; minPrice: number; maxPrice: number } {
+    const slotCounts: Record<string, number> = {};
+    let minPrice = Infinity;
+    let maxPrice = 0;
+    for (const item of items) {
+      slotCounts[item.slot] = (slotCounts[item.slot] ?? 0) + 1;
+      if (item.cost < minPrice) minPrice = item.cost;
+      if (item.cost > maxPrice) maxPrice = item.cost;
+    }
+    const total = items.length;
+    let category = 'mixed';
+    for (const [slot, count] of Object.entries(slotCounts)) {
+      if (count > total / 2) { category = slot; break; }
+    }
+    return { category, minPrice: minPrice === Infinity ? 0 : minPrice, maxPrice };
+  }
+
+  /**
+   * Generate a shop inventory.
+   * @param rng Seeded RNG
+   * @param actIndex Current act (0 = early, 1 = mid, 2+ = late)
+   * @param itemCount Number of items to offer (4-6)
+   */
   static generate(rng: SeededRNG, actIndex: number, itemCount?: number): ItemData[] {
     const count = itemCount ?? rng.nextInt(4, 6);
     const stage = actIndex <= 0 ? 'early' : actIndex === 1 ? 'mid' : 'late';

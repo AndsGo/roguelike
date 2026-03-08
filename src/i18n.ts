@@ -284,6 +284,14 @@ export const UI = {
     keybindings: '快捷键',
   },
 
+  // Shop categories (for map tooltips)
+  shopCategory: {
+    weapon: '武器为主',
+    armor: '防具为主',
+    accessory: '饰品为主',
+    mixed: '综合商店',
+  },
+
   // Codex
   codex: {
     title: '图鉴',

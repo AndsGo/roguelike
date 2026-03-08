@@ -1,9 +1,10 @@
 import Phaser from 'phaser';
-import { MapNode, BattleNodeData, EventNodeData } from '../types';
+import { MapNode, BattleNodeData, EventNodeData, ShopNodeData } from '../types';
 import { Theme, colorToString } from './Theme';
 import { UI } from '../i18n';
 import enemiesData from '../data/enemies.json';
 import eventsData from '../data/events.json';
+import { ShopGenerator } from '../systems/ShopGenerator';
 
 const TOOLTIP_MAX_WIDTH = 180;
 const PADDING = 6;
@@ -92,9 +93,17 @@ export class NodeTooltip extends Phaser.GameObjects.Container {
         }
         break;
       }
-      case 'shop':
-        lines.push('  浏览和购买装备');
+      case 'shop': {
+        const shopData = node.data as ShopNodeData | undefined;
+        if (shopData?.items?.length) {
+          const hint = ShopGenerator.computeShopHint(shopData.items);
+          const catLabel = UI.shopCategory[hint.category as keyof typeof UI.shopCategory] ?? UI.shopCategory.mixed;
+          lines.push(`  ${catLabel} · ${hint.minPrice}-${hint.maxPrice}金`);
+        } else {
+          lines.push('  浏览和购买装备');
+        }
         break;
+      }
       case 'rest':
         lines.push('  恢复队伍生命');
         break;
