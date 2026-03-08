@@ -24,8 +24,8 @@ const VALID_STAT_KEYS: (keyof UnitStats)[] = [
 ];
 
 describe('Relics 数据验证', () => {
-  it('应有 35 个遗物', () => {
-    expect(relics.length).toBe(43);
+  it('应有 48 个遗物', () => {
+    expect(relics.length).toBe(48);
   });
 
   it('无重复 ID', () => {

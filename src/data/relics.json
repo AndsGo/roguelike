@@ -342,5 +342,45 @@
     "rarity": "rare",
     "triggerEvent": "unit:kill",
     "effect": { "type": "on_kill", "value": 0.03 }
+  },
+  {
+    "id": "melt_heart",
+    "name": "融化之心",
+    "description": "融化反应时，攻击者回复20%反应伤害的HP",
+    "rarity": "rare",
+    "triggerEvent": "element:reaction",
+    "effect": { "type": "on_reaction", "reactionType": "融化", "value": 0.2 }
+  },
+  {
+    "id": "overload_engine",
+    "name": "超载引擎",
+    "description": "超载反应时，25%几率眩晕目标1秒",
+    "rarity": "rare",
+    "triggerEvent": "element:reaction",
+    "effect": { "type": "on_reaction", "reactionType": "超载", "chance": 0.25 }
+  },
+  {
+    "id": "superconduct_shield",
+    "name": "超导护盾",
+    "description": "超导反应时，攻击者获得10点临时护盾",
+    "rarity": "rare",
+    "triggerEvent": "element:reaction",
+    "effect": { "type": "on_reaction", "reactionType": "超导", "value": 10 }
+  },
+  {
+    "id": "annihilation_echo",
+    "name": "湮灭回响",
+    "description": "湮灭反应时，1秒后重复40%反应伤害",
+    "rarity": "legendary",
+    "triggerEvent": "element:reaction",
+    "effect": { "type": "on_reaction", "reactionType": "湮灭", "value": 0.4 }
+  },
+  {
+    "id": "elemental_resonance",
+    "name": "元素共鸣",
+    "description": "任何元素反应时，降低目标15魔抗持续5秒",
+    "rarity": "legendary",
+    "triggerEvent": "element:reaction",
+    "effect": { "type": "on_reaction", "reactionType": "any", "value": 15, "duration": 5 }
   }
 ]
