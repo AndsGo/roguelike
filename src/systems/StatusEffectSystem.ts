@@ -1,8 +1,14 @@
 import { Unit } from '../entities/Unit';
 import { DamageNumber } from '../components/DamageNumber';
+import { DamageAccumulator } from './DamageAccumulator';
 import { EventBus } from './EventBus';
 
 export class StatusEffectSystem {
+  private static accumulator?: DamageAccumulator;
+
+  static setAccumulator(acc: DamageAccumulator): void {
+    StatusEffectSystem.accumulator = acc;
+  }
   /**
    * Tick all status effects on a unit.
    * Handles DoT/HoT, buff/debuff expiration, stun duration.
@@ -28,7 +34,11 @@ export class StatusEffectSystem {
           if (effect.type === 'dot') {
             const dmg = Math.max(1, Math.round(effect.value));
             unit.takeDamage(dmg);
-            new DamageNumber(unit.scene, unit.x, unit.y - 20, dmg, false, false);
+            if (StatusEffectSystem.accumulator) {
+              StatusEffectSystem.accumulator.addDamage(unit.unitId, unit.scene, unit.x, unit.y, dmg, { element: effect.element });
+            } else {
+              new DamageNumber(unit.scene, unit.x, unit.y - 20, dmg, false, false);
+            }
             // Emit damage event so AudioManager plays sfx_hit
             const bus = EventBus.getInstance();
             bus.emit('unit:damage', {
@@ -49,7 +59,11 @@ export class StatusEffectSystem {
           } else {
             const heal = Math.max(1, Math.round(effect.value));
             unit.heal(heal);
-            new DamageNumber(unit.scene, unit.x, unit.y - 20, heal, true, false);
+            if (StatusEffectSystem.accumulator) {
+              StatusEffectSystem.accumulator.addHeal(unit.unitId, unit.scene, unit.x, unit.y, heal);
+            } else {
+              new DamageNumber(unit.scene, unit.x, unit.y - 20, heal, true, false);
+            }
           }
         }
       }

@@ -2,6 +2,7 @@ import { Unit } from '../entities/Unit';
 import { SkillData, SkillEffect, StatusEffect, StatusEffectType, SkillAdvancement } from '../types';
 import { DamageSystem } from './DamageSystem';
 import { DamageNumber } from '../components/DamageNumber';
+import { DamageAccumulator } from './DamageAccumulator';
 import { SeededRNG } from '../utils/rng';
 import { EventBus } from './EventBus';
 import { TargetingSystem } from './TargetingSystem';
@@ -11,10 +12,15 @@ import advancementsData from '../data/skill-advancements.json';
 export class SkillSystem {
   private rng: SeededRNG;
   private damageSystem: DamageSystem;
+  private accumulator?: DamageAccumulator;
 
   constructor(rng: SeededRNG, damageSystem: DamageSystem) {
     this.rng = rng;
     this.damageSystem = damageSystem;
+  }
+
+  setAccumulator(acc: DamageAccumulator): void {
+    this.accumulator = acc;
   }
 
   /** Initialize skills for a unit from skill IDs, applying advancements based on unit level */
@@ -161,25 +167,36 @@ export class SkillSystem {
           this.damageSystem.comboSystem.registerHit(unit.unitId, target.unitId);
         }
 
-        new DamageNumber(
-          target.scene,
-          target.x + this.rng.nextInt(-10, 10),
-          target.y - 20,
-          result.finalDamage,
-          false,
-          result.isCrit,
-        );
-
-        // Show reaction damage
-        if (result.elementReactionDamage > 0) {
+        if (this.accumulator) {
+          this.accumulator.addDamage(target.unitId, target.scene, target.x + this.rng.nextInt(-10, 10), target.y, result.finalDamage, {
+            isCrit: result.isCrit,
+            element: skillElement,
+          });
+        } else {
           new DamageNumber(
             target.scene,
             target.x + this.rng.nextInt(-10, 10),
-            target.y - 30,
-            result.elementReactionDamage,
+            target.y - 20,
+            result.finalDamage,
             false,
-            false,
+            result.isCrit,
           );
+        }
+
+        // Show reaction damage
+        if (result.elementReactionDamage > 0) {
+          if (this.accumulator) {
+            this.accumulator.addDamage(`${target.unitId}_reaction`, target.scene, target.x + this.rng.nextInt(-10, 10), target.y, result.elementReactionDamage);
+          } else {
+            new DamageNumber(
+              target.scene,
+              target.x + this.rng.nextInt(-10, 10),
+              target.y - 30,
+              result.elementReactionDamage,
+              false,
+              false,
+            );
+          }
         }
 
         // Emit damage event

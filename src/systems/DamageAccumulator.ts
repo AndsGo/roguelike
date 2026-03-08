@@ -141,6 +141,13 @@ export class DamageAccumulator {
     return offset;
   }
 
+  flushAll(): void {
+    for (const [key, entry] of this.pending) {
+      this.flush(entry);
+    }
+    this.pending.clear();
+  }
+
   reset(): void {
     this.pending.clear();
     this.activeSlots.clear();

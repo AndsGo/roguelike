@@ -8,6 +8,7 @@ import { ComboSystem } from './ComboSystem';
 import { EventBus } from './EventBus';
 import { AudioManager } from './AudioManager';
 import { RelicSystem } from './RelicSystem';
+import { DamageAccumulator } from './DamageAccumulator';
 
 export interface DamageResult {
   rawDamage: number;
@@ -19,10 +20,15 @@ export interface DamageResult {
 
 export class DamageSystem {
   private rng: SeededRNG;
+  private accumulator?: DamageAccumulator;
   comboSystem: ComboSystem | null = null;
 
   constructor(rng: SeededRNG) {
     this.rng = rng;
+  }
+
+  setAccumulator(acc: DamageAccumulator): void {
+    this.accumulator = acc;
   }
 
   /**
@@ -153,25 +159,37 @@ export class DamageSystem {
     }
 
     // Show damage number
-    new DamageNumber(
-      target.scene,
-      target.x + this.rng.nextInt(-10, 10),
-      target.y - 20,
-      result.finalDamage,
-      false,
-      result.isCrit,
-    );
-
-    // Show reaction damage as separate number
-    if (result.elementReactionDamage > 0) {
+    if (this.accumulator) {
+      this.accumulator.addDamage(target.unitId, target.scene, target.x + this.rng.nextInt(-10, 10), target.y, result.finalDamage, {
+        isCrit: result.isCrit,
+        element: element ?? attacker.element,
+        comboCount: this.comboSystem ? this.comboSystem.getComboCount(attacker.unitId) : undefined,
+      });
+    } else {
       new DamageNumber(
         target.scene,
         target.x + this.rng.nextInt(-10, 10),
-        target.y - 30,
-        result.elementReactionDamage,
+        target.y - 20,
+        result.finalDamage,
         false,
-        false,
+        result.isCrit,
       );
+    }
+
+    // Show reaction damage as separate number
+    if (result.elementReactionDamage > 0) {
+      if (this.accumulator) {
+        this.accumulator.addDamage(`${target.unitId}_reaction`, target.scene, target.x + this.rng.nextInt(-10, 10), target.y, result.elementReactionDamage);
+      } else {
+        new DamageNumber(
+          target.scene,
+          target.x + this.rng.nextInt(-10, 10),
+          target.y - 30,
+          result.elementReactionDamage,
+          false,
+          false,
+        );
+      }
     }
 
     // Play crit SFX for critical hits
@@ -227,13 +245,17 @@ export class DamageSystem {
     }
 
     if (actual > 0) {
-      new DamageNumber(
-        target.scene,
-        target.x + this.rng.nextInt(-10, 10),
-        target.y - 20,
-        actual,
-        true,
-      );
+      if (this.accumulator) {
+        this.accumulator.addHeal(target.unitId, target.scene, target.x + this.rng.nextInt(-10, 10), target.y, actual);
+      } else {
+        new DamageNumber(
+          target.scene,
+          target.x + this.rng.nextInt(-10, 10),
+          target.y - 20,
+          actual,
+          true,
+        );
+      }
     }
     return actual;
   }

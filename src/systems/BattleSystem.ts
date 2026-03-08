@@ -12,6 +12,7 @@ import { SkillQueueSystem } from './SkillQueueSystem';
 import { ActModifierSystem } from './ActModifierSystem';
 import { EventBus } from './EventBus';
 import { RelicSystem } from './RelicSystem';
+import { DamageAccumulator } from './DamageAccumulator';
 import { SeededRNG } from '../utils/rng';
 import { HeroData, HeroState, BattleResult } from '../types';
 
@@ -41,17 +42,22 @@ export class BattleSystem {
   speedMultiplier: number = 1;
   isPaused: boolean = false;
   private rng: SeededRNG;
+  private damageAccumulator: DamageAccumulator;
   private internalPhase: InternalPhase = 'preparing';
   private phaseTimer: number = 0;
   private battleResult: BattleResult | null = null;
 
   constructor(rng: SeededRNG) {
     this.rng = rng;
+    this.damageAccumulator = new DamageAccumulator();
     this.comboSystem = new ComboSystem();
     this.synergySystem = new SynergySystem();
     this.damageSystem = new DamageSystem(rng);
     this.damageSystem.comboSystem = this.comboSystem;
+    this.damageSystem.setAccumulator(this.damageAccumulator);
     this.skillSystem = new SkillSystem(rng, this.damageSystem);
+    this.skillSystem.setAccumulator(this.damageAccumulator);
+    StatusEffectSystem.setAccumulator(this.damageAccumulator);
     this.skillQueue = new SkillQueueSystem();
   }
 
@@ -245,6 +251,9 @@ export class BattleSystem {
       this.actModifier.tick(adjustedDelta, this.heroes, this.enemies);
     }
 
+    // Flush accumulated damage numbers
+    this.damageAccumulator.update(adjustedDelta);
+
     // Check win/lose
     this.checkBattleEnd();
   }
@@ -332,6 +341,10 @@ export class BattleSystem {
         victory,
         result: this.battleResult,
       });
+
+      // Flush remaining damage numbers and reset accumulator
+      this.damageAccumulator.flushAll();
+      this.damageAccumulator.reset();
 
       // Transition to settling phase (still publicly 'fighting')
       this.internalPhase = 'settling';
