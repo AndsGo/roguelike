@@ -26,7 +26,7 @@
       "magicPower": 0,
       "magicResist": 3
     },
-    "skills": ["shield_bash", "taunt_shout"],
+    "skills": ["shield_bash", "taunt_shout", "ult_iron_bastion"],
     "spriteKey": "hero_warrior"
   },
   {
@@ -56,7 +56,7 @@
       "magicPower": 0,
       "magicResist": 1
     },
-    "skills": ["multi_shot", "piercing_arrow"],
+    "skills": ["multi_shot", "piercing_arrow", "ult_arrow_rain"],
     "spriteKey": "hero_archer"
   },
   {
@@ -86,7 +86,7 @@
       "magicPower": 10,
       "magicResist": 3
     },
-    "skills": ["fireball", "flame_wave"],
+    "skills": ["fireball", "flame_wave", "ult_meteor_fall"],
     "spriteKey": "hero_mage"
   },
   {
@@ -116,7 +116,7 @@
       "magicPower": 8,
       "magicResist": 4
     },
-    "skills": ["heal", "group_heal"],
+    "skills": ["heal", "group_heal", "ult_divine_revival"],
     "spriteKey": "hero_priest"
   },
   {
@@ -146,7 +146,7 @@
       "magicPower": 0,
       "magicResist": 1
     },
-    "skills": ["backstab", "shadow_strike"],
+    "skills": ["backstab", "shadow_strike", "ult_shadow_chain"],
     "spriteKey": "hero_rogue"
   },
   {
@@ -176,7 +176,7 @@
       "magicPower": 3,
       "magicResist": 5
     },
-    "skills": ["holy_smite", "divine_shield"],
+    "skills": ["holy_smite", "divine_shield", "ult_holy_judgment"],
     "spriteKey": "hero_knight"
   },
   {
@@ -206,7 +206,7 @@
       "magicPower": 0,
       "magicResist": 1
     },
-    "skills": ["backstab", "shadow_drain"],
+    "skills": ["backstab", "shadow_drain", "ult_lethal_phantom"],
     "spriteKey": "hero_shadow_assassin"
   },
   {
@@ -236,7 +236,7 @@
       "magicPower": 10,
       "magicResist": 3
     },
-    "skills": ["chain_lightning", "thunder_strike"],
+    "skills": ["chain_lightning", "thunder_strike", "ult_thunder_storm"],
     "spriteKey": "hero_elementalist"
   },
   {
@@ -266,7 +266,7 @@
       "magicPower": 8,
       "magicResist": 4
     },
-    "skills": ["nature_heal", "rejuvenation"],
+    "skills": ["nature_heal", "rejuvenation", "ult_tree_of_life"],
     "spriteKey": "hero_druid"
   },
   {
@@ -296,7 +296,7 @@
       "magicPower": 10,
       "magicResist": 3
     },
-    "skills": ["shadow_bolt", "summon_skeleton"],
+    "skills": ["shadow_bolt", "summon_skeleton", "ult_undead_army"],
     "spriteKey": "hero_necromancer"
   },
   {
@@ -326,7 +326,7 @@
       "magicPower": 0,
       "magicResist": 1
     },
-    "skills": ["berserk_rage", "flame_strike"],
+    "skills": ["berserk_rage", "flame_strike", "ult_berserk_inferno"],
     "spriteKey": "hero_berserker"
   },
   {
@@ -356,7 +356,7 @@
       "magicPower": 4,
       "magicResist": 2
     },
-    "skills": ["ice_bolt", "frost_nova"],
+    "skills": ["ice_bolt", "frost_nova", "ult_absolute_zero"],
     "spriteKey": "hero_frost_ranger"
   },
   {
@@ -386,7 +386,7 @@
       "magicPower": 0,
       "magicResist": 3
     },
-    "skills": ["beast_charge", "primal_roar"],
+    "skills": ["beast_charge", "primal_roar", "ult_beast_roar"],
     "spriteKey": "hero_beast_warden"
   },
   {
@@ -416,7 +416,7 @@
       "magicPower": 4,
       "magicResist": 2
     },
-    "skills": ["dragon_breath", "dragon_guard"],
+    "skills": ["dragon_breath", "dragon_guard", "ult_dragon_soul"],
     "spriteKey": "hero_dragon_knight"
   },
   {
@@ -446,7 +446,7 @@
       "magicPower": 10,
       "magicResist": 3
     },
-    "skills": ["shadow_weave", "dark_mend"],
+    "skills": ["shadow_weave", "dark_mend", "ult_shadow_domain"],
     "spriteKey": "hero_shadow_weaver"
   },
   {
@@ -476,7 +476,7 @@
       "magicPower": 5,
       "magicResist": 2
     },
-    "skills": ["storm_arrow", "wind_wall"],
+    "skills": ["storm_arrow", "wind_wall", "ult_storm_barrage"],
     "spriteKey": "hero_storm_caller"
   },
   {
@@ -506,7 +506,7 @@
       "magicPower": 9,
       "magicResist": 4
     },
-    "skills": ["holy_barrier", "smite"],
+    "skills": ["holy_barrier", "smite", "ult_holy_aegis"],
     "spriteKey": "hero_holy_sentinel"
   },
   {
@@ -536,7 +536,7 @@
       "magicPower": 10,
       "magicResist": 3
     },
-    "skills": ["blizzard", "ice_lance"],
+    "skills": ["blizzard", "ice_lance", "ult_frozen_world"],
     "spriteKey": "hero_ice_mage"
   },
   {
@@ -566,7 +566,7 @@
       "magicPower": 3,
       "magicResist": 2
     },
-    "skills": ["thunder_fist", "static_field"],
+    "skills": ["thunder_fist", "static_field", "ult_thunder_god"],
     "spriteKey": "hero_thunder_monk"
   }
 ]

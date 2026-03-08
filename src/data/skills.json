@@ -433,65 +433,6 @@
     "element": "dark"
   },
   {
-    "id": "ultimate_holy_burst",
-    "name": "圣光爆发",
-    "description": "释放终极圣光，治疗全体队友并对全体敌人造成光伤",
-    "cooldown": 25,
-    "damageType": "magical",
-    "targetType": "all_allies",
-    "baseDamage": -70,
-    "scalingStat": "magicPower",
-    "scalingRatio": 1.0,
-    "range": 300,
-    "element": "holy",
-    "effects": [
-      {
-        "type": "heal",
-        "baseDamage": 70,
-        "scalingStat": "magicPower",
-        "scalingRatio": 1.0
-      },
-      {
-        "type": "damage",
-        "damageType": "magical",
-        "element": "holy",
-        "baseDamage": 60,
-        "scalingStat": "magicPower",
-        "scalingRatio": 0.8,
-        "aoeRadius": 300
-      }
-    ]
-  },
-  {
-    "id": "ultimate_dark_ritual",
-    "name": "黑暗仪式",
-    "description": "以自身生命为代价，大幅增强全队攻击力和魔法力量",
-    "cooldown": 30,
-    "damageType": "magical",
-    "targetType": "all_allies",
-    "baseDamage": 0,
-    "scalingStat": "magicPower",
-    "scalingRatio": 0,
-    "range": 300,
-    "element": "dark",
-    "statusEffect": "dark_empowerment",
-    "effectDuration": 8,
-    "effects": [
-      {
-        "type": "damage",
-        "damageType": "pure",
-        "baseDamage": 100,
-        "scalingStat": "magicPower",
-        "scalingRatio": 0
-      },
-      {
-        "type": "buff",
-        "statusEffectId": "dark_empowerment",
-        "statusDuration": 8
-      }
-    ]
-  },
-  {
     "id": "beast_charge",
     "name": "野兽冲锋",
     "description": "向目标发起猛烈冲锋，造成物理伤害并眩晕",
@@ -708,5 +649,307 @@
     "statusEffect": "attack_debuff",
     "effectDuration": 3,
     "element": "lightning"
+  },
+  {
+    "id": "ult_iron_bastion",
+    "name": "钢铁壁垒",
+    "description": "化身铁壁，大幅提升防御并嘲讽全体敌人",
+    "cooldown": 0,
+    "damageType": "physical",
+    "targetType": "self",
+    "baseDamage": 0,
+    "scalingStat": "attack",
+    "scalingRatio": 0,
+    "range": 300,
+    "statusEffect": "taunt",
+    "effectDuration": 8,
+    "isUltimate": true,
+    "effects": [
+      { "type": "status", "statusEffectId": "defense_up", "statusDuration": 8, "baseDamage": 80 }
+    ]
+  },
+  {
+    "id": "ult_arrow_rain",
+    "name": "箭雨",
+    "description": "召唤箭雨覆盖战场，对全体敌人造成5次物理伤害",
+    "cooldown": 0,
+    "damageType": "physical",
+    "targetType": "all_enemies",
+    "baseDamage": 200,
+    "scalingStat": "attack",
+    "scalingRatio": 1.5,
+    "range": 300,
+    "isUltimate": true
+  },
+  {
+    "id": "ult_meteor_fall",
+    "name": "陨石坠落",
+    "description": "召唤巨大陨石，对全体敌人造成火焰伤害并附带灼烧",
+    "cooldown": 0,
+    "damageType": "magical",
+    "targetType": "all_enemies",
+    "baseDamage": 200,
+    "scalingStat": "magicPower",
+    "scalingRatio": 1.8,
+    "range": 300,
+    "element": "fire",
+    "statusEffect": "burn",
+    "effectDuration": 5,
+    "isUltimate": true
+  },
+  {
+    "id": "ult_divine_revival",
+    "name": "神圣复苏",
+    "description": "释放神圣之光，大量治疗全体队友",
+    "cooldown": 0,
+    "damageType": "magical",
+    "targetType": "all_allies",
+    "baseDamage": -150,
+    "scalingStat": "magicPower",
+    "scalingRatio": 1.5,
+    "range": 300,
+    "element": "holy",
+    "isUltimate": true
+  },
+  {
+    "id": "ult_shadow_chain",
+    "name": "暗影连斩",
+    "description": "连续斩击目标6次，每击必暴",
+    "cooldown": 0,
+    "damageType": "physical",
+    "targetType": "enemy",
+    "baseDamage": 300,
+    "scalingStat": "attack",
+    "scalingRatio": 2.0,
+    "range": 50,
+    "element": "dark",
+    "isUltimate": true
+  },
+  {
+    "id": "ult_holy_judgment",
+    "name": "圣光审判",
+    "description": "圣光洗礼全场，伤害全体敌人并为全体队友施加护盾",
+    "cooldown": 0,
+    "damageType": "magical",
+    "targetType": "all_enemies",
+    "baseDamage": 120,
+    "scalingStat": "magicPower",
+    "scalingRatio": 1.2,
+    "range": 300,
+    "element": "holy",
+    "isUltimate": true,
+    "effects": [
+      { "type": "heal", "baseDamage": 80, "scalingStat": "magicPower", "scalingRatio": 0.5 }
+    ]
+  },
+  {
+    "id": "ult_lethal_phantom",
+    "name": "致命幻影",
+    "description": "暗影突袭单体目标，目标生命值低于30%时伤害翻倍",
+    "cooldown": 0,
+    "damageType": "physical",
+    "targetType": "enemy",
+    "baseDamage": 300,
+    "scalingStat": "attack",
+    "scalingRatio": 2.5,
+    "range": 50,
+    "element": "dark",
+    "isUltimate": true
+  },
+  {
+    "id": "ult_thunder_storm",
+    "name": "雷霆万钧",
+    "description": "召唤雷暴，对全体敌人造成雷电伤害并眩晕",
+    "cooldown": 0,
+    "damageType": "magical",
+    "targetType": "all_enemies",
+    "baseDamage": 120,
+    "scalingStat": "magicPower",
+    "scalingRatio": 1.5,
+    "range": 300,
+    "element": "lightning",
+    "statusEffect": "stun",
+    "effectDuration": 2,
+    "isUltimate": true
+  },
+  {
+    "id": "ult_tree_of_life",
+    "name": "生命之树",
+    "description": "召唤生命之树，持续治疗全体队友10秒",
+    "cooldown": 0,
+    "damageType": "magical",
+    "targetType": "all_allies",
+    "baseDamage": -100,
+    "scalingStat": "magicPower",
+    "scalingRatio": 1.2,
+    "range": 300,
+    "isUltimate": true,
+    "effects": [
+      { "type": "status", "statusEffectId": "regen", "statusDuration": 10, "baseDamage": 30 }
+    ]
+  },
+  {
+    "id": "ult_undead_army",
+    "name": "亡灵大军",
+    "description": "释放黑暗力量，对全体敌人造成暗影伤害并附加腐蚀",
+    "cooldown": 0,
+    "damageType": "magical",
+    "targetType": "all_enemies",
+    "baseDamage": 150,
+    "scalingStat": "magicPower",
+    "scalingRatio": 1.5,
+    "range": 300,
+    "element": "dark",
+    "isUltimate": true,
+    "effects": [
+      { "type": "status", "statusEffectId": "decay", "statusDuration": 6, "baseDamage": 25 }
+    ]
+  },
+  {
+    "id": "ult_berserk_inferno",
+    "name": "狂战怒焰",
+    "description": "进入狂暴状态，大幅提升攻击力和速度8秒",
+    "cooldown": 0,
+    "damageType": "physical",
+    "targetType": "self",
+    "baseDamage": 0,
+    "scalingStat": "attack",
+    "scalingRatio": 0,
+    "range": 50,
+    "element": "fire",
+    "isUltimate": true,
+    "effects": [
+      { "type": "status", "statusEffectId": "attack_buff", "statusDuration": 8, "baseDamage": 100 }
+    ]
+  },
+  {
+    "id": "ult_absolute_zero",
+    "name": "绝对零度",
+    "description": "释放极寒之力，冻结全体敌人并造成冰霜伤害",
+    "cooldown": 0,
+    "damageType": "magical",
+    "targetType": "all_enemies",
+    "baseDamage": 100,
+    "scalingStat": "magicPower",
+    "scalingRatio": 1.3,
+    "range": 300,
+    "element": "ice",
+    "statusEffect": "stun",
+    "effectDuration": 3,
+    "isUltimate": true
+  },
+  {
+    "id": "ult_beast_roar",
+    "name": "百兽咆哮",
+    "description": "发出震天怒吼，提升全队攻击和防御10秒",
+    "cooldown": 0,
+    "damageType": "physical",
+    "targetType": "all_allies",
+    "baseDamage": 0,
+    "scalingStat": "attack",
+    "scalingRatio": 0,
+    "range": 300,
+    "isUltimate": true,
+    "effects": [
+      { "type": "status", "statusEffectId": "attack_buff", "statusDuration": 10, "baseDamage": 50 }
+    ]
+  },
+  {
+    "id": "ult_dragon_soul",
+    "name": "龙魂觉醒",
+    "description": "觉醒龙魂，大幅提升全属性10秒",
+    "cooldown": 0,
+    "damageType": "physical",
+    "targetType": "self",
+    "baseDamage": 0,
+    "scalingStat": "attack",
+    "scalingRatio": 0,
+    "range": 50,
+    "element": "fire",
+    "isUltimate": true,
+    "effects": [
+      { "type": "status", "statusEffectId": "attack_buff", "statusDuration": 10, "baseDamage": 80 }
+    ]
+  },
+  {
+    "id": "ult_shadow_domain",
+    "name": "暗影领域",
+    "description": "展开暗影领域，降低全体敌人攻击和防御8秒",
+    "cooldown": 0,
+    "damageType": "magical",
+    "targetType": "all_enemies",
+    "baseDamage": 80,
+    "scalingStat": "magicPower",
+    "scalingRatio": 1.0,
+    "range": 300,
+    "element": "dark",
+    "isUltimate": true,
+    "effects": [
+      { "type": "status", "statusEffectId": "defense_down", "statusDuration": 8, "baseDamage": -40 }
+    ]
+  },
+  {
+    "id": "ult_storm_barrage",
+    "name": "风暴箭雨",
+    "description": "释放闪电箭矢风暴，对全体敌人造成3次雷电伤害",
+    "cooldown": 0,
+    "damageType": "physical",
+    "targetType": "all_enemies",
+    "baseDamage": 240,
+    "scalingStat": "attack",
+    "scalingRatio": 1.5,
+    "range": 300,
+    "element": "lightning",
+    "isUltimate": true
+  },
+  {
+    "id": "ult_holy_aegis",
+    "name": "圣光庇护",
+    "description": "为全体队友施加圣光护盾，大量治疗并持续回复",
+    "cooldown": 0,
+    "damageType": "magical",
+    "targetType": "all_allies",
+    "baseDamage": -120,
+    "scalingStat": "magicPower",
+    "scalingRatio": 1.5,
+    "range": 300,
+    "element": "holy",
+    "isUltimate": true,
+    "effects": [
+      { "type": "status", "statusEffectId": "regen", "statusDuration": 8, "baseDamage": 25 }
+    ]
+  },
+  {
+    "id": "ult_frozen_world",
+    "name": "冰封世界",
+    "description": "冰封全场，冻结全体敌人并造成冰霜伤害",
+    "cooldown": 0,
+    "damageType": "magical",
+    "targetType": "all_enemies",
+    "baseDamage": 150,
+    "scalingStat": "magicPower",
+    "scalingRatio": 1.5,
+    "range": 300,
+    "element": "ice",
+    "statusEffect": "stun",
+    "effectDuration": 2,
+    "isUltimate": true
+  },
+  {
+    "id": "ult_thunder_god",
+    "name": "雷神降临",
+    "description": "化身雷神，大幅提升攻击速度并附加雷电伤害8秒",
+    "cooldown": 0,
+    "damageType": "physical",
+    "targetType": "self",
+    "baseDamage": 0,
+    "scalingStat": "attack",
+    "scalingRatio": 0,
+    "range": 50,
+    "element": "lightning",
+    "isUltimate": true,
+    "effects": [
+      { "type": "status", "statusEffectId": "attack_buff", "statusDuration": 8, "baseDamage": 60 }
+    ]
   }
 ]
