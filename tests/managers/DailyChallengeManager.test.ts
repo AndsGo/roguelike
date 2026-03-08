@@ -88,6 +88,19 @@ describe('DailyChallengeManager', () => {
     expect(DailyChallengeManager.applyHPModifier(1000, rules)).toBe(1000);
   });
 
+  it('applyGoldModifier with 0.7 multiplier (reduction)', () => {
+    const rules: DailyRule[] = [{ type: 'gold_modifier', label: '金币-30%', value: 0.7 }];
+    expect(DailyChallengeManager.applyGoldModifier(100, rules)).toBe(70);
+  });
+
+  it('getEnemyElementBonus returns correct element among multiple rules', () => {
+    const rules: DailyRule[] = [
+      { type: 'enemy_element', label: '火强化', value: 'fire' },
+      { type: 'gold_modifier', label: '金币-30%', value: 0.7 },
+    ];
+    expect(DailyChallengeManager.getEnemyElementBonus(rules)).toBe('fire');
+  });
+
   it('should return enemy element bonus from rules', () => {
     const rulesWithElement: DailyRule[] = [
       { type: 'enemy_element', label: '敌人强化: 火属性+20%', value: 'fire' },
