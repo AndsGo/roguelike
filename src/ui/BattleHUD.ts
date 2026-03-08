@@ -37,6 +37,7 @@ export class BattleHUD extends Phaser.GameObjects.Container {
   private onComboHit: (data: { unitId: string; comboCount: number }) => void;
   private onUnitDamage: (data: { sourceId: string; targetId: string; amount: number }) => void;
   private skillBar: SkillBar | null = null;
+  private ultimateBar: { updateSlots(): void } | null = null;
 
   constructor(
     scene: Phaser.Scene,
@@ -344,6 +345,10 @@ export class BattleHUD extends Phaser.GameObjects.Container {
     return this.skillBar?.fireByHotkey(index) ?? false;
   }
 
+  setUltimateBar(bar: { updateSlots(): void }): void {
+    this.ultimateBar = bar;
+  }
+
   destroy(): void {
     const eb = EventBus.getInstance();
     eb.off('combo:hit', this.onComboHit);
@@ -355,6 +360,7 @@ export class BattleHUD extends Phaser.GameObjects.Container {
   /** Call every frame to update HP displays and skill bar (conditional redraw) */
   updatePortraits(): void {
     this.skillBar?.updateSlots();
+    this.ultimateBar?.updateSlots();
     const updateList = [...this.heroPortraits, ...this.enemyPortraits];
     for (const container of updateList) {
       const hpFill = container.getData('hpFill') as Phaser.GameObjects.Graphics | null;

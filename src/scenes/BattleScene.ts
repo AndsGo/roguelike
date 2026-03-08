@@ -26,6 +26,8 @@ import { UI } from '../i18n';
 import { KeybindingConfig } from '../config/keybindings';
 import { RunOverviewPanel } from '../ui/RunOverviewPanel';
 import { DailyChallengeManager, DailyRule } from '../managers/DailyChallengeManager';
+import { UltimateSystem } from '../systems/UltimateSystem';
+import { UltimateBar } from '../ui/UltimateBar';
 
 export class BattleScene extends Phaser.Scene {
   private battleSystem!: BattleSystem;
@@ -38,6 +40,8 @@ export class BattleScene extends Phaser.Scene {
   private unitAnimations!: UnitAnimationSystem;
   private pauseElements: Phaser.GameObjects.GameObject[] = [];
   private overviewPanel: RunOverviewPanel | null = null;
+  private ultimateSystem!: UltimateSystem;
+  private ultimateBar!: UltimateBar;
 
   // Target selection state
   private targetingMode: boolean = false;
@@ -170,6 +174,7 @@ export class BattleScene extends Phaser.Scene {
       .filter((e): e is Enemy => e !== null);
 
     RelicSystem.activateWithUnits(rm.getRelics(), heroes, enemies);
+    this.ultimateSystem = new UltimateSystem();
     this.battleSystem.setUnits(heroes, enemies);
 
     // Apply daily challenge rules
@@ -207,6 +212,11 @@ export class BattleScene extends Phaser.Scene {
       this.battleSystem.speedMultiplier = speed;
     }, this.battleSystem.skillQueue);
 
+    // Initialize ultimate system after heroes have skills
+    this.ultimateSystem.activate(heroes);
+    this.ultimateBar = new UltimateBar(this, heroes, this.ultimateSystem);
+    this.hud.setUltimateBar(this.ultimateBar);
+
     // Keyboard shortcuts for skill bar (configurable via keybindings)
     const skillKeyNames = KeybindingConfig.getSkillKeys();
     skillKeyNames.forEach((keyName, idx) => {
@@ -216,6 +226,19 @@ export class BattleScene extends Phaser.Scene {
       key?.on('down', () => {
         if (this.battleSystem.battleState === 'fighting') {
           this.hud.fireSkillByHotkey(idx + 1);
+        }
+      });
+    });
+
+    // Ultimate hotkeys (Q/W/E/R)
+    const ultKeyNames = KeybindingConfig.getUltimateKeys();
+    ultKeyNames.forEach((keyName, idx) => {
+      const keyCode = (Phaser.Input.Keyboard.KeyCodes as Record<string, number>)[keyName];
+      if (keyCode == null) return;
+      const key = this.input.keyboard?.addKey(keyCode);
+      key?.on('down', () => {
+        if (this.battleSystem.battleState === 'fighting') {
+          this.ultimateBar.fireByHotkey(idx);
         }
       });
     });
@@ -394,6 +417,11 @@ export class BattleScene extends Phaser.Scene {
       this.enterTargetingMode(data.unitId, data.skillId, data.targetType);
     };
     this.onManualFire = (data) => {
+      // Check if this is a targeted ultimate — consume energy
+      const ultSkillId = this.ultimateSystem.getUltimateSkillId(data.unitId);
+      if (ultSkillId && data.skillId === ultSkillId && data.targetId) {
+        this.ultimateSystem.consumeEnergy(data.unitId);
+      }
       this.battleSystem.executeQueuedSkill(data.unitId, data.skillId, data.targetId);
     };
     eb.on('skill:targetRequest', this.onTargetRequest);
@@ -599,6 +627,9 @@ export class BattleScene extends Phaser.Scene {
 
   update(_time: number, delta: number): void {
     this.battleSystem.update(delta);
+    if (this.battleSystem.battleState === 'fighting' && !this.battleSystem.isPaused) {
+      this.ultimateSystem.update(delta * this.battleSystem.speedMultiplier);
+    }
     this.hud.updatePortraits();
 
     // Update status visuals for all living units
@@ -728,6 +759,8 @@ export class BattleScene extends Phaser.Scene {
     eb.off('skill:interrupt', this.onSkillInterrupt);
     eb.off('skill:targetRequest', this.onTargetRequest);
     eb.off('skill:manualFire', this.onManualFire);
+    this.ultimateSystem.deactivate();
+    this.ultimateBar.destroy();
     RelicSystem.deactivate();
     this.cancelTargetingMode();
     this.threatGraphics?.destroy();
