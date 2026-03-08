@@ -8,6 +8,21 @@ import eventsData from '../data/events.json';
 const TOOLTIP_MAX_WIDTH = 180;
 const PADDING = 6;
 
+const ELEMENT_SHORT: Record<string, string> = {
+  fire: '火', ice: '冰', lightning: '雷', dark: '暗', holy: '圣'
+};
+const RACE_SHORT: Record<string, string> = {
+  human: '人', elf: '精', undead: '亡', demon: '魔', beast: '兽', dragon: '龙'
+};
+
+/** Build a short tag string like " [火/兽]" from element and race. Exported for testing. */
+export function buildEnemyTag(element?: string | null, race?: string | null): string {
+  const parts: string[] = [];
+  if (element && ELEMENT_SHORT[element]) parts.push(ELEMENT_SHORT[element]);
+  if (race && RACE_SHORT[race]) parts.push(RACE_SHORT[race]);
+  return parts.length > 0 ? ` [${parts.join('/')}]` : '';
+}
+
 /**
  * Tooltip shown when hovering over map nodes.
  * Shows enemy composition for battle/elite/boss, event title, or item count.
@@ -59,9 +74,10 @@ export class NodeTooltip extends Phaser.GameObjects.Container {
         const battleData = node.data as BattleNodeData | undefined;
         if (battleData?.enemies) {
           for (const e of battleData.enemies) {
-            const enemyDef = (enemiesData as { id: string; name: string }[]).find(ed => ed.id === e.id);
+            const enemyDef = (enemiesData as { id: string; name: string; element?: string | null; race?: string | null }[]).find(ed => ed.id === e.id);
             const name = enemyDef?.name ?? e.id;
-            lines.push(`  ${name} Lv.${e.level}`);
+            const tag = buildEnemyTag(enemyDef?.element, enemyDef?.race);
+            lines.push(`  ${name} Lv.${e.level}${tag}`);
           }
         }
         break;
