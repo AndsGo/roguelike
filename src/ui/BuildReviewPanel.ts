@@ -171,7 +171,7 @@ export class BuildReviewPanel {
       this.panel.addContent(nameText);
 
       // Stats line
-      const statsStr = `${UI.buildReview.totalDamage}:${Math.round(damage)}  ${UI.buildReview.totalHealing}:${Math.round(healing)}  ${UI.buildReview.kills}:${kills}  ${UI.reward.kills}:${deaths}`;
+      const statsStr = `${UI.buildReview.totalDamage}:${Math.round(damage)}  ${UI.buildReview.totalHealing}:${Math.round(healing)}  ${UI.buildReview.kills}:${kills}  ${UI.buildReview.deaths}:${deaths}`;
       const statsText = scene.add.text(-80, y, statsStr, {
         fontSize: '8px', color: '#8899aa', fontFamily: 'monospace',
       });

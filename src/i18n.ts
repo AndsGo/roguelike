@@ -299,6 +299,7 @@ export const UI = {
     skillsUsed: '使用技能',
     equipment: '装备',
     relics: '遗物',
+    deaths: '阵亡',
     noEquipment: '无装备',
     close: '[关闭]',
   },
