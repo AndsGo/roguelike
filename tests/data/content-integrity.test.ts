@@ -5,9 +5,11 @@ import itemsData from '../../src/data/items.json';
 import relicsData from '../../src/data/relics.json';
 import eventsData from '../../src/data/events.json';
 import actsData from '../../src/data/acts.json';
+import enemiesData from '../../src/data/enemies.json';
 import skillVisualsData from '../../src/data/skill-visuals.json';
 import skillAdvancementsData from '../../src/data/skill-advancements.json';
 import { SYNERGY_DEFINITIONS } from '../../src/config/synergies';
+import { MetaManager } from '../../src/managers/MetaManager';
 
 const heroes = heroesData as { id: string; name: string; skills: string[]; element: string | null; race: string; class: string }[];
 const skills = skillsData as { id: string; name: string; element?: string }[];
@@ -15,6 +17,7 @@ const items = itemsData as { id: string; name: string; rarity: string; slot: str
 const relics = relicsData as { id: string; name: string; rarity: string }[];
 const events = eventsData as { id: string; title: string; choices: { text: string; outcomes: { probability: number; effects: { type: string; heroId?: string; relicId?: string }[] }[] }[] }[];
 const acts = actsData as { id: string; eventPool: string[]; enemyPool: string[]; bossPool: string[] }[];
+const enemies = enemiesData as { id: string; name: string; isBoss?: boolean }[];
 const skillVisuals = skillVisualsData as Record<string, { type: string; color: string }>;
 const skillAdvancements = skillAdvancementsData as { skillId: string; level: number }[];
 
@@ -219,6 +222,46 @@ describe('Content Integrity', () => {
       for (const el of elements) {
         const count = heroes.filter(h => h.element === el).length;
         expect(count, `Element ${el} has only ${count} heroes`).toBeGreaterThanOrEqual(2);
+      }
+    });
+  });
+
+  describe('Hero unlock conditions', () => {
+    it('every hero has a valid unlock condition', () => {
+      for (const hero of heroes) {
+        const cond = MetaManager.getHeroUnlockCondition(hero.id);
+        expect(cond, `Missing unlock condition for ${hero.id}`).toBeDefined();
+        expect(cond!.description).toBeTruthy();
+      }
+    });
+
+    it('boss_kill conditions reference valid boss IDs', () => {
+      const bossIds = enemies.filter(e => e.isBoss).map(e => e.id);
+      for (const hero of heroes) {
+        const cond = MetaManager.getHeroUnlockCondition(hero.id);
+        if (cond?.type === 'boss_kill' && cond.bossId) {
+          expect(bossIds, `${hero.id} references non-existent boss ${cond.bossId}`).toContain(cond.bossId);
+        }
+      }
+    });
+
+    it('hero_used conditions reference valid hero IDs', () => {
+      const heroIds = heroes.map(h => h.id);
+      for (const hero of heroes) {
+        const cond = MetaManager.getHeroUnlockCondition(hero.id);
+        if (cond?.type === 'hero_used' && cond.heroId) {
+          expect(heroIds, `${hero.id} references non-existent hero ${cond.heroId}`).toContain(cond.heroId);
+        }
+      }
+    });
+
+    it('element_wins conditions reference valid element types', () => {
+      const validElements = ['fire', 'ice', 'lightning', 'dark', 'holy'];
+      for (const hero of heroes) {
+        const cond = MetaManager.getHeroUnlockCondition(hero.id);
+        if (cond?.type === 'element_wins' && cond.element) {
+          expect(validElements, `${hero.id} uses invalid element ${cond.element}`).toContain(cond.element);
+        }
       }
     });
   });
