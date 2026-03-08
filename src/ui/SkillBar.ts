@@ -40,6 +40,7 @@ export class SkillBar extends Phaser.GameObjects.Container {
 
     for (const hero of this.heroes) {
       for (const skill of hero.skills) {
+        if (skill.isUltimate) continue;
         allSkillSlots.push({ hero, skill, index: allSkillSlots.length });
       }
     }
