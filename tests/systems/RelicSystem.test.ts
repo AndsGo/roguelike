@@ -297,5 +297,28 @@ describe('RelicSystem', () => {
       RelicSystem.activate([]);
       expect(RelicSystem.getDamageTakenBonus()).toBe(0);
     });
+
+    it('getGoldBonus returns 0.2 for lucky_coin', () => {
+      RelicSystem.activate([{ id: 'lucky_coin', triggerCount: 0 }]);
+      expect(RelicSystem.getGoldBonus()).toBeCloseTo(0.2);
+    });
+
+    it('getGoldBonus returns 0 without lucky_coin', () => {
+      RelicSystem.activate([]);
+      expect(RelicSystem.getGoldBonus()).toBe(0);
+    });
+
+    it('getExpBonus stacks training_manual + tactics_manual', () => {
+      RelicSystem.activate([
+        { id: 'training_manual', triggerCount: 0 },
+        { id: 'tactics_manual', triggerCount: 0 },
+      ]);
+      expect(RelicSystem.getExpBonus()).toBeCloseTo(0.35);
+    });
+
+    it('getExpBonus returns 0 without exp relics', () => {
+      RelicSystem.activate([]);
+      expect(RelicSystem.getExpBonus()).toBe(0);
+    });
   });
 });

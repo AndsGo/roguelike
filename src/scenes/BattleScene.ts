@@ -169,8 +169,8 @@ export class BattleScene extends Phaser.Scene {
       })
       .filter((e): e is Enemy => e !== null);
 
-    this.battleSystem.setUnits(heroes, enemies);
     RelicSystem.activateWithUnits(rm.getRelics(), heroes, enemies);
+    this.battleSystem.setUnits(heroes, enemies);
 
     // Apply daily challenge rules
     const runState = rm.getState();
@@ -642,7 +642,19 @@ export class BattleScene extends Phaser.Scene {
       if (endRunState.isDaily && endRunState.dailyModifiers?.rules) {
         goldEarned = DailyChallengeManager.applyGoldModifier(goldEarned, endRunState.dailyModifiers.rules as DailyRule[]);
       }
-      const expEarned = this.battleSystem.getTotalExpReward();
+      // Apply relic gold bonus
+      const goldBonus = RelicSystem.getGoldBonus();
+      if (goldBonus > 0) {
+        goldEarned = Math.round(goldEarned * (1 + goldBonus));
+      }
+
+      let expEarned = this.battleSystem.getTotalExpReward();
+      // Apply relic exp bonus
+      const expBonus = RelicSystem.getExpBonus();
+      if (expBonus > 0) {
+        expEarned = Math.round(expEarned * (1 + expBonus));
+      }
+
       const survivors = this.battleSystem.heroes
         .filter(h => h.isAlive)
         .map(h => h.unitId);

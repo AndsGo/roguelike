@@ -186,6 +186,27 @@ export class RelicSystem {
     return total;
   }
 
+  /** Get total gold bonus fraction (lucky_coin = +20%) */
+  static getGoldBonus(): number {
+    const inst = RelicSystem.getInstance();
+    let total = 0;
+    for (const relic of inst.relics) {
+      if (relic.id === 'lucky_coin') total += 0.2;
+    }
+    return total;
+  }
+
+  /** Get total exp bonus fraction (training_manual +15%, tactics_manual +20%) */
+  static getExpBonus(): number {
+    const inst = RelicSystem.getInstance();
+    let total = 0;
+    for (const relic of inst.relics) {
+      if (relic.id === 'training_manual') total += 0.15;
+      if (relic.id === 'tactics_manual') total += 0.2;
+    }
+    return total;
+  }
+
   /** Get damage taken bonus (glass_cannon = +30% damage taken) */
   static getDamageTakenBonus(): number {
     const inst = RelicSystem.getInstance();
