@@ -1,6 +1,7 @@
 import { RelicState, RelicEffect, UnitStats } from '../types';
 import { EventBus } from './EventBus';
 import { Unit } from '../entities/Unit';
+import { SeededRNG } from '../utils/rng';
 import relicsData from '../data/relics.json';
 
 interface RelicDef {
@@ -48,6 +49,7 @@ export class RelicSystem {
   private heroes: Unit[] = [];
   private enemies: Unit[] = [];
   private listeners: Array<{ event: string; handler: (...args: any[]) => void }> = [];
+  private rng: SeededRNG = new SeededRNG(Date.now());
   private phoenixUsed: boolean = false;
   private shieldTimer: number = 0;
 
@@ -74,12 +76,13 @@ export class RelicSystem {
   }
 
   /** Activate relics with unit references for reactive effects */
-  static activateWithUnits(relics: RelicState[], heroes: Unit[], enemies: Unit[]): void {
+  static activateWithUnits(relics: RelicState[], heroes: Unit[], enemies: Unit[], rng?: SeededRNG): void {
     const inst = RelicSystem.getInstance();
     inst.unregisterListeners();
     inst.relics = [...relics];
     inst.heroes = heroes;
     inst.enemies = enemies;
+    if (rng) inst.rng = rng;
     inst.registerListeners();
   }
 
@@ -472,7 +475,7 @@ export class RelicSystem {
     const chance = def.effect.chance ?? 1;
 
     // Roll chance check
-    if (Math.random() > chance) return;
+    if (!this.rng.chance(chance)) return;
 
     const source = this.findUnit(data.sourceId);
     const target = this.findUnit(data.targetId);
@@ -502,7 +505,7 @@ export class RelicSystem {
             e => e.isAlive && e.unitId !== data.targetId
           );
           if (otherEnemies.length > 0) {
-            const randomEnemy = otherEnemies[Math.floor(Math.random() * otherEnemies.length)];
+            const randomEnemy = this.rng.pick(otherEnemies);
             randomEnemy.takeDamage(val);
           }
         }

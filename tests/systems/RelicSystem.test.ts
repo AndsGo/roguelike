@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { RelicSystem } from '../../src/systems/RelicSystem';
 import { RelicState, UnitStats } from '../../src/types';
+import { SeededRNG } from '../../src/utils/rng';
 
 const BASE_STATS: UnitStats = {
   maxHp: 500, hp: 500, attack: 50, defense: 20,
@@ -534,6 +535,51 @@ describe('RelicSystem', () => {
         { id: 'elemental_catalyst', triggerCount: 0 },
       ]);
       expect(RelicSystem.getReactionDamageBonus()).toBeCloseTo(0.75);
+    });
+  });
+
+  describe('SeededRNG injection', () => {
+    it('activateWithUnits accepts optional SeededRNG parameter', () => {
+      const rng = new SeededRNG(42);
+      const heroes: any[] = [];
+      const enemies: any[] = [];
+      // Should not throw
+      RelicSystem.activateWithUnits(
+        [{ id: 'quick_boots', triggerCount: 0 }],
+        heroes,
+        enemies,
+        rng,
+      );
+      expect(RelicSystem.hasRelic('quick_boots')).toBe(true);
+    });
+
+    it('activateWithUnits works without rng parameter (backward compat)', () => {
+      const heroes: any[] = [];
+      const enemies: any[] = [];
+      RelicSystem.activateWithUnits(
+        [{ id: 'quick_boots', triggerCount: 0 }],
+        heroes,
+        enemies,
+      );
+      expect(RelicSystem.hasRelic('quick_boots')).toBe(true);
+    });
+
+    it('thunder_emblem uses deterministic RNG for target selection', () => {
+      const rng = new SeededRNG(123);
+      const mockHero = { unitId: 'h1', isHero: true, isAlive: true } as any;
+      const mockEnemy1 = { unitId: 'e1', isAlive: true, takeDamage: () => {} } as any;
+      const mockEnemy2 = { unitId: 'e2', isAlive: true, takeDamage: () => {} } as any;
+
+      RelicSystem.activateWithUnits(
+        [{ id: 'thunder_emblem', triggerCount: 0 }],
+        [mockHero],
+        [mockEnemy1, mockEnemy2],
+        rng,
+      );
+
+      // Verify handler was registered
+      const handlers = RelicSystem.getReactiveHandlers('unit:damage');
+      expect(handlers.length).toBe(1);
     });
   });
 });

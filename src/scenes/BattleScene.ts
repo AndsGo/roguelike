@@ -173,7 +173,7 @@ export class BattleScene extends Phaser.Scene {
       })
       .filter((e): e is Enemy => e !== null);
 
-    RelicSystem.activateWithUnits(rm.getRelics(), heroes, enemies);
+    RelicSystem.activateWithUnits(rm.getRelics(), heroes, enemies, rng);
     this.ultimateSystem = new UltimateSystem();
     this.battleSystem.setUnits(heroes, enemies);
 
