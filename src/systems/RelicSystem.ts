@@ -161,6 +161,24 @@ export class RelicSystem {
     return total;
   }
 
+  /** Check if overflow_shield relic is active */
+  static hasOverflowShield(): boolean {
+    return RelicSystem.hasRelic('overflow_shield');
+  }
+
+  /** Check if chain_reaction relic is active */
+  static hasChainReactionSplash(): boolean {
+    return RelicSystem.hasRelic('chain_reaction');
+  }
+
+  /** Get alive enemies excluding a specific unit (for splash targeting) */
+  static getSplashTargets(excludeId: string, maxCount: number): Unit[] {
+    const inst = RelicSystem.getInstance();
+    return inst.enemies
+      .filter(e => e.isAlive && e.unitId !== excludeId)
+      .slice(0, maxCount);
+  }
+
   /** Get total element reaction damage bonus */
   static getReactionDamageBonus(): number {
     const inst = RelicSystem.getInstance();
@@ -171,6 +189,7 @@ export class RelicSystem {
       if ((def.id === 'elemental_catalyst' || def.id === 'elemental_fusion_stone') && def.effect.value) {
         total += def.effect.value;
       }
+      if (relic.id === 'chain_reaction') total += 0.5;
     }
     return total;
   }

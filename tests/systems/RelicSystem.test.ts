@@ -378,4 +378,36 @@ describe('RelicSystem', () => {
       expect(RelicSystem.getExpBonus()).toBe(0);
     });
   });
+
+  describe('overflow_shield relic', () => {
+    it('hasOverflowShield returns true when active', () => {
+      RelicSystem.activate([{ id: 'overflow_shield', triggerCount: 0 }]);
+      expect(RelicSystem.hasOverflowShield()).toBe(true);
+    });
+
+    it('hasOverflowShield returns false without relic', () => {
+      RelicSystem.activate([]);
+      expect(RelicSystem.hasOverflowShield()).toBe(false);
+    });
+  });
+
+  describe('chain_reaction relic', () => {
+    it('hasChainReactionSplash returns true when active', () => {
+      RelicSystem.activate([{ id: 'chain_reaction', triggerCount: 0 }]);
+      expect(RelicSystem.hasChainReactionSplash()).toBe(true);
+    });
+
+    it('chain_reaction adds to reaction damage bonus', () => {
+      RelicSystem.activate([{ id: 'chain_reaction', triggerCount: 0 }]);
+      expect(RelicSystem.getReactionDamageBonus()).toBeCloseTo(0.5);
+    });
+
+    it('chain_reaction stacks with elemental_catalyst', () => {
+      RelicSystem.activate([
+        { id: 'chain_reaction', triggerCount: 0 },
+        { id: 'elemental_catalyst', triggerCount: 0 },
+      ]);
+      expect(RelicSystem.getReactionDamageBonus()).toBeCloseTo(0.75);
+    });
+  });
 });

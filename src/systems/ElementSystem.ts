@@ -85,6 +85,17 @@ export class ElementSystem {
       target.takeDamage(reactionDamage);
     }
 
+    // Chain reaction splash: 30% of reaction damage to up to 2 nearby enemies
+    if (RelicSystem.hasChainReactionSplash() && reactionDamage > 0) {
+      const splashDamage = Math.round(reactionDamage * 0.3);
+      if (splashDamage > 0) {
+        const splashTargets = RelicSystem.getSplashTargets(target.unitId, 2);
+        for (const nearby of splashTargets) {
+          nearby.takeDamage(splashDamage);
+        }
+      }
+    }
+
     // Apply reaction status effect if defined
     if (reaction.statusEffect && reaction.duration) {
       const statusEffect: StatusEffect = {

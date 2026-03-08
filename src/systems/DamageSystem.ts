@@ -194,6 +194,21 @@ export class DamageSystem {
       healAmount = Math.round(healAmount * (1 + healBonus));
     }
     const actual = target.heal(healAmount);
+
+    // Overflow shield: excess healing becomes temporary HP (max 20% maxHp)
+    if (RelicSystem.hasOverflowShield() && target.isHero) {
+      const overflow = healAmount - actual;
+      if (overflow > 0) {
+        const maxShield = Math.round(target.currentStats.maxHp * 0.2);
+        const currentOverheal = target.currentHp - target.currentStats.maxHp;
+        const available = maxShield - Math.max(0, currentOverheal);
+        if (available > 0) {
+          const shieldAmount = Math.min(overflow, available);
+          target.currentHp += shieldAmount;
+        }
+      }
+    }
+
     if (actual > 0) {
       new DamageNumber(
         target.scene,
