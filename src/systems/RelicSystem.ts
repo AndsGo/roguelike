@@ -137,6 +137,65 @@ export class RelicSystem {
     return inst.relicDefs.get(relicId);
   }
 
+  /** Get total defense piercing fraction (0-1). armor_piercer = 0.3 (not yet in data — Task 5) */
+  static getDefensePiercing(): number {
+    const inst = RelicSystem.getInstance();
+    let total = 0;
+    for (const relic of inst.relics) {
+      if (relic.id === 'armor_piercer') total += 0.3;
+    }
+    return total;
+  }
+
+  /** Get total heal bonus multiplier (e.g. 0.2 = +20%) */
+  static getHealBonus(): number {
+    const inst = RelicSystem.getInstance();
+    let total = 0;
+    for (const relic of inst.relics) {
+      const def = inst.relicDefs.get(relic.id);
+      if (!def) continue;
+      if (def.id === 'healers_blessing' && def.effect.value) {
+        total += def.effect.value;
+      }
+    }
+    return total;
+  }
+
+  /** Get total element reaction damage bonus */
+  static getReactionDamageBonus(): number {
+    const inst = RelicSystem.getInstance();
+    let total = 0;
+    for (const relic of inst.relics) {
+      const def = inst.relicDefs.get(relic.id);
+      if (!def) continue;
+      if ((def.id === 'elemental_catalyst' || def.id === 'elemental_fusion_stone') && def.effect.value) {
+        total += def.effect.value;
+      }
+    }
+    return total;
+  }
+
+  /** Get total damage multiplier bonus (glass_cannon +60%, heart_of_dragon +20%) */
+  static getDamageBonus(): number {
+    const inst = RelicSystem.getInstance();
+    let total = 0;
+    for (const relic of inst.relics) {
+      if (relic.id === 'glass_cannon') total += 0.6;
+      if (relic.id === 'heart_of_dragon') total += 0.2;
+    }
+    return total;
+  }
+
+  /** Get damage taken bonus (glass_cannon = +30% damage taken) */
+  static getDamageTakenBonus(): number {
+    const inst = RelicSystem.getInstance();
+    let total = 0;
+    for (const relic of inst.relics) {
+      if (relic.id === 'glass_cannon') total += 0.3;
+    }
+    return total;
+  }
+
   /** Test helper: get reactive handlers registered for a given event */
   static getReactiveHandlers(event: string): Array<{ event: string; handler: any }> {
     return RelicSystem.getInstance().listeners.filter(l => l.event === event);

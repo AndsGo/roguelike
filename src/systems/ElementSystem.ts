@@ -9,6 +9,7 @@ import {
   hasElementAdvantage,
 } from '../config/elements';
 import { Unit } from '../entities/Unit';
+import { RelicSystem } from './RelicSystem';
 
 /**
  * Handles element-based combat mechanics:
@@ -77,7 +78,8 @@ export class ElementSystem {
     baseDamage: number,
   ): number {
     // Calculate reaction bonus damage
-    const reactionDamage = Math.round(baseDamage * (reaction.damageMultiplier - 1));
+    const reactionBonus = RelicSystem.getReactionDamageBonus();
+    const reactionDamage = Math.round(baseDamage * (reaction.damageMultiplier - 1) * (1 + reactionBonus));
 
     if (reactionDamage > 0) {
       target.takeDamage(reactionDamage);

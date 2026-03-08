@@ -7,6 +7,7 @@ import { ElementSystem } from './ElementSystem';
 import { ComboSystem } from './ComboSystem';
 import { EventBus } from './EventBus';
 import { AudioManager } from './AudioManager';
+import { RelicSystem } from './RelicSystem';
 
 export interface DamageResult {
   rawDamage: number;
@@ -45,7 +46,9 @@ export class DamageSystem {
     // Apply defense reduction
     const defense = damageType === 'magical' ? targetStats.magicResist : targetStats.defense;
     if (damageType !== 'pure') {
-      raw = raw * (DEFENSE_FORMULA_BASE / (DEFENSE_FORMULA_BASE + Math.max(0, defense)));
+      const piercing = RelicSystem.getDefensePiercing();
+      const effectiveDefense = Math.max(0, defense) * (1 - piercing);
+      raw = raw * (DEFENSE_FORMULA_BASE / (DEFENSE_FORMULA_BASE + effectiveDefense));
     }
 
     // Crit check
@@ -63,6 +66,14 @@ export class DamageSystem {
     if (this.comboSystem) {
       const comboMod = this.comboSystem.getComboMultiplier(attacker.unitId);
       raw *= comboMod;
+    }
+
+    // Relic damage bonus (glass_cannon, heart_of_dragon)
+    if (attacker.isHero) {
+      const relicDmgBonus = RelicSystem.getDamageBonus();
+      if (relicDmgBonus > 0) {
+        raw *= (1 + relicDmgBonus);
+      }
     }
 
     // Random variance +/-10%
@@ -110,7 +121,14 @@ export class DamageSystem {
     const base = baseDamage ?? (damageType === 'magical' ? stats.magicPower : stats.attack);
 
     const result = this.calculateDamage(attacker, target, base, damageType, false, element);
-    target.takeDamage(result.finalDamage);
+    let finalDmg = result.finalDamage;
+    if (target.isHero) {
+      const takenBonus = RelicSystem.getDamageTakenBonus();
+      if (takenBonus > 0) {
+        finalDmg = Math.round(finalDmg * (1 + takenBonus));
+      }
+    }
+    target.takeDamage(finalDmg);
 
     // Register combo hit
     if (this.comboSystem) {
@@ -170,7 +188,12 @@ export class DamageSystem {
    * Apply healing.
    */
   applyHeal(healer: Unit, target: Unit, baseHeal: number): number {
-    const actual = target.heal(baseHeal);
+    let healAmount = baseHeal;
+    const healBonus = RelicSystem.getHealBonus();
+    if (healBonus > 0) {
+      healAmount = Math.round(healAmount * (1 + healBonus));
+    }
+    const actual = target.heal(healAmount);
     if (actual > 0) {
       new DamageNumber(
         target.scene,

@@ -268,4 +268,34 @@ describe('RelicSystem', () => {
       expect(handlers.length).toBe(0);
     });
   });
+
+  describe('formula modifiers', () => {
+    it('getDefensePiercing returns 0 with no armor_piercer', () => {
+      RelicSystem.activate([]);
+      expect(RelicSystem.getDefensePiercing()).toBe(0);
+    });
+
+    it('getHealBonus returns correct value for healers_blessing', () => {
+      RelicSystem.activate([{ id: 'healers_blessing', triggerCount: 0 }]);
+      expect(RelicSystem.getHealBonus()).toBeCloseTo(0.2);
+    });
+
+    it('getReactionDamageBonus stacks catalyst + fusion_stone', () => {
+      RelicSystem.activate([
+        { id: 'elemental_catalyst', triggerCount: 0 },
+        { id: 'elemental_fusion_stone', triggerCount: 0 },
+      ]);
+      expect(RelicSystem.getReactionDamageBonus()).toBeCloseTo(0.6);
+    });
+
+    it('getDamageBonus returns heart_of_dragon bonus', () => {
+      RelicSystem.activate([{ id: 'heart_of_dragon', triggerCount: 0 }]);
+      expect(RelicSystem.getDamageBonus()).toBeCloseTo(0.2);
+    });
+
+    it('getDamageTakenBonus returns 0 without glass_cannon', () => {
+      RelicSystem.activate([]);
+      expect(RelicSystem.getDamageTakenBonus()).toBe(0);
+    });
+  });
 });
