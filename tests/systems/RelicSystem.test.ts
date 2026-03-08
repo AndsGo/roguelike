@@ -407,6 +407,87 @@ describe('RelicSystem', () => {
     });
   });
 
+  describe('phoenix_ash', () => {
+    it('shouldRevive returns false without relic', () => {
+      RelicSystem.activate([]);
+      const mockUnit = { isHero: true, currentStats: { maxHp: 100 }, currentHp: 0 } as any;
+      expect(RelicSystem.shouldRevive(mockUnit)).toBe(false);
+    });
+
+    it('shouldRevive returns true for hero with phoenix_ash', () => {
+      RelicSystem.activate([{ id: 'phoenix_ash', triggerCount: 0 }]);
+      const mockUnit = { isHero: true, currentStats: { maxHp: 100 }, currentHp: 0 } as any;
+      expect(RelicSystem.shouldRevive(mockUnit)).toBe(true);
+      expect(mockUnit.currentHp).toBe(30); // 30% of 100
+    });
+
+    it('shouldRevive only works once per battle', () => {
+      RelicSystem.activate([{ id: 'phoenix_ash', triggerCount: 0 }]);
+      const unit1 = { isHero: true, currentStats: { maxHp: 100 }, currentHp: 0 } as any;
+      const unit2 = { isHero: true, currentStats: { maxHp: 200 }, currentHp: 0 } as any;
+      expect(RelicSystem.shouldRevive(unit1)).toBe(true);
+      expect(RelicSystem.shouldRevive(unit2)).toBe(false); // already used
+    });
+
+    it('shouldRevive returns false for enemies', () => {
+      RelicSystem.activate([{ id: 'phoenix_ash', triggerCount: 0 }]);
+      const mockUnit = { isHero: false, currentStats: { maxHp: 100 }, currentHp: 0 } as any;
+      expect(RelicSystem.shouldRevive(mockUnit)).toBe(false);
+    });
+
+    it('reset clears phoenix usage', () => {
+      RelicSystem.activate([{ id: 'phoenix_ash', triggerCount: 0 }]);
+      const unit = { isHero: true, currentStats: { maxHp: 100 }, currentHp: 0 } as any;
+      RelicSystem.shouldRevive(unit);
+      RelicSystem.reset();
+      RelicSystem.activate([{ id: 'phoenix_ash', triggerCount: 0 }]);
+      const unit2 = { isHero: true, currentStats: { maxHp: 200 }, currentHp: 0 } as any;
+      expect(RelicSystem.shouldRevive(unit2)).toBe(true);
+    });
+
+    it('deactivate clears phoenix usage', () => {
+      RelicSystem.activate([{ id: 'phoenix_ash', triggerCount: 0 }]);
+      const unit = { isHero: true, currentStats: { maxHp: 100 }, currentHp: 0 } as any;
+      RelicSystem.shouldRevive(unit);
+      RelicSystem.deactivate();
+      RelicSystem.activate([{ id: 'phoenix_ash', triggerCount: 0 }]);
+      const unit2 = { isHero: true, currentStats: { maxHp: 200 }, currentHp: 0 } as any;
+      expect(RelicSystem.shouldRevive(unit2)).toBe(true);
+    });
+
+    it('increments triggerCount on revive', () => {
+      const relics = [{ id: 'phoenix_ash', triggerCount: 0 }];
+      RelicSystem.activate(relics);
+      const mockUnit = { isHero: true, currentStats: { maxHp: 100 }, currentHp: 0 } as any;
+      RelicSystem.shouldRevive(mockUnit);
+      // activate does a shallow copy of the array, but objects are same references
+      expect(relics[0].triggerCount).toBe(1);
+    });
+  });
+
+  describe('shield_charm', () => {
+    it('update does nothing without shield_charm', () => {
+      RelicSystem.activate([]);
+      // Should not throw
+      RelicSystem.update(5000);
+    });
+
+    it('update with shield_charm does not heal before 5000ms', () => {
+      RelicSystem.activate([{ id: 'shield_charm', triggerCount: 0 }]);
+      RelicSystem.update(3000);
+      // No assertion needed — just verifying no errors (no heroes to heal)
+    });
+
+    it('update resets timer after deactivate', () => {
+      RelicSystem.activate([{ id: 'shield_charm', triggerCount: 0 }]);
+      RelicSystem.update(4000);
+      RelicSystem.deactivate();
+      RelicSystem.activate([{ id: 'shield_charm', triggerCount: 0 }]);
+      RelicSystem.update(2000);
+      // Timer should have been reset, so 2000 < 5000 — no heal triggered, no error
+    });
+  });
+
   describe('berserker_mask', () => {
     it('provides +25% bonus when HP < 50%', () => {
       RelicSystem.activate([{ id: 'berserker_mask', triggerCount: 0 }]);

@@ -299,6 +299,13 @@ export class Unit extends Phaser.GameObjects.Container {
   }
 
   die(): void {
+    // Check phoenix ash revival
+    if (RelicSystem.shouldRevive(this)) {
+      // Cancel death — unit stays alive with 30% HP
+      this.healthBar.updateHealth(this.currentHp, this.currentStats.maxHp);
+      return;
+    }
+
     this.isAlive = false;
     this.target = null;
 

@@ -11,6 +11,7 @@ import { SynergySystem } from './SynergySystem';
 import { SkillQueueSystem } from './SkillQueueSystem';
 import { ActModifierSystem } from './ActModifierSystem';
 import { EventBus } from './EventBus';
+import { RelicSystem } from './RelicSystem';
 import { SeededRNG } from '../utils/rng';
 import { HeroData, HeroState, BattleResult } from '../types';
 
@@ -162,6 +163,9 @@ export class BattleSystem {
    * Core combat update loop.
    */
   private updateCombat(adjustedDelta: number): void {
+    // Update relic timers (shield_charm periodic heal, etc.)
+    RelicSystem.update(adjustedDelta);
+
     // Reset per-frame distance cache
     TargetingSystem.beginFrame(adjustedDelta);
 

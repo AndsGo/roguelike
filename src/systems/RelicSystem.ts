@@ -48,6 +48,8 @@ export class RelicSystem {
   private heroes: Unit[] = [];
   private enemies: Unit[] = [];
   private listeners: Array<{ event: string; handler: (...args: any[]) => void }> = [];
+  private phoenixUsed: boolean = false;
+  private shieldTimer: number = 0;
 
   private constructor() {
     // Load relic definitions from data
@@ -88,6 +90,8 @@ export class RelicSystem {
     inst.relics = [];
     inst.heroes = [];
     inst.enemies = [];
+    inst.phoenixUsed = false;
+    inst.shieldTimer = 0;
   }
 
   /** Reset singleton — for testing */
@@ -97,6 +101,8 @@ export class RelicSystem {
       RelicSystem.instance.relics = [];
       RelicSystem.instance.heroes = [];
       RelicSystem.instance.enemies = [];
+      RelicSystem.instance.phoenixUsed = false;
+      RelicSystem.instance.shieldTimer = 0;
     }
   }
 
@@ -132,6 +138,43 @@ export class RelicSystem {
     }
 
     return mods;
+  }
+
+  /** Check if phoenix_ash should revive a dying hero. Called from Unit.die() */
+  static shouldRevive(unit: Unit): boolean {
+    const inst = RelicSystem.getInstance();
+    if (!RelicSystem.hasRelic('phoenix_ash')) return false;
+    if (inst.phoenixUsed) return false;
+    if (!unit.isHero) return false;
+
+    inst.phoenixUsed = true;
+    const relic = inst.relics.find(r => r.id === 'phoenix_ash');
+    if (relic) relic.triggerCount++;
+
+    // Revive with 30% HP
+    const reviveHp = Math.round(unit.currentStats.maxHp * 0.3);
+    unit.currentHp = reviveHp;
+    return true;
+  }
+
+  /** Called from BattleSystem.update() every frame */
+  static update(delta: number): void {
+    const inst = RelicSystem.getInstance();
+
+    // shield_charm: every 5 seconds, heal all heroes by 20
+    if (RelicSystem.hasRelic('shield_charm')) {
+      inst.shieldTimer += delta;
+      if (inst.shieldTimer >= 5000) {
+        inst.shieldTimer -= 5000;
+        for (const hero of inst.heroes) {
+          if (hero.isAlive) {
+            hero.heal(20);
+          }
+        }
+        const relic = inst.relics.find(r => r.id === 'shield_charm');
+        if (relic) relic.triggerCount++;
+      }
+    }
   }
 
   /** Check if a relic is currently active */
