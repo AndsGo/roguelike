@@ -10,12 +10,6 @@ const RARITY_WEIGHTS: Record<string, Record<Rarity, number>> = {
 
 export class ShopGenerator {
   /**
-   * Generate a shop inventory.
-   * @param rng Seeded RNG
-   * @param actIndex Current act (0 = early, 1 = mid, 2+ = late)
-   * @param itemCount Number of items to offer (4-6)
-   */
-  /**
    * Compute a shop hint (category + price range) from a list of items.
    */
   static computeShopHint(items: ItemData[]): { category: string; minPrice: number; maxPrice: number } {
