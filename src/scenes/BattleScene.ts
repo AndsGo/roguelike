@@ -64,6 +64,7 @@ export class BattleScene extends Phaser.Scene {
   private onSkillVisual!: (data: { casterId: string; skillId: string; targets: string[] }) => void;
   private onComboBreak!: (data: { unitId: string }) => void;
   private onSkillInterrupt!: (data: { unitId: string; skillId: string; reason: string }) => void;
+  private onBossKill!: (data: { killerId: string; targetId: string }) => void;
 
   constructor() {
     super({ key: 'BattleScene' });
@@ -386,6 +387,15 @@ export class BattleScene extends Phaser.Scene {
     eb.on('skill:use', this.onSkillVisual);
     eb.on('combo:break', this.onComboBreak);
     eb.on('skill:interrupt', this.onSkillInterrupt);
+
+    // Track boss kills for meta progression
+    this.onBossKill = (data) => {
+      const enemy = this.battleSystem.enemies.find(e => e.unitId === data.targetId);
+      if (enemy && enemy.isBoss) {
+        MetaManager.recordBossKill(enemy.unitId);
+      }
+    };
+    eb.on('unit:kill', this.onBossKill);
 
     // Threat & healer indicator graphics (single reusable objects, cleared each frame)
     this.threatGraphics = this.add.graphics().setDepth(5);
@@ -770,6 +780,7 @@ export class BattleScene extends Phaser.Scene {
     eb.off('skill:use', this.onSkillVisual);
     eb.off('combo:break', this.onComboBreak);
     eb.off('skill:interrupt', this.onSkillInterrupt);
+    eb.off('unit:kill', this.onBossKill);
     eb.off('skill:targetRequest', this.onTargetRequest);
     eb.off('skill:manualFire', this.onManualFire);
     this.ultimateSystem.deactivate();
