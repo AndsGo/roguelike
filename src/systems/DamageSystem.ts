@@ -116,6 +116,7 @@ export class DamageSystem {
           reactionResult.existingElement,
           target,
           finalDamage,
+          attacker,
         );
       }
     }

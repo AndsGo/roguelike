@@ -172,13 +172,13 @@ describe('StatsManager', () => {
   describe('element reaction tracking', () => {
     it('tracks element reactions by reactionType', () => {
       EventBus.getInstance().emit('element:reaction', {
-        element1: 'fire', element2: 'ice', targetId: 'enemy1', reactionType: 'ignite',
+        element1: 'fire', element2: 'ice', targetId: 'enemy1', reactionType: 'ignite', attackerId: 'hero1', damage: 50,
       });
       EventBus.getInstance().emit('element:reaction', {
-        element1: 'ice', element2: 'lightning', targetId: 'enemy2', reactionType: 'freeze',
+        element1: 'ice', element2: 'lightning', targetId: 'enemy2', reactionType: 'freeze', attackerId: 'hero1', damage: 30,
       });
       EventBus.getInstance().emit('element:reaction', {
-        element1: 'fire', element2: 'ice', targetId: 'enemy3', reactionType: 'ignite',
+        element1: 'fire', element2: 'ice', targetId: 'enemy3', reactionType: 'ignite', attackerId: 'hero2', damage: 40,
       });
 
       const stats = StatsManager.getRunStats();

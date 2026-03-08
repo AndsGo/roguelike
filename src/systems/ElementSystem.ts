@@ -76,6 +76,7 @@ export class ElementSystem {
     existingElement: ElementType,
     target: Unit,
     baseDamage: number,
+    attacker?: Unit,
   ): number {
     // Calculate reaction bonus damage
     const reactionBonus = RelicSystem.getReactionDamageBonus();
@@ -116,6 +117,8 @@ export class ElementSystem {
       element2: existingElement,
       targetId: target.unitId,
       reactionType: reaction.name,
+      attackerId: attacker?.unitId ?? '',
+      damage: reactionDamage,
     });
 
     return reactionDamage;

@@ -144,10 +144,12 @@ export interface RelicConfig {
 }
 
 export interface RelicEffect {
-  type: 'stat_boost' | 'on_damage' | 'on_heal' | 'on_kill' | 'on_battle_start' | 'on_battle_end' | 'passive' | 'formula_mod';
+  type: 'stat_boost' | 'on_damage' | 'on_heal' | 'on_kill' | 'on_battle_start' | 'on_battle_end' | 'on_reaction' | 'passive' | 'formula_mod';
   stat?: keyof UnitStats;
   value?: number;
   chance?: number; // 0-1 probability of triggering
+  reactionType?: string; // for on_reaction relics — reaction name filter or 'any'
+  duration?: number; // for timed effects (seconds)
 }
 
 // ============ Synergies ============
@@ -385,7 +387,7 @@ export interface GameEventMap {
   'status:expire': { targetId: string; effectId: string; effectType: StatusEffectType };
   'combo:hit': { unitId: string; comboCount: number };
   'combo:break': { unitId: string };
-  'element:reaction': { element1: ElementType; element2: ElementType; targetId: string; reactionType: string };
+  'element:reaction': { element1: ElementType; element2: ElementType; targetId: string; reactionType: string; attackerId: string; damage: number };
   'node:complete': { nodeIndex: number; nodeType: NodeType };
   'run:end': { victory: boolean; floor: number };
   'item:equip': { heroId: string; itemId: string; slot: EquipmentSlot };

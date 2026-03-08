@@ -29,6 +29,7 @@ const REACTIVE_EFFECT_TYPES = new Set([
   'on_kill',
   'on_heal',
   'on_battle_end',
+  'on_reaction',
 ]);
 
 /** All numeric keys on UnitStats */
@@ -426,6 +427,8 @@ export class RelicSystem {
         return (data: any) => this.handleOnHeal(relic, def, data);
       case 'on_battle_end':
         return (data: any) => this.handleBattleEnd(relic, def, data);
+      case 'on_reaction':
+        return (data: any) => this.handleOnReaction(relic, def, data);
       default:
         return null;
     }
@@ -553,5 +556,75 @@ export class RelicSystem {
   /** Handle battle:end relics — triggerCount increment (actual behavior in later tasks) */
   private handleBattleEnd(relic: RelicState, _def: RelicDef, _data: any): void {
     relic.triggerCount++;
+  }
+
+  /** Handle element:reaction relics */
+  private handleOnReaction(relic: RelicState, def: RelicDef, data: {
+    reactionType: string; attackerId: string; targetId: string; damage: number;
+  }): void {
+    // Check reaction type filter
+    const requiredReaction = def.effect.reactionType;
+    if (requiredReaction && requiredReaction !== 'any' && data.reactionType !== requiredReaction) return;
+
+    const attacker = this.findUnit(data.attackerId);
+    const target = this.findUnit(data.targetId);
+    if (!attacker?.isAlive || !target?.isAlive) return;
+
+    switch (def.id) {
+      case 'melt_heart': {
+        // Heal attacker for value% of reaction damage
+        if (data.damage > 0) {
+          const heal = Math.round(data.damage * (def.effect.value ?? 0.2));
+          attacker.heal(heal);
+        }
+        break;
+      }
+      case 'overload_engine': {
+        // chance% to stun target for 1s
+        if (this.rng.chance(def.effect.chance ?? 0.25)) {
+          target.statusEffects.push({
+            id: `relic_stun_${Date.now()}`,
+            type: 'stun',
+            name: 'stun',
+            duration: 1,
+            value: 0,
+          });
+        }
+        break;
+      }
+      case 'superconduct_shield': {
+        // Grant attacker temp HP
+        const shieldVal = def.effect.value ?? 10;
+        attacker.currentStats.maxHp += shieldVal;
+        attacker.currentHp = Math.min(attacker.currentHp + shieldVal, attacker.currentStats.maxHp);
+        break;
+      }
+      case 'annihilation_echo': {
+        // Repeat value% of reaction damage after 1s
+        if (data.damage > 0 && attacker.scene) {
+          const echoDamage = Math.round(data.damage * (def.effect.value ?? 0.4));
+          attacker.scene.time.delayedCall(1000, () => {
+            if (target.isAlive) target.takeDamage(echoDamage);
+          });
+        }
+        break;
+      }
+      case 'elemental_resonance': {
+        // Apply element resist debuff
+        target.statusEffects.push({
+          id: `relic_elres_down_${Date.now()}`,
+          type: 'debuff',
+          name: 'element_resist_down',
+          duration: def.effect.duration ?? 5,
+          value: -(def.effect.value ?? 15),
+          stat: 'magicResist',
+        });
+        break;
+      }
+    }
+
+    relic.triggerCount++;
+    // Emit relic trigger event
+    EventBus.getInstance().emit('relic:trigger', { relicId: def.id, context: 'on_reaction' });
   }
 }

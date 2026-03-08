@@ -5,7 +5,7 @@ import { RelicConfig, GameEventType, UnitStats } from '../../src/types';
 const relics = relicsData as RelicConfig[];
 
 const VALID_RARITIES = ['common', 'uncommon', 'rare', 'epic', 'legendary'];
-const VALID_EFFECT_TYPES = ['stat_boost', 'on_damage', 'on_heal', 'on_kill', 'on_battle_start', 'on_battle_end', 'passive', 'formula_mod'];
+const VALID_EFFECT_TYPES = ['stat_boost', 'on_damage', 'on_heal', 'on_kill', 'on_battle_start', 'on_battle_end', 'on_reaction', 'passive', 'formula_mod'];
 const VALID_TRIGGER_EVENTS: GameEventType[] = [
   'battle:start', 'battle:end', 'battle:turn',
   'unit:damage', 'unit:heal', 'unit:kill', 'unit:death', 'unit:attack',
