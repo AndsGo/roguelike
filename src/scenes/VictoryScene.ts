@@ -1,10 +1,12 @@
 import { GAME_WIDTH, GAME_HEIGHT } from '../constants';
 import { RunManager } from '../managers/RunManager';
+import { RunEndContext } from '../managers/MetaManager';
 import { Theme, colorToString } from '../ui/Theme';
 import { ParticleManager } from '../systems/ParticleManager';
 import { RunEndPanel } from '../ui/RunEndPanel';
 import { UI } from '../i18n';
 import { BaseEndScene } from './BaseEndScene';
+import heroesData from '../data/heroes.json';
 
 export class VictoryScene extends BaseEndScene {
   constructor() {
@@ -36,8 +38,24 @@ export class VictoryScene extends BaseEndScene {
 
     this.createSubtitle(UI.victory.subtitle, 105, colorToString(Theme.colors.success));
 
+    // Build run-end context for hero unlock checks
+    const heroStates = rm.getHeroes();
+    const context: RunEndContext = {
+      partyHeroIds: heroStates.map(h => h.id),
+      partyElements: heroStates.map(h => {
+        const data = (heroesData as { id: string; element: string | null }[]).find(d => d.id === h.id);
+        return data?.element ?? undefined;
+      }),
+      partyRoles: heroStates.map(h => {
+        const data = (heroesData as { id: string; role: string }[]).find(d => d.id === h.id);
+        return data?.role ?? 'melee_dps';
+      }),
+      relicCount: rm.getRelics().length,
+      difficulty: rm.getDifficulty(),
+    };
+
     // Meta progression settlement
-    const { metaReward, newAchievements } = this.settleRewards(true, rm.getFloor());
+    const { metaReward, newAchievements } = this.settleRewards(true, rm.getFloor(), context);
 
     // Final team
     this.add.text(GAME_WIDTH / 2, 135, UI.victory.finalTeam, {

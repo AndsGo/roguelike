@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { GAME_WIDTH } from '../constants';
-import { MetaManager } from '../managers/MetaManager';
+import { MetaManager, RunEndContext } from '../managers/MetaManager';
 import { StatsManager } from '../managers/StatsManager';
 import { AchievementManager } from '../managers/AchievementManager';
 import { SaveManager } from '../managers/SaveManager';
@@ -17,8 +17,8 @@ export interface RunEndResult {
  */
 export class RunEndPanel {
   /** Settle meta rewards. Returns metaReward and newAchievements. */
-  static settle(victory: boolean, floor: number): RunEndResult {
-    const metaReward = MetaManager.recordRunEnd(victory, floor);
+  static settle(victory: boolean, floor: number, context?: RunEndContext): RunEndResult {
+    const metaReward = MetaManager.recordRunEnd(victory, floor, context);
     StatsManager.finalizeRun(victory);
     const newAchievements = AchievementManager.checkAchievements();
     SaveManager.deleteSave(0);

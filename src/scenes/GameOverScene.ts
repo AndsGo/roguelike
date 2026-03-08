@@ -1,9 +1,11 @@
 import { GAME_WIDTH, GAME_HEIGHT } from '../constants';
 import { RunManager } from '../managers/RunManager';
+import { RunEndContext } from '../managers/MetaManager';
 import { Theme, colorToString } from '../ui/Theme';
 import { RunEndPanel } from '../ui/RunEndPanel';
 import { UI } from '../i18n';
 import { BaseEndScene } from './BaseEndScene';
+import heroesData from '../data/heroes.json';
 
 export class GameOverScene extends BaseEndScene {
   constructor() {
@@ -33,8 +35,24 @@ export class GameOverScene extends BaseEndScene {
       fontFamily: 'monospace',
     }).setOrigin(0.5);
 
+    // Build run-end context for hero unlock checks
+    const heroStates = rm.getHeroes();
+    const context: RunEndContext = {
+      partyHeroIds: heroStates.map(h => h.id),
+      partyElements: heroStates.map(h => {
+        const data = (heroesData as { id: string; element: string | null }[]).find(d => d.id === h.id);
+        return data?.element ?? undefined;
+      }),
+      partyRoles: heroStates.map(h => {
+        const data = (heroesData as { id: string; role: string }[]).find(d => d.id === h.id);
+        return data?.role ?? 'melee_dps';
+      }),
+      relicCount: rm.getRelics().length,
+      difficulty: rm.getDifficulty(),
+    };
+
     // Meta progression settlement
-    const { metaReward, newAchievements } = this.settleRewards(false, rm.getFloor());
+    const { metaReward, newAchievements } = this.settleRewards(false, rm.getFloor(), context);
 
     this.createSoulsText(215, UI.gameOver.soulsEarned(metaReward));
 

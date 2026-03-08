@@ -4,6 +4,7 @@ import { Button } from '../ui/Button';
 import { Theme, colorToString } from '../ui/Theme';
 import { SceneTransition, TRANSITION } from '../systems/SceneTransition';
 import { RunEndPanel, RunEndResult } from '../ui/RunEndPanel';
+import { RunEndContext } from '../managers/MetaManager';
 import { DailyChallengeManager } from '../managers/DailyChallengeManager';
 import { RunManager } from '../managers/RunManager';
 import { BuildReviewPanel } from '../ui/BuildReviewPanel';
@@ -21,12 +22,12 @@ export abstract class BaseEndScene extends Phaser.Scene {
   }
 
   /** Settle meta rewards (guarded against re-entry). */
-  protected settleRewards(victory: boolean, floor: number): RunEndResult {
+  protected settleRewards(victory: boolean, floor: number, context?: RunEndContext): RunEndResult {
     if (this.rewardsApplied) {
       return { metaReward: 0, newAchievements: [] };
     }
     this.rewardsApplied = true;
-    return RunEndPanel.settle(victory, floor);
+    return RunEndPanel.settle(victory, floor, context);
   }
 
   /** Create a centered title with scale-in animation. Returns the text object. */
