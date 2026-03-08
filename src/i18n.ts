@@ -1,4 +1,5 @@
 import heroesData from './data/heroes.json';
+import enemiesData from './data/enemies.json';
 import relicsData from './data/relics.json';
 
 /** Look up the Chinese display name of a relic by ID */
@@ -174,11 +175,28 @@ export const UI = {
     unlocked: '已解锁',
     locked: '未解锁',
     default: '默认英雄',
-    victory: '通关1次',
-    runs3: '完成3次冒险',
+    victory: (n: number) => `通关${n}次`,
+    runs: (n: number) => `完成${n}次冒险`,
+    floor: (n: number) => `到达第${n}层`,
+    element_wins: (element: string, n: number) => `使用${n}名${element}英雄通关`,
+    boss_kill: (bossName: string) => `击败${bossName}`,
+    no_healer_win: '不携带治疗者通关',
+    no_healer_win_hard: (diff: string) => `在${diff}难度下不携带治疗者通关`,
+    full_element_team: (element: string) => `使用全${element}队伍通关`,
+    relic_count: (n: number) => `携带${n}个以上遗物完成一局`,
+    hero_used: (heroName: string) => `使用${heroName}通关`,
     element: (e: string) => `元素: ${e}`,
     noElement: '无元素',
   },
+
+  // Element display names (for unlock conditions)
+  elementNames: {
+    fire: '火',
+    ice: '冰',
+    lightning: '雷',
+    dark: '暗',
+    holy: '圣',
+  } as Record<string, string>,
 
   // Difficulty selection
   difficulty: {
@@ -468,3 +486,49 @@ export const ACHIEVEMENT_ICONS: Record<string, string> = {
   nuke: '\u2622\uFE0F',
   wolf: '\u{1F43A}',
 };
+
+/** Format a hero unlock condition into a Chinese display string */
+export function formatUnlockCondition(cond: {
+  type: string;
+  threshold?: number;
+  element?: string;
+  heroId?: string;
+  bossId?: string;
+  difficulty?: string;
+  description: string;
+}): string {
+  switch (cond.type) {
+    case 'default':
+      return UI.heroUnlock.default;
+    case 'victory':
+      return UI.heroUnlock.victory(cond.threshold ?? 1);
+    case 'runs':
+      return UI.heroUnlock.runs(cond.threshold ?? 1);
+    case 'floor':
+      return UI.heroUnlock.floor(cond.threshold ?? 1);
+    case 'element_wins':
+      return UI.heroUnlock.element_wins(
+        UI.elementNames[cond.element ?? ''] ?? cond.element ?? '',
+        cond.threshold ?? 2,
+      );
+    case 'boss_kill': {
+      const boss = (enemiesData as { id: string; name: string }[]).find(e => e.id === cond.bossId);
+      return UI.heroUnlock.boss_kill(boss?.name ?? cond.bossId ?? '');
+    }
+    case 'no_healer_win':
+      if (cond.difficulty) return UI.heroUnlock.no_healer_win_hard(cond.difficulty);
+      return UI.heroUnlock.no_healer_win;
+    case 'full_element_team':
+      return UI.heroUnlock.full_element_team(
+        UI.elementNames[cond.element ?? ''] ?? cond.element ?? '',
+      );
+    case 'relic_count':
+      return UI.heroUnlock.relic_count(cond.threshold ?? 1);
+    case 'hero_used': {
+      const hero = (heroesData as { id: string; name: string }[]).find(h => h.id === cond.heroId);
+      return UI.heroUnlock.hero_used(hero?.name ?? cond.heroId ?? '');
+    }
+    default:
+      return cond.description;
+  }
+}

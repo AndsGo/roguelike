@@ -6,7 +6,7 @@ import { ELEMENT_ADVANTAGE, ELEMENT_REACTIONS, ELEMENT_ADVANTAGE_MULTIPLIER, ELE
 import { SYNERGY_DEFINITIONS } from '../config/synergies';
 import { ElementType } from '../types';
 import { MetaManager } from '../managers/MetaManager';
-import { UI, RACE_NAMES, CLASS_NAMES } from '../i18n';
+import { UI, RACE_NAMES, CLASS_NAMES, formatUnlockCondition } from '../i18n';
 import heroesData from '../data/heroes.json';
 
 const ELEMENT_NAMES: Record<ElementType, string> = {
@@ -146,14 +146,6 @@ export class HelpPanel {
     this.panel.addContent(heroHeader);
     y += 16;
 
-    const unlockConditions: Record<string, string> = {
-      warrior: UI.heroUnlock.default,
-      archer: UI.heroUnlock.default,
-      mage: UI.heroUnlock.default,
-      priest: UI.heroUnlock.victory,
-      rogue: UI.heroUnlock.runs3,
-    };
-
     const unlockedHeroes = MetaManager.getUnlockedHeroes();
 
     for (const hero of heroesData as { id: string; name: string; element: string | null; race: string; class: string }[]) {
@@ -163,7 +155,8 @@ export class HelpPanel {
       const elementStr = hero.element
         ? ELEMENT_NAMES[hero.element as ElementType] ?? hero.element
         : UI.heroUnlock.noElement;
-      const condition = unlockConditions[hero.id] ?? UI.heroUnlock.default;
+      const cond = MetaManager.getHeroUnlockCondition(hero.id);
+      const condition = cond ? formatUnlockCondition(cond) : UI.heroUnlock.default;
 
       const raceCn = RACE_NAMES[hero.race] ?? hero.race;
       const classCn = CLASS_NAMES[hero.class] ?? hero.class;

@@ -3,7 +3,7 @@ import { GAME_WIDTH, GAME_HEIGHT } from '../constants';
 import { Theme, colorToString } from './Theme';
 import { HeroData, EnemyData, UnitRole, RaceType, ClassType } from '../types';
 import { MetaManager } from '../managers/MetaManager';
-import { UI, STAT_LABELS, RACE_NAMES, CLASS_NAMES, ROLE_NAMES, ELEMENT_NAMES } from '../i18n';
+import { UI, STAT_LABELS, RACE_NAMES, CLASS_NAMES, ROLE_NAMES, ELEMENT_NAMES, formatUnlockCondition } from '../i18n';
 import { getOrCreateTexture, getDisplaySize, ChibiConfig } from '../systems/UnitRenderer';
 import skillsData from '../data/skills.json';
 
@@ -226,7 +226,7 @@ export class CodexDetailPopup extends Phaser.GameObjects.Container {
       infoY += 4;
       const cond = MetaManager.getHeroUnlockCondition(data.id);
       if (cond) {
-        const unlockText = scene.add.text(infoX, infoY, `${UI.codex.unlockCondition}: ${cond.description}`, {
+        const unlockText = scene.add.text(infoX, infoY, `${UI.codex.unlockCondition}: ${formatUnlockCondition(cond)}`, {
           fontSize: '9px',
           color: '#ff8866',
           fontFamily: 'monospace',
