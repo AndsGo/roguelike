@@ -279,6 +279,11 @@ export interface RunState {
   difficulty: string;       // difficulty config ID
   activeSynergies: ActiveSynergy[];
   currentAct: number;       // index into acts array
+  isDaily?: boolean;
+  dailyModifiers?: {
+    title: string;
+    rules: Array<{ type: string; label: string; value: any }>;
+  };
 }
 
 export interface RelicState {

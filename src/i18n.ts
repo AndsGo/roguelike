@@ -281,6 +281,15 @@ export const UI = {
     boss: '首领',
   },
 
+  // Daily challenge
+  daily: {
+    title: '每日挑战',
+    completed: '今日已完成',
+    start: '开始挑战',
+    rules: '今日规则',
+    info: '每天一次固定挑战，全球同步种子',
+  },
+
   // Tutorial
   tutorial: {
     clickToContinue: '[ 点击继续 ]',
