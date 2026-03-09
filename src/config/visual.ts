@@ -96,6 +96,13 @@ export const BOSS_ENTRANCE = {
   TITLE_DEPTH: 500,
 } as const;
 
+// ─── Wave Transition (Gauntlet) ───
+export const WAVE_TRANSITION = {
+  SLIDE_DURATION: 400,     // ms for enemies to slide in
+  SLIDE_START_X: 900,      // start offscreen right
+  TEXT_DEPTH: 500,
+} as const;
+
 // ─── Gameplay UI Thresholds ───
 export const UI_THRESHOLDS = {
   COMBO_DISPLAY_MIN: 5,

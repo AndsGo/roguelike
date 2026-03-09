@@ -25,7 +25,7 @@ import skillVisualsData from '../data/skill-visuals.json';
 import { Button } from '../ui/Button';
 import { UI } from '../i18n';
 import { KeybindingConfig } from '../config/keybindings';
-import { BOSS_ENTRANCE } from '../config/visual';
+import { BOSS_ENTRANCE, WAVE_TRANSITION } from '../config/visual';
 import { RunOverviewPanel } from '../ui/RunOverviewPanel';
 import { DailyChallengeManager, DailyRule } from '../managers/DailyChallengeManager';
 import { UltimateSystem } from '../systems/UltimateSystem';
@@ -44,6 +44,11 @@ export class BattleScene extends Phaser.Scene {
   private overviewPanel: RunOverviewPanel | null = null;
   private ultimateSystem!: UltimateSystem;
   private ultimateBar!: UltimateBar;
+
+  // Wave management (gauntlet)
+  private waveEnemyData: { id: string; level: number }[][] = [];
+  private isGauntlet: boolean = false;
+  private waveIndicator: Phaser.GameObjects.Text | null = null;
 
   // Target selection state
   private targetingMode: boolean = false;
@@ -199,6 +204,15 @@ export class BattleScene extends Phaser.Scene {
     this.ultimateSystem = new UltimateSystem();
     this.battleSystem.setUnits(heroes, enemies);
 
+    // Detect gauntlet waves
+    this.isGauntlet = node.type === 'gauntlet' && !!(battleData as BattleNodeData).waves;
+    if (this.isGauntlet) {
+      this.waveEnemyData = (battleData as BattleNodeData).waves!;
+      this.battleSystem.setWaveData(this.waveEnemyData, (waveIdx, totalWaves) => {
+        this.handleWaveTransition(waveIdx, totalWaves);
+      });
+    }
+
     // Apply daily challenge rules
     const runState = rm.getState();
     if (runState.isDaily && runState.dailyModifiers?.rules) {
@@ -332,10 +346,19 @@ export class BattleScene extends Phaser.Scene {
 
     // Unit animation system (idle floats, attack rush, cast pulse)
     this.allUnits = [...heroes, ...enemies];
+
+    // Wave indicator for gauntlet
+    if (this.isGauntlet) {
+      this.waveIndicator = this.add.text(GAME_WIDTH / 2, 45, UI.wave.indicator(1, this.battleSystem.getTotalWaves()), {
+        fontSize: '11px', color: '#cc44cc', fontFamily: 'monospace', fontStyle: 'bold',
+        stroke: '#000000', strokeThickness: 2,
+      }).setOrigin(0.5).setDepth(200);
+    }
+
     this.unitAnimations = new UnitAnimationSystem(this, this.allUnits);
 
     // Listen for visual events (store refs for cleanup in shutdown)
-    const allUnits = this.allUnits;
+    // NOTE: use this.allUnits (not a captured const) so wave transitions update correctly
 
     this.onDamage = (data) => {
       if (data.isCrit) {
@@ -345,8 +368,8 @@ export class BattleScene extends Phaser.Scene {
       } else {
         this.effects.screenShake(0.003, 60);
       }
-      const target = allUnits.find(u => u.unitId === data.targetId);
-      const source = allUnits.find(u => u.unitId === data.sourceId);
+      const target = this.allUnits.find(u => u.unitId === data.targetId);
+      const source = this.allUnits.find(u => u.unitId === data.sourceId);
       if (target) {
         this.particles.createHitEffect(target.x, target.y, data.element);
         this.effects.hitFlash(target);
@@ -364,14 +387,14 @@ export class BattleScene extends Phaser.Scene {
     };
 
     this.onHeal = (data) => {
-      const target = allUnits.find(u => u.unitId === data.targetId);
+      const target = this.allUnits.find(u => u.unitId === data.targetId);
       if (target) {
         this.particles.createHealEffect(target.x, target.y);
       }
     };
 
     this.onDeath = (data) => {
-      const unit = allUnits.find(u => u.unitId === data.unitId);
+      const unit = this.allUnits.find(u => u.unitId === data.unitId);
       if (unit) {
         this.particles.createDeathEffect(unit.x, unit.y, unit.element, unit.isBoss);
         if (unit.isBoss) {
@@ -385,7 +408,7 @@ export class BattleScene extends Phaser.Scene {
     };
 
     this.onReaction = (data) => {
-      const target = allUnits.find(u => u.unitId === data.targetId);
+      const target = this.allUnits.find(u => u.unitId === data.targetId);
       if (target) {
         this.particles.createElementReactionEffect(target.x, target.y, data.element1, data.element2);
         this.effects.screenShake(0.012, 200);
@@ -396,7 +419,7 @@ export class BattleScene extends Phaser.Scene {
     };
 
     this.onSkillVisual = (data) => {
-      const caster = allUnits.find(u => u.unitId === data.casterId);
+      const caster = this.allUnits.find(u => u.unitId === data.casterId);
       if (!caster) return;
 
       const visual = (skillVisualsData as Record<string, { type: string; color: string; count?: number }>)[data.skillId];
@@ -411,7 +434,7 @@ export class BattleScene extends Phaser.Scene {
       if (!visual) return;
 
       const targets = data.targets
-        .map(tid => allUnits.find(u => u.unitId === tid))
+        .map(tid => this.allUnits.find(u => u.unitId === tid))
         .filter((u): u is Hero | Enemy => u !== undefined);
       const firstTarget = targets[0] ?? null;
 
@@ -452,14 +475,14 @@ export class BattleScene extends Phaser.Scene {
     };
 
     this.onComboBreak = (data) => {
-      const unit = allUnits.find(u => u.unitId === data.unitId);
+      const unit = this.allUnits.find(u => u.unitId === data.unitId);
       if (unit && unit.isAlive) {
         this.effects.showComboBreak(unit.x, unit.y);
       }
     };
 
     this.onSkillInterrupt = (data) => {
-      const unit = allUnits.find(u => u.unitId === data.unitId);
+      const unit = this.allUnits.find(u => u.unitId === data.unitId);
       if (unit && unit.isAlive) {
         this.effects.showInterruptText(unit.x, unit.y);
       }
@@ -489,8 +512,8 @@ export class BattleScene extends Phaser.Scene {
       if (this.lastShownEnemy && !this.lastShownEnemy.isBoss) {
         this.lastShownEnemy.setNameVisible(false);
       }
-      // Show current target if it's an enemy
-      const target = enemies.find(e => e.unitId === data.targetId);
+      // Show current target if it's an enemy (use battleSystem.enemies for wave support)
+      const target = this.battleSystem.enemies.find(e => e.unitId === data.targetId);
       if (target && !target.isBoss) {
         target.setNameVisible(true);
         this.lastShownEnemy = target;
@@ -787,12 +810,75 @@ export class BattleScene extends Phaser.Scene {
     }
   }
 
+  private handleWaveTransition(waveIndex: number, totalWaves: number): void {
+    // Update wave indicator
+    if (this.waveIndicator) {
+      this.waveIndicator.setText(UI.wave.indicator(waveIndex + 1, totalWaves));
+    }
+
+    // Show "Wave N" text overlay
+    const waveText = this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 - 30, UI.wave.indicator(waveIndex + 1, totalWaves), {
+      fontSize: '24px', color: '#cc44cc', fontFamily: 'monospace', fontStyle: 'bold',
+      stroke: '#000000', strokeThickness: 4,
+    }).setOrigin(0.5).setAlpha(0).setDepth(WAVE_TRANSITION.TEXT_DEPTH);
+
+    this.tweens.add({
+      targets: waveText,
+      alpha: 1,
+      duration: 300,
+      yoyo: true,
+      hold: 1000,
+      onComplete: () => waveText.destroy(),
+    });
+
+    // Spawn new enemies
+    const waveData = this.waveEnemyData[waveIndex - 1]; // waveIndex is 1-based, array is 0-based
+    const newEnemies: Enemy[] = waveData
+      .map((e, i) => {
+        const data = enemiesData.find(ed => ed.id === e.id) as EnemyData | undefined;
+        if (!data) return null;
+        const y = BATTLE_GROUND_Y - ((waveData.length - 1) / 2 - i) * UNIT_SPACING_Y;
+        const enemy = new Enemy(this, WAVE_TRANSITION.SLIDE_START_X, y, data, e.level);
+        // Slide in from right
+        this.tweens.add({
+          targets: enemy,
+          x: ENEMY_START_X,
+          duration: WAVE_TRANSITION.SLIDE_DURATION,
+          ease: 'Power2',
+        });
+        return enemy;
+      })
+      .filter((e): e is Enemy => e !== null);
+
+    // Register new enemies with battle system
+    this.battleSystem.replaceEnemies(newEnemies);
+
+    // Re-register new enemies with RelicSystem
+    RelicSystem.updateEnemies(newEnemies);
+
+    // Mutate allUnits in-place so captured references (UnitAnimationSystem, closures) stay synced
+    this.allUnits.length = 0;
+    this.allUnits.push(...this.battleSystem.heroes, ...newEnemies);
+
+    // Record encounters for codex
+    for (const enemy of newEnemies) {
+      MetaManager.recordEnemyEncounter(enemy.unitId);
+    }
+
+    // Hide names of non-boss enemies
+    for (const enemy of newEnemies) {
+      if (!enemy.isBoss) enemy.setNameVisible(false);
+    }
+  }
+
   private handleBattleEnd(): void {
     const rm = RunManager.getInstance();
     const isVictory = this.battleSystem.battleState === 'victory';
 
     if (isVictory) {
-      let goldEarned = this.battleSystem.getTotalGoldReward();
+      let goldEarned = this.isGauntlet
+        ? (this.battleSystem.getBattleResult()?.goldEarned ?? this.battleSystem.getTotalGoldReward())
+        : this.battleSystem.getTotalGoldReward();
       const endRunState = rm.getState();
       if (endRunState.isDaily && endRunState.dailyModifiers?.rules) {
         goldEarned = DailyChallengeManager.applyGoldModifier(goldEarned, endRunState.dailyModifiers.rules as DailyRule[]);
@@ -803,7 +889,9 @@ export class BattleScene extends Phaser.Scene {
         goldEarned = Math.round(goldEarned * (1 + goldBonus));
       }
 
-      let expEarned = this.battleSystem.getTotalExpReward();
+      let expEarned = this.isGauntlet
+        ? (this.battleSystem.getBattleResult()?.expEarned ?? this.battleSystem.getTotalExpReward())
+        : this.battleSystem.getTotalExpReward();
       // Apply relic exp bonus
       const expBonus = RelicSystem.getExpBonus();
       if (expBonus > 0) {
