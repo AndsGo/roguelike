@@ -20,7 +20,7 @@ export const UI = {
     continue: '继续',
     newGame: '新游戏',
     upgrades: '升级',
-    version: 'v1.9.0',
+    version: 'v1.10.0',
     stats: (runs: number, victories: number, heroCount: number, totalHeroes: number, souls: number) =>
       `冒险: ${runs}  |  胜利: ${victories}  |  英雄: ${heroCount}/${totalHeroes}  |  灵魂: ${souls}`,
     confirmOverwrite: '现有存档将丢失。\n是否继续？',
@@ -69,6 +69,29 @@ export const UI = {
     cleared: '波次清除！',
     next: '下一波即将到来...',
     gauntletTooltip: (waves: number) => `连战 · ${waves}波`,
+  },
+
+  // Mutations
+  mutation: {
+    title: '变异升级',
+    locked: (remaining: number) => `再升级${remaining}级解锁变异`,
+    unlocked: '已解锁',
+    extra_draft_pick: '额外征召',
+    shop_extra_item: '商人好感',
+    start_with_relic: '遗物直觉',
+    first_event_safe: '先知之眼',
+    overkill_splash: '溢杀扩散',
+    crit_cooldown: '暴击加速',
+    heal_shield: '过量护盾',
+    reaction_chain: '连锁反应',
+    desc_extra_draft_pick: '英雄征召多提供1个选择',
+    desc_shop_extra_item: '商店多展示1件商品',
+    desc_start_with_relic: '每局开始获得1个随机遗物',
+    desc_first_event_safe: '首个事件必有安全选项',
+    desc_overkill_splash: '击杀溢出伤害30%溅射',
+    desc_crit_cooldown: '暴击减少技能冷却1秒',
+    desc_heal_shield: '溢出治疗转50%护盾',
+    desc_reaction_chain: '元素反应25%传递元素',
   },
 
   // BattleScene
