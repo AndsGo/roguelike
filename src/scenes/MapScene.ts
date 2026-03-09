@@ -12,6 +12,7 @@ import actsData from '../data/acts.json';
 import { UI } from '../i18n';
 import { NodeTooltip } from '../ui/NodeTooltip';
 import { RunOverviewPanel } from '../ui/RunOverviewPanel';
+import { FormationPanel } from '../ui/FormationPanel';
 
 export class MapScene extends Phaser.Scene {
   private mapContainer!: Phaser.GameObjects.Container;
@@ -27,6 +28,7 @@ export class MapScene extends Phaser.Scene {
   private heroPopup: HeroDetailPopup | null = null;
   private heroPanelObjects: Phaser.GameObjects.GameObject[] = [];
   private overviewPanel: RunOverviewPanel | null = null;
+  private formationPanel: FormationPanel | null = null;
 
   constructor() {
     super({ key: 'MapScene' });
@@ -312,6 +314,16 @@ export class MapScene extends Phaser.Scene {
         }
       },
     );
+
+    // Formation button near hero panel
+    const formBtn = new Button(this, GAME_WIDTH - 50, GAME_HEIGHT - 45,
+      UI.formation.title, 50, 24, () => {
+        if (!this.formationPanel) {
+          this.formationPanel = new FormationPanel(this, () => { this.formationPanel = null; });
+        }
+      });
+    formBtn.setScrollFactor(0);
+    formBtn.setDepth(101);
 
     // Set up camera scrolling if map is wider than screen
     if (needsScroll) {
@@ -625,6 +637,10 @@ export class MapScene extends Phaser.Scene {
     if (this.overviewPanel) {
       this.overviewPanel.close();
       this.overviewPanel = null;
+    }
+    if (this.formationPanel) {
+      this.formationPanel.close();
+      this.formationPanel = null;
     }
   }
 }
