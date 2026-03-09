@@ -553,7 +553,102 @@ export class MainMenuScene extends Phaser.Scene {
       }
     });
 
-    panel.setContentHeight(upgrades.length * 48 + 80);
+    // ── Mutation Section ──
+    const mutationStartY = -90 + upgrades.length * 48 + 20;
+
+    // Divider line
+    const divider = this.add.graphics();
+    divider.lineStyle(1, 0x555555, 0.5);
+    divider.lineBetween(-220, mutationStartY, 220, mutationStartY);
+    panel.addContent(divider);
+
+    // Section title
+    const mutTitle = this.add.text(0, mutationStartY + 12, UI.mutation.title, {
+      fontSize: '12px', color: '#cc44cc', fontFamily: 'monospace', fontStyle: 'bold',
+    }).setOrigin(0.5);
+    panel.addContent(mutTitle);
+
+    const tierUnlocked = MetaManager.isMutationTierUnlocked();
+
+    if (!tierUnlocked) {
+      const remaining = MetaManager.MUTATION_GATE - MetaManager.getTotalUpgradeLevels();
+      const lockText = this.add.text(0, mutationStartY + 36, UI.mutation.locked(remaining), {
+        fontSize: '10px', color: '#888888', fontFamily: 'monospace',
+      }).setOrigin(0.5);
+      panel.addContent(lockText);
+    } else {
+      const mutDefs = MetaManager.MUTATION_DEFS;
+      mutDefs.forEach((def, i) => {
+        const my = mutationStartY + 36 + i * 36;
+        const owned = MetaManager.hasMutation(def.id);
+        const mutStrings = UI.mutation as unknown as Record<string, string>;
+        const name = mutStrings[def.id] ?? def.id;
+        const desc = mutStrings[`desc_${def.id}`] ?? '';
+
+        // Mutation name
+        const nameText = this.add.text(-220, my, owned ? `✓ ${name}` : name, {
+          fontSize: '10px',
+          color: owned ? '#44ff44' : '#ffffff',
+          fontFamily: 'monospace',
+          fontStyle: 'bold',
+        });
+        panel.addContent(nameText);
+
+        // Description
+        const descText = this.add.text(-220, my + 13, desc, {
+          fontSize: '8px', color: '#aaaaaa', fontFamily: 'monospace',
+        });
+        panel.addContent(descText);
+
+        if (!owned) {
+          // Cost
+          const canAfford = currency >= def.cost;
+          const costText = this.add.text(140, my, `${def.cost} 灵魂`, {
+            fontSize: '9px',
+            color: canAfford ? colorToString(Theme.colors.gold) : colorToString(Theme.colors.danger),
+            fontFamily: 'monospace',
+          });
+          panel.addContent(costText);
+
+          // Buy button (matching existing upgrade button style)
+          const buyBg = this.add.graphics();
+          buyBg.fillStyle(canAfford ? Theme.colors.primary : 0x555555, 0.8);
+          buyBg.fillRoundedRect(200, my - 8, 40, 20, 3);
+          panel.addContent(buyBg);
+
+          const buyText = this.add.text(220, my + 2, UI.mainMenu.buy, {
+            fontSize: '9px',
+            color: canAfford ? '#ffffff' : '#888888',
+            fontFamily: 'monospace',
+          }).setOrigin(0.5);
+          panel.addContent(buyText);
+
+          if (canAfford) {
+            const buyHit = this.add.rectangle(220, my + 2, 56, 32, 0x000000, 0)
+              .setInteractive({ useHandCursor: true });
+            buyHit.on('pointerdown', () => {
+              if (MetaManager.purchaseMutation(def.id)) {
+                this.closeUpgradePanel();
+                this.showUpgradePanel();
+              }
+            });
+            panel.addContent(buyHit);
+          }
+        } else {
+          const ownedText = this.add.text(180, my, UI.mutation.unlocked, {
+            fontSize: '10px', color: '#44ff44', fontFamily: 'monospace',
+          });
+          panel.addContent(ownedText);
+        }
+      });
+    }
+
+    // Calculate total content height
+    const baseHeight = upgrades.length * 48 + 80;
+    const mutationHeight = tierUnlocked
+      ? 50 + MetaManager.MUTATION_DEFS.length * 36
+      : 60;
+    panel.setContentHeight(baseHeight + mutationHeight);
 
     // Fixed close button (outside scrollable content, always visible)
     const panelHeight = 340;
