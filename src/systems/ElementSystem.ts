@@ -10,6 +10,7 @@ import {
 } from '../config/elements';
 import { Unit } from '../entities/Unit';
 import { RelicSystem } from './RelicSystem';
+import { MetaManager } from '../managers/MetaManager';
 
 /**
  * Handles element-based combat mechanics:
@@ -120,6 +121,23 @@ export class ElementSystem {
       attackerId: attacker?.unitId ?? '',
       damage: reactionDamage,
     });
+
+    // Mutation: reaction_chain — 25% chance to spread trigger element to nearby enemy
+    if (MetaManager.hasMutation('reaction_chain') && Math.random() < 0.25) {
+      const spreadTargets = RelicSystem.getSplashTargets(target.unitId, 1);
+      if (spreadTargets.length > 0) {
+        const spreadTarget = spreadTargets[0];
+        const spreadEffect: StatusEffect = {
+          id: `reaction_chain_${Date.now()}`,
+          type: 'debuff',
+          name: `element_${incomingElement}`,
+          duration: 3,
+          value: 0,
+          element: incomingElement,
+        };
+        spreadTarget.statusEffects.push(spreadEffect);
+      }
+    }
 
     return reactionDamage;
   }

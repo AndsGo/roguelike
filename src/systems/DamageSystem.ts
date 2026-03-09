@@ -9,6 +9,7 @@ import { EventBus } from './EventBus';
 import { AudioManager } from './AudioManager';
 import { RelicSystem } from './RelicSystem';
 import { DamageAccumulator } from './DamageAccumulator';
+import { MetaManager } from '../managers/MetaManager';
 
 export interface DamageResult {
   rawDamage: number;
@@ -152,6 +153,7 @@ export class DamageSystem {
         finalDmg = Math.round(finalDmg * (1 + takenBonus));
       }
     }
+    const preDamageHp = target.currentHp;
     target.takeDamage(finalDmg);
 
     // Register combo hit
@@ -215,6 +217,24 @@ export class DamageSystem {
         killerId: attacker.unitId,
         targetId: target.unitId,
       });
+
+      // Mutation: overkill_splash — 30% excess damage to random enemy
+      if (MetaManager.hasMutation('overkill_splash') && attacker.isHero) {
+        const excess = finalDmg - preDamageHp;
+        if (excess > 0) {
+          const splashDmg = Math.round(excess * 0.3);
+          if (splashDmg > 0) {
+            const splashTargets = RelicSystem.getSplashTargets(target.unitId, 1);
+            if (splashTargets.length > 0) {
+              const splashTarget = splashTargets[0];
+              splashTarget.takeDamage(splashDmg);
+              if (this.accumulator) {
+                this.accumulator.addDamage(splashTarget.unitId, splashTarget.scene, splashTarget.x, splashTarget.y, splashDmg);
+              }
+            }
+          }
+        }
+      }
     }
 
     return result;
@@ -241,6 +261,17 @@ export class DamageSystem {
         if (available > 0) {
           const shieldAmount = Math.min(overflow, available);
           target.currentHp += shieldAmount;
+        }
+      }
+    }
+
+    // Mutation: heal_shield — overflow heals → shield at 50% efficiency
+    if (MetaManager.hasMutation('heal_shield') && target.isHero) {
+      const overflow = healAmount - actual;
+      if (overflow > 0) {
+        const shieldAmount = Math.round(overflow * 0.5);
+        if (shieldAmount > 0) {
+          target.currentHp = Math.min(target.currentHp + shieldAmount, target.currentStats.maxHp + shieldAmount);
         }
       }
     }

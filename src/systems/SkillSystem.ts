@@ -6,6 +6,7 @@ import { DamageAccumulator } from './DamageAccumulator';
 import { SeededRNG } from '../utils/rng';
 import { EventBus } from './EventBus';
 import { TargetingSystem } from './TargetingSystem';
+import { MetaManager } from '../managers/MetaManager';
 import skillsData from '../data/skills.json';
 import advancementsData from '../data/skill-advancements.json';
 
@@ -208,6 +209,15 @@ export class SkillSystem {
           element: skillElement,
           isCrit: result.isCrit,
         });
+
+        // Mutation: crit_cooldown — reduce all cooldowns by 1s on crit
+        if (result.isCrit && MetaManager.hasMutation('crit_cooldown') && unit.isHero) {
+          for (const [skillId, cd] of unit.skillCooldowns) {
+            if (cd > 0) {
+              unit.skillCooldowns.set(skillId, Math.max(0, cd - 1));
+            }
+          }
+        }
 
         // Check for kill
         if (!target.isAlive) {
