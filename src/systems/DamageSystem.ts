@@ -118,6 +118,7 @@ export class DamageSystem {
           target,
           finalDamage,
           attacker,
+          this.rng,
         );
       }
     }
@@ -265,13 +266,18 @@ export class DamageSystem {
       }
     }
 
-    // Mutation: heal_shield — remaining overflow → shield at 50% efficiency
+    // Mutation: heal_shield — remaining overflow → shield at 50% efficiency (cap 30% maxHp)
     if (MetaManager.hasMutation('heal_shield') && target.isHero) {
       const remainingOverflow = totalOverflow - overflowConsumed;
       if (remainingOverflow > 0) {
-        const shieldAmount = Math.round(remainingOverflow * 0.5);
-        if (shieldAmount > 0) {
-          target.currentHp += shieldAmount;
+        const maxMutShield = Math.round(target.currentStats.maxHp * 0.3);
+        const currentOverheal = target.currentHp - target.currentStats.maxHp;
+        const available = maxMutShield - Math.max(0, currentOverheal);
+        if (available > 0) {
+          const shieldAmount = Math.min(Math.round(remainingOverflow * 0.5), available);
+          if (shieldAmount > 0) {
+            target.currentHp += shieldAmount;
+          }
         }
       }
     }
