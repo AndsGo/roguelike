@@ -98,6 +98,7 @@ export const Theme = {
       shop: 0x44cc44,
       event: 0x8844cc,
       rest: 0x4488cc,
+      gauntlet: 0xcc44cc,
     } as Record<string, number>,
 
     health: {

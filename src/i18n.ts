@@ -61,7 +61,15 @@ export const UI = {
     shop: '商店',
     event: '事件',
     rest: '休息',
+    gauntlet: '连战',
   } as Record<string, string>,
+
+  wave: {
+    indicator: (current: number, total: number) => `第${current}波 / 共${total}波`,
+    cleared: '波次清除！',
+    next: '下一波即将到来...',
+    gauntletTooltip: (waves: number) => `连战 · ${waves}波`,
+  },
 
   // BattleScene
   battle: {

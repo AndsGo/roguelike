@@ -72,7 +72,8 @@ export class NodeTooltip extends Phaser.GameObjects.Container {
     switch (node.type) {
       case 'battle':
       case 'elite':
-      case 'boss': {
+      case 'boss':
+      case 'gauntlet': {
         const battleData = node.data as BattleNodeData | undefined;
         if (battleData?.enemies) {
           for (const e of battleData.enemies) {
@@ -81,6 +82,9 @@ export class NodeTooltip extends Phaser.GameObjects.Container {
             const tag = buildEnemyTag(enemyDef?.element, enemyDef?.race);
             lines.push(`  ${name} Lv.${e.level}${tag}`);
           }
+        }
+        if (node.type === 'gauntlet' && battleData?.waves) {
+          lines.push(UI.wave.gauntletTooltip(1 + battleData.waves.length));
         }
         break;
       }

@@ -5,7 +5,7 @@ export type DamageType = 'physical' | 'magical' | 'pure';
 export type TargetType = 'enemy' | 'ally' | 'self' | 'all_enemies' | 'all_allies';
 export type Rarity = 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary';
 export type EquipmentSlot = 'weapon' | 'armor' | 'accessory';
-export type NodeType = 'battle' | 'elite' | 'boss' | 'shop' | 'event' | 'rest';
+export type NodeType = 'battle' | 'elite' | 'boss' | 'shop' | 'event' | 'rest' | 'gauntlet';
 export type StatusEffectType = 'dot' | 'hot' | 'stun' | 'buff' | 'debuff' | 'taunt';
 
 // ============ New: Element, Race, Class ============
@@ -219,6 +219,7 @@ export interface MapNode {
 
 export interface BattleNodeData {
   enemies: { id: string; level: number }[];
+  waves?: { id: string; level: number }[][];
 }
 
 export interface ShopNodeData {

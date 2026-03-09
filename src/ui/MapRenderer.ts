@@ -13,6 +13,7 @@ export const NODE_LABELS: Record<NodeType, string> = {
   shop: '\u2666',
   event: '?',
   rest: '\u2665',
+  gauntlet: '\u2694\u2694',
 };
 
 export const ACT_COLORS: number[] = [0x1a2a1e, 0x2a1a1a, 0x1a1a2a];

@@ -541,6 +541,7 @@ export class MapScene extends Phaser.Scene {
       shop: 'ShopScene',
       event: 'EventScene',
       rest: 'RestScene',
+      gauntlet: 'BattleScene',
     };
 
     const target = sceneMap[node.type];
