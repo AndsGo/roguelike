@@ -13,6 +13,11 @@ import { GameLifecycle } from '../systems/GameLifecycle';
 import heroesData from '../data/heroes.json';
 import actsData from '../data/acts.json';
 
+/** Auto-assign formation row based on unit role */
+export function autoFormationByRole(role: string): 'front' | 'back' {
+  return (role === 'tank' || role === 'melee_dps') ? 'front' : 'back';
+}
+
 /**
  * Singleton managing the state of the current run.
  * Persists across scene transitions within a single run.
@@ -78,6 +83,7 @@ export class RunManager {
         armor: null,
         accessory: null,
       },
+      formation: autoFormationByRole(data.role),
     };
   }
 

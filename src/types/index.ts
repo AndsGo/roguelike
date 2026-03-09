@@ -66,6 +66,7 @@ export interface HeroState {
   temporaryElement?: ElementType;
   /** Permanent stat bonuses from events (accumulated across the run) */
   statBonuses?: Partial<Record<keyof UnitStats, number>>;
+  formation?: 'front' | 'back';
 }
 
 // ============ Enemy ============

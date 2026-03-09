@@ -45,6 +45,14 @@ export const UI = {
       `英雄:${heroes}  遗物:${relics}  进度:${completed}/${total}`,
   },
 
+  formation: {
+    title: '阵型',
+    front: '前排',
+    back: '后排',
+    autoAssign: '自动分配',
+    tip: '前排英雄更容易被近战敌人攻击',
+  },
+
   // Node types
   nodeType: {
     battle: '战斗',

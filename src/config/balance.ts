@@ -10,6 +10,13 @@ export const HERO_START_X = 120;
 export const ENEMY_START_X = 620;
 export const UNIT_SPACING_Y = 70;
 
+// ============ Formation ============
+
+export const FRONT_ROW_X = 140;
+export const BACK_ROW_X = 80;
+export const FRONT_ROW_AGGRO_BONUS = 50;
+export const MELEE_RANGE_THRESHOLD = 100;
+
 // ============ Combat ============
 
 export const BASE_ATTACK_COOLDOWN = 1000; // ms
