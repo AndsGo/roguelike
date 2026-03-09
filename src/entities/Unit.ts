@@ -19,6 +19,7 @@ export class Unit extends Phaser.GameObjects.Container {
   classType: ClassType;
   isHero: boolean;
   element: ElementType | undefined;
+  formation: 'front' | 'back' = 'front';
 
   // Stats
   baseStats: UnitStats;

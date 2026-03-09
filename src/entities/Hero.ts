@@ -21,6 +21,7 @@ export class Hero extends Unit {
 
     this.heroData = heroData;
     this.heroState = heroState;
+    this.formation = heroState.formation ?? 'front';
     this.currentHp = heroState.currentHp;
     this.healthBar.updateHealth(this.currentHp, stats.maxHp);
   }

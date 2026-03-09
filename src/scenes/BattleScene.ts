@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { GAME_WIDTH, GAME_HEIGHT, BATTLE_GROUND_Y, HERO_START_X, ENEMY_START_X, UNIT_SPACING_Y } from '../constants';
+import { GAME_WIDTH, GAME_HEIGHT, BATTLE_GROUND_Y, HERO_START_X, ENEMY_START_X, UNIT_SPACING_Y, FRONT_ROW_X, BACK_ROW_X } from '../constants';
 import { RunManager } from '../managers/RunManager';
 import { BattleSystem } from '../systems/BattleSystem';
 import { Hero } from '../entities/Hero';
@@ -159,13 +159,30 @@ export class BattleScene extends Phaser.Scene {
     this.battleSystem = new BattleSystem(rng);
     this.battleSystem.actModifier = new ActModifierSystem(actIndex, this.battleSystem.damageSystem);
 
-    // Create heroes
+    // Create heroes — split into front/back rows
     const heroStates = rm.getHeroes();
-    const heroes: Hero[] = heroStates.map((state, i) => {
+    const frontHeroes: { state: typeof heroStates[0]; data: ReturnType<typeof rm.getHeroData> }[] = [];
+    const backHeroes: { state: typeof heroStates[0]; data: ReturnType<typeof rm.getHeroData> }[] = [];
+    for (const state of heroStates) {
       const data = rm.getHeroData(state.id);
-      const y = BATTLE_GROUND_Y - ((heroStates.length - 1) / 2 - i) * UNIT_SPACING_Y;
-      return new Hero(this, HERO_START_X, y, data, state);
-    });
+      const formation = rm.getHeroFormation(state.id);
+      if (formation === 'front') {
+        frontHeroes.push({ state, data });
+      } else {
+        backHeroes.push({ state, data });
+      }
+    }
+
+    const positionRow = (row: typeof frontHeroes, xPos: number): Hero[] =>
+      row.map((h, i) => {
+        const y = BATTLE_GROUND_Y - ((row.length - 1) / 2 - i) * UNIT_SPACING_Y;
+        return new Hero(this, xPos, y, h.data, h.state);
+      });
+
+    const heroes: Hero[] = [
+      ...positionRow(frontHeroes, FRONT_ROW_X),
+      ...positionRow(backHeroes, BACK_ROW_X),
+    ];
 
     // Create enemies
     const battleData = node.data as BattleNodeData;

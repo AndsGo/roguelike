@@ -111,6 +111,19 @@ export class RunManager {
     return this.state.heroes.find(h => h.id === heroId);
   }
 
+  /** Get hero's formation, falling back to role-based default for old saves */
+  getHeroFormation(heroId: string): 'front' | 'back' {
+    const hero = this.state.heroes.find(h => h.id === heroId);
+    if (!hero) return 'front';
+    return hero.formation ?? autoFormationByRole(this.getHeroData(heroId).role);
+  }
+
+  /** Update a hero's formation row */
+  setHeroFormation(heroId: string, formation: 'front' | 'back'): void {
+    const hero = this.state.heroes.find(h => h.id === heroId);
+    if (hero) hero.formation = formation;
+  }
+
   // ---- Mutations ----
 
   setMap(map: MapNode[]): void {
