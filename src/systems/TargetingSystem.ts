@@ -1,6 +1,7 @@
 import { Unit } from '../entities/Unit';
 import { ElementType } from '../types';
 import { hasElementAdvantage } from '../config/elements';
+import { FRONT_ROW_AGGRO_BONUS, MELEE_RANGE_THRESHOLD } from '../constants';
 
 export type TargetStrategy = 'default' | 'element_priority' | 'lowest_hp' | 'nearest' | 'highest_threat';
 
@@ -235,6 +236,13 @@ export class TargetingSystem {
 
       // Aggro weight
       score += rawThreat[i] * invMaxThreat * 0.15;
+
+      // Formation bonus: melee enemies prefer front-row heroes
+      if (!unit.isHero && unit.currentStats.attackRange <= MELEE_RANGE_THRESHOLD) {
+        if (targets[i].formation === 'front') {
+          score += FRONT_ROW_AGGRO_BONUS * invMaxBase;
+        }
+      }
 
       if (score > bestScore) {
         bestScore = score;
