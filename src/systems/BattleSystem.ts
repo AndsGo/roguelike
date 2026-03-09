@@ -47,6 +47,16 @@ export class BattleSystem {
   private phaseTimer: number = 0;
   private battleResult: BattleResult | null = null;
 
+  // Wave management (gauntlet nodes)
+  private waveIndex: number = 0;
+  private totalWaves: number = 1;
+  private waveEnemyData: { id: string; level: number }[][] = [];
+  private onWaveTransition: ((waveIndex: number, totalWaves: number) => void) | null = null;
+
+  // Accumulated rewards across waves
+  private accumulatedGold: number = 0;
+  private accumulatedExp: number = 0;
+
   constructor(rng: SeededRNG) {
     this.rng = rng;
     this.damageAccumulator = new DamageAccumulator();
@@ -76,6 +86,12 @@ export class BattleSystem {
     this.internalPhase = 'preparing';
     this.phaseTimer = PREPARE_DURATION;
     this.battleResult = null;
+    this.accumulatedGold = 0;
+    this.accumulatedExp = 0;
+    this.waveIndex = 0;
+    this.totalWaves = 1;
+    this.waveEnemyData = [];
+    this.onWaveTransition = null;
 
     // Reset threat tracking for new battle
     TargetingSystem.resetThreat();
@@ -105,6 +121,21 @@ export class BattleSystem {
       enemyCount: enemies.length,
     });
   }
+
+  /** Configure multi-wave battle (gauntlet). Call after setUnits(). */
+  setWaveData(
+    waves: { id: string; level: number }[][],
+    onWaveTransition: (waveIndex: number, totalWaves: number) => void,
+  ): void {
+    this.totalWaves = 1 + waves.length;
+    this.waveEnemyData = waves;
+    this.waveIndex = 0;
+    this.onWaveTransition = onWaveTransition;
+  }
+
+  getWaveIndex(): number { return this.waveIndex; }
+  getTotalWaves(): number { return this.totalWaves; }
+  hasMoreWaves(): boolean { return this.waveIndex < this.totalWaves - 1; }
 
   /**
    * Calculate synergy bonuses and apply them to hero units.
@@ -322,34 +353,91 @@ export class BattleSystem {
     }
   }
 
+  private getAccumulatedGoldReward(): number {
+    return this.accumulatedGold + this.getTotalGoldReward();
+  }
+
+  private getAccumulatedExpReward(): number {
+    return this.accumulatedExp + this.getTotalExpReward();
+  }
+
+  /** Replace enemy roster for new wave (gauntlet). Banks previous wave rewards. */
+  replaceEnemies(newEnemies: Enemy[]): void {
+    this.accumulatedGold += this.getTotalGoldReward();
+    this.accumulatedExp += this.getTotalExpReward();
+
+    this.enemies = newEnemies;
+
+    // Initialize skills for new enemies
+    for (const enemy of newEnemies) {
+      this.skillSystem.initializeSkills(enemy, enemy.enemyData.skills);
+    }
+
+    // Apply act modifiers to new enemies
+    if (this.actModifier) {
+      this.actModifier.applyBattleStart(this.heroes, newEnemies);
+    }
+  }
+
   private checkBattleEnd(): void {
     const heroesAlive = this.heroes.some(h => h.isAlive);
     const enemiesAlive = this.enemies.some(e => e.isAlive);
 
     if (!enemiesAlive || !heroesAlive) {
-      const victory = !enemiesAlive;
+      if (!heroesAlive) {
+        this.endBattle(false);
+        return;
+      }
 
-      this.battleResult = {
-        victory,
-        goldEarned: victory ? this.getTotalGoldReward() : 0,
-        expEarned: victory ? this.getTotalExpReward() : 0,
-        survivors: this.heroes.filter(h => h.isAlive).map(h => h.unitId),
-      };
+      if (this.hasMoreWaves()) {
+        this.beginNextWave();
+        return;
+      }
 
-      // Emit battle:end event
-      EventBus.getInstance().emit('battle:end', {
-        victory,
-        result: this.battleResult,
-      });
-
-      // Flush remaining damage numbers and reset accumulator
-      this.damageAccumulator.flushAll();
-      this.damageAccumulator.reset();
-
-      // Transition to settling phase (still publicly 'fighting')
-      this.internalPhase = 'settling';
-      this.phaseTimer = SETTLE_DURATION;
+      this.endBattle(true);
     }
+  }
+
+  private endBattle(victory: boolean): void {
+    this.battleResult = {
+      victory,
+      goldEarned: victory ? this.getAccumulatedGoldReward() : 0,
+      expEarned: victory ? this.getAccumulatedExpReward() : 0,
+      survivors: this.heroes.filter(h => h.isAlive).map(h => h.unitId),
+    };
+
+    // Emit battle:end event
+    EventBus.getInstance().emit('battle:end', {
+      victory,
+      result: this.battleResult,
+    });
+
+    // Flush remaining damage numbers and reset accumulator
+    this.damageAccumulator.flushAll();
+    this.damageAccumulator.reset();
+
+    // Transition to settling phase (still publicly 'fighting')
+    this.internalPhase = 'settling';
+    this.phaseTimer = SETTLE_DURATION;
+  }
+
+  private beginNextWave(): void {
+    this.waveIndex++;
+
+    this.damageAccumulator.flushAll();
+    this.damageAccumulator.reset();
+
+    TargetingSystem.resetThreat();
+    this.comboSystem.reset();
+
+    RelicSystem.resetBattleFlags();
+
+    if (this.onWaveTransition) {
+      this.onWaveTransition(this.waveIndex, this.totalWaves);
+    }
+
+    this.internalPhase = 'preparing';
+    this.phaseTimer = PREPARE_DURATION;
   }
 
   /**

@@ -98,6 +98,12 @@ export class RelicSystem {
     inst.shieldTimer = 0;
   }
 
+  /** Reset per-battle one-time flags (called between gauntlet waves) */
+  static resetBattleFlags(): void {
+    const inst = RelicSystem.getInstance();
+    inst.phoenixUsed = false;
+  }
+
   /** Reset singleton — for testing */
   static reset(): void {
     if (RelicSystem.instance) {
