@@ -332,6 +332,7 @@ export interface MetaProgressionData {
   metaCurrency: number;     // soul currency for permanent upgrades
   encounteredEnemies: string[];   // enemy IDs seen in battle (codex tracking)
   defeatedBosses: string[];       // boss IDs killed across all runs
+  mutations?: string[];           // unlocked mutation IDs (optional for legacy saves)
 }
 
 export interface PermanentUpgrade {
