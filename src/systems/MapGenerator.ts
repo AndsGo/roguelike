@@ -6,9 +6,9 @@ import actsData from '../data/acts.json';
 // Node type templates for each act (per-layer distribution)
 // Each act: [battle, battle, event/shop, battle, elite, battle, rest, boss]
 const ACT_NODE_TEMPLATES: NodeType[][] = [
-  ['battle', 'battle', 'shop', 'battle', 'event', 'battle', 'rest', 'boss'],
-  ['battle', 'battle', 'event', 'battle', 'elite', 'battle', 'rest', 'boss'],
-  ['battle', 'event', 'battle', 'elite', 'battle', 'battle', 'rest', 'boss'],
+  ['battle', 'battle', 'shop', 'gauntlet', 'event', 'battle', 'rest', 'boss'],
+  ['battle', 'battle', 'event', 'battle', 'elite', 'gauntlet', 'rest', 'boss'],
+  ['battle', 'event', 'gauntlet', 'elite', 'battle', 'battle', 'rest', 'boss'],
 ];
 
 export class MapGenerator {
@@ -63,6 +63,8 @@ export class MapGenerator {
           // Generate data for battle/elite/boss nodes
           if (finalType === 'battle' || finalType === 'elite' || finalType === 'boss') {
             node.data = this.generateBattleData(rng, finalType, layerIdx, floor, act);
+          } else if (finalType === 'gauntlet') {
+            node.data = this.generateGauntletData(rng, layerIdx, floor, act);
           } else if (finalType === 'event') {
             node.data = this.generateEventData(rng, act);
           }
@@ -200,6 +202,50 @@ export class MapGenerator {
         id: e.id,
         level: Math.round(baseLevel * diffMult),
       })),
+    };
+  }
+
+  private static generateGauntletData(
+    rng: SeededRNG,
+    layerIndex: number,
+    floor: number,
+    act: ActConfig,
+  ): BattleNodeData {
+    const baseLevel = Math.max(1, floor + Math.floor(layerIndex / 2));
+    const diffMult = act.difficultyMultiplier;
+
+    const actEnemies = enemiesData.filter(
+      e => act.enemyPool.includes(e.id) && !e.isBoss
+    );
+    const normalEnemies = actEnemies.length > 0
+      ? actEnemies
+      : enemiesData.filter(e => !e.isBoss);
+
+    // Wave 1: 2-3 enemies at base level
+    const wave1Count = rng.nextInt(2, 3);
+    const wave1 = rng.pickN(normalEnemies, Math.min(wave1Count, normalEnemies.length));
+    const wave1Data = wave1.map(e => ({
+      id: e.id,
+      level: Math.round(baseLevel * diffMult),
+    }));
+
+    // Total waves: 2-3
+    const totalWaves = rng.nextInt(2, 3);
+    const extraWaves: { id: string; level: number }[][] = [];
+
+    for (let w = 1; w < totalWaves; w++) {
+      // Each subsequent wave: +1 enemy, slightly higher level
+      const waveCount = wave1Count + w;
+      const waveEnemies = rng.pickN(normalEnemies, Math.min(waveCount, normalEnemies.length));
+      extraWaves.push(waveEnemies.map(e => ({
+        id: e.id,
+        level: Math.round((baseLevel + w) * diffMult),
+      })));
+    }
+
+    return {
+      enemies: wave1Data,
+      waves: extraWaves.length > 0 ? extraWaves : undefined,
     };
   }
 
