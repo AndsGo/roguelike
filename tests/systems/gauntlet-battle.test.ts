@@ -223,8 +223,8 @@ describe('Gauntlet wave management', () => {
     const result = bs.getBattleResult();
     expect(result).toBeDefined();
     expect(result!.victory).toBe(true);
-    expect(result!.goldEarned).toBe(25); // 10 + 15
-    expect(result!.expEarned).toBe(13);  // 5 + 8
+    expect(result!.goldEarned).toBe(20); // (10 + 15) * 0.8 = 20 (gauntlet scaling)
+    expect(result!.expEarned).toBe(10);  // (5 + 8) * 0.8 = 10.4 → 10 (gauntlet scaling)
   });
 
   it('defeat does not award gold even with accumulated rewards', () => {

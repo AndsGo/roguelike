@@ -14,6 +14,7 @@ import { EventBus } from './EventBus';
 import { RelicSystem } from './RelicSystem';
 import { DamageAccumulator } from './DamageAccumulator';
 import { SeededRNG } from '../utils/rng';
+import { GAUNTLET_REWARD_MULTIPLIER } from '../constants';
 import { HeroData, HeroState, BattleResult } from '../types';
 
 /**
@@ -354,11 +355,19 @@ export class BattleSystem {
   }
 
   private getAccumulatedGoldReward(): number {
-    return this.accumulatedGold + this.getTotalGoldReward();
+    const raw = this.accumulatedGold + this.getTotalGoldReward();
+    if (this.totalWaves > 1) {
+      return Math.round(raw * GAUNTLET_REWARD_MULTIPLIER);
+    }
+    return raw;
   }
 
   private getAccumulatedExpReward(): number {
-    return this.accumulatedExp + this.getTotalExpReward();
+    const raw = this.accumulatedExp + this.getTotalExpReward();
+    if (this.totalWaves > 1) {
+      return Math.round(raw * GAUNTLET_REWARD_MULTIPLIER);
+    }
+    return raw;
   }
 
   /** Replace enemy roster for new wave (gauntlet). Banks previous wave rewards. */

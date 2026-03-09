@@ -48,4 +48,6 @@ export {
   HEALTH_BAR_HEIGHT,
   DAMAGE_NUMBER_DURATION,
   DAMAGE_NUMBER_RISE,
+  // Gauntlet
+  GAUNTLET_REWARD_MULTIPLIER,
 } from './config/balance';

@@ -65,3 +65,7 @@ export const HEALTH_BAR_WIDTH = 40;
 export const HEALTH_BAR_HEIGHT = 5;
 export const DAMAGE_NUMBER_DURATION = 800;
 export const DAMAGE_NUMBER_RISE = 30;
+
+// ============ Gauntlet ============
+
+export const GAUNTLET_REWARD_MULTIPLIER = 0.8; // per-wave multiplier (3 waves × 0.8 = 2.4x total)
