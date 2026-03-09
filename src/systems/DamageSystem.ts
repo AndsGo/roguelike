@@ -252,26 +252,26 @@ export class DamageSystem {
     const actual = target.heal(healAmount);
 
     // Overflow shield: excess healing becomes temporary HP (max 20% maxHp)
-    if (RelicSystem.hasOverflowShield() && target.isHero) {
-      const overflow = healAmount - actual;
-      if (overflow > 0) {
-        const maxShield = Math.round(target.currentStats.maxHp * 0.2);
-        const currentOverheal = target.currentHp - target.currentStats.maxHp;
-        const available = maxShield - Math.max(0, currentOverheal);
-        if (available > 0) {
-          const shieldAmount = Math.min(overflow, available);
-          target.currentHp += shieldAmount;
-        }
+    const totalOverflow = healAmount - actual;
+    let overflowConsumed = 0;
+    if (RelicSystem.hasOverflowShield() && target.isHero && totalOverflow > 0) {
+      const maxShield = Math.round(target.currentStats.maxHp * 0.2);
+      const currentOverheal = target.currentHp - target.currentStats.maxHp;
+      const available = maxShield - Math.max(0, currentOverheal);
+      if (available > 0) {
+        const shieldAmount = Math.min(totalOverflow, available);
+        target.currentHp += shieldAmount;
+        overflowConsumed = shieldAmount;
       }
     }
 
-    // Mutation: heal_shield — overflow heals → shield at 50% efficiency
+    // Mutation: heal_shield — remaining overflow → shield at 50% efficiency
     if (MetaManager.hasMutation('heal_shield') && target.isHero) {
-      const overflow = healAmount - actual;
-      if (overflow > 0) {
-        const shieldAmount = Math.round(overflow * 0.5);
+      const remainingOverflow = totalOverflow - overflowConsumed;
+      if (remainingOverflow > 0) {
+        const shieldAmount = Math.round(remainingOverflow * 0.5);
         if (shieldAmount > 0) {
-          target.currentHp = Math.min(target.currentHp + shieldAmount, target.currentStats.maxHp + shieldAmount);
+          target.currentHp += shieldAmount;
         }
       }
     }

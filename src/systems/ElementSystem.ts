@@ -123,7 +123,7 @@ export class ElementSystem {
     });
 
     // Mutation: reaction_chain — 25% chance to spread trigger element to nearby enemy
-    if (MetaManager.hasMutation('reaction_chain') && Math.random() < 0.25) {
+    if (MetaManager.hasMutation('reaction_chain') && attacker && attacker.scene && Math.random() < 0.25) {
       const spreadTargets = RelicSystem.getSplashTargets(target.unitId, 1);
       if (spreadTargets.length > 0) {
         const spreadTarget = spreadTargets[0];
