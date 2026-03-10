@@ -98,6 +98,12 @@ export class RelicSystem {
     inst.shieldTimer = 0;
   }
 
+  /** Update enemy references for new wave (gauntlet) */
+  static updateEnemies(enemies: Unit[]): void {
+    const inst = RelicSystem.getInstance();
+    inst.enemies = enemies;
+  }
+
   /** Reset per-battle one-time flags (called between gauntlet waves) */
   static resetBattleFlags(): void {
     const inst = RelicSystem.getInstance();

@@ -45,6 +45,17 @@ export class MetaManager {
     { id: 'relic_chance', level: 0, maxLevel: 3 },
   ];
 
+  /** Mutation definitions: unlockable battle modifiers */
+  static MUTATION_DEFS: Array<{ id: string; cost: number }> = [
+    { id: 'overkill_splash', cost: 150 },
+    { id: 'crit_cooldown', cost: 150 },
+    { id: 'heal_shield', cost: 150 },
+    { id: 'reaction_chain', cost: 130 },
+  ];
+
+  /** Total permanent upgrade levels required to unlock mutations */
+  static MUTATION_GATE = 8;
+
   /** Unlock requirements: heroId -> { type, threshold, description, ... } */
   private static HERO_UNLOCK_CONDITIONS: Record<string, {
     type: string;
@@ -357,6 +368,43 @@ export class MetaManager {
     return (MetaManager.getInstance().meta.defeatedBosses ?? []).includes(bossId);
   }
 
+  // ---- Mutations ----
+
+  /** Get total levels across all permanent upgrades */
+  static getTotalUpgradeLevels(): number {
+    const inst = MetaManager.getInstance();
+    return inst.meta.permanentUpgrades.reduce((sum, u) => sum + u.level, 0);
+  }
+
+  /** Check if mutation tier is unlocked (enough total upgrade levels) */
+  static isMutationTierUnlocked(): boolean {
+    return MetaManager.getTotalUpgradeLevels() >= MetaManager.MUTATION_GATE;
+  }
+
+  /** Check if a mutation is owned */
+  static hasMutation(mutationId: string): boolean {
+    return (MetaManager.getInstance().meta.mutations ?? []).includes(mutationId);
+  }
+
+  /** Purchase a mutation. Returns false if gate not met, already owned, or insufficient currency. */
+  static purchaseMutation(mutationId: string): boolean {
+    if (!MetaManager.isMutationTierUnlocked()) return false;
+    if (MetaManager.hasMutation(mutationId)) return false;
+
+    const def = MetaManager.MUTATION_DEFS.find(d => d.id === mutationId);
+    if (!def) return false;
+
+    const currency = MetaManager.getMetaCurrency();
+    if (currency < def.cost) return false;
+
+    const inst = MetaManager.getInstance();
+    MetaManager.addMetaCurrency(-def.cost);
+    if (!inst.meta.mutations) inst.meta.mutations = [];
+    inst.meta.mutations.push(mutationId);
+    inst.persist();
+    return true;
+  }
+
   /** Reset all meta progression to defaults */
   static resetAll(): void {
     const inst = MetaManager.getInstance();
@@ -372,6 +420,7 @@ export class MetaManager {
     inst.meta.metaCurrency = 0;
     inst.meta.encounteredEnemies = [];
     inst.meta.defeatedBosses = [];
+    inst.meta.mutations = [];
     inst.ensureUpgradeState();
     inst.persist();
   }
