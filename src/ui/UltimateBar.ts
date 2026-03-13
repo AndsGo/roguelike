@@ -95,6 +95,7 @@ class UltimateSlot extends Phaser.GameObjects.Container {
   private ringGraphics: Phaser.GameObjects.Graphics;
   private nameText: Phaser.GameObjects.Text;
   private energyText: Phaser.GameObjects.Text;
+  private tooltip: Phaser.GameObjects.Container | null = null;
   private isReady: boolean = false;
   private lastEnergyRatio: number = -1;
   private readyTween: Phaser.Tweens.Tween | null = null;
@@ -172,6 +173,8 @@ class UltimateSlot extends Phaser.GameObjects.Container {
       const dist = Math.sqrt((x - downX) ** 2 + (y - downY) ** 2);
       if (dist < 20) this.tryFire();
     });
+    hitArea.on('pointerover', () => this.showTooltip());
+    hitArea.on('pointerout', () => this.hideTooltip());
     this.add(hitArea);
   }
 
@@ -253,6 +256,59 @@ class UltimateSlot extends Phaser.GameObjects.Container {
       }
     }
     this.ringGraphics.strokePath();
+  }
+
+  private showTooltip(): void {
+    if (this.tooltip) return;
+
+    const targetLabels: Record<string, string> = {
+      enemy: '敌方单体', ally: '友方单体', self: '自身',
+      all_enemies: '全体敌方', all_allies: '全体友方',
+    };
+    const elementStr = this.skill.element ? ` [${this.skill.element}]` : '';
+    const lines: string[] = [
+      `★ ${this.skill.name}${elementStr}`,
+      `目标: ${targetLabels[this.skill.targetType] ?? this.skill.targetType}`,
+    ];
+    if (this.skill.scalingRatio) {
+      const ratio = Math.round(this.skill.scalingRatio * 100);
+      lines.push(`倍率: ${ratio}% ${this.skill.scalingStat === 'magicPower' ? '法力' : '攻击'}`);
+    }
+
+    const cx = BUTTON_SIZE / 2;
+    this.tooltip = this.scene.add.container(cx, -8);
+
+    const text = this.scene.add.text(0, 0, lines.join('\n'), {
+      fontSize: '9px',
+      color: '#ffffff',
+      fontFamily: 'monospace',
+      lineSpacing: 2,
+    }).setOrigin(0.5, 1);
+
+    const padding = 6;
+    const bg = this.scene.add.graphics();
+    bg.fillStyle(Theme.colors.panel, 0.95);
+    bg.fillRoundedRect(
+      -text.width / 2 - padding, -text.height - padding,
+      text.width + padding * 2, text.height + padding * 2, 4,
+    );
+    bg.lineStyle(1, Theme.colors.panelBorder, 0.7);
+    bg.strokeRoundedRect(
+      -text.width / 2 - padding, -text.height - padding,
+      text.width + padding * 2, text.height + padding * 2, 4,
+    );
+
+    this.tooltip.add(bg);
+    this.tooltip.add(text);
+    this.tooltip.setDepth(200);
+    this.add(this.tooltip);
+  }
+
+  private hideTooltip(): void {
+    if (this.tooltip) {
+      this.tooltip.destroy();
+      this.tooltip = null;
+    }
   }
 
   /** Attempt to fire this ultimate */

@@ -1,4 +1,4 @@
-import { RelicState, RelicEffect, UnitStats } from '../types';
+import { RelicState, RelicEffect, UnitStats, GameEventType } from '../types';
 import { EventBus } from './EventBus';
 import { Unit } from '../entities/Unit';
 import { SeededRNG } from '../utils/rng';
@@ -9,7 +9,7 @@ interface RelicDef {
   name: string;
   description: string;
   rarity: string;
-  triggerEvent: string;
+  triggerEvent: GameEventType;
   effect: RelicEffect;
 }
 
@@ -49,7 +49,7 @@ export class RelicSystem {
   private relicDefs: Map<string, RelicDef> = new Map();
   private heroes: Unit[] = [];
   private enemies: Unit[] = [];
-  private listeners: Array<{ event: string; handler: (...args: any[]) => void }> = [];
+  private listeners: Array<{ event: GameEventType; handler: (...args: any[]) => void }> = [];
   private rng: SeededRNG = new SeededRNG(Date.now());
   private phoenixUsed: boolean = false;
   private shieldTimer: number = 0;
@@ -412,7 +412,7 @@ export class RelicSystem {
       const handler = this.createHandler(relicState, def);
       if (!handler) continue;
 
-      eb.on(def.triggerEvent as any, handler);
+      eb.on(def.triggerEvent, handler);
       this.listeners.push({ event: def.triggerEvent, handler });
     }
   }
@@ -421,7 +421,7 @@ export class RelicSystem {
   private unregisterListeners(): void {
     const eb = EventBus.getInstance();
     for (const { event, handler } of this.listeners) {
-      eb.off(event as any, handler);
+      eb.off(event, handler);
     }
     this.listeners = [];
   }
