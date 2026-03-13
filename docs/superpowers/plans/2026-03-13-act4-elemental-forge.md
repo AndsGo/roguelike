@@ -31,7 +31,7 @@
 | `src/data/events.json` | +3 event entries |
 | `src/data/acts.json` | +1 act4 entry |
 | `src/data/skill-visuals.json` | +19 visual entries |
-| `src/data/skill-advancements.json` | +24 advancement entries (12 skills × 2 levels) |
+| `src/data/skill-advancements.json` | +16 advancement entries (8 regular skills × 2 levels; ultimates excluded per existing convention) |
 
 ### Modified Source Files
 | File | Change |
@@ -582,7 +582,6 @@ Append to the array in `src/data/acts.json`:
   "enemyPool": ["flame_construct", "frost_sentinel", "lightning_strider", "holy_smith", "void_weaver", "elemental_chimera"],
   "bossPool": ["heart_of_the_forge"],
   "eventPool": ["forge_trial", "element_shard", "master_smith", "ancient_altar", "blacksmith", "elemental_rift", "elemental_shrine"],
-  "elementAffinity": null,
   "difficultyMultiplier": 2.2
 }
 ```
@@ -643,13 +642,15 @@ Append to `src/data/events.json`. Follow the existing event structure: `id`, `ti
     {
       "text": "接受火元素灌注",
       "outcomes": [
-        { "probability": 1.0, "description": "火焰之力充盈你的队伍！攻击力提升但冰抗下降。", "effects": [{ "type": "stat_boost", "stat": "attack", "value": 15 }, { "type": "stat_boost", "stat": "magicResist", "value": -5 }] }
+        { "probability": 0.7, "description": "火焰之力充盈你的队伍！", "effects": [{ "type": "stat_boost", "value": 15 }] },
+        { "probability": 0.3, "description": "火焰失控，灼伤了队伍但也带来了力量。", "effects": [{ "type": "damage", "value": 0.1, "target": "all" }, { "type": "stat_boost", "value": 20 }] }
       ]
     },
     {
       "text": "接受雷元素灌注",
       "outcomes": [
-        { "probability": 1.0, "description": "雷电之力充盈你的队伍！速度提升但防御下降。", "effects": [{ "type": "stat_boost", "stat": "speed", "value": 20 }, { "type": "stat_boost", "stat": "defense", "value": -5 }] }
+        { "probability": 0.7, "description": "雷电之力充盈你的队伍！", "effects": [{ "type": "stat_boost", "value": 12 }] },
+        { "probability": 0.3, "description": "雷电过载！痛苦中蕴含着更强的力量。", "effects": [{ "type": "damage", "value": 0.15, "target": "all" }, { "type": "stat_boost", "value": 22 }] }
       ]
     },
     {
@@ -668,8 +669,8 @@ Append to `src/data/events.json`. Follow the existing event structure: `id`, `ti
     {
       "text": "吸收碎片能量",
       "outcomes": [
-        { "probability": 0.5, "description": "碎片的力量增强了你的队伍！", "effects": [{ "type": "stat_boost", "stat": "attack", "value": 12 }] },
-        { "probability": 0.5, "description": "碎片的力量增强了你的防御！", "effects": [{ "type": "stat_boost", "stat": "defense", "value": 10 }] }
+        { "probability": 0.6, "description": "碎片的力量增强了你的队伍！", "effects": [{ "type": "stat_boost", "value": 12 }] },
+        { "probability": 0.4, "description": "碎片能量过于强烈，但你也获得了力量。", "effects": [{ "type": "damage", "value": 0.08, "target": "random" }, { "type": "stat_boost", "value": 18 }] }
       ]
     },
     {
@@ -688,7 +689,7 @@ Append to `src/data/events.json`. Follow the existing event structure: `id`, `ti
     {
       "text": "支付80金币强化装备",
       "outcomes": [
-        { "probability": 0.7, "description": "大师精湛的技艺提升了你的装备！", "effects": [{ "type": "gold", "value": -80 }, { "type": "stat_boost", "stat": "attack", "value": 10 }, { "type": "stat_boost", "stat": "defense", "value": 8 }] },
+        { "probability": 0.7, "description": "大师精湛的技艺提升了你的装备！", "effects": [{ "type": "gold", "value": -80 }, { "type": "stat_boost", "value": 15 }] },
         { "probability": 0.3, "description": "强化失败了，但大师退还了一半费用。", "effects": [{ "type": "gold", "value": -40 }] }
       ]
     },
@@ -730,7 +731,7 @@ Add to the object in `src/data/skill-visuals.json`:
 
 - [ ] **Step 5: Add skill advancement entries to `skill-advancements.json`**
 
-Append 24 entries (12 hero skills × 2 levels) to `src/data/skill-advancements.json`. Each follows the pattern: `skillId`, `level` (1 or 2), `requiredHeroLevel` (5 or 10), `name`, `description`, `bonuses`.
+Append 16 entries (8 regular hero skills × 2 levels) to `src/data/skill-advancements.json`. Ultimates (`ult_*`) are excluded — they have `cooldown: 0` and no advancement path, matching existing convention. Each follows the pattern: `skillId`, `level` (1 or 2), `requiredHeroLevel` (5 or 10), `name`, `description`, `bonuses`.
 
 ```json
 { "skillId": "elemental_infusion", "level": 1, "requiredHeroLevel": 5, "name": "强化灌注", "description": "冷却-1s", "bonuses": { "cooldown": -1 } },
@@ -1232,6 +1233,38 @@ this.onBossPhase = (data) => {
     if (boss) {
       // Visual announcement
       this.effects.showSkillName(boss.x, boss.y - 20, UI.battle.bossPhase(data.phaseIndex + 1), 0xffcc00);
+
+      // Apply mechanical effect by pushing to unit.statusEffects directly
+      // (same pattern as SkillSystem.ts and RelicSystem.ts)
+      switch (data.effect.type) {
+        case 'shield':
+          // Temporary invulnerability — massive defense buff for N ms
+          boss.statusEffects.push({
+            id: 'boss_shield', type: 'buff', name: '护盾',
+            stat: 'defense', value: 9999,
+            duration: data.effect.value / 1000, // ms → seconds
+          });
+          this.effects.showSkillName(boss.x, boss.y - 40, UI.battle.bossShield, 0x44aaff);
+          break;
+        case 'enrage':
+          // Permanent attack buff for remainder of fight
+          boss.statusEffects.push({
+            id: 'boss_enrage', type: 'buff', name: '狂暴',
+            stat: 'attack', value: data.effect.value,
+            duration: 999,
+          });
+          this.effects.showSkillName(boss.x, boss.y - 40, UI.battle.bossEnrage, 0xff4444);
+          break;
+        case 'damage_reduction':
+          // Permanent defense buff
+          boss.statusEffects.push({
+            id: 'boss_dmg_reduction', type: 'buff', name: '防御强化',
+            stat: 'defense', value: data.effect.value,
+            duration: 999,
+          });
+          this.effects.showSkillName(boss.x, boss.y - 40, UI.battle.bossDamageReduction, 0xffaa44);
+          break;
+      }
     }
   }
 };
