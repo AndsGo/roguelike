@@ -139,8 +139,8 @@ describe('MapGenerator', () => {
   });
 
   describe('getActCount', () => {
-    it('returns 3 acts', () => {
-      expect(MapGenerator.getActCount()).toBe(3);
+    it('returns 4 acts', () => {
+      expect(MapGenerator.getActCount()).toBe(4);
     });
   });
 
