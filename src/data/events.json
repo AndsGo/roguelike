@@ -793,5 +793,72 @@
         ]
       }
     ]
+  },
+  {
+    "id": "forge_trial",
+    "title": "熔炉试炼",
+    "description": "一座古老的元素熔炉正在运转，你可以选择接受元素灌注...",
+    "choices": [
+      {
+        "text": "接受火元素灌注",
+        "outcomes": [
+          { "probability": 0.7, "description": "火焰之力充盈你的队伍！", "effects": [{ "type": "stat_boost", "value": 15 }] },
+          { "probability": 0.3, "description": "火焰失控，灼伤了队伍但也带来了力量。", "effects": [{ "type": "damage", "value": 0.1, "target": "all" }, { "type": "stat_boost", "value": 20 }] }
+        ]
+      },
+      {
+        "text": "接受雷元素灌注",
+        "outcomes": [
+          { "probability": 0.7, "description": "雷电之力充盈你的队伍！", "effects": [{ "type": "stat_boost", "value": 12 }] },
+          { "probability": 0.3, "description": "雷电过载！痛苦中蕴含着更强的力量。", "effects": [{ "type": "damage", "value": 0.15, "target": "all" }, { "type": "stat_boost", "value": 22 }] }
+        ]
+      },
+      {
+        "text": "拒绝试炼",
+        "outcomes": [
+          { "probability": 1.0, "description": "你谨慎地离开，获得一些金币作为补偿。", "effects": [{ "type": "gold", "value": 30 }] }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "element_shard",
+    "title": "元素碎片",
+    "description": "地上散落着一块闪烁着多彩光芒的元素碎片...",
+    "choices": [
+      {
+        "text": "吸收碎片能量",
+        "outcomes": [
+          { "probability": 0.6, "description": "碎片的力量增强了你的队伍！", "effects": [{ "type": "stat_boost", "value": 12 }] },
+          { "probability": 0.4, "description": "碎片能量过于强烈，但你也获得了力量。", "effects": [{ "type": "damage", "value": 0.08, "target": "random" }, { "type": "stat_boost", "value": 18 }] }
+        ]
+      },
+      {
+        "text": "出售碎片",
+        "outcomes": [
+          { "probability": 1.0, "description": "一位收藏家高价买下了碎片。", "effects": [{ "type": "gold", "value": 80 }] }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "master_smith",
+    "title": "锻造大师",
+    "description": "一位传奇锻造大师正在此地工作，他愿意为你强化装备...",
+    "choices": [
+      {
+        "text": "支付80金币强化装备",
+        "outcomes": [
+          { "probability": 0.7, "description": "大师精湛的技艺提升了你的装备！", "effects": [{ "type": "gold", "value": -80 }, { "type": "stat_boost", "value": 15 }] },
+          { "probability": 0.3, "description": "强化失败了，但大师退还了一半费用。", "effects": [{ "type": "gold", "value": -40 }] }
+        ]
+      },
+      {
+        "text": "离开",
+        "outcomes": [
+          { "probability": 1.0, "description": "你继续前行。", "effects": [] }
+        ]
+      }
+    ]
   }
 ]

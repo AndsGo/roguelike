@@ -430,5 +430,41 @@
     "rarity": "legendary",
     "cost": 400,
     "stats": { "attack": 20, "defense": 20, "magicPower": 25, "maxHp": 120, "critChance": 0.08, "attackSpeed": 0.1 }
+  },
+  {
+    "id": "forge_hammer_weapon",
+    "name": "熔炉之锤",
+    "description": "元素熔炉锻造的战锤",
+    "slot": "weapon",
+    "rarity": "rare",
+    "cost": 180,
+    "stats": { "attack": 35, "magicPower": 15 }
+  },
+  {
+    "id": "elemental_plate",
+    "name": "元素护甲",
+    "description": "融合五种元素的护甲",
+    "slot": "armor",
+    "rarity": "rare",
+    "cost": 170,
+    "stats": { "defense": 25, "magicResist": 20 }
+  },
+  {
+    "id": "forge_core",
+    "name": "熔炉核心",
+    "description": "蕴含熔炉力量的核心",
+    "slot": "accessory",
+    "rarity": "epic",
+    "cost": 280,
+    "stats": { "magicPower": 30, "critChance": 0.10 }
+  },
+  {
+    "id": "elemental_fusion_blade",
+    "name": "元素融合之刃",
+    "description": "传说中的元素之刃",
+    "slot": "weapon",
+    "rarity": "legendary",
+    "cost": 400,
+    "stats": { "attack": 50, "magicPower": 30, "critDamage": 0.15 }
   }
 ]
