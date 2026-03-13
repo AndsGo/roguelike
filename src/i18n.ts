@@ -277,6 +277,7 @@ export const UI = {
     relics: '获得遗物',
     synergies: '激活羁绊',
     runStats: '冒险信息',
+    equipment: '装备一览',
     noRelics: '(无)',
     noSynergies: '(无)',
     close: '[ 关闭 ]',

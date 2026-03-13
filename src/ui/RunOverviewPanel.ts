@@ -1,12 +1,13 @@
 import Phaser from 'phaser';
 import { GAME_WIDTH, GAME_HEIGHT } from '../constants';
 import { Panel } from './Panel';
-import { Theme, colorToString, getElementColor } from './Theme';
+import { Theme, colorToString, getElementColor, getRarityColor, getRoleColor } from './Theme';
 import { RunManager } from '../managers/RunManager';
 import { SYNERGY_DEFINITIONS } from '../config/synergies';
 import { getDifficultyConfig } from '../config/difficulty';
 import { UI, getHeroDisplayName, ROLE_NAMES, RACE_NAMES, CLASS_NAMES } from '../i18n';
 import relicsData from '../data/relics.json';
+import itemsData from '../data/items.json';
 
 const PANEL_WIDTH = 540;
 const PANEL_HEIGHT = 400;
@@ -100,7 +101,7 @@ export class RunOverviewPanel {
       // Role tag
       const roleLabel = heroData.role ?? '';
       if (roleLabel) {
-        const roleColor = Theme.colors.role[roleLabel] ?? 0xaaaaaa;
+        const roleColor = getRoleColor(roleLabel);
         const roleText = scene.add.text(10, y, ROLE_NAMES[roleLabel] ?? roleLabel, {
           fontSize: '8px',
           color: colorToString(roleColor),
@@ -144,7 +145,7 @@ export class RunOverviewPanel {
       for (const relicState of relics) {
         const relicDef = (relicsData as RelicDef[]).find(r => r.id === relicState.id);
         const rarity = relicDef?.rarity ?? 'common';
-        const rarityColor = Theme.colors.rarity[rarity] ?? 0xbbbbbb;
+        const rarityColor = getRarityColor(rarity);
 
         // Rarity dot
         const dotG = scene.add.graphics();
@@ -247,6 +248,51 @@ export class RunOverviewPanel {
     });
     this.panel.addContent(statsText);
     y += 16;
+
+    y += 6;
+
+    // ---- Section E: Equipment ----
+    y = this.renderSectionHeader(UI.runOverview.equipment, y, Theme.colors.ui.accent);
+    y += 4;
+
+    for (const heroState of heroes) {
+      const heroData = rm.getHeroData(heroState.id);
+      const nameText = scene.add.text(-240, y, heroData.name, {
+        fontSize: '9px',
+        color: '#ffffff',
+        fontFamily: 'monospace',
+        fontStyle: 'bold',
+      });
+      this.panel.addContent(nameText);
+      y += 14;
+
+      const slots = ['weapon', 'armor', 'accessory'] as const;
+      const slotLabels: Record<string, string> = { weapon: '武器', armor: '防具', accessory: '饰品' };
+      for (const slot of slots) {
+        const equip = heroState.equipment[slot];
+        const slotLabel = slotLabels[slot];
+        if (equip) {
+          const itemDef = (itemsData as any[]).find((it: any) => it.id === equip.id);
+          const itemName = itemDef?.name ?? equip.id;
+          const rarityColor = getRarityColor(itemDef?.rarity ?? 'common');
+          const itemText = scene.add.text(-228, y, `${slotLabel}: ${itemName}`, {
+            fontSize: '8px',
+            color: colorToString(rarityColor),
+            fontFamily: 'monospace',
+          });
+          this.panel.addContent(itemText);
+        } else {
+          const emptyText = scene.add.text(-228, y, `${slotLabel}: (空)`, {
+            fontSize: '8px',
+            color: '#444455',
+            fontFamily: 'monospace',
+          });
+          this.panel.addContent(emptyText);
+        }
+        y += 12;
+      }
+      y += 4;
+    }
 
     // Set content height for scrolling
     this.panel.setContentHeight(y + 170);
