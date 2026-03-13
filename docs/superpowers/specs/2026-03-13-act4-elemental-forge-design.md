@@ -48,7 +48,7 @@ Act 4 "元素熔炉" (Elemental Forge) is the final act, unlocked after defeatin
 
 ## New Heroes (4)
 
-All heroes use `"element": null` in JSON for no-element (matching existing pattern in `heroes.json`).
+All heroes use `"element": null` in JSON for no-element (matching existing pattern in `heroes.json`). All hero `spriteKey` values follow the `hero_<id>` convention: `hero_elemental_weaver`, `hero_forest_stalker`, `hero_magma_warden`, `hero_storm_falcon`.
 
 ### 1. 元素织者 (Elemental Weaver)
 
@@ -402,6 +402,7 @@ The new `addUnit(unit: Unit)` method on `BattleSystem` must register the spawned
 3. Register with `StatusEffectSystem` — add to tracked units for DoT/HoT/buff processing
 4. Register with `SkillSystem` — register enemy skills with cooldown tracking
 5. Register with `DamageAccumulator` — track damage numbers for the new unit
+6. Apply `ActModifierSystem` battle start effects — ensures spawned adds receive the act's `difficultyMultiplier` scaling
 
 **Reference model:** The gauntlet wave transition logic (`BattleScene` lines 126-135) already handles adding new enemies between waves. `addUnit()` is similar but mid-combat rather than between waves.
 
