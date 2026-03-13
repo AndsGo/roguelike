@@ -31,5 +31,15 @@
     "eventPool": ["shadow_shrine", "holy_temple", "fortune_teller", "mysterious_portal", "goblin_camp", "dark_market", "ancient_battlefield"],
     "elementAffinity": "dark",
     "difficultyMultiplier": 1.8
+  },
+  {
+    "id": "act4_forge",
+    "name": "元素熔炉",
+    "description": "传说中的元素熔炉，五种元素在此交汇融合。",
+    "nodeCount": 10,
+    "enemyPool": ["flame_construct", "frost_sentinel", "lightning_strider", "holy_smith", "void_weaver", "elemental_chimera"],
+    "bossPool": ["heart_of_the_forge"],
+    "eventPool": ["forge_trial", "element_shard", "master_smith", "ancient_altar", "blacksmith", "elemental_rift", "elemental_shrine"],
+    "difficultyMultiplier": 2.2
   }
 ]

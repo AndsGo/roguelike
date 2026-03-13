@@ -568,5 +568,125 @@
     },
     "skills": ["thunder_fist", "static_field", "ult_thunder_god"],
     "spriteKey": "hero_thunder_monk"
+  },
+  {
+    "id": "elemental_weaver",
+    "name": "元素织者",
+    "role": "support",
+    "element": null,
+    "race": "dragon",
+    "class": "mage",
+    "baseStats": {
+      "maxHp": 550,
+      "hp": 550,
+      "attack": 30,
+      "defense": 18,
+      "magicPower": 65,
+      "magicResist": 25,
+      "speed": 55,
+      "attackSpeed": 0.9,
+      "attackRange": 300,
+      "critChance": 0.08,
+      "critDamage": 1.5
+    },
+    "scalingPerLevel": {
+      "maxHp": 35,
+      "attack": 2,
+      "defense": 1.5,
+      "magicPower": 5,
+      "magicResist": 1.5
+    },
+    "skills": ["elemental_infusion", "resonance_pulse", "ult_elemental_convergence"],
+    "spriteKey": "hero_elemental_weaver"
+  },
+  {
+    "id": "forest_stalker",
+    "name": "深林猎手",
+    "role": "melee_dps",
+    "element": null,
+    "race": "beast",
+    "class": "assassin",
+    "baseStats": {
+      "maxHp": 480,
+      "hp": 480,
+      "attack": 72,
+      "defense": 15,
+      "magicPower": 10,
+      "magicResist": 12,
+      "speed": 60,
+      "attackSpeed": 1.2,
+      "attackRange": 80,
+      "critChance": 0.25,
+      "critDamage": 2.2
+    },
+    "scalingPerLevel": {
+      "maxHp": 28,
+      "attack": 6,
+      "defense": 1,
+      "magicPower": 0.5,
+      "magicResist": 0.8
+    },
+    "skills": ["predator_strike", "pack_instinct", "ult_apex_predator"],
+    "spriteKey": "hero_forest_stalker"
+  },
+  {
+    "id": "magma_warden",
+    "name": "熔岩守卫",
+    "role": "tank",
+    "element": "fire",
+    "race": "dragon",
+    "class": "warrior",
+    "baseStats": {
+      "maxHp": 900,
+      "hp": 900,
+      "attack": 40,
+      "defense": 45,
+      "magicPower": 20,
+      "magicResist": 30,
+      "speed": 30,
+      "attackSpeed": 0.7,
+      "attackRange": 80,
+      "critChance": 0.05,
+      "critDamage": 1.5
+    },
+    "scalingPerLevel": {
+      "maxHp": 55,
+      "attack": 3,
+      "defense": 3.5,
+      "magicPower": 1,
+      "magicResist": 2
+    },
+    "skills": ["molten_shield", "eruption_slam", "ult_magma_fortress"],
+    "spriteKey": "hero_magma_warden"
+  },
+  {
+    "id": "storm_falcon",
+    "name": "风暴隼",
+    "role": "ranged_dps",
+    "element": "lightning",
+    "race": "beast",
+    "class": "ranger",
+    "baseStats": {
+      "maxHp": 500,
+      "hp": 500,
+      "attack": 55,
+      "defense": 16,
+      "magicPower": 35,
+      "magicResist": 15,
+      "speed": 65,
+      "attackSpeed": 1.3,
+      "attackRange": 350,
+      "critChance": 0.15,
+      "critDamage": 1.8
+    },
+    "scalingPerLevel": {
+      "maxHp": 30,
+      "attack": 4.5,
+      "defense": 1,
+      "magicPower": 2.5,
+      "magicResist": 1
+    },
+    "skills": ["lightning_volley", "static_charge", "ult_thunderstrike_barrage"],
+    "spriteKey": "hero_storm_falcon"
   }
 ]

@@ -20,7 +20,7 @@ export const UI = {
     continue: '继续',
     newGame: '新游戏',
     upgrades: '升级',
-    version: 'v1.10.0',
+    version: 'v1.11.0',
     stats: (runs: number, victories: number, heroCount: number, totalHeroes: number, souls: number) =>
       `冒险: ${runs}  |  胜利: ${victories}  |  英雄: ${heroCount}/${totalHeroes}  |  灵魂: ${souls}`,
     confirmOverwrite: '现有存档将丢失。\n是否继续？',
@@ -108,6 +108,10 @@ export const UI = {
     abandonBattle: '放弃战斗',
     ultimateReady: '终极技就绪!',
     ultimateUsed: '终极技释放!',
+    bossPhase: (n: number) => `阶段 ${n}！`,
+    bossShield: '护盾激活！',
+    bossEnrage: '狂暴化！',
+    bossDamageReduction: '防御强化！',
   },
 
   // RewardScene
@@ -137,6 +141,9 @@ export const UI = {
     vsEmpty: '对比: (空槽位)',
     vsSame: (name: string) => `对比 ${name}: 属性相同`,
     vs: (name: string) => `对比 ${name}: `,
+    synergyLabel: '协同:',
+    synergyProgress: (name: string, count: number, next: number) => `${name}(${count}/${next})`,
+    synergyActive: (name: string, count: number, threshold: number) => `${name}(${count}/${threshold})✓`,
   },
 
   // RestScene

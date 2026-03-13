@@ -89,6 +89,10 @@ export class MetaManager {
     holy_sentinel: { type: 'no_healer_win', difficulty: 'hard', description: 'Win without healer on hard+' },
     ice_mage: { type: 'boss_kill', bossId: 'shadow_lord', description: 'Defeat Shadow Lord' },
     thunder_monk: { type: 'full_element_team', element: 'lightning', description: 'Win with mono-lightning team' },
+    elemental_weaver: { type: 'victory', threshold: 3, description: 'Win 3 runs' },
+    forest_stalker: { type: 'hero_used', heroId: 'beast_warden', threshold: 3, description: 'Use beast_warden in 3 runs' },
+    magma_warden: { type: 'boss_kill', bossId: 'thunder_titan', description: 'Defeat Thunder Titan' },
+    storm_falcon: { type: 'element_wins', element: 'lightning', threshold: 5, description: 'Win 5 runs with lightning heroes' },
   };
 
   private constructor() {}

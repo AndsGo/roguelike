@@ -1,0 +1,21 @@
+{
+  "heart_of_the_forge": {
+    "phases": [
+      {
+        "hpPercent": 0.75,
+        "spawns": ["flame_construct", "frost_sentinel"],
+        "bossEffect": { "type": "shield", "value": 2000 }
+      },
+      {
+        "hpPercent": 0.50,
+        "spawns": ["lightning_strider", "holy_smith"],
+        "bossEffect": { "type": "enrage", "value": 30 }
+      },
+      {
+        "hpPercent": 0.25,
+        "spawns": ["void_weaver", "flame_construct"],
+        "bossEffect": { "type": "damage_reduction", "value": 20 }
+      }
+    ]
+  }
+}

@@ -13,6 +13,7 @@ import { ActModifierSystem } from '../systems/ActModifierSystem';
 import { UnitAnimationSystem } from '../systems/UnitAnimationSystem';
 import { EventBus } from '../systems/EventBus';
 import { AudioManager } from '../systems/AudioManager';
+import { ErrorHandler } from '../systems/ErrorHandler';
 import { RelicSystem } from '../systems/RelicSystem';
 import { SaveManager } from '../managers/SaveManager';
 import { MetaManager } from '../managers/MetaManager';
@@ -30,6 +31,8 @@ import { RunOverviewPanel } from '../ui/RunOverviewPanel';
 import { DailyChallengeManager, DailyRule } from '../managers/DailyChallengeManager';
 import { UltimateSystem } from '../systems/UltimateSystem';
 import { UltimateBar } from '../ui/UltimateBar';
+import { BossPhaseSystem } from '../systems/BossPhaseSystem';
+import bossPhaseData from '../data/boss-phases.json';
 
 export class BattleScene extends Phaser.Scene {
   private battleSystem!: BattleSystem;
@@ -74,6 +77,8 @@ export class BattleScene extends Phaser.Scene {
   private onBossKill!: (data: { killerId: string; targetId: string }) => void;
   private onAttackShowName!: (data: { sourceId: string; targetId: string; damage: number }) => void;
   private lastShownEnemy: Unit | null = null;
+  private bossPhaseSystem: BossPhaseSystem | null = null;
+  private onBossPhase!: (data: { bossId: string; phaseIndex: number; spawns: string[]; effect?: { type: string; value: number } }) => void;
 
   constructor() {
     super({ key: 'BattleScene' });
@@ -347,6 +352,18 @@ export class BattleScene extends Phaser.Scene {
     // Unit animation system (idle floats, attack rush, cast pulse)
     this.allUnits = [...heroes, ...enemies];
 
+    // Boss phase system (for multi-phase boss fights)
+    const bossEnemy = enemies.find(e => e.isBoss);
+    if (bossEnemy) {
+      const phaseConfig = (bossPhaseData as Record<string, { phases: Array<{ hpPercent: number; spawns: string[]; bossEffect?: { type: string; value: number } }> }>)[bossEnemy.enemyData.id];
+      if (phaseConfig) {
+        this.bossPhaseSystem = new BossPhaseSystem(bossEnemy, {
+          bossId: bossEnemy.enemyData.id,
+          phases: phaseConfig.phases as any,
+        });
+      }
+    }
+
     // Wave indicator for gauntlet
     if (this.isGauntlet) {
       this.waveIndicator = this.add.text(GAME_WIDTH / 2, 45, UI.wave.indicator(1, this.battleSystem.getTotalWaves()), {
@@ -431,7 +448,10 @@ export class BattleScene extends Phaser.Scene {
       this.effects.showSkillName(caster.x, caster.y, skillName, colorNum);
       this.particles.createSkillCastEffect(caster.x, caster.y, colorNum);
 
-      if (!visual) return;
+      if (!visual) {
+        ErrorHandler.report('warn', 'BattleScene', `Missing skill visual for "${data.skillId}"`, { skillId: data.skillId });
+        return;
+      }
 
       const targets = data.targets
         .map(tid => this.allUnits.find(u => u.unitId === tid))
@@ -526,6 +546,61 @@ export class BattleScene extends Phaser.Scene {
       }
     };
     eb.on('unit:attack', this.onAttackShowName);
+
+    this.onBossPhase = (data) => {
+      const aliveEnemies = this.allUnits.filter(u => u instanceof Enemy && u.isAlive);
+      const bossUnit = aliveEnemies.find(u => (u as Enemy).isBoss) as Enemy | undefined;
+      const spawnLevel = bossUnit?.level ?? 1;
+
+      for (let i = 0; i < data.spawns.length; i++) {
+        const spawnData = (enemiesData as EnemyData[]).find(e => e.id === data.spawns[i]);
+        if (!spawnData) continue;
+
+        const yIndex = aliveEnemies.length + i;
+        const x = ENEMY_START_X + 40;
+        const y = BATTLE_GROUND_Y - ((yIndex - 1) / 2) * UNIT_SPACING_Y;
+
+        const enemy = new Enemy(this, x, y, spawnData, spawnLevel);
+        this.allUnits.push(enemy);
+        this.battleSystem.addUnit(enemy);
+      }
+
+      // Apply boss effect
+      if (data.effect) {
+        const boss = this.allUnits.find(u => u instanceof Enemy && (u as Enemy).isBoss);
+        if (boss) {
+          this.effects.showSkillName(boss.x, boss.y - 20, UI.battle.bossPhase(data.phaseIndex + 1), 0xffcc00);
+
+          switch (data.effect.type) {
+            case 'shield':
+              boss.statusEffects.push({
+                id: 'boss_shield', type: 'buff', name: '护盾',
+                stat: 'defense', value: 9999,
+                duration: data.effect.value / 1000,
+              });
+              this.effects.showSkillName(boss.x, boss.y - 40, UI.battle.bossShield, 0x44aaff);
+              break;
+            case 'enrage':
+              boss.statusEffects.push({
+                id: 'boss_enrage', type: 'buff', name: '狂暴',
+                stat: 'attack', value: data.effect.value,
+                duration: 999,
+              });
+              this.effects.showSkillName(boss.x, boss.y - 40, UI.battle.bossEnrage, 0xff4444);
+              break;
+            case 'damage_reduction':
+              boss.statusEffects.push({
+                id: 'boss_dmg_reduction', type: 'buff', name: '防御强化',
+                stat: 'defense', value: data.effect.value,
+                duration: 999,
+              });
+              this.effects.showSkillName(boss.x, boss.y - 40, UI.battle.bossDamageReduction, 0xffaa44);
+              break;
+          }
+        }
+      }
+    };
+    EventBus.getInstance().on('boss:phase', this.onBossPhase);
 
     // Threat & healer indicator graphics (single reusable objects, cleared each frame)
     this.threatGraphics = this.add.graphics().setDepth(5);
@@ -980,6 +1055,11 @@ export class BattleScene extends Phaser.Scene {
     eb.off('skill:manualFire', this.onManualFire);
     eb.off('unit:attack', this.onAttackShowName);
     this.lastShownEnemy = null;
+    if (this.bossPhaseSystem) {
+      this.bossPhaseSystem.deactivate();
+      this.bossPhaseSystem = null;
+    }
+    eb.off('boss:phase', this.onBossPhase);
     this.ultimateSystem.deactivate();
     this.ultimateBar.destroy();
     RelicSystem.deactivate();

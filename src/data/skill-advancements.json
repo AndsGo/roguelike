@@ -60,5 +60,22 @@
   { "skillId": "thunder_fist", "level": 1, "requiredHeroLevel": 5, "name": "雷拳强化", "description": "伤害+20，冷却-0.5s", "bonuses": { "baseDamage": 20, "cooldown": -0.5 } },
   { "skillId": "thunder_fist", "level": 2, "requiredHeroLevel": 10, "name": "万雷拳", "description": "伤害+30，眩晕+0.5s", "bonuses": { "baseDamage": 30, "effectDuration": 0.5 } },
   { "skillId": "static_field", "level": 1, "requiredHeroLevel": 5, "name": "强化力场", "description": "伤害+15，AOE+20", "bonuses": { "baseDamage": 15, "aoeRadius": 20 } },
-  { "skillId": "static_field", "level": 2, "requiredHeroLevel": 10, "name": "雷域", "description": "效果持续+2s，冷却-1s", "bonuses": { "effectDuration": 2, "cooldown": -1 } }
+  { "skillId": "static_field", "level": 2, "requiredHeroLevel": 10, "name": "雷域", "description": "效果持续+2s，冷却-1s", "bonuses": { "effectDuration": 2, "cooldown": -1 } },
+
+  { "skillId": "elemental_infusion", "level": 1, "requiredHeroLevel": 5, "name": "强化灌注", "description": "冷却-1s", "bonuses": { "cooldown": -1 } },
+  { "skillId": "elemental_infusion", "level": 2, "requiredHeroLevel": 10, "name": "双元素灌注", "description": "冷却-1s", "bonuses": { "cooldown": -1 } },
+  { "skillId": "resonance_pulse", "level": 1, "requiredHeroLevel": 5, "name": "增幅脉冲", "description": "伤害+20", "bonuses": { "baseDamage": 20 } },
+  { "skillId": "resonance_pulse", "level": 2, "requiredHeroLevel": 10, "name": "扩散脉冲", "description": "伤害+25", "bonuses": { "baseDamage": 25 } },
+  { "skillId": "predator_strike", "level": 1, "requiredHeroLevel": 5, "name": "利爪强化", "description": "伤害+25", "bonuses": { "baseDamage": 25 } },
+  { "skillId": "predator_strike", "level": 2, "requiredHeroLevel": 10, "name": "致命猎杀", "description": "伤害+30，冷却-1s", "bonuses": { "baseDamage": 30, "cooldown": -1 } },
+  { "skillId": "pack_instinct", "level": 1, "requiredHeroLevel": 5, "name": "群猎强化", "description": "冷却-1s", "bonuses": { "cooldown": -1 } },
+  { "skillId": "pack_instinct", "level": 2, "requiredHeroLevel": 10, "name": "猎群协同", "description": "冷却-2s", "bonuses": { "cooldown": -2 } },
+  { "skillId": "molten_shield", "level": 1, "requiredHeroLevel": 5, "name": "熔岩强化", "description": "冷却-1s", "bonuses": { "cooldown": -1 } },
+  { "skillId": "molten_shield", "level": 2, "requiredHeroLevel": 10, "name": "烈焰护盾", "description": "冷却-2s", "bonuses": { "cooldown": -2 } },
+  { "skillId": "eruption_slam", "level": 1, "requiredHeroLevel": 5, "name": "烈焰冲击", "description": "伤害+30", "bonuses": { "baseDamage": 30 } },
+  { "skillId": "eruption_slam", "level": 2, "requiredHeroLevel": 10, "name": "火山爆发", "description": "伤害+40，冷却-1s", "bonuses": { "baseDamage": 40, "cooldown": -1 } },
+  { "skillId": "lightning_volley", "level": 1, "requiredHeroLevel": 5, "name": "雷电强化", "description": "伤害+15", "bonuses": { "baseDamage": 15 } },
+  { "skillId": "lightning_volley", "level": 2, "requiredHeroLevel": 10, "name": "雷霆齐射", "description": "伤害+20，冷却-1s", "bonuses": { "baseDamage": 20, "cooldown": -1 } },
+  { "skillId": "static_charge", "level": 1, "requiredHeroLevel": 5, "name": "增幅标记", "description": "冷却-1s", "bonuses": { "cooldown": -1 } },
+  { "skillId": "static_charge", "level": 2, "requiredHeroLevel": 10, "name": "超导标记", "description": "冷却-2s", "bonuses": { "cooldown": -2 } }
 ]

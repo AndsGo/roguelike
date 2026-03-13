@@ -388,6 +388,15 @@ export class BattleSystem {
     }
   }
 
+  /** Add a single enemy unit mid-combat (for boss phase spawns) */
+  addUnit(enemy: Enemy): void {
+    this.enemies.push(enemy);
+    this.skillSystem.initializeSkills(enemy, enemy.enemyData.skills);
+    if (this.actModifier) {
+      this.actModifier.applyBattleStart(this.heroes, [enemy]);
+    }
+  }
+
   private checkBattleEnd(): void {
     const heroesAlive = this.heroes.some(h => h.isAlive);
     const enemiesAlive = this.enemies.some(e => e.isAlive);
