@@ -9,6 +9,7 @@ const ACT_NODE_TEMPLATES: NodeType[][] = [
   ['battle', 'battle', 'shop', 'gauntlet', 'event', 'battle', 'rest', 'boss'],
   ['battle', 'battle', 'event', 'battle', 'elite', 'gauntlet', 'rest', 'boss'],
   ['battle', 'event', 'gauntlet', 'elite', 'battle', 'battle', 'rest', 'boss'],
+  ['battle', 'battle', 'shop', 'gauntlet', 'event', 'elite', 'battle', 'event', 'rest', 'boss'],
 ];
 
 export class MapGenerator {
