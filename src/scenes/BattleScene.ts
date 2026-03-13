@@ -439,22 +439,28 @@ export class BattleScene extends Phaser.Scene {
       const firstTarget = targets[0] ?? null;
 
       switch (visual.type) {
-        case 'projectile':
-          // Show projectile to each target (with staggered delay for multi-target)
+        case 'projectile': {
+          const projCount = visual.count ?? 1;
           for (let i = 0; i < targets.length; i++) {
             const t = targets[i];
-            const delay = i * 80;
-            if (delay === 0) {
-              this.effects.showProjectile(caster.x, caster.y, t.x, t.y, colorNum);
-              this.particles.createProjectileTrail(caster.x, caster.y, t.x, t.y, colorNum);
-            } else {
-              this.time.delayedCall(delay, () => {
-                this.effects.showProjectile(caster.x, caster.y, t.x, t.y, colorNum);
-                this.particles.createProjectileTrail(caster.x, caster.y, t.x, t.y, colorNum);
-              });
+            // If count > 1 and single-target, show multiple projectiles with spread
+            const shotsForTarget = targets.length === 1 ? projCount : 1;
+            for (let s = 0; s < shotsForTarget; s++) {
+              const delay = i * 80 + s * 60;
+              const offsetY = shotsForTarget > 1 ? (s - (shotsForTarget - 1) / 2) * 8 : 0;
+              if (delay === 0) {
+                this.effects.showProjectile(caster.x, caster.y, t.x, t.y + offsetY, colorNum);
+                this.particles.createProjectileTrail(caster.x, caster.y, t.x, t.y + offsetY, colorNum);
+              } else {
+                this.time.delayedCall(delay, () => {
+                  this.effects.showProjectile(caster.x, caster.y, t.x, t.y + offsetY, colorNum);
+                  this.particles.createProjectileTrail(caster.x, caster.y, t.x, t.y + offsetY, colorNum);
+                });
+              }
             }
           }
           break;
+        }
         case 'melee_impact':
           // Show impact indicator on all targets
           for (const t of targets) {
