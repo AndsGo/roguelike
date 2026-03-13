@@ -374,7 +374,8 @@ export type GameEventType =
   | 'relic:acquire' | 'relic:trigger'
   | 'achievement:unlock'
   | 'error:report'
-  | 'ultimate:ready' | 'ultimate:used';
+  | 'ultimate:ready' | 'ultimate:used'
+  | 'boss:phase';
 
 export interface GameEventMap {
   'battle:start': { heroCount: number; enemyCount: number };
@@ -407,4 +408,5 @@ export interface GameEventMap {
   'skill:interrupt': { unitId: string; skillId: string; reason: string };
   'ultimate:ready': { unitId: string; heroIndex: number };
   'ultimate:used': { unitId: string; skillId: string };
+  'boss:phase': { bossId: string; phaseIndex: number; spawns: string[]; effect?: { type: string; value: number } };
 }
