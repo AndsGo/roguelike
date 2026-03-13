@@ -6,11 +6,11 @@
 
 | 项目 | 数据 |
 |------|------|
-| 开发周期 | 2026-02-26 ~ 2026-03-02 (5天) |
-| Claude 会话数 | 20+ 次 |
-| Git 提交数 | 35+ |
-| 代码规模 | 180+ 文件, 30,000+ 行 |
-| 测试用例 | 615 (44 个测试套件) |
+| 开发周期 | 2026-02-26 ~ 2026-03-13 |
+| Claude 会话数 | 30+ 次 |
+| Git 提交数 | 55+ |
+| 代码规模 | 200+ 文件, 35,000+ 行 |
+| 测试用例 | 841 (62 个测试套件) |
 | 技术栈 | TypeScript + Phaser 3 + Vite |
 
 ---
@@ -82,6 +82,24 @@ Day 4-5 (Mar 01-02)
  ├─ .gitignore 清理 (移除 node_modules/dist 追踪)
  ├─ CLAUDE.md 项目指导文件
  └─ 游戏截图更新 (Chrome MCP 自动化截图)
+
+Day 6-14 (Mar 03-12) — 持续迭代
+ ├─ v1.3.0: 遗物系统激活 (RelicSystem 三层架构, 43遗物)
+ ├─ v1.4.0: 终极技能系统 (19个独特终极技, 混合充能)
+ ├─ v1.5.0: 英雄解锁多样化 (9种条件类型)
+ ├─ v1.6.0: Boss入场动画 + 伤害数字优化
+ ├─ v1.7.0: 事件风险标签 + 5个反应遗物
+ ├─ v1.8.0: 前后排阵型系统
+ ├─ v1.9.0: 多波次连战节点 (Gauntlet)
+ └─ v1.10.0: 战斗突变系统
+
+Day 15 (Mar 13) — 第四幕
+ ├─ v1.11.0: 元素熔炉 (Subagent-Driven Development)
+ │   ├─ 4 名新英雄, 7 个新敌人, 19 个新技能
+ │   ├─ BossPhaseSystem (血量阈值触发阶段)
+ │   ├─ 第四幕门控 (需击败暗影领主)
+ │   └─ 13 个任务 + 双阶段审查 → 841 测试通过
+ └─ README + DEVELOPMENT 文档更新
 ```
 
 ---
@@ -577,7 +595,7 @@ src/
 │   ├── GameOverScene.ts      # 失败 (继承BaseEndScene)
 │   └── VictoryScene.ts       # 胜利 (继承BaseEndScene)
 │
-├── systems/ (24个)
+├── systems/ (28个)
 │   ├── BattleSystem.ts       # 战斗主循环
 │   ├── DamageSystem.ts       # 伤害计算管道
 │   ├── SkillSystem.ts        # 技能释放逻辑
@@ -601,7 +619,11 @@ src/
 │   ├── DifficultySystem.ts   # 难度配置
 │   ├── TutorialSystem.ts     # 教程系统
 │   ├── ErrorHandler.ts       # 错误环形缓冲
-│   └── GameLifecycle.ts      # 统一生命周期管理
+│   ├── GameLifecycle.ts      # 统一生命周期管理
+│   ├── RelicSystem.ts        # 遗物运行时求值 (三层架构)
+│   ├── UltimateSystem.ts     # 终极技能能量管理
+│   ├── DamageAccumulator.ts  # 伤害数字合并
+│   └── BossPhaseSystem.ts    # Boss 阶段触发
 │
 ├── managers/ (5个)
 │   ├── RunManager.ts         # 单局运行状态 (序列化/反序列化)
@@ -633,10 +655,10 @@ src/
 │   └── MapRenderer.ts        # 地图渲染
 │
 ├── data/
-│   ├── heroes.ts (19)        ├── enemies.ts (21)
-│   ├── skills.ts (46)        ├── items.ts (48)
-│   ├── events.ts (34)        ├── relics.ts (35)
-│   ├── acts.ts (3)           ├── achievements.ts (25)
+│   ├── heroes.ts (23)        ├── enemies.ts (28)
+│   ├── skills.ts (80)        ├── items.ts (52)
+│   ├── events.ts (37)        ├── relics.ts (48)
+│   ├── acts.ts (4)           ├── achievements.ts (25)
 │   ├── pixel-templates.ts    # 像素矩阵模板 + 调色板
 │   ├── skill-visuals.ts      └── skill-advancements.ts
 │
@@ -699,6 +721,88 @@ src/
 
 ---
 
+## 持续迭代 (v1.3.0 ~ v1.11.0)
+
+### v1.3.0 — 遗物系统激活 (Mar 03-04)
+
+**核心功能：** `RelicSystem` 单例模式，43 个遗物运行时求值
+
+- **三层集成架构:**
+  1. 属性加成层 (`getStatModifiers`) — 应用于 `Unit.getEffectiveStats()`
+  2. 响应式层 (`registerListeners`) — EventBus 订阅 on_damage/on_kill/on_heal/on_battle_start/on_battle_end
+  3. 公式修正层 — 内联查询: `getDefensePiercing()`, `getDamageBonus()`, `getHealBonus()` 等
+- **8 个构建定义型遗物:** armor_piercer, overflow_shield, chain_reaction, glass_cannon, mono_element_crown, diversity_badge, berserker_oath, kill_momentum
+- **特殊机制:** phoenix_ash (每场一次复活), shield_charm (周期治疗), overflow_shield (治疗溢出→临时HP)
+
+### v1.4.0 — 终极技能系统 (Mar 04-05)
+
+**核心功能：** 19 个英雄独特终极技能，混合能量充能机制
+
+- `UltimateSystem.ts`: 被动 2/s + 攻击 3 + 技能 5 + 受伤 2 + 击杀 10 → ~20-25s 充满
+- `UltimateBar.ts`: 4 个圆形按钮 (Q/W/E/R 快捷键), 能量环弧线, 脏标记重绘优化
+- 终极技能从自动释放、技能队列、SkillBar 显示中过滤
+- 17 个 UltimateSystem 测试
+
+### v1.5.0 — 英雄解锁多样化 (Mar 05-06)
+
+- **9 种解锁条件类型:** default, runs, victory, floor, element_wins, boss_kill, no_healer_win, full_element_team, relic_count, hero_used
+- `RunEndContext` 接口贯穿结算链: VictoryScene/GameOverScene → BaseEndScene → RunEndPanel → MetaManager.recordRunEnd
+- `defeatedBosses: string[]` 新增到 MetaProgressionData
+- RelicSystem RNG 确定性修复 — `activateWithUnits(relics, heroes, enemies, rng?)`
+
+### v1.6.0 — Boss 入场动画 + 伤害数字优化 (Mar 06)
+
+- Boss 入场: 震屏 + 闪烁 + 名称渐入动画
+- `DamageAccumulator`: 同源同目标伤害合并显示，减少数字飘浮数量
+- 名称可见性优化: 仅显示存活单位名称
+
+### v1.7.0 — 事件风险标签 + 反应遗物 (Mar 07)
+
+- 事件选项显示风险等级标签 (低风险/中风险/高风险)
+- 商店物品悬浮提示 (属性对比)
+- **5 个元素反应遗物:** melt_heart (治疗), overload_engine (眩晕), superconduct_shield (+HP), annihilation_echo (回响伤害), elemental_resonance (-法抗减益)
+
+### v1.8.0 — 前后排阵型系统 (Mar 08-09)
+
+- 前排/后排阵型选择 (FormationPanel UI)
+- 目标选择优先级: 前排优先被攻击
+- 阵型数据 Save/Load 兼容
+
+### v1.9.0 — 多波次连战节点 (Mar 09-10)
+
+- **Gauntlet 节点类型:** 2-3 波敌人，无缝波次过渡
+- 波次间保留英雄状态，累积奖励 ×0.8 平衡系数
+- `BattleSystem.replaceEnemies()` + `setWaveData()` 波次管理
+
+### v1.10.0 — 战斗突变系统 (Mar 11-12)
+
+- 4 个战斗突变 (overkill, crit CD, heal shield, reaction chain)
+- 突变可选字段兼容旧存档
+- 代码质量改进
+
+### v1.11.0 — 第四幕：元素熔炉 (Mar 13)
+
+**使用 Subagent-Driven Development 执行 (13 个任务 + 双阶段审查)**
+
+**新内容:**
+- **4 名新英雄:** elemental_weaver (龙族/法师/辅助), forest_stalker (兽族/刺客/近战), magma_warden (龙族/战士/坦克/火), storm_falcon (兽族/游侠/远程/雷)
+- **7 个新敌人:** flame_construct, frost_sentinel, lightning_strider, holy_smith, void_weaver, elemental_chimera (精英), heart_of_the_forge (Boss)
+- **19 个新技能:** 12 英雄技能 + 7 敌人技能
+- **4 件新装备:** forge_hammer_weapon, elemental_plate, forge_core, elemental_fusion_blade
+- **3 个新事件:** forge_trial, element_shard, master_smith
+
+**新系统:**
+- `BossPhaseSystem.ts`: 监控 Boss 血量阈值 (75%/50%/25%)，触发召唤增援 + Boss 强化效果 (护盾/狂暴/减伤)
+- `BattleSystem.addUnit()`: 战斗中途添加敌人单位
+- 第四幕门控: 需击败暗影要塞 Boss (shadow_lord) 解锁
+
+**技术实现:**
+- 计划审查循环发现 3 个关键问题 (JSON null vs undefined, 不支持的 stat 字段, Boss 效果仅为视觉)
+- 13 个实施子任务 + 规格合规审查 + 代码质量审查
+- 62 个测试套件, 841 个测试全部通过, 零 TypeScript 错误
+
+---
+
 ## 八、经验总结
 
 ### 8.1 高效的用户-AI协作模式
@@ -737,6 +841,6 @@ src/
 | Agent Swarm次数 | 10次 |
 | 最大Agent数 | 5 (研究/测试) |
 | Bug发现总数 | 100+ |
-| 测试用例 | 615 (44套件) |
-| 代码行数 | 30,000+ |
-| 开发耗时 | ~5天 |
+| 测试用例 | 841 (62套件) |
+| 代码行数 | 35,000+ |
+| 开发耗时 | ~16天 |
