@@ -1,5 +1,6 @@
 import { MapNode, NodeType, BattleNodeData, EventNodeData, ActConfig } from '../types';
 import { SeededRNG } from '../utils/rng';
+import { MetaManager } from '../managers/MetaManager';
 import enemiesData from '../data/enemies.json';
 import actsData from '../data/acts.json';
 
@@ -21,7 +22,14 @@ export class MapGenerator {
     const allNodes: MapNode[] = [];
     let nodeOffset = 0;
 
-    const acts = actsData as ActConfig[];
+    const allActs = actsData as ActConfig[];
+    // Gate Act 4: requires defeating Act 3 boss (shadow_lord)
+    const acts = allActs.filter(act => {
+      if (act.id === 'act4_forge') {
+        return MetaManager.getDefeatedBosses().includes('shadow_lord');
+      }
+      return true;
+    });
 
     for (let actIndex = 0; actIndex < acts.length; actIndex++) {
       const act = acts[actIndex];
