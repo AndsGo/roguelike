@@ -184,7 +184,7 @@ describe('Content Integrity', () => {
   });
 
   describe('Content counts', () => {
-    it('has 19 heroes', () => expect(heroes.length).toBe(19));
+    it('has 23 heroes', () => expect(heroes.length).toBe(23));
     it('has at least 44 skills', () => expect(skills.length).toBeGreaterThanOrEqual(44));
     it('has at least 48 items', () => expect(items.length).toBeGreaterThanOrEqual(48));
     it('has at least 35 relics', () => expect(relics.length).toBeGreaterThanOrEqual(35));
