@@ -654,5 +654,217 @@
     "goldReward": 220,
     "expReward": 400,
     "isBoss": true
+  },
+  {
+    "id": "flame_construct",
+    "name": "火焰铸体",
+    "role": "melee_dps",
+    "element": "fire",
+    "baseStats": {
+      "maxHp": 450,
+      "hp": 450,
+      "attack": 55,
+      "defense": 20,
+      "magicPower": 15,
+      "magicResist": 10,
+      "speed": 45,
+      "attackSpeed": 1.0,
+      "attackRange": 80,
+      "critChance": 0.08,
+      "critDamage": 1.5
+    },
+    "scalingPerLevel": {
+      "maxHp": 30,
+      "attack": 4,
+      "defense": 1.5,
+      "magicPower": 1,
+      "magicResist": 0.8
+    },
+    "skills": ["forge_fire_strike"],
+    "spriteKey": "enemy_flame_construct",
+    "goldReward": 18,
+    "expReward": 30
+  },
+  {
+    "id": "frost_sentinel",
+    "name": "寒冰哨兵",
+    "role": "tank",
+    "element": "ice",
+    "baseStats": {
+      "maxHp": 700,
+      "hp": 700,
+      "attack": 30,
+      "defense": 45,
+      "magicPower": 10,
+      "magicResist": 30,
+      "speed": 25,
+      "attackSpeed": 0.7,
+      "attackRange": 80,
+      "critChance": 0.05,
+      "critDamage": 1.5
+    },
+    "scalingPerLevel": {
+      "maxHp": 45,
+      "attack": 2,
+      "defense": 3,
+      "magicPower": 0.5,
+      "magicResist": 2
+    },
+    "skills": ["frost_guard"],
+    "spriteKey": "enemy_frost_sentinel",
+    "goldReward": 18,
+    "expReward": 30
+  },
+  {
+    "id": "lightning_strider",
+    "name": "雷光行者",
+    "role": "ranged_dps",
+    "element": "lightning",
+    "baseStats": {
+      "maxHp": 350,
+      "hp": 350,
+      "attack": 50,
+      "defense": 12,
+      "magicPower": 30,
+      "magicResist": 10,
+      "speed": 70,
+      "attackSpeed": 1.3,
+      "attackRange": 300,
+      "critChance": 0.12,
+      "critDamage": 1.6
+    },
+    "scalingPerLevel": {
+      "maxHp": 22,
+      "attack": 4,
+      "defense": 0.8,
+      "magicPower": 2,
+      "magicResist": 0.6
+    },
+    "skills": ["spark_barrage"],
+    "spriteKey": "enemy_lightning_strider",
+    "goldReward": 18,
+    "expReward": 30
+  },
+  {
+    "id": "holy_smith",
+    "name": "圣光铸师",
+    "role": "healer",
+    "element": "holy",
+    "baseStats": {
+      "maxHp": 400,
+      "hp": 400,
+      "attack": 25,
+      "defense": 20,
+      "magicPower": 50,
+      "magicResist": 25,
+      "speed": 40,
+      "attackSpeed": 0.8,
+      "attackRange": 300,
+      "critChance": 0.05,
+      "critDamage": 1.5
+    },
+    "scalingPerLevel": {
+      "maxHp": 25,
+      "attack": 1.5,
+      "defense": 1.5,
+      "magicPower": 3.5,
+      "magicResist": 1.5
+    },
+    "skills": ["forge_mend"],
+    "spriteKey": "enemy_holy_smith",
+    "goldReward": 18,
+    "expReward": 30
+  },
+  {
+    "id": "void_weaver",
+    "name": "虚空织工",
+    "role": "support",
+    "element": "dark",
+    "baseStats": {
+      "maxHp": 380,
+      "hp": 380,
+      "attack": 35,
+      "defense": 15,
+      "magicPower": 45,
+      "magicResist": 20,
+      "speed": 50,
+      "attackSpeed": 0.9,
+      "attackRange": 280,
+      "critChance": 0.06,
+      "critDamage": 1.5
+    },
+    "scalingPerLevel": {
+      "maxHp": 24,
+      "attack": 2.5,
+      "defense": 1,
+      "magicPower": 3,
+      "magicResist": 1.2
+    },
+    "skills": ["void_debuff"],
+    "spriteKey": "enemy_void_weaver",
+    "goldReward": 18,
+    "expReward": 30
+  },
+  {
+    "id": "elemental_chimera",
+    "name": "元素嵌合体",
+    "role": "melee_dps",
+    "element": null,
+    "baseStats": {
+      "maxHp": 2000,
+      "hp": 2000,
+      "attack": 65,
+      "defense": 35,
+      "magicPower": 40,
+      "magicResist": 25,
+      "speed": 45,
+      "attackSpeed": 1.0,
+      "attackRange": 100,
+      "critChance": 0.10,
+      "critDamage": 1.8
+    },
+    "scalingPerLevel": {
+      "maxHp": 120,
+      "attack": 5,
+      "defense": 2.5,
+      "magicPower": 3,
+      "magicResist": 1.5
+    },
+    "skills": ["chimera_shift"],
+    "spriteKey": "enemy_elemental_chimera",
+    "goldReward": 65,
+    "expReward": 60
+  },
+  {
+    "id": "heart_of_the_forge",
+    "name": "元素熔炉之心",
+    "role": "tank",
+    "element": null,
+    "race": "dragon",
+    "baseStats": {
+      "maxHp": 5000,
+      "hp": 5000,
+      "attack": 55,
+      "defense": 80,
+      "magicPower": 50,
+      "magicResist": 40,
+      "speed": 30,
+      "attackSpeed": 0.8,
+      "attackRange": 120,
+      "critChance": 0.08,
+      "critDamage": 1.5
+    },
+    "scalingPerLevel": {
+      "maxHp": 300,
+      "attack": 4,
+      "defense": 5,
+      "magicPower": 3,
+      "magicResist": 3
+    },
+    "skills": ["forge_slam"],
+    "spriteKey": "enemy_heart_of_the_forge",
+    "goldReward": 200,
+    "expReward": 120,
+    "isBoss": true
   }
 ]
