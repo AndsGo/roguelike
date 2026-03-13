@@ -12,6 +12,8 @@ import { AudioManager } from '../systems/AudioManager';
 import { GameLifecycle } from '../systems/GameLifecycle';
 import heroesData from '../data/heroes.json';
 import actsData from '../data/acts.json';
+import relicsData from '../data/relics.json';
+import { MetaManager } from './MetaManager';
 
 /** Auto-assign formation row based on unit role */
 export function autoFormationByRole(role: string): 'front' | 'back' {
@@ -65,6 +67,15 @@ export class RunManager {
     if (dailyModifiers) {
       this.state.isDaily = true;
       this.state.dailyModifiers = dailyModifiers;
+    }
+
+    // Mutation: start with a random common relic
+    if (MetaManager.hasMutation('start_with_relic')) {
+      const relicPool = (relicsData as any[]).filter((r: any) => r.rarity === 'common');
+      if (relicPool.length > 0) {
+        const pick = this.rng.pick(relicPool);
+        this.state.relics.push({ id: pick.id, triggerCount: 0 });
+      }
     }
 
     this.calculateSynergies();

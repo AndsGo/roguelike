@@ -11,7 +11,7 @@ import { HeroData } from '../types';
 import heroesData from '../data/heroes.json';
 import { AudioManager } from '../systems/AudioManager';
 
-const MAX_SELECTION = 3;
+const BASE_MAX_SELECTION = 3;
 const MIN_SELECTION = 2;
 const CARD_W = 74;
 const CARD_H = 110;
@@ -57,7 +57,9 @@ export class HeroDraftScene extends Phaser.Scene {
     }).setOrigin(0.5);
 
     // Subtitle
-    this.add.text(GAME_WIDTH / 2, 38, UI.heroDraft.subtitle, {
+    const draftMax = BASE_MAX_SELECTION + (MetaManager.hasMutation('extra_draft_pick') ? 1 : 0);
+    const subtitleText = draftMax > BASE_MAX_SELECTION ? `选择2-${draftMax}名英雄开始冒险` : UI.heroDraft.subtitle;
+    this.add.text(GAME_WIDTH / 2, 38, subtitleText, {
       fontSize: '10px',
       color: '#8899cc',
       fontFamily: 'monospace',
@@ -102,7 +104,8 @@ export class HeroDraftScene extends Phaser.Scene {
     bottomBg.fillRoundedRect(0, bottomY - 15, GAME_WIDTH, 70, 0);
 
     // Selection text
-    this.selectionText = this.add.text(GAME_WIDTH / 2, bottomY, UI.heroDraft.selected(0, MAX_SELECTION), {
+    const maxSelection = BASE_MAX_SELECTION + (MetaManager.hasMutation('extra_draft_pick') ? 1 : 0);
+    this.selectionText = this.add.text(GAME_WIDTH / 2, bottomY, UI.heroDraft.selected(0, maxSelection), {
       fontSize: '11px',
       color: '#aaaacc',
       fontFamily: 'monospace',
@@ -258,7 +261,8 @@ export class HeroDraftScene extends Phaser.Scene {
       this.selectedIds.splice(idx, 1);
       AudioManager.getInstance().playSfx('sfx_select');
     } else {
-      if (this.selectedIds.length >= MAX_SELECTION) return;
+      const maxSelection = BASE_MAX_SELECTION + (MetaManager.hasMutation('extra_draft_pick') ? 1 : 0);
+      if (this.selectedIds.length >= maxSelection) return;
       this.selectedIds.push(heroId);
       AudioManager.getInstance().playSfx('sfx_select');
     }
@@ -268,7 +272,8 @@ export class HeroDraftScene extends Phaser.Scene {
   private updateSelectionUI(): void {
     // Update selection text
     if (this.selectionText) {
-      this.selectionText.setText(UI.heroDraft.selected(this.selectedIds.length, MAX_SELECTION));
+      const maxSelection = BASE_MAX_SELECTION + (MetaManager.hasMutation('extra_draft_pick') ? 1 : 0);
+      this.selectionText.setText(UI.heroDraft.selected(this.selectedIds.length, maxSelection));
     }
 
     // Update start button

@@ -10,6 +10,7 @@ import eventsData from '../data/events.json';
 import { ShopGenerator } from '../systems/ShopGenerator';
 import { UI, getHeroDisplayName, ELEMENT_NAMES } from '../i18n';
 import { AudioManager } from '../systems/AudioManager';
+import { MetaManager } from '../managers/MetaManager';
 
 /** Classify the risk level of an event choice based on worst-case effects. */
 export function getChoiceRiskLevel(choice: EventChoice): { label: string; color: string } {
@@ -70,6 +71,21 @@ export class EventScene extends Phaser.Scene {
     }
     if (!event) {
       event = rng.pick(eventPool);
+    }
+
+    // Mutation: first_event_safe — ensure at least one safe option for the first event
+    if (MetaManager.hasMutation('first_event_safe') && event) {
+      const map = rm.getMap();
+      const firstEventIdx = map.findIndex(n => n.type === 'event');
+      if (this.nodeIndex === firstEventIdx) {
+        const hasLowRisk = event.choices.some(c => getChoiceRiskLevel(c).label === UI.event.riskLow);
+        if (!hasLowRisk) {
+          event = { ...event, choices: [...event.choices, {
+            text: '谨慎离开',
+            outcomes: [{ probability: 1, effects: [{ type: 'gold', value: 15 }], description: '小心翼翼地离开，获得少量金币' }],
+          }] };
+        }
+      }
     }
 
     // === Cinematic entry sequence ===

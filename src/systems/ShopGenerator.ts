@@ -1,6 +1,7 @@
 import { ItemData, Rarity } from '../types';
 import { SeededRNG } from '../utils/rng';
 import itemsData from '../data/items.json';
+import { MetaManager } from '../managers/MetaManager';
 
 const RARITY_WEIGHTS: Record<string, Record<Rarity, number>> = {
   early: { common: 50, uncommon: 30, rare: 15, epic: 5, legendary: 0 },
@@ -36,7 +37,10 @@ export class ShopGenerator {
    * @param itemCount Number of items to offer (4-6)
    */
   static generate(rng: SeededRNG, actIndex: number, itemCount?: number): ItemData[] {
-    const count = itemCount ?? rng.nextInt(4, 6);
+    let count = itemCount ?? rng.nextInt(4, 6);
+    if (MetaManager.hasMutation('shop_extra_item')) {
+      count += 1;
+    }
     const stage = actIndex <= 0 ? 'early' : actIndex === 1 ? 'mid' : 'late';
     const weights = RARITY_WEIGHTS[stage];
 

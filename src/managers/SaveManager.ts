@@ -149,6 +149,7 @@ export class SaveManager {
       metaCurrency: 0,
       encounteredEnemies: [],
       defeatedBosses: [],
+      mutations: [],
     };
   }
 
