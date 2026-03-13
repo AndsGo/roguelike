@@ -4,7 +4,7 @@ import { HealthBar } from '../components/HealthBar';
 import { HEALTH_BAR_WIDTH, HEALTH_BAR_HEIGHT, Y_MOVEMENT_DAMPING } from '../constants';
 import { EventBus } from '../systems/EventBus';
 import { RelicSystem } from '../systems/RelicSystem';
-import { Theme, darkenColor, getElementColor } from '../ui/Theme';
+import { Theme, darkenColor, getElementColor, getRoleColor } from '../ui/Theme';
 import { getOrCreateTexture, getDisplaySize, ChibiConfig } from '../systems/UnitRenderer';
 
 /** Default enemy color (no element) */
@@ -139,7 +139,7 @@ export class Unit extends Phaser.GameObjects.Container {
 
   private computeFillColor(): number {
     if (this.isHero) {
-      return Theme.colors.role[this.role] ?? 0x4488ff;
+      return getRoleColor(this.role);
     }
     // Enemy: use darkened element color, or base red
     if (this.element) {

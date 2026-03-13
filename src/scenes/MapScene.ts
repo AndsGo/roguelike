@@ -3,10 +3,10 @@ import { GAME_WIDTH, GAME_HEIGHT } from '../constants';
 import { RunManager } from '../managers/RunManager';
 import { MapGenerator } from '../systems/MapGenerator';
 import { MapNode, ActConfig } from '../types';
-import { Theme, colorToString } from '../ui/Theme';
+import { Theme, colorToString, getNodeColor } from '../ui/Theme';
 import { SceneTransition } from '../systems/SceneTransition';
 import { Button } from '../ui/Button';
-import { MapRenderer, NODE_COLORS, NODE_LABELS, LayerInfo } from '../ui/MapRenderer';
+import { MapRenderer, NODE_LABELS, LayerInfo } from '../ui/MapRenderer';
 import { HeroDetailPopup } from '../ui/HeroDetailPopup';
 import actsData from '../data/acts.json';
 import { UI } from '../i18n';
@@ -133,7 +133,7 @@ export class MapScene extends Phaser.Scene {
       const isCompleted = node.completed;
       const isCurrent = node.index === currentNodeIdx;
       const radius = node.type === 'boss' ? 16 : node.type === 'elite' ? 14 : 12;
-      const color = NODE_COLORS[node.type];
+      const color = getNodeColor(node.type);
 
       const g = this.add.graphics();
 

@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { GAME_WIDTH, GAME_HEIGHT } from '../constants';
-import { Theme, colorToString } from './Theme';
+import { Theme, colorToString, getRoleColor } from './Theme';
 import { HeroData, EnemyData, UnitRole, RaceType, ClassType } from '../types';
 import { MetaManager } from '../managers/MetaManager';
 import { UI, STAT_LABELS, RACE_NAMES, CLASS_NAMES, ROLE_NAMES, ELEMENT_NAMES, formatUnlockCondition } from '../i18n';
@@ -57,7 +57,7 @@ export class CodexDetailPopup extends Phaser.GameObjects.Container {
         role: data.role as UnitRole,
         race: (data.race ?? 'human') as RaceType,
         classType: ((data as HeroData).class ?? 'warrior') as ClassType,
-        fillColor: Theme.colors.role[data.role] ?? 0xaaaaaa,
+        fillColor: getRoleColor(data.role),
         borderColor: 0x222222,
         isHero,
         isBoss,

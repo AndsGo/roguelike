@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { GAME_WIDTH, GAME_HEIGHT } from '../constants';
-import { Theme, colorToString } from '../ui/Theme';
+import { Theme, colorToString, getRoleColor } from '../ui/Theme';
 import { Button } from '../ui/Button';
 import { RunManager } from '../managers/RunManager';
 import { MetaManager } from '../managers/MetaManager';
@@ -164,7 +164,7 @@ export class HeroDraftScene extends Phaser.Scene {
     }
 
     // Role color bar at top
-    const roleColor = Theme.colors.role[hero.role] ?? 0x888888;
+    const roleColor = getRoleColor(hero.role);
     const roleBar = this.add.graphics();
     roleBar.fillStyle(roleColor, 0.7);
     roleBar.fillRoundedRect(-CARD_W / 2, -CARD_H / 2, CARD_W, 3, 1);

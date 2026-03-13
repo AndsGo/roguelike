@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import { GAME_WIDTH, GAME_HEIGHT } from '../constants';
 import { Panel } from './Panel';
-import { Theme, colorToString } from './Theme';
+import { Theme, colorToString, getRoleColor } from './Theme';
 import { MetaManager } from '../managers/MetaManager';
 import { UI, RACE_NAMES, CLASS_NAMES, ROLE_NAMES, ELEMENT_NAMES } from '../i18n';
 import { getOrCreateTexture, getDisplaySize, ChibiConfig } from '../systems/UnitRenderer';
@@ -245,7 +245,7 @@ export class CodexPanel {
           role: data.role as UnitRole,
           race: (data.race ?? 'human') as RaceType,
           classType: ((data as HeroData).class ?? 'warrior') as ClassType,
-          fillColor: Theme.colors.role[data.role] ?? 0xaaaaaa,
+          fillColor: getRoleColor(data.role),
           borderColor: 0x222222,
           isHero,
           isBoss,

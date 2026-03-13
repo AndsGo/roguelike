@@ -4,7 +4,7 @@ import { RunManager } from '../managers/RunManager';
 import { ShopGenerator } from '../systems/ShopGenerator';
 import { ItemData, HeroState } from '../types';
 import { Button } from '../ui/Button';
-import { Theme, colorToString } from '../ui/Theme';
+import { Theme, colorToString, getRarityColor } from '../ui/Theme';
 import { SceneTransition } from '../systems/SceneTransition';
 import { SaveManager } from '../managers/SaveManager';
 import { UI, formatStat, formatStatDiff, SLOT_LABELS } from '../i18n';
@@ -115,7 +115,7 @@ export class ShopScene extends Phaser.Scene {
   private createItemCard(item: ItemData, x: number, y: number, rm: RunManager): void {
     const container = this.add.container(x, y);
 
-    const rarityColor = Theme.colors.rarity[item.rarity] ?? 0xbbbbbb;
+    const rarityColor = getRarityColor(item.rarity);
 
     // Card background
     const bg = this.add.graphics();

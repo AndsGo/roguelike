@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import { GAME_WIDTH, GAME_HEIGHT } from '../constants';
 import { MapNode, NodeType, ActConfig, HeroState, HeroData } from '../types';
-import { Theme, colorToString } from './Theme';
+import { Theme, colorToString, getRoleColor, getNodeColor } from './Theme';
 import { UI, SLOT_LABELS } from '../i18n';
 
 export const NODE_COLORS: Record<NodeType, number> = Theme.colors.node as Record<NodeType, number>;
@@ -166,7 +166,7 @@ export class MapRenderer {
       const x = startX + i * 80 + 40;
       const y = panelY + 12;
 
-      const roleColor = Theme.colors.role[data.role] ?? 0x888888;
+      const roleColor = getRoleColor(data.role);
       const bar = scene.add.graphics().setScrollFactor(0).setDepth(101);
       bar.fillStyle(roleColor, 0.6);
       bar.fillRoundedRect(x - 30, y, 60, 3, 2);
@@ -221,7 +221,7 @@ export class MapRenderer {
       const y = panelY + 12;
 
       // Role color bar
-      const roleColor = Theme.colors.role[data.role] ?? 0x888888;
+      const roleColor = getRoleColor(data.role);
       const bar = scene.add.graphics().setScrollFactor(0).setDepth(101);
       bar.fillStyle(roleColor, 0.6);
       bar.fillRoundedRect(x - 30, y, 60, 3, 2);

@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { GAME_WIDTH, GAME_HEIGHT } from '../constants';
-import { Theme } from './Theme';
+import { Theme, getRoleColor } from './Theme';
 import { Button } from './Button';
 import { HeroState } from '../types';
 import { RunManager, autoFormationByRole } from '../managers/RunManager';
@@ -117,7 +117,7 @@ export class FormationPanel {
         role: data.role as ChibiConfig['role'],
         race: (data.race ?? 'human') as ChibiConfig['race'],
         classType: (data.class ?? 'warrior') as ChibiConfig['classType'],
-        fillColor: Theme.colors.role[data.role] ?? 0x888888,
+        fillColor: getRoleColor(data.role),
         borderColor: 0x000000,
         isHero: true,
         isBoss: false,

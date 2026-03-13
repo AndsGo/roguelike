@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 import { GAME_WIDTH, GAME_HEIGHT, REST_HEAL_PERCENT } from '../constants';
 import { RunManager } from '../managers/RunManager';
 import { Button } from '../ui/Button';
-import { Theme, colorToString } from '../ui/Theme';
+import { Theme, colorToString, getNodeColor } from '../ui/Theme';
 import { SceneTransition } from '../systems/SceneTransition';
 import { SaveManager } from '../managers/SaveManager';
 import { ParticleManager } from '../systems/ParticleManager';
@@ -32,7 +32,7 @@ export class RestScene extends Phaser.Scene {
 
     this.add.text(GAME_WIDTH / 2, 55, UI.rest.title, {
       fontSize: '20px',
-      color: colorToString(Theme.colors.node.rest),
+      color: colorToString(getNodeColor('rest')),
       fontFamily: 'monospace',
       fontStyle: 'bold',
     }).setOrigin(0.5);

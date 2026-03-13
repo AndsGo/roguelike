@@ -3,7 +3,7 @@ import { GAME_WIDTH, GAME_HEIGHT } from '../constants';
 import { RunManager } from '../managers/RunManager';
 import { EventData, EventChoice, EventOutcome, EventNodeData, ElementType } from '../types';
 import { Button } from '../ui/Button';
-import { Theme, colorToString } from '../ui/Theme';
+import { Theme, colorToString, getNodeColor } from '../ui/Theme';
 import { SceneTransition } from '../systems/SceneTransition';
 import { SaveManager } from '../managers/SaveManager';
 import eventsData from '../data/events.json';
@@ -98,7 +98,7 @@ export class EventScene extends Phaser.Scene {
     // Title (starts invisible)
     const title = this.add.text(GAME_WIDTH / 2, 38, event.title, {
       fontSize: '18px',
-      color: colorToString(Theme.colors.node.event),
+      color: colorToString(getNodeColor('event')),
       fontFamily: 'monospace',
       fontStyle: 'bold',
     }).setOrigin(0.5).setAlpha(0);

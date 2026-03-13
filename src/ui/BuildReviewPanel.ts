@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import { GAME_WIDTH, GAME_HEIGHT } from '../constants';
 import { Panel } from './Panel';
-import { Theme, colorToString, getElementColor } from './Theme';
+import { Theme, colorToString, getElementColor, getRarityColor } from './Theme';
 import { RunManager } from '../managers/RunManager';
 import { StatsManager, RunStats } from '../managers/StatsManager';
 import { UI, getHeroDisplayName } from '../i18n';
@@ -244,7 +244,7 @@ export class BuildReviewPanel {
       for (const relicState of relics) {
         const relicDef = (relicsData as RelicDef[]).find(r => r.id === relicState.id);
         const rarity = relicDef?.rarity ?? 'common';
-        const rarityColor = Theme.colors.rarity[rarity] ?? 0xbbbbbb;
+        const rarityColor = getRarityColor(rarity);
 
         const relicName = relicDef?.name ?? relicState.id;
         const relicText = scene.add.text(-240, y, relicName, {

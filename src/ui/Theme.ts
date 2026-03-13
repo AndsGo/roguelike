@@ -37,12 +37,65 @@ const COLORBLIND_ELEMENT: Record<string, number> = {
   holy: 0xffffff,      // white (unchanged)
 };
 
+/** Colorblind-safe rarity palette — uses luminance + saturation variation */
+const COLORBLIND_RARITY: Record<string, number> = {
+  common: 0xbbbbbb,     // grey (unchanged)
+  uncommon: 0x33aa77,   // teal-green (shifted from pure green)
+  rare: 0x3388dd,       // bright blue (higher contrast)
+  epic: 0xcc66ff,       // light purple (more luminance)
+  legendary: 0xff8800,  // orange (unchanged, high contrast)
+};
+
+/** Colorblind-safe role palette — distinct hue + luminance */
+const COLORBLIND_ROLE: Record<string, number> = {
+  tank: 0x4488ff,       // blue (unchanged)
+  melee_dps: 0xff8844,  // orange (unchanged, distinct from blue)
+  ranged_dps: 0xee55aa, // pink (shifted for better red-green distinction)
+  healer: 0x33ddaa,     // teal (shifted from pure green)
+  support: 0xcccc44,    // yellow-green (unchanged)
+};
+
+/** Colorblind-safe node palette */
+const COLORBLIND_NODE: Record<string, number> = {
+  battle: 0xdd5555,     // red (slightly brighter)
+  elite: 0xff9944,      // orange (unchanged)
+  boss: 0xff3333,       // bright red (unchanged)
+  shop: 0x33bbaa,       // teal (shifted from green)
+  event: 0x9955dd,      // purple (brighter)
+  rest: 0x4488cc,       // blue (unchanged)
+  gauntlet: 0xdd44dd,   // magenta (unchanged)
+};
+
 /** Get the element color, respecting colorblind mode setting */
 export function getElementColor(element: string): number {
   if (getAccessibility().colorblindMode) {
     return COLORBLIND_ELEMENT[element] ?? Theme.colors.element[element] ?? 0xaaaaaa;
   }
   return Theme.colors.element[element] ?? 0xaaaaaa;
+}
+
+/** Get rarity color, respecting colorblind mode */
+export function getRarityColor(rarity: string): number {
+  if (getAccessibility().colorblindMode) {
+    return COLORBLIND_RARITY[rarity] ?? Theme.colors.rarity[rarity] ?? 0xaaaaaa;
+  }
+  return Theme.colors.rarity[rarity] ?? 0xaaaaaa;
+}
+
+/** Get role color, respecting colorblind mode */
+export function getRoleColor(role: string): number {
+  if (getAccessibility().colorblindMode) {
+    return COLORBLIND_ROLE[role] ?? Theme.colors.role[role] ?? 0xaaaaaa;
+  }
+  return Theme.colors.role[role] ?? 0xaaaaaa;
+}
+
+/** Get node color, respecting colorblind mode */
+export function getNodeColor(nodeType: string): number {
+  if (getAccessibility().colorblindMode) {
+    return COLORBLIND_NODE[nodeType] ?? Theme.colors.node[nodeType] ?? 0xaaaaaa;
+  }
+  return Theme.colors.node[nodeType] ?? 0xaaaaaa;
 }
 
 export const Theme = {

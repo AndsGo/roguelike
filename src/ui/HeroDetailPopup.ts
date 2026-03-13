@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import { HeroData, HeroState, EquipmentSlot, SkillAdvancement, UnitStats } from '../types';
 import { RunManager } from '../managers/RunManager';
-import { Theme, colorToString } from './Theme';
+import { Theme, colorToString, getRarityColor } from './Theme';
 import { GAME_WIDTH, GAME_HEIGHT } from '../constants';
 import { STAT_LABELS, SLOT_LABELS, formatStat, ELEMENT_NAMES, RACE_NAMES, CLASS_NAMES } from '../i18n';
 import { expForLevel } from '../utils/math';
@@ -252,7 +252,7 @@ export class HeroDetailPopup extends Phaser.GameObjects.Container {
       }
       const t = scene.add.text(leftX, equipY + 16 + i * 14, line, {
         fontSize: '9px',
-        color: item ? colorToString(Theme.colors.rarity[item.rarity] ?? 0xaaaaaa) : '#666666',
+        color: item ? colorToString(getRarityColor(item.rarity)) : '#666666',
         fontFamily: 'monospace',
         wordWrap: { width: POPUP_WIDTH - 40 },
       }).setDepth(801);

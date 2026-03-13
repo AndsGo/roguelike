@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import { HeroData, HeroState, EquipmentSlot } from '../types';
 import { RunManager } from '../managers/RunManager';
-import { Theme, colorToString, getElementColor } from './Theme';
+import { Theme, colorToString, getElementColor, getRarityColor } from './Theme';
 import { UI } from '../i18n';
 import { HeroDetailPopup } from './HeroDetailPopup';
 
@@ -129,7 +129,7 @@ export class HeroCard extends Phaser.GameObjects.Container {
       const sy = 56;
       const equipped = heroState.equipment[slotNames[i]];
       const slotColor = equipped
-        ? (Theme.colors.rarity[equipped.rarity] ?? 0x888888)
+        ? getRarityColor(equipped.rarity)
         : 0x333344;
       const slot = scene.add.graphics();
       slot.fillStyle(slotColor, equipped ? 0.8 : 0.4);
@@ -279,7 +279,7 @@ export class HeroCard extends Phaser.GameObjects.Container {
       }
     }
     if (bestRarity >= 0) {
-      return Theme.colors.rarity[rarityOrder[bestRarity]] ?? Theme.colors.panelBorder;
+      return getRarityColor(rarityOrder[bestRarity]);
     }
     return Theme.colors.panelBorder;
   }
