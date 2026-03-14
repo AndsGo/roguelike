@@ -241,6 +241,45 @@ export class BattleScene extends Phaser.Scene {
           }
         }
       }
+
+      // Apply additional rule effects
+      for (const rule of rules) {
+        switch (rule.type) {
+          case 'double_crit':
+            for (const unit of [...heroes, ...enemies]) {
+              unit.currentStats.critDamage *= 2;
+            }
+            break;
+          case 'gold_rush':
+            for (const enemy of enemies) {
+              enemy.currentStats.maxHp = Math.round(enemy.currentStats.maxHp * 1.3);
+              enemy.currentHp = Math.round(enemy.currentHp * 1.3);
+              enemy.healthBar.updateHealth(enemy.currentHp, enemy.currentStats.maxHp);
+            }
+            break;
+          case 'element_chaos': {
+            const elems = ['fire', 'ice', 'lightning', 'dark', 'holy'];
+            const battleRng = rm.getRng();
+            for (const hero of heroes) {
+              (hero as any).element = battleRng.pick(elems);
+            }
+            break;
+          }
+          case 'speed_frenzy':
+            for (const unit of [...heroes, ...enemies]) {
+              unit.currentStats.attackSpeed *= 1.3;
+            }
+            break;
+        }
+      }
+    }
+
+    // Golden border for daily runs
+    if (runState.isDaily) {
+      const border = this.add.graphics();
+      border.lineStyle(2, 0xccaa44, 0.6);
+      border.strokeRect(1, 1, GAME_WIDTH - 2, GAME_HEIGHT - 2);
+      border.setDepth(100);
     }
 
     // Record enemy encounters for codex
@@ -947,6 +986,10 @@ export class BattleScene extends Phaser.Scene {
       const endRunState = rm.getState();
       if (endRunState.isDaily && endRunState.dailyModifiers?.rules) {
         goldEarned = DailyChallengeManager.applyGoldModifier(goldEarned, endRunState.dailyModifiers.rules as DailyRule[]);
+        const goldRushRule = (endRunState.dailyModifiers!.rules as DailyRule[]).find((r: any) => r.type === 'gold_rush');
+        if (goldRushRule) {
+          goldEarned = Math.round(goldEarned * 2);
+        }
       }
       // Apply relic gold bonus
       const goldBonus = RelicSystem.getGoldBonus();
