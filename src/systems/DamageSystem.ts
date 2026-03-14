@@ -1,6 +1,6 @@
 import { Unit } from '../entities/Unit';
 import { DamageType, ElementType } from '../types';
-import { DAMAGE_VARIANCE, DEFENSE_FORMULA_BASE } from '../constants';
+import { DAMAGE_VARIANCE, DEFENSE_FORMULA_BASE, DEFENSE_SOFT_CAP, DEFENSE_SOFT_CAP_FACTOR } from '../constants';
 import { DamageNumber } from '../components/DamageNumber';
 import { SeededRNG } from '../utils/rng';
 import { ElementSystem } from './ElementSystem';
@@ -55,7 +55,11 @@ export class DamageSystem {
     if (damageType !== 'pure') {
       const piercing = RelicSystem.getDefensePiercing();
       const effectiveDefense = Math.max(0, defense) * (1 - piercing);
-      raw = raw * (DEFENSE_FORMULA_BASE / (DEFENSE_FORMULA_BASE + effectiveDefense));
+      // Soft cap: diminishing returns above DEFENSE_SOFT_CAP
+      const cappedDef = effectiveDefense <= DEFENSE_SOFT_CAP
+        ? effectiveDefense
+        : DEFENSE_SOFT_CAP + Math.sqrt(Math.max(0, effectiveDefense - DEFENSE_SOFT_CAP) * DEFENSE_SOFT_CAP_FACTOR);
+      raw = raw * (DEFENSE_FORMULA_BASE / (DEFENSE_FORMULA_BASE + cappedDef));
     }
 
     // Crit check

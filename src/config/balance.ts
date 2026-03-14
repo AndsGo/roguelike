@@ -23,6 +23,8 @@ export const BASE_ATTACK_COOLDOWN = 1000; // ms
 export const DAMAGE_VARIANCE = 0.1; // +/-10%
 export const CRIT_MULTIPLIER = 1.5;
 export const DEFENSE_FORMULA_BASE = 100; // damage * (100 / (100 + def))
+export const DEFENSE_SOFT_CAP = 80;         // defense value where diminishing returns begin
+export const DEFENSE_SOFT_CAP_FACTOR = 20;  // sqrt scaling factor above soft cap
 export const Y_MOVEMENT_DAMPING = 0.3;
 
 // ============ Leveling ============

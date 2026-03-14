@@ -136,6 +136,49 @@ describe('DamageSystem', () => {
       expect(result.finalDamage).toBeGreaterThanOrEqual(1);
     });
 
+    describe('defense soft cap', () => {
+      it('defense below 80 is unchanged', () => {
+        const attacker = createMockUnit({
+          stats: { attack: 50, critChance: 0, critDamage: 1.5 },
+        });
+        const target = createMockUnit({
+          stats: { defense: 40, maxHp: 1000, hp: 1000 },
+        });
+        const result = ds.calculateDamage(attacker as any, target as any, 100, 'physical', false);
+        // defense 40: 100/(100+40) = 0.714 → damage ~71 ± 10%
+        expect(result.finalDamage).toBeGreaterThanOrEqual(60);
+        expect(result.finalDamage).toBeLessThanOrEqual(82);
+      });
+
+      it('defense above 80 uses soft cap (diminishing returns)', () => {
+        const attacker = createMockUnit({
+          stats: { attack: 50, critChance: 0, critDamage: 1.5 },
+        });
+        const target = createMockUnit({
+          stats: { defense: 200, maxHp: 1000, hp: 1000 },
+        });
+        const result = ds.calculateDamage(attacker as any, target as any, 100, 'physical', false);
+        // New soft cap: effectiveDef = 80 + sqrt(120*20) = 80+49 = 129
+        // New formula: 100/(100+129) = 43.7 → with variance range 39-48
+        expect(result.finalDamage).toBeGreaterThanOrEqual(38);
+        expect(result.finalDamage).toBeLessThanOrEqual(50);
+      });
+
+      it('extreme defense 281 still allows meaningful damage', () => {
+        const attacker = createMockUnit({
+          stats: { attack: 50, critChance: 0, critDamage: 1.5 },
+        });
+        const target = createMockUnit({
+          stats: { defense: 281, maxHp: 1000, hp: 1000 },
+        });
+        const result = ds.calculateDamage(attacker as any, target as any, 100, 'physical', false);
+        // New soft cap: effectiveDef = 80+sqrt(201*20) = 80+63.4 = 143.4
+        // New formula: 100/(100+143.4) = 41.1 → with variance range 37-45
+        expect(result.finalDamage).toBeGreaterThanOrEqual(36);
+        expect(result.finalDamage).toBeLessThanOrEqual(46);
+      });
+    });
+
     it('element advantage multiplier is applied to damage', () => {
       // fire vs ice should get element advantage bonus
       const attacker = createMockUnit({
