@@ -46,6 +46,9 @@ export const BOSS_BATTLE_GOLD = 120;
 
 export const MAP_NODE_COUNT = 15;
 export const REST_HEAL_PERCENT = 0.3;
+export const REST_TRAIN_EXP = 120;
+export const REST_SCAVENGE_GOLD_MIN = 40;
+export const REST_SCAVENGE_GOLD_MAX = 60;
 
 // ============ Equipment ============
 
