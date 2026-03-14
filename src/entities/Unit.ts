@@ -316,6 +316,7 @@ export class Unit extends Phaser.GameObjects.Container {
     this.healthBar.updateHealth(this.currentHp, maxHp);
 
     if (actual > 0) {
+      this.flashColor(0x44ff88, 120); // Green heal flash
       EventBus.getInstance().emit('unit:heal', {
         sourceId: this.unitId,
         targetId: this.unitId,

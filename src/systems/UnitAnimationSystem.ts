@@ -48,14 +48,18 @@ export class UnitAnimationSystem {
   playIdle(unit: Unit): void {
     if (this.idleTweens.has(unit.unitId)) return;
 
-    const baseY = unit.y;
+    const randomDelay = Math.random() * 400;
     const tween = this.scene.tweens.add({
       targets: unit,
-      y: baseY - 3,
+      y: unit.y - 3,
       duration: 800,
       yoyo: true,
       repeat: -1,
       ease: 'Sine.easeInOut',
+      delay: randomDelay,
+      onStart: () => {
+        tween.updateTo('y', unit.y - 3, true);
+      },
     });
     this.idleTweens.set(unit.unitId, tween);
   }
