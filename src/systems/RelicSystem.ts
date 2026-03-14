@@ -191,6 +191,13 @@ export class RelicSystem {
         if (relic) relic.triggerCount++;
       }
     }
+
+    // Decay shields on all heroes
+    for (const hero of inst.heroes) {
+      if (hero.isAlive) {
+        hero.decayShield(delta);
+      }
+    }
   }
 
   /** Check if a relic is currently active */

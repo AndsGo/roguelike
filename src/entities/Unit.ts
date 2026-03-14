@@ -37,6 +37,10 @@ export class Unit extends Phaser.GameObjects.Container {
   statusEffects: StatusEffect[] = [];
   target: Unit | null = null;
   tauntTarget: Unit | null = null;
+  lastAttacker?: Unit;
+  private shieldHp: number = 0;
+  private shieldDuration: number = 0;
+  private static isCounterDamage = false;
 
   // Visual
   sprite: Phaser.GameObjects.Image;
@@ -270,15 +274,38 @@ export class Unit extends Phaser.GameObjects.Container {
   takeDamage(amount: number): number {
     const actual = Math.max(0, Math.round(amount));
     if (actual === 0) return 0;
-    this.currentHp = Math.max(0, this.currentHp - actual);
+
+    // Shield absorption
+    let remaining = actual;
+    if (this.shieldHp > 0) {
+      const absorbed = Math.min(this.shieldHp, remaining);
+      this.shieldHp -= absorbed;
+      remaining -= absorbed;
+      if (remaining === 0) {
+        this.healthBar.updateHealth(this.currentHp, this.currentStats.maxHp);
+        return 0;
+      }
+    }
+
+    this.currentHp = Math.max(0, this.currentHp - remaining);
     this.healthBar.updateHealth(this.currentHp, this.currentStats.maxHp);
+
+    // Counter aura: reflect damage back to attacker (re-entrant guard)
+    if (!Unit.isCounterDamage) {
+      const counterEffect = this.statusEffects.find(e => e.name === 'counter_aura');
+      if (counterEffect && this.lastAttacker && this.lastAttacker.isAlive) {
+        Unit.isCounterDamage = true;
+        this.lastAttacker.takeDamage(Math.round(remaining * counterEffect.value));
+        Unit.isCounterDamage = false;
+      }
+    }
 
     if (this.currentHp <= 0) {
       this.die();
     } else {
       this.flashHurt();
     }
-    return actual;
+    return remaining;
   }
 
   heal(amount: number): number {
@@ -297,6 +324,22 @@ export class Unit extends Phaser.GameObjects.Container {
     }
 
     return actual;
+  }
+
+  addShield(value: number, duration: number): void {
+    this.shieldHp = Math.max(this.shieldHp, value);
+    this.shieldDuration = duration * 1000;
+    this.healthBar.updateHealth(this.currentHp, this.currentStats.maxHp);
+  }
+
+  decayShield(deltaMs: number): void {
+    if (this.shieldDuration > 0) {
+      this.shieldDuration -= deltaMs;
+      if (this.shieldDuration <= 0) {
+        this.shieldHp = 0;
+        this.shieldDuration = 0;
+      }
+    }
   }
 
   die(): void {

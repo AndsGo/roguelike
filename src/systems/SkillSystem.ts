@@ -244,6 +244,25 @@ export class SkillSystem {
 
     // Visual flash for skill use
     unit.flashColor(0xffff88, 150);
+
+    // Special: ult_iron_bastion — apply counter_aura to caster + shield to all allies
+    if (skill.id === 'ult_iron_bastion') {
+      const counterAura: StatusEffect = {
+        id: `counter_aura_${Date.now()}`,
+        type: 'counter_aura',
+        name: 'counter_aura',
+        duration: 8,
+        value: 0.15,
+      };
+      unit.statusEffects.push(counterAura);
+
+      const alliedUnits = unit.isHero ? allies : enemies;
+      for (const ally of alliedUnits) {
+        if (ally.isAlive) {
+          ally.addShield(50, 8);
+        }
+      }
+    }
   }
 
   /**

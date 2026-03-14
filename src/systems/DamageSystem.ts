@@ -46,6 +46,7 @@ export class DamageSystem {
   ): DamageResult {
     const stats = attacker.getEffectiveStats();
     const targetStats = target.getEffectiveStats();
+    target.lastAttacker = attacker;
 
     // Calculate raw damage
     let raw = baseDamage;

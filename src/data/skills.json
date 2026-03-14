@@ -653,7 +653,7 @@
   {
     "id": "ult_iron_bastion",
     "name": "钢铁壁垒",
-    "description": "化身铁壁，大幅提升防御并嘲讽全体敌人",
+    "description": "化身铁壁，嘲讽全体敌人，大幅提升防御，反弹15%伤害，并为全队施加护盾",
     "cooldown": 0,
     "damageType": "physical",
     "targetType": "self",

@@ -6,7 +6,7 @@ export type TargetType = 'enemy' | 'ally' | 'self' | 'all_enemies' | 'all_allies
 export type Rarity = 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary';
 export type EquipmentSlot = 'weapon' | 'armor' | 'accessory';
 export type NodeType = 'battle' | 'elite' | 'boss' | 'shop' | 'event' | 'rest' | 'gauntlet';
-export type StatusEffectType = 'dot' | 'hot' | 'stun' | 'buff' | 'debuff' | 'taunt';
+export type StatusEffectType = 'dot' | 'hot' | 'stun' | 'buff' | 'debuff' | 'taunt' | 'counter_aura';
 
 // ============ New: Element, Race, Class ============
 
