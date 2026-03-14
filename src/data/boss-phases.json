@@ -17,5 +17,57 @@
         "bossEffect": { "type": "damage_reduction", "value": 20 }
       }
     ]
+  },
+  "frost_queen": {
+    "phases": [
+      {
+        "hpPercent": 0.50,
+        "spawns": [],
+        "bossEffect": { "type": "enrage", "value": 30 }
+      },
+      {
+        "hpPercent": 0.25,
+        "spawns": [],
+        "bossEffect": { "type": "shield", "value": 500 }
+      }
+    ]
+  },
+  "thunder_titan": {
+    "phases": [
+      {
+        "hpPercent": 0.75,
+        "spawns": [],
+        "bossEffect": { "type": "enrage", "value": 20 }
+      },
+      {
+        "hpPercent": 0.50,
+        "spawns": ["storm_hawk", "storm_hawk"],
+        "bossEffect": { "type": "damage_reduction", "value": 15 }
+      },
+      {
+        "hpPercent": 0.25,
+        "spawns": [],
+        "bossEffect": { "type": "enrage", "value": 40 }
+      }
+    ]
+  },
+  "shadow_lord": {
+    "phases": [
+      {
+        "hpPercent": 0.75,
+        "spawns": [],
+        "bossEffect": { "type": "damage_reduction", "value": 20 }
+      },
+      {
+        "hpPercent": 0.50,
+        "spawns": ["skeleton_archer", "skeleton_archer"],
+        "bossEffect": { "type": "enrage", "value": 25 }
+      },
+      {
+        "hpPercent": 0.25,
+        "spawns": ["dark_mage"],
+        "bossEffect": { "type": "enrage", "value": 35 }
+      }
+    ]
   }
 }
