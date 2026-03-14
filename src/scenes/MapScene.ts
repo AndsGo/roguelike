@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
-import { GAME_WIDTH, GAME_HEIGHT } from '../constants';
+import { GAME_WIDTH, GAME_HEIGHT, MAP_HIDDEN_NODE_COST } from '../constants';
+import { SaveManager } from '../managers/SaveManager';
 import { RunManager } from '../managers/RunManager';
 import { MapGenerator } from '../systems/MapGenerator';
 import { MapNode, ActConfig } from '../types';
@@ -96,12 +97,28 @@ export class MapScene extends Phaser.Scene {
       }
     }
 
+    // Position hidden nodes near their parent
+    for (const node of map) {
+      if (!node.hidden) continue;
+      if (nodePositions.has(node.index)) continue;
+
+      const parent = map.find(n => !n.hidden && n.connections.includes(node.index));
+      if (!parent) continue;
+      const parentPos = nodePositions.get(parent.index);
+      if (!parentPos) continue;
+
+      nodePositions.set(node.index, { x: parentPos.x, y: parentPos.y + 50 });
+    }
+
     // Draw connection lines
     for (const node of map) {
       const fromPos = nodePositions.get(node.index);
       if (!fromPos) continue;
 
       for (const connIdx of node.connections) {
+        // Skip connections to hidden nodes (drawn separately below)
+        if (map[connIdx]?.hidden) continue;
+
         const toPos = nodePositions.get(connIdx);
         if (!toPos) continue;
 
@@ -124,6 +141,68 @@ export class MapScene extends Phaser.Scene {
       }
     }
 
+    // Draw connections to hidden nodes in gray dashed style
+    for (const node of map) {
+      if (node.hidden) continue;
+      const fromPos = nodePositions.get(node.index);
+      if (!fromPos) continue;
+
+      for (const connIdx of node.connections) {
+        const targetNode = map[connIdx];
+        if (!targetNode?.hidden) continue;
+        const toPos = nodePositions.get(connIdx);
+        if (!toPos) continue;
+
+        const g = this.add.graphics();
+        this.mapContainer.add(g);
+        g.lineStyle(1, 0x888888, 0.4);
+
+        const dx = toPos.x - fromPos.x;
+        const dy = toPos.y - fromPos.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist === 0) continue;
+        const nx = dx / dist;
+        const ny = dy / dist;
+        for (let d = 0; d < dist; d += 6) {
+          const endD = Math.min(d + 4, dist);
+          g.beginPath();
+          g.moveTo(fromPos.x + nx * d, fromPos.y + ny * d);
+          g.lineTo(fromPos.x + nx * endD, fromPos.y + ny * endD);
+          g.strokePath();
+        }
+      }
+    }
+
+    // Draw shortcut connections (dashed cyan lines)
+    for (const node of map) {
+      if (!node.shortcutConnections?.length) continue;
+      const fromPos = nodePositions.get(node.index);
+      if (!fromPos) continue;
+
+      for (const targetIdx of node.shortcutConnections) {
+        const toPos = nodePositions.get(targetIdx);
+        if (!toPos) continue;
+
+        const connGraphics2 = this.add.graphics();
+        this.mapContainer.add(connGraphics2);
+        connGraphics2.lineStyle(1.5, 0x44dddd, 0.6);
+
+        const dx = toPos.x - fromPos.x;
+        const dy = toPos.y - fromPos.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist === 0) continue;
+        const nx = dx / dist;
+        const ny = dy / dist;
+        for (let d = 0; d < dist; d += 6) {
+          const endD = Math.min(d + 4, dist);
+          connGraphics2.beginPath();
+          connGraphics2.moveTo(fromPos.x + nx * d, fromPos.y + ny * d);
+          connGraphics2.lineTo(fromPos.x + nx * endD, fromPos.y + ny * endD);
+          connGraphics2.strokePath();
+        }
+      }
+    }
+
     // Draw nodes
     const currentNodeIdx = rm.getCurrentNode();
     for (const node of map) {
@@ -135,6 +214,48 @@ export class MapScene extends Phaser.Scene {
       const isCurrent = node.index === currentNodeIdx;
       const radius = node.type === 'boss' ? 16 : node.type === 'elite' ? 14 : 12;
       const color = getNodeColor(node.type);
+
+      if (node.hidden) {
+        // Hidden node: gray circle, "?" label, cost text
+        const hg = this.add.graphics();
+        hg.fillStyle(0x888888, 0.4);
+        hg.fillCircle(pos.x, pos.y, radius);
+        hg.lineStyle(1, 0x888888, 0.4);
+        hg.strokeCircle(pos.x, pos.y, radius);
+        this.mapContainer.add(hg);
+
+        const labelText = this.add.text(pos.x, pos.y, '?', {
+          fontSize: '10px', color: '#888888', fontFamily: 'monospace', fontStyle: 'bold',
+        }).setOrigin(0.5);
+        this.mapContainer.add(labelText);
+
+        const costText = this.add.text(pos.x, pos.y + radius + 8, UI.map.hiddenCost(node.revealCost ?? MAP_HIDDEN_NODE_COST), {
+          fontSize: '8px', color: '#ccaa44', fontFamily: 'monospace',
+        }).setOrigin(0.5);
+        this.mapContainer.add(costText);
+
+        // Click to reveal
+        const hitArea = this.add.zone(pos.x, pos.y, radius * 2, radius * 2).setInteractive({ useHandCursor: true });
+        this.mapContainer.add(hitArea);
+        hitArea.on('pointerup', () => {
+          if (this.isDragging) return;
+          const rm2 = RunManager.getInstance();
+          if (rm2.getGold() < (node.revealCost ?? MAP_HIDDEN_NODE_COST)) {
+            const noGold = this.add.text(pos.x, pos.y - 20, UI.map.hiddenNoGold, {
+              fontSize: '10px', color: '#ff4444', fontFamily: 'monospace',
+            }).setOrigin(0.5);
+            this.mapContainer.add(noGold);
+            this.tweens.add({ targets: noGold, alpha: 0, y: pos.y - 40, duration: 1000, onComplete: () => noGold.destroy() });
+            return;
+          }
+          rm2.spendGold(node.revealCost ?? MAP_HIDDEN_NODE_COST);
+          node.hidden = false;
+          SaveManager.autoSave();
+          this.scene.restart();
+        });
+
+        continue; // Skip normal node rendering
+      }
 
       const g = this.add.graphics();
 

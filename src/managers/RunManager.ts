@@ -331,8 +331,23 @@ export class RunManager {
             accessible.add(connIdx);
           }
         }
+        if (node.shortcutConnections) {
+          for (const connIdx of node.shortcutConnections) {
+            if (connIdx < map.length && !map[connIdx].completed) {
+              accessible.add(connIdx);
+            }
+          }
+        }
       }
     }
+
+    // Hidden nodes are not accessible until revealed
+    for (const idx of [...accessible]) {
+      if (map[idx].hidden) {
+        accessible.delete(idx);
+      }
+    }
+
     return Array.from(accessible);
   }
 
