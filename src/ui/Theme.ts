@@ -180,13 +180,6 @@ export const Theme = {
     },
   },
 
-  fonts: {
-    title: { fontSize: '24px', fontFamily: 'monospace', color: '#ffffff' },
-    body: { fontSize: '14px', fontFamily: 'monospace', color: '#ffffff' },
-    small: { fontSize: '11px', fontFamily: 'monospace', color: '#999999' },
-    damage: { fontSize: '18px', fontFamily: 'monospace', fontStyle: 'bold' },
-  },
-
   spacing: { xs: 4, sm: 8, md: 16, lg: 24, xl: 32 },
 };
 
