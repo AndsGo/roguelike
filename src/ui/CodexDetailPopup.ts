@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { GAME_WIDTH, GAME_HEIGHT } from '../constants';
 import { Theme, colorToString, getRoleColor } from './Theme';
+import { TextFactory } from './TextFactory';
 import { HeroData, EnemyData, UnitRole, RaceType, ClassType } from '../types';
 import { MetaManager } from '../managers/MetaManager';
 import { UI, STAT_LABELS, RACE_NAMES, CLASS_NAMES, ROLE_NAMES, ELEMENT_NAMES, formatUnlockCondition } from '../i18n';
@@ -70,10 +71,8 @@ export class CodexDetailPopup extends Phaser.GameObjects.Container {
       this.add(sprite);
     } catch {
       // Fallback placeholder
-      const placeholder = scene.add.text(leftX + 40, topY + 50, '?', {
-        fontSize: '32px',
+      const placeholder = TextFactory.create(scene, leftX + 40, topY + 50, '?', 'title', {
         color: '#555555',
-        fontFamily: 'monospace',
       }).setOrigin(0.5);
       this.add(placeholder);
     }
@@ -83,11 +82,8 @@ export class CodexDetailPopup extends Phaser.GameObjects.Container {
     let infoY = topY;
 
     // Name (bold)
-    const nameText = scene.add.text(infoX, infoY, data.name, {
-      fontSize: '14px',
+    const nameText = TextFactory.create(scene, infoX, infoY, data.name, 'subtitle', {
       color: '#ffffff',
-      fontFamily: 'monospace',
-      fontStyle: 'bold',
     });
     this.add(nameText);
     infoY += 20;
@@ -99,30 +95,24 @@ export class CodexDetailPopup extends Phaser.GameObjects.Container {
     if (data.element) tags.push(ELEMENT_NAMES[data.element] ?? data.element);
     tags.push(ROLE_NAMES[data.role] ?? data.role);
 
-    const tagsText = scene.add.text(infoX, infoY, tags.join(' / '), {
-      fontSize: '9px',
+    const tagsText = TextFactory.create(scene, infoX, infoY, tags.join(' / '), 'small', {
       color: '#aaaacc',
-      fontFamily: 'monospace',
     });
     this.add(tagsText);
     infoY += 18;
 
     // Boss tag
     if (isBoss) {
-      const bossTag = scene.add.text(infoX + tagsText.width + 8, infoY - 18, UI.codex.boss, {
-        fontSize: '9px',
+      const bossTag = TextFactory.create(scene, infoX + tagsText.width + 8, infoY - 18, UI.codex.boss, 'small', {
         color: colorToString(Theme.colors.danger),
-        fontFamily: 'monospace',
         fontStyle: 'bold',
       });
       this.add(bossTag);
     }
 
     // ---- Base Stats (2 columns, 5 stats each) ----
-    const statsHeaderText = scene.add.text(infoX, infoY, UI.codex.baseStats, {
-      fontSize: '10px',
+    const statsHeaderText = TextFactory.create(scene, infoX, infoY, UI.codex.baseStats, 'label', {
       color: '#ffdd88',
-      fontFamily: 'monospace',
       fontStyle: 'bold',
     });
     this.add(statsHeaderText);
@@ -151,10 +141,8 @@ export class CodexDetailPopup extends Phaser.GameObjects.Container {
       const s = leftStats[i];
       const label = STAT_LABELS[s.key] ?? s.key;
       const valueStr = this.formatStatValue(s.value, s.isPercent, s.suffix);
-      const t = scene.add.text(statColX, infoY + i * 14, `${label}: ${valueStr}`, {
-        fontSize: '9px',
+      const t = TextFactory.create(scene, statColX, infoY + i * 14, `${label}: ${valueStr}`, 'small', {
         color: '#ccccdd',
-        fontFamily: 'monospace',
       });
       this.add(t);
     }
@@ -163,10 +151,8 @@ export class CodexDetailPopup extends Phaser.GameObjects.Container {
       const s = rightStats[i];
       const label = STAT_LABELS[s.key] ?? s.key;
       const valueStr = this.formatStatValue(s.value, s.isPercent, s.suffix);
-      const t = scene.add.text(statCol2X, infoY + i * 14, `${label}: ${valueStr}`, {
-        fontSize: '9px',
+      const t = TextFactory.create(scene, statCol2X, infoY + i * 14, `${label}: ${valueStr}`, 'small', {
         color: '#ccccdd',
-        fontFamily: 'monospace',
       });
       this.add(t);
     }
@@ -176,20 +162,16 @@ export class CodexDetailPopup extends Phaser.GameObjects.Container {
     // ---- Monster rewards ----
     if (!isHero) {
       const enemy = data as EnemyData;
-      const rewardText = scene.add.text(infoX, infoY, UI.codex.rewards(enemy.goldReward, enemy.expReward), {
-        fontSize: '9px',
+      const rewardText = TextFactory.create(scene, infoX, infoY, UI.codex.rewards(enemy.goldReward, enemy.expReward), 'small', {
         color: colorToString(Theme.colors.gold),
-        fontFamily: 'monospace',
       });
       this.add(rewardText);
       infoY += 16;
     }
 
     // ---- Skills section ----
-    const skillHeader = scene.add.text(infoX, infoY, UI.codex.skills, {
-      fontSize: '10px',
+    const skillHeader = TextFactory.create(scene, infoX, infoY, UI.codex.skills, 'label', {
       color: '#88aaff',
-      fontFamily: 'monospace',
       fontStyle: 'bold',
     });
     this.add(skillHeader);
@@ -197,10 +179,8 @@ export class CodexDetailPopup extends Phaser.GameObjects.Container {
 
     const allSkills = skillsData as { id: string; name: string; description: string }[];
     if (data.skills.length === 0) {
-      const noSkillText = scene.add.text(infoX + 8, infoY, UI.codex.noSkills, {
-        fontSize: '9px',
+      const noSkillText = TextFactory.create(scene, infoX + 8, infoY, UI.codex.noSkills, 'small', {
         color: '#555566',
-        fontFamily: 'monospace',
       });
       this.add(noSkillText);
       infoY += 14;
@@ -210,10 +190,8 @@ export class CodexDetailPopup extends Phaser.GameObjects.Container {
         const name = skill?.name ?? skillId;
         const desc = skill?.description ?? '';
         const shortDesc = desc.length > 35 ? desc.substring(0, 35) + '...' : desc;
-        const t = scene.add.text(infoX + 8, infoY, `${name} - ${shortDesc}`, {
-          fontSize: '9px',
+        const t = TextFactory.create(scene, infoX + 8, infoY, `${name} - ${shortDesc}`, 'small', {
           color: '#aabbdd',
-          fontFamily: 'monospace',
           wordWrap: { width: POPUP_WIDTH - 140 },
         });
         this.add(t);
@@ -226,20 +204,16 @@ export class CodexDetailPopup extends Phaser.GameObjects.Container {
       infoY += 4;
       const cond = MetaManager.getHeroUnlockCondition(data.id);
       if (cond) {
-        const unlockText = scene.add.text(infoX, infoY, `${UI.codex.unlockCondition}: ${formatUnlockCondition(cond)}`, {
-          fontSize: '9px',
+        const unlockText = TextFactory.create(scene, infoX, infoY, `${UI.codex.unlockCondition}: ${formatUnlockCondition(cond)}`, 'small', {
           color: '#ff8866',
-          fontFamily: 'monospace',
         });
         this.add(unlockText);
       }
     }
 
     // ---- Close instruction ----
-    const closeText = scene.add.text(cx, cy + POPUP_HEIGHT / 2 - 14, '[ 点击关闭 ]', {
-      fontSize: '9px',
+    const closeText = TextFactory.create(scene, cx, cy + POPUP_HEIGHT / 2 - 14, '[ 点击关闭 ]', 'small', {
       color: '#666677',
-      fontFamily: 'monospace',
     }).setOrigin(0.5);
     this.add(closeText);
 

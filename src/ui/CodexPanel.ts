@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { GAME_WIDTH, GAME_HEIGHT } from '../constants';
 import { Panel } from './Panel';
 import { Theme, colorToString, getRoleColor } from './Theme';
+import { TextFactory } from './TextFactory';
 import { MetaManager } from '../managers/MetaManager';
 import { UI, RACE_NAMES, CLASS_NAMES, ROLE_NAMES, ELEMENT_NAMES } from '../i18n';
 import { getOrCreateTexture, getDisplaySize, ChibiConfig } from '../systems/UnitRenderer';
@@ -68,10 +69,8 @@ export class CodexPanel {
     this.renderTab();
 
     // Fixed close button (outside scrollable content)
-    this.closeText = scene.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 + PANEL_HEIGHT / 2 - 16, UI.codex.close, {
-      fontSize: '10px',
+    this.closeText = TextFactory.create(scene, GAME_WIDTH / 2, GAME_HEIGHT / 2 + PANEL_HEIGHT / 2 - 16, UI.codex.close, 'label', {
       color: '#888888',
-      fontFamily: 'monospace',
     }).setOrigin(0.5).setDepth(801);
 
     this.closeHit = scene.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2 + PANEL_HEIGHT / 2 - 16, 80, 24, 0x000000, 0)
@@ -99,10 +98,8 @@ export class CodexPanel {
       this.tabBgs.push(bg);
 
       // Tab text
-      const text = this.scene.add.text(tx + tabWidth / 2, tabY, tab.label, {
-        fontSize: '10px',
+      const text = TextFactory.create(this.scene, tx + tabWidth / 2, tabY, tab.label, 'label', {
         color: '#ffffff',
-        fontFamily: 'monospace',
       }).setOrigin(0.5).setDepth(801);
       this.tabButtons.push(text);
 
@@ -159,10 +156,8 @@ export class CodexPanel {
     let y = -140;
 
     // Summary line
-    const summaryText = this.scene.add.text(0, y, UI.codex.heroCount(unlockedCount, heroes.length), {
-      fontSize: '11px',
+    const summaryText = TextFactory.create(this.scene, 0, y, UI.codex.heroCount(unlockedCount, heroes.length), 'body', {
       color: colorToString(Theme.colors.secondary),
-      fontFamily: 'monospace',
     }).setOrigin(0.5);
     this.panel.addContent(summaryText);
     y += 22;
@@ -194,10 +189,8 @@ export class CodexPanel {
     let y = -140;
 
     // Summary line
-    const summaryText = this.scene.add.text(0, y, UI.codex.monsterCount(seenCount, enemies.length), {
-      fontSize: '11px',
+    const summaryText = TextFactory.create(this.scene, 0, y, UI.codex.monsterCount(seenCount, enemies.length), 'body', {
       color: colorToString(Theme.colors.secondary),
-      fontFamily: 'monospace',
     }).setOrigin(0.5);
     this.panel.addContent(summaryText);
     y += 22;
@@ -260,28 +253,22 @@ export class CodexPanel {
         this.panel.addContent(sprite);
       } catch {
         // Fallback: show placeholder text if texture generation fails
-        const placeholder = scene.add.text(x, y - 12, '?', {
-          fontSize: '24px',
+        const placeholder = TextFactory.create(scene, x, y - 12, '?', 'title', {
           color: '#555555',
-          fontFamily: 'monospace',
         }).setOrigin(0.5);
         this.panel.addContent(placeholder);
       }
 
       // Name
-      const nameText = scene.add.text(x, y + 32, data.name, {
-        fontSize: '8px',
+      const nameText = TextFactory.create(scene, x, y + 32, data.name, 'tiny', {
         color: '#ccccdd',
-        fontFamily: 'monospace',
       }).setOrigin(0.5);
       this.panel.addContent(nameText);
 
       // Boss tag
       if (!isHero && (data as EnemyData).isBoss) {
-        const bossTag = scene.add.text(x + CARD_WIDTH / 2 - 4, y - CARD_HEIGHT / 2 + 4, UI.codex.boss, {
-          fontSize: '7px',
+        const bossTag = TextFactory.create(scene, x + CARD_WIDTH / 2 - 4, y - CARD_HEIGHT / 2 + 4, UI.codex.boss, 'tiny', {
           color: colorToString(Theme.colors.danger),
-          fontFamily: 'monospace',
           fontStyle: 'bold',
         }).setOrigin(1, 0);
         this.panel.addContent(bossTag);
@@ -300,17 +287,13 @@ export class CodexPanel {
       this.panel.addContent(hitArea);
     } else {
       // Unknown entry
-      const unknownText = scene.add.text(x, y - 8, UI.codex.unknown, {
-        fontSize: '16px',
+      const unknownText = TextFactory.create(scene, x, y - 8, UI.codex.unknown, 'subtitle', {
         color: '#444455',
-        fontFamily: 'monospace',
       }).setOrigin(0.5);
       this.panel.addContent(unknownText);
 
-      const lockedLabel = scene.add.text(x, y + 32, isHero ? UI.codex.locked : UI.codex.encounterUnlock, {
-        fontSize: '8px',
+      const lockedLabel = TextFactory.create(scene, x, y + 32, isHero ? UI.codex.locked : UI.codex.encounterUnlock, 'tiny', {
         color: '#555566',
-        fontFamily: 'monospace',
       }).setOrigin(0.5);
       this.panel.addContent(lockedLabel);
     }

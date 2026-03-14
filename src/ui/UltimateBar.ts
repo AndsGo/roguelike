@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { GAME_WIDTH, GAME_HEIGHT } from '../constants';
 import { Theme, getElementColor } from './Theme';
+import { TextFactory } from './TextFactory';
 import { Hero } from '../entities/Hero';
 import { UltimateSystem } from '../systems/UltimateSystem';
 import { EventBus } from '../systems/EventBus';
@@ -131,36 +132,28 @@ class UltimateSlot extends Phaser.GameObjects.Container {
     this.add(this.ringGraphics);
 
     // Skill name (1-2 chars)
-    this.nameText = scene.add.text(cx, cy - 3, skill.name.substring(0, 2), {
-      fontSize: '10px',
+    this.nameText = TextFactory.create(scene, cx, cy - 3, skill.name.substring(0, 2), 'label', {
       color: '#ffffff',
-      fontFamily: 'monospace',
       align: 'center',
     }).setOrigin(0.5);
     this.add(this.nameText);
 
     // Hero name below (tiny)
-    const heroLabel = scene.add.text(cx, BUTTON_SIZE + 2, hero.unitName.substring(0, 2), {
-      fontSize: '7px',
+    const heroLabel = TextFactory.create(scene, cx, BUTTON_SIZE + 2, hero.unitName.substring(0, 2), 'tiny', {
       color: '#888888',
-      fontFamily: 'monospace',
     }).setOrigin(0.5, 0);
     this.add(heroLabel);
 
     // Hotkey label (Q/W/E/R)
     const hotkeys = ['Q', 'W', 'E', 'R'];
-    const hotkeyText = scene.add.text(BUTTON_SIZE - 2, 2, hotkeys[slotIndex] ?? '', {
-      fontSize: '7px',
+    const hotkeyText = TextFactory.create(scene, BUTTON_SIZE - 2, 2, hotkeys[slotIndex] ?? '', 'tiny', {
       color: '#666666',
-      fontFamily: 'monospace',
     }).setOrigin(1, 0);
     this.add(hotkeyText);
 
     // Energy percentage text
-    this.energyText = scene.add.text(cx, cy + 8, '0%', {
-      fontSize: '7px',
+    this.energyText = TextFactory.create(scene, cx, cy + 8, '0%', 'tiny', {
       color: '#aaaaaa',
-      fontFamily: 'monospace',
     }).setOrigin(0.5);
     this.add(this.energyText);
 
@@ -278,10 +271,8 @@ class UltimateSlot extends Phaser.GameObjects.Container {
     const cx = BUTTON_SIZE / 2;
     this.tooltip = this.scene.add.container(cx, -8);
 
-    const text = this.scene.add.text(0, 0, lines.join('\n'), {
-      fontSize: '9px',
+    const text = TextFactory.create(this.scene, 0, 0, lines.join('\n'), 'small', {
       color: '#ffffff',
-      fontFamily: 'monospace',
       lineSpacing: 2,
     }).setOrigin(0.5, 1);
 

@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { GAME_WIDTH, GAME_HEIGHT } from '../constants';
 import { Theme, colorToString } from './Theme';
+import { TextFactory } from './TextFactory';
 import { SkillQueueSystem } from '../systems/SkillQueueSystem';
 import { Hero } from '../entities/Hero';
 import { SkillData } from '../types';
@@ -137,10 +138,8 @@ class SkillSlot extends Phaser.GameObjects.Container {
     this.add(this.readyGlow);
 
     // Queue position badge (top-left, hidden by default)
-    this.queueBadge = scene.add.text(2, 2, '', {
-      fontSize: '9px',
+    this.queueBadge = TextFactory.create(scene, 2, 2, '', 'small', {
       color: '#ffcc00',
-      fontFamily: 'monospace',
       fontStyle: 'bold',
       backgroundColor: '#000000',
       padding: { left: 2, right: 2, top: 0, bottom: 0 },
@@ -149,27 +148,21 @@ class SkillSlot extends Phaser.GameObjects.Container {
 
     // Skill name (abbreviated, 2 chars)
     const skillName = this.getSkillDisplayName(skill.id);
-    this.nameText = scene.add.text(SLOT_SIZE / 2, SLOT_SIZE / 2 - 4, skillName.substring(0, 3), {
-      fontSize: '10px',
+    this.nameText = TextFactory.create(scene, SLOT_SIZE / 2, SLOT_SIZE / 2 - 4, skillName.substring(0, 3), 'label', {
       color: '#ffffff',
-      fontFamily: 'monospace',
       align: 'center',
     }).setOrigin(0.5);
     this.add(this.nameText);
 
     // Hero name indicator (tiny, bottom)
-    const heroLabel = scene.add.text(SLOT_SIZE / 2, SLOT_SIZE - 4, hero.unitName.substring(0, 2), {
-      fontSize: '7px',
+    const heroLabel = TextFactory.create(scene, SLOT_SIZE / 2, SLOT_SIZE - 4, hero.unitName.substring(0, 2), 'tiny', {
       color: '#888888',
-      fontFamily: 'monospace',
     }).setOrigin(0.5, 1);
     this.add(heroLabel);
 
     // Hotkey label (top-right corner)
-    this.hotkeyText = scene.add.text(SLOT_SIZE - 3, 2, `${hotkeyNum}`, {
-      fontSize: '7px',
+    this.hotkeyText = TextFactory.create(scene, SLOT_SIZE - 3, 2, `${hotkeyNum}`, 'tiny', {
       color: '#666666',
-      fontFamily: 'monospace',
     }).setOrigin(1, 0);
     this.add(this.hotkeyText);
 
@@ -297,10 +290,8 @@ class SkillSlot extends Phaser.GameObjects.Container {
 
     this.tooltip = this.scene.add.container(SLOT_SIZE / 2, -8);
 
-    const text = this.scene.add.text(0, 0, tooltipText, {
-      fontSize: '9px',
+    const text = TextFactory.create(this.scene, 0, 0, tooltipText, 'small', {
       color: '#ffffff',
-      fontFamily: 'monospace',
       lineSpacing: 2,
     }).setOrigin(0.5, 1);
 

@@ -3,6 +3,7 @@ import { HeroData, HeroState, EquipmentSlot, SkillAdvancement, UnitStats } from 
 import { RunManager } from '../managers/RunManager';
 import { Theme, colorToString, getRarityColor } from './Theme';
 import { GAME_WIDTH, GAME_HEIGHT } from '../constants';
+import { TextFactory } from './TextFactory';
 import { STAT_LABELS, SLOT_LABELS, formatStat, ELEMENT_NAMES, RACE_NAMES, CLASS_NAMES } from '../i18n';
 import { expForLevel } from '../utils/math';
 import { SYNERGY_DEFINITIONS } from '../config/synergies';
@@ -55,19 +56,14 @@ export class HeroDetailPopup extends Phaser.GameObjects.Container {
     const classLabel = heroData.class ? (CLASS_NAMES[heroData.class] ?? heroData.class) : '';
     const subtags = [raceLabel, classLabel].filter(Boolean).join(' / ');
 
-    const nameText = scene.add.text(cx, topY, `${heroData.name}  Lv.${heroState.level}${elementLabel}`, {
-      fontSize: '14px',
+    const nameText = TextFactory.create(scene, cx, topY, `${heroData.name}  Lv.${heroState.level}${elementLabel}`, 'subtitle', {
       color: '#ffffff',
-      fontFamily: 'monospace',
-      fontStyle: 'bold',
     }).setOrigin(0.5).setDepth(801);
     this.add(nameText);
 
     if (subtags) {
-      const subtagText = scene.add.text(cx, topY + 16, subtags, {
-        fontSize: '9px',
+      const subtagText = TextFactory.create(scene, cx, topY + 16, subtags, 'small', {
         color: '#aaaacc',
-        fontFamily: 'monospace',
       }).setOrigin(0.5).setDepth(801);
       this.add(subtagText);
     }
@@ -86,10 +82,8 @@ export class HeroDetailPopup extends Phaser.GameObjects.Container {
     expG.fillRoundedRect(cx - expBarWidth / 2, expBarY, expBarWidth * expRatio, expBarHeight, 2);
     this.add(expG);
 
-    const expText = scene.add.text(cx + expBarWidth / 2 + 6, expBarY - 1, `${heroState.exp}/${expNeeded}`, {
-      fontSize: '8px',
+    const expText = TextFactory.create(scene, cx + expBarWidth / 2 + 6, expBarY - 1, `${heroState.exp}/${expNeeded}`, 'tiny', {
       color: '#8899aa',
-      fontFamily: 'monospace',
     }).setDepth(801);
     this.add(expText);
 
@@ -173,10 +167,8 @@ export class HeroDetailPopup extends Phaser.GameObjects.Container {
         valueStr = `${heroState.currentHp}/${Math.round(total)}`;
       }
 
-      const mainText = scene.add.text(x, y, `${label}: ${valueStr}`, {
-        fontSize: '10px',
+      const mainText = TextFactory.create(scene, x, y, `${label}: ${valueStr}`, 'label', {
         color: '#ccccdd',
-        fontFamily: 'monospace',
       }).setDepth(801);
       this.add(mainText);
 
@@ -186,30 +178,24 @@ export class HeroDetailPopup extends Phaser.GameObjects.Container {
         let offsetX = mainText.width + 4;
         if (eqb !== 0) {
           const eqStr = isPercent ? `${Math.round(eqb * 100)}%` : suffix === 'x' ? eqb.toFixed(1) : `${Math.round(eqb)}`;
-          const eqText = scene.add.text(x + offsetX, y, `+${eqStr}`, {
-            fontSize: '9px',
+          const eqText = TextFactory.create(scene, x + offsetX, y, `+${eqStr}`, 'small', {
             color: colorToString(Theme.colors.success),
-            fontFamily: 'monospace',
           }).setDepth(801);
           this.add(eqText);
           offsetX += eqText.width + 2;
         }
         if (syb !== 0) {
           const syStr = isPercent ? `${Math.round(syb * 100)}%` : suffix === 'x' ? syb.toFixed(1) : `${Math.round(syb)}`;
-          const syText = scene.add.text(x + offsetX, y, `+${syStr}`, {
-            fontSize: '9px',
+          const syText = TextFactory.create(scene, x + offsetX, y, `+${syStr}`, 'small', {
             color: colorToString(Theme.colors.gold),
-            fontFamily: 'monospace',
           }).setDepth(801);
           this.add(syText);
           offsetX += syText.width + 2;
         }
         if (evb !== 0) {
           const evStr = isPercent ? `${Math.round(evb * 100)}%` : suffix === 'x' ? evb.toFixed(1) : `${Math.round(evb)}`;
-          const evText = scene.add.text(x + offsetX, y, `+${evStr}`, {
-            fontSize: '9px',
+          const evText = TextFactory.create(scene, x + offsetX, y, `+${evStr}`, 'small', {
             color: '#88ddff',
-            fontFamily: 'monospace',
           }).setDepth(801);
           this.add(evText);
         }
@@ -228,10 +214,8 @@ export class HeroDetailPopup extends Phaser.GameObjects.Container {
 
     // ---- Equipment (3 slots) ----
     const equipY = statsStartY + statKeys.length * 16 + 10;
-    const equipLabel = scene.add.text(leftX, equipY, '装备:', {
-      fontSize: '10px',
+    const equipLabel = TextFactory.create(scene, leftX, equipY, '装备:', 'label', {
       color: '#ffdd88',
-      fontFamily: 'monospace',
       fontStyle: 'bold',
     }).setDepth(801);
     this.add(equipLabel);
@@ -250,10 +234,8 @@ export class HeroDetailPopup extends Phaser.GameObjects.Container {
       } else {
         line = `  ${slotLabel}: (空)`;
       }
-      const t = scene.add.text(leftX, equipY + 16 + i * 14, line, {
-        fontSize: '9px',
+      const t = TextFactory.create(scene, leftX, equipY + 16 + i * 14, line, 'small', {
         color: item ? colorToString(getRarityColor(item.rarity)) : '#666666',
-        fontFamily: 'monospace',
         wordWrap: { width: POPUP_WIDTH - 40 },
       }).setDepth(801);
       this.add(t);
@@ -261,10 +243,8 @@ export class HeroDetailPopup extends Phaser.GameObjects.Container {
 
     // ---- Skills ----
     const skillY = equipY + 16 + slotNames.length * 14 + 10;
-    const skillLabel = scene.add.text(leftX, skillY, '技能:', {
-      fontSize: '10px',
+    const skillLabel = TextFactory.create(scene, leftX, skillY, '技能:', 'label', {
       color: '#88aaff',
-      fontFamily: 'monospace',
       fontStyle: 'bold',
     }).setDepth(801);
     this.add(skillLabel);
@@ -277,10 +257,8 @@ export class HeroDetailPopup extends Phaser.GameObjects.Container {
       const name = skill?.name ?? skillId;
       const desc = skill?.description ?? '';
       const shortDesc = desc.length > 30 ? desc.substring(0, 30) + '...' : desc;
-      const t = scene.add.text(leftX, skillRowY, `  ${name} - ${shortDesc}`, {
-        fontSize: '9px',
+      const t = TextFactory.create(scene, leftX, skillRowY, `  ${name} - ${shortDesc}`, 'small', {
         color: '#aabbdd',
-        fontFamily: 'monospace',
         wordWrap: { width: POPUP_WIDTH - 40 },
       }).setDepth(801);
       this.add(t);
@@ -304,10 +282,8 @@ export class HeroDetailPopup extends Phaser.GameObjects.Container {
           if (adv.bonuses.effectDuration) bonusParts.push(`持续+${adv.bonuses.effectDuration}s`);
         }
         const bonusStr = bonusParts.length > 0 ? ` (${bonusParts.join(', ')})` : '';
-        const advText = scene.add.text(leftX + 12, skillRowY, `${marker} Lv${adv.requiredHeroLevel}: ${adv.name}${bonusStr}`, {
-          fontSize: '8px',
+        const advText = TextFactory.create(scene, leftX + 12, skillRowY, `${marker} Lv${adv.requiredHeroLevel}: ${adv.name}${bonusStr}`, 'tiny', {
           color: unlocked ? '#88ff88' : '#555566',
-          fontFamily: 'monospace',
           wordWrap: { width: POPUP_WIDTH - 60 },
         }).setDepth(801);
         this.add(advText);
@@ -318,10 +294,8 @@ export class HeroDetailPopup extends Phaser.GameObjects.Container {
     // ---- Active Synergies ----
     if (activeSynergies.length > 0) {
       const synY = skillRowY + 6;
-      const synLabel = scene.add.text(leftX, synY, '羁绊:', {
-        fontSize: '10px',
+      const synLabel = TextFactory.create(scene, leftX, synY, '羁绊:', 'label', {
         color: colorToString(Theme.colors.gold),
-        fontFamily: 'monospace',
         fontStyle: 'bold',
       }).setDepth(801);
       this.add(synLabel);
@@ -335,10 +309,8 @@ export class HeroDetailPopup extends Phaser.GameObjects.Container {
         const nextStr = nextThreshold ? ` (下一级: ${as.count}/${nextThreshold.count})` : ' (已满)';
         const activeThresholdDef = def.thresholds.filter(t => as.count >= t.count).pop();
         const effectDesc = activeThresholdDef?.description ?? '';
-        const synText = scene.add.text(leftX + 4, synRowY, `${def.name} [${as.count}]: ${effectDesc}${nextStr}`, {
-          fontSize: '8px',
+        const synText = TextFactory.create(scene, leftX + 4, synRowY, `${def.name} [${as.count}]: ${effectDesc}${nextStr}`, 'tiny', {
           color: '#ddcc88',
-          fontFamily: 'monospace',
           wordWrap: { width: POPUP_WIDTH - 50 },
         }).setDepth(801);
         this.add(synText);
@@ -347,10 +319,8 @@ export class HeroDetailPopup extends Phaser.GameObjects.Container {
     }
 
     // ---- Close instruction ----
-    const closeText = scene.add.text(cx, cy + POPUP_HEIGHT / 2 - 14, '[ 点击关闭 ]', {
-      fontSize: '9px',
+    const closeText = TextFactory.create(scene, cx, cy + POPUP_HEIGHT / 2 - 14, '[ 点击关闭 ]', 'small', {
       color: '#666677',
-      fontFamily: 'monospace',
     }).setOrigin(0.5).setDepth(801);
     this.add(closeText);
 

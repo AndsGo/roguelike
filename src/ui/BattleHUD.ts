@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { GAME_WIDTH, GAME_HEIGHT } from '../constants';
 import { Theme, colorToString } from './Theme';
+import { TextFactory } from './TextFactory';
 import { Unit } from '../entities/Unit';
 import { Hero } from '../entities/Hero';
 import { Enemy } from '../entities/Enemy';
@@ -69,21 +70,16 @@ export class BattleHUD extends Phaser.GameObjects.Container {
     this.createSynergyIndicators();
 
     // Combo counter (bottom-right)
-    this.comboText = scene.add.text(GAME_WIDTH * 3 / 4, GAME_HEIGHT - 30, '', {
-      fontSize: '20px',
+    this.comboText = TextFactory.create(scene, GAME_WIDTH * 3 / 4, GAME_HEIGHT - 30, '', 'title', {
       color: colorToString(Theme.colors.secondary),
-      fontFamily: 'monospace',
-      fontStyle: 'bold',
       stroke: '#000000',
       strokeThickness: 3,
     }).setOrigin(1, 1).setAlpha(0);
     this.add(this.comboText);
 
     // Stats toggle button — use padded hit zone for easier clicking
-    const statsBtn = scene.add.text(GAME_WIDTH - 10, GAME_HEIGHT - 65, '[统计]', {
-      fontSize: '9px',
+    const statsBtn = TextFactory.create(scene, GAME_WIDTH - 10, GAME_HEIGHT - 65, '[统计]', 'small', {
       color: '#888888',
-      fontFamily: 'monospace',
     }).setOrigin(1, 1);
     this.add(statsBtn);
 
@@ -123,10 +119,8 @@ export class BattleHUD extends Phaser.GameObjects.Container {
       container.add(box);
 
       // Name
-      const name = this.scene.add.text(16, 0, hero.unitName.substring(0, 6), {
-        fontSize: '9px',
+      const name = TextFactory.create(this.scene, 16, 0, hero.unitName.substring(0, 6), 'small', {
         color: '#ffffff',
-        fontFamily: 'monospace',
       }).setOrigin(0, 0.5);
       container.add(name);
 
@@ -169,10 +163,8 @@ export class BattleHUD extends Phaser.GameObjects.Container {
       container.setData('lastAlive', true);
 
       // Name
-      const name = this.scene.add.text(44, 0, enemy.unitName.substring(0, 6), {
-        fontSize: '9px',
+      const name = TextFactory.create(this.scene, 44, 0, enemy.unitName.substring(0, 6), 'small', {
         color: '#ff8888',
-        fontFamily: 'monospace',
       }).setOrigin(0, 0.5);
       container.add(name);
 
@@ -199,10 +191,8 @@ export class BattleHUD extends Phaser.GameObjects.Container {
     bg.strokeRoundedRect(btnX - 25, btnY - 9, 50, 18, 4);
     this.add(bg);
 
-    const text = this.scene.add.text(btnX, btnY, `${this.currentSpeed}x`, {
-      fontSize: '11px',
+    const text = TextFactory.create(this.scene, btnX, btnY, `${this.currentSpeed}x`, 'body', {
       color: '#ffffff',
-      fontFamily: 'monospace',
     }).setOrigin(0.5);
     this.add(text);
 
@@ -244,10 +234,8 @@ export class BattleHUD extends Phaser.GameObjects.Container {
       circle.strokeCircle(x, y, 8);
       this.add(circle);
 
-      const label = this.scene.add.text(x, y, `${syn.count}`, {
-        fontSize: '9px',
+      const label = TextFactory.create(this.scene, x, y, `${syn.count}`, 'small', {
         color: '#ffffff',
-        fontFamily: 'monospace',
       }).setOrigin(0.5);
       this.add(label);
 
@@ -258,10 +246,8 @@ export class BattleHUD extends Phaser.GameObjects.Container {
         const bonusText = activeThreshold ? activeThreshold.description : '';
         const tooltipStr = `${def.name}\n${bonusText}`;
 
-        const tooltip = this.scene.add.text(x, y - 16, tooltipStr, {
-          fontSize: '9px',
+        const tooltip = TextFactory.create(this.scene, x, y - 16, tooltipStr, 'small', {
           color: '#ffffff',
-          fontFamily: 'monospace',
           backgroundColor: '#222222',
           padding: { left: 3, right: 3, top: 2, bottom: 2 },
         }).setOrigin(0, 1).setAlpha(0).setDepth(110);
@@ -318,20 +304,16 @@ export class BattleHUD extends Phaser.GameObjects.Container {
     bg.strokeRoundedRect(0, 0, 120, Math.max(40, this.damageStats.size * 16 + 20), 4);
     this.statsPanel.add(bg);
 
-    const title = this.scene.add.text(60, 8, '伤害统计', {
-      fontSize: '10px',
+    const title = TextFactory.create(this.scene, 60, 8, '伤害统计', 'label', {
       color: '#aaaaaa',
-      fontFamily: 'monospace',
     }).setOrigin(0.5, 0);
     this.statsPanel.add(title);
 
     let yOffset = 24;
     for (const [unitId, dmg] of this.damageStats) {
       const displayName = this.unitNameMap.get(unitId) ?? unitId.substring(0, 8);
-      const label = this.scene.add.text(8, yOffset, `${displayName}: ${dmg}`, {
-        fontSize: '9px',
+      const label = TextFactory.create(this.scene, 8, yOffset, `${displayName}: ${dmg}`, 'small', {
         color: '#cccccc',
-        fontFamily: 'monospace',
       });
       this.statsPanel.add(label);
       yOffset += 14;

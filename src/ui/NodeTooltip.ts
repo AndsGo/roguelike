@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { MapNode, BattleNodeData, EventNodeData, ShopNodeData, EventData } from '../types';
 import { Theme, colorToString } from './Theme';
+import { TextFactory } from './TextFactory';
 import { UI } from '../i18n';
 import enemiesData from '../data/enemies.json';
 import eventsData from '../data/events.json';
@@ -37,10 +38,8 @@ export class NodeTooltip extends Phaser.GameObjects.Container {
     const lines = this.buildLines(node);
     if (lines.length === 0) return;
 
-    const text = scene.add.text(0, 0, lines.join('\n'), {
-      fontSize: '9px',
+    const text = TextFactory.create(scene, 0, 0, lines.join('\n'), 'small', {
       color: '#ccccdd',
-      fontFamily: 'monospace',
       lineSpacing: 2,
       wordWrap: { width: TOOLTIP_MAX_WIDTH - PADDING * 2 },
     });

@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { Theme } from './Theme';
+import { TextFactory } from './TextFactory';
 
 export interface PanelConfig {
   title?: string;
@@ -76,10 +77,8 @@ export class Panel extends Phaser.GameObjects.Container {
       this.titleBarBg.fillRoundedRect(-width / 2, -height / 2, width, 24, { tl: 8, tr: 8, bl: 0, br: 0 });
       this.add(this.titleBarBg);
 
-      this.titleBar = scene.add.text(0, -height / 2 + 12, config.title, {
-        fontSize: '12px',
+      this.titleBar = TextFactory.create(scene, 0, -height / 2 + 12, config.title, 'body', {
         color: '#ffffff',
-        fontFamily: 'monospace',
       }).setOrigin(0.5);
       this.add(this.titleBar);
     }

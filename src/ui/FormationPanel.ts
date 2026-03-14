@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { GAME_WIDTH, GAME_HEIGHT } from '../constants';
 import { Theme, getRoleColor } from './Theme';
 import { Button } from './Button';
+import { TextFactory } from './TextFactory';
 import { HeroState } from '../types';
 import { RunManager, autoFormationByRole } from '../managers/RunManager';
 import { getOrCreateTexture, ChibiConfig } from '../systems/UnitRenderer';
@@ -47,14 +48,14 @@ export class FormationPanel {
     this.objects.push(bg);
 
     // Title
-    const title = scene.add.text(GAME_WIDTH / 2, panelY + 20, UI.formation.title, {
-      fontSize: '14px', color: '#ffffff', fontFamily: 'monospace', fontStyle: 'bold',
+    const title = TextFactory.create(scene, GAME_WIDTH / 2, panelY + 20, UI.formation.title, 'subtitle', {
+      color: '#ffffff',
     }).setOrigin(0.5).setDepth(800);
     this.objects.push(title);
 
     // Tip
-    const tip = scene.add.text(GAME_WIDTH / 2, panelY + 38, UI.formation.tip, {
-      fontSize: '9px', color: '#aaaaaa', fontFamily: 'monospace',
+    const tip = TextFactory.create(scene, GAME_WIDTH / 2, panelY + 38, UI.formation.tip, 'small', {
+      color: '#aaaaaa',
     }).setOrigin(0.5).setDepth(800);
     this.objects.push(tip);
 
@@ -62,13 +63,13 @@ export class FormationPanel {
     const frontX = GAME_WIDTH / 2 + 80;
     const backX = GAME_WIDTH / 2 - 80;
 
-    const frontLabel = scene.add.text(frontX, panelY + 58, UI.formation.front, {
-      fontSize: '11px', color: '#ff8844', fontFamily: 'monospace', fontStyle: 'bold',
+    const frontLabel = TextFactory.create(scene, frontX, panelY + 58, UI.formation.front, 'body', {
+      color: '#ff8844', fontStyle: 'bold',
     }).setOrigin(0.5).setDepth(800);
     this.objects.push(frontLabel);
 
-    const backLabel = scene.add.text(backX, panelY + 58, UI.formation.back, {
-      fontSize: '11px', color: '#44aaff', fontFamily: 'monospace', fontStyle: 'bold',
+    const backLabel = TextFactory.create(scene, backX, panelY + 58, UI.formation.back, 'body', {
+      color: '#44aaff', fontStyle: 'bold',
     }).setOrigin(0.5).setDepth(800);
     this.objects.push(backLabel);
 
@@ -127,8 +128,8 @@ export class FormationPanel {
       this.objects.push(sprite);
 
       // Name
-      const name = this.scene.add.text(x, y + 22, data.name, {
-        fontSize: '9px', color: '#ffffff', fontFamily: 'monospace',
+      const name = TextFactory.create(this.scene, x, y + 22, data.name, 'small', {
+        color: '#ffffff',
       }).setOrigin(0.5).setDepth(800);
       this.objects.push(name);
 

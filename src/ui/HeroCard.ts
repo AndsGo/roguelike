@@ -4,6 +4,7 @@ import { RunManager } from '../managers/RunManager';
 import { Theme, colorToString, getElementColor, getRarityColor } from './Theme';
 import { UI } from '../i18n';
 import { HeroDetailPopup } from './HeroDetailPopup';
+import { TextFactory } from './TextFactory';
 
 export class HeroCard extends Phaser.GameObjects.Container {
   private bg: Phaser.GameObjects.Graphics;
@@ -48,8 +49,8 @@ export class HeroCard extends Phaser.GameObjects.Container {
       this.add(elCircle);
       const elSym = Theme.colors.elementSymbol[heroData.element] ?? '';
       if (elSym) {
-        const symText = scene.add.text(elX, elY, elSym, {
-          fontSize: '8px', color: '#000000', fontFamily: 'monospace', fontStyle: 'bold',
+        const symText = TextFactory.create(scene, elX, elY, elSym, 'tiny', {
+          color: '#000000', fontStyle: 'bold',
         }).setOrigin(0.5);
         this.add(symText);
       }
@@ -62,27 +63,20 @@ export class HeroCard extends Phaser.GameObjects.Container {
     this.add(icon);
 
     // Role initial on icon
-    const roleInitial = scene.add.text(0, -42, heroData.role.charAt(0).toUpperCase(), {
-      fontSize: '14px',
+    const roleInitial = TextFactory.create(scene, 0, -42, heroData.role.charAt(0).toUpperCase(), 'subtitle', {
       color: '#ffffff',
-      fontFamily: 'monospace',
-      fontStyle: 'bold',
     }).setOrigin(0.5);
     this.add(roleInitial);
 
     // Name
-    const name = scene.add.text(0, -17, heroData.name, {
-      fontSize: '11px',
+    const name = TextFactory.create(scene, 0, -17, heroData.name, 'body', {
       color: '#ffffff',
-      fontFamily: 'monospace',
     }).setOrigin(0.5);
     this.add(name);
 
     // Level
-    const level = scene.add.text(0, -3, `Lv.${heroState.level}`, {
-      fontSize: '9px',
+    const level = TextFactory.create(scene, 0, -3, `Lv.${heroState.level}`, 'small', {
       color: colorToString(Theme.colors.secondary),
-      fontFamily: 'monospace',
     }).setOrigin(0.5);
     this.add(level);
 
@@ -92,10 +86,8 @@ export class HeroCard extends Phaser.GameObjects.Container {
     const hpRatio = heroState.currentHp / maxHp;
     this.drawMiniHpBar(scene, 0, 12, 100, 6, hpRatio);
 
-    const hpText = scene.add.text(0, 24, `${heroState.currentHp}/${maxHp}`, {
-      fontSize: '9px',
+    const hpText = TextFactory.create(scene, 0, 24, `${heroState.currentHp}/${maxHp}`, 'small', {
       color: '#cccccc',
-      fontFamily: 'monospace',
     }).setOrigin(0.5);
     this.add(hpText);
 
@@ -114,10 +106,8 @@ export class HeroCard extends Phaser.GameObjects.Container {
     }
     const atk = stats.attack + scaling.attack * (lvl - 1) + (mainEqBonus['attack'] ?? 0);
     const def = stats.defense + scaling.defense * (lvl - 1) + (mainEqBonus['defense'] ?? 0);
-    const statsText = scene.add.text(0, 38, UI.heroCard.atkDef(atk, def), {
-      fontSize: '9px',
+    const statsText = TextFactory.create(scene, 0, 38, UI.heroCard.atkDef(atk, def), 'small', {
       color: '#aaccff',
-      fontFamily: 'monospace',
     }).setOrigin(0.5);
     this.add(statsText);
 
@@ -136,10 +126,8 @@ export class HeroCard extends Phaser.GameObjects.Container {
       slot.fillRoundedRect(sx - 10, sy - 8, 20, 16, 3);
       this.add(slot);
 
-      const slotLabel = scene.add.text(sx, sy, equipped ? slotIcons[i] : '-', {
-        fontSize: '9px',
+      const slotLabel = TextFactory.create(scene, sx, sy, equipped ? slotIcons[i] : '-', 'small', {
         color: '#ffffff',
-        fontFamily: 'monospace',
       }).setOrigin(0.5);
       this.add(slotLabel);
     }
@@ -214,20 +202,16 @@ export class HeroCard extends Phaser.GameObjects.Container {
     ];
 
     lines.forEach((line, i) => {
-      const t = scene.add.text(-this.cardWidth / 2 + 8, 6 + i * 16, line, {
-        fontSize: '9px',
+      const t = TextFactory.create(scene, -this.cardWidth / 2 + 8, 6 + i * 16, line, 'small', {
         color: '#bbbbbb',
-        fontFamily: 'monospace',
       });
       this.detailContainer!.add(t);
     });
 
     // Skills list
     if (this.heroData.skills.length > 0) {
-      const skillText = scene.add.text(-this.cardWidth / 2 + 8, 82, UI.heroCard.skills(this.heroData.skills.join(', ')), {
-        fontSize: '9px',
+      const skillText = TextFactory.create(scene, -this.cardWidth / 2 + 8, 82, UI.heroCard.skills(this.heroData.skills.join(', ')), 'small', {
         color: '#8899cc',
-        fontFamily: 'monospace',
         wordWrap: { width: this.cardWidth - 16 },
       });
       this.detailContainer.add(skillText);

@@ -4,6 +4,7 @@ import { MapNode, NodeType, ActConfig, HeroState, HeroData } from '../types';
 import { Theme, colorToString, getRoleColor, getNodeColor } from './Theme';
 import { UI, SLOT_LABELS } from '../i18n';
 import { computeNodeLayers } from '../utils/map-utils';
+import { TextFactory } from './TextFactory';
 
 export const NODE_COLORS: Record<NodeType, number> = Theme.colors.node as Record<NodeType, number>;
 
@@ -136,10 +137,8 @@ export class MapRenderer {
       container.add(actBg);
 
       const actLabelX = firstLayerX + actWidth / 2;
-      const actLabel = scene.add.text(actLabelX, headerHeight + 8, UI.map.actLabel(actIdx + 1, acts[actIdx].name), {
-        fontSize: '11px',
+      const actLabel = TextFactory.create(scene, actLabelX, headerHeight + 8, UI.map.actLabel(actIdx + 1, acts[actIdx].name), 'body', {
         color: '#8899bb',
-        fontFamily: 'monospace',
       }).setOrigin(0.5);
       container.add(actLabel);
     }
@@ -172,12 +171,12 @@ export class MapRenderer {
       bar.fillStyle(roleColor, 0.6);
       bar.fillRoundedRect(x - 30, y, 60, 3, 2);
 
-      scene.add.text(x, y + 10, data.name, {
-        fontSize: '9px', color: '#ffffff', fontFamily: 'monospace',
+      TextFactory.create(scene, x, y + 10, data.name, 'small', {
+        color: '#ffffff',
       }).setOrigin(0.5).setScrollFactor(0).setDepth(101);
 
-      scene.add.text(x, y + 22, `Lv.${hero.level}`, {
-        fontSize: '9px', color: colorToString(Theme.colors.secondary), fontFamily: 'monospace',
+      TextFactory.create(scene, x, y + 22, `Lv.${hero.level}`, 'small', {
+        color: colorToString(Theme.colors.secondary),
       }).setOrigin(0.5).setScrollFactor(0).setDepth(101);
 
       const maxHp = getMaxHp(hero, data);
@@ -190,8 +189,8 @@ export class MapRenderer {
       hpG.fillStyle(hpColor, 1);
       hpG.fillRoundedRect(x - hpBarWidth / 2, y + 32, hpBarWidth * hpRatio, 4, 2);
 
-      scene.add.text(x, y + 43, `${hero.currentHp}/${maxHp}`, {
-        fontSize: '9px', color: '#aaaaaa', fontFamily: 'monospace',
+      TextFactory.create(scene, x, y + 43, `${hero.currentHp}/${maxHp}`, 'small', {
+        color: '#aaaaaa',
       }).setOrigin(0.5).setScrollFactor(0).setDepth(101);
     });
   }
@@ -229,13 +228,13 @@ export class MapRenderer {
       interactiveObjects.push(bar);
 
       // Name
-      scene.add.text(x, y + 10, data.name, {
-        fontSize: '9px', color: '#ffffff', fontFamily: 'monospace',
+      TextFactory.create(scene, x, y + 10, data.name, 'small', {
+        color: '#ffffff',
       }).setOrigin(0.5).setScrollFactor(0).setDepth(101);
 
       // Level
-      scene.add.text(x, y + 22, `Lv.${hero.level}`, {
-        fontSize: '9px', color: colorToString(Theme.colors.secondary), fontFamily: 'monospace',
+      TextFactory.create(scene, x, y + 22, `Lv.${hero.level}`, 'small', {
+        color: colorToString(Theme.colors.secondary),
       }).setOrigin(0.5).setScrollFactor(0).setDepth(101);
 
       // HP bar
@@ -259,8 +258,8 @@ export class MapRenderer {
         const eqG = scene.add.graphics().setScrollFactor(0).setDepth(101);
         eqG.fillStyle(hasEquip ? 0x44aa44 : 0x333333, hasEquip ? 0.8 : 0.5);
         eqG.fillRoundedRect(sx, sy, 10, 10, 1);
-        const eqLabel = scene.add.text(sx + 5, sy + 5, slotLabels[s], {
-          fontSize: '7px', color: hasEquip ? '#ffffff' : '#666666', fontFamily: 'monospace',
+        const eqLabel = TextFactory.create(scene, sx + 5, sy + 5, slotLabels[s], 'tiny', {
+          color: hasEquip ? '#ffffff' : '#666666',
         }).setOrigin(0.5).setScrollFactor(0).setDepth(102);
         interactiveObjects.push(eqG, eqLabel);
       }

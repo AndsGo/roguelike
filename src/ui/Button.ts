@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { Theme, lightenColor, darkenColor } from './Theme';
 import { AudioManager } from '../systems/AudioManager';
+import { TextFactory } from './TextFactory';
 
 export class Button extends Phaser.GameObjects.Container {
   private static readonly HIT_PADDING = 8;
@@ -37,10 +38,8 @@ export class Button extends Phaser.GameObjects.Container {
     this.drawButton(this.baseColor, this.borderColor);
     this.add(this.bg);
 
-    this.label = scene.add.text(0, 0, text, {
-      fontSize: '14px',
+    this.label = TextFactory.create(scene, 0, 0, text, 'subtitle', {
       color: '#ffffff',
-      fontFamily: 'monospace',
     }).setOrigin(0.5);
     this.add(this.label);
 

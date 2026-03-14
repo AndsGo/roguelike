@@ -6,6 +6,7 @@ import { AchievementManager } from '../managers/AchievementManager';
 import { SaveManager } from '../managers/SaveManager';
 import { Theme, colorToString } from './Theme';
 import { getHeroDisplayName } from '../i18n';
+import { TextFactory } from './TextFactory';
 
 export interface RunEndResult {
   metaReward: number;
@@ -37,10 +38,8 @@ export class RunEndPanel {
     const maxDisplayedAchievements = 5;
 
     if (newAchievements.length > 0) {
-      scene.add.text(x, infoY, ui.achievementsUnlocked(newAchievements.length), {
-        fontSize: '11px',
+      TextFactory.create(scene, x, infoY, ui.achievementsUnlocked(newAchievements.length), 'body', {
         color: colorToString(Theme.colors.success),
-        fontFamily: 'monospace',
       }).setOrigin(0.5);
       infoY += 18;
 
@@ -48,10 +47,8 @@ export class RunEndPanel {
       for (const achId of displayed) {
         const def = AchievementManager.getAll().find(a => a.id === achId);
         if (def) {
-          scene.add.text(x, infoY, `- ${def.name}`, {
-            fontSize: '9px',
+          TextFactory.create(scene, x, infoY, `- ${def.name}`, 'small', {
             color: '#aaccff',
-            fontFamily: 'monospace',
           }).setOrigin(0.5);
           infoY += 14;
         }
@@ -59,10 +56,8 @@ export class RunEndPanel {
 
       const remaining = newAchievements.length - maxDisplayedAchievements;
       if (remaining > 0) {
-        scene.add.text(x, infoY, ui.andMore(remaining), {
-          fontSize: '9px',
+        TextFactory.create(scene, x, infoY, ui.andMore(remaining), 'small', {
           color: colorToString(Theme.colors.textDim),
-          fontFamily: 'monospace',
         }).setOrigin(0.5);
         infoY += 14;
       }
@@ -72,10 +67,8 @@ export class RunEndPanel {
     const meta = MetaManager.getMetaData();
     const nonDefault = meta.unlockedHeroes.filter(h => !['warrior', 'archer', 'mage', 'priest', 'rogue'].includes(h));
     if (nonDefault.length > 0) {
-      scene.add.text(x, infoY + 5, ui.unlockedHeroes(nonDefault.map(getHeroDisplayName).join(', ')), {
-        fontSize: '9px',
+      TextFactory.create(scene, x, infoY + 5, ui.unlockedHeroes(nonDefault.map(getHeroDisplayName).join(', ')), 'small', {
         color: '#88cc88',
-        fontFamily: 'monospace',
       }).setOrigin(0.5);
       infoY += 19;
     }

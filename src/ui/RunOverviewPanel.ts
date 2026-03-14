@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { GAME_WIDTH, GAME_HEIGHT } from '../constants';
 import { Panel } from './Panel';
 import { Theme, colorToString, getElementColor, getRarityColor, getRoleColor } from './Theme';
+import { TextFactory } from './TextFactory';
 import { RunManager } from '../managers/RunManager';
 import { SYNERGY_DEFINITIONS } from '../config/synergies';
 import { getDifficultyConfig } from '../config/difficulty';
@@ -80,10 +81,8 @@ export class RunOverviewPanel {
 
       // Hero name + level
       const nameStr = `${heroData.name}  Lv.${heroState.level}`;
-      const nameText = scene.add.text(-230, y, nameStr, {
-        fontSize: '10px',
+      const nameText = TextFactory.create(scene, -230, y, nameStr, 'label', {
         color: '#ffffff',
-        fontFamily: 'monospace',
       });
       this.panel.addContent(nameText);
 
@@ -91,10 +90,8 @@ export class RunOverviewPanel {
       const hpColor = hpRatio > 0.5 ? colorToString(Theme.colors.health.high)
         : hpRatio > 0.25 ? colorToString(Theme.colors.health.medium)
         : colorToString(Theme.colors.health.low);
-      const hpText = scene.add.text(-80, y, `${heroState.currentHp}/${maxHp}`, {
-        fontSize: '9px',
+      const hpText = TextFactory.create(scene, -80, y, `${heroState.currentHp}/${maxHp}`, 'small', {
         color: hpColor,
-        fontFamily: 'monospace',
       });
       this.panel.addContent(hpText);
 
@@ -102,10 +99,8 @@ export class RunOverviewPanel {
       const roleLabel = heroData.role ?? '';
       if (roleLabel) {
         const roleColor = getRoleColor(roleLabel);
-        const roleText = scene.add.text(10, y, ROLE_NAMES[roleLabel] ?? roleLabel, {
-          fontSize: '8px',
+        const roleText = TextFactory.create(scene, 10, y, ROLE_NAMES[roleLabel] ?? roleLabel, 'tiny', {
           color: colorToString(roleColor),
-          fontFamily: 'monospace',
         });
         this.panel.addContent(roleText);
       }
@@ -115,10 +110,8 @@ export class RunOverviewPanel {
       const className = heroData.class ? (CLASS_NAMES[heroData.class] ?? heroData.class) : '';
       const tags = [raceName, className].filter(Boolean).join('/');
       if (tags) {
-        const tagText = scene.add.text(90, y, tags, {
-          fontSize: '8px',
+        const tagText = TextFactory.create(scene, 90, y, tags, 'tiny', {
           color: '#8899aa',
-          fontFamily: 'monospace',
         });
         this.panel.addContent(tagText);
       }
@@ -134,10 +127,8 @@ export class RunOverviewPanel {
 
     const relics = rm.getRelics();
     if (relics.length === 0) {
-      const noRelicText = scene.add.text(-240, y, UI.runOverview.noRelics, {
-        fontSize: '9px',
+      const noRelicText = TextFactory.create(scene, -240, y, UI.runOverview.noRelics, 'small', {
         color: '#666677',
-        fontFamily: 'monospace',
       });
       this.panel.addContent(noRelicText);
       y += 14;
@@ -155,10 +146,8 @@ export class RunOverviewPanel {
 
         // Name
         const relicName = relicDef?.name ?? relicState.id;
-        const nameText = scene.add.text(-232, y, relicName, {
-          fontSize: '9px',
+        const nameText = TextFactory.create(scene, -232, y, relicName, 'small', {
           color: colorToString(rarityColor),
-          fontFamily: 'monospace',
           fontStyle: 'bold',
         });
         this.panel.addContent(nameText);
@@ -166,10 +155,8 @@ export class RunOverviewPanel {
         // Description (dim, right side)
         const desc = relicDef?.description ?? '';
         const shortDesc = desc.length > 28 ? desc.substring(0, 28) + '...' : desc;
-        const descText = scene.add.text(-100, y, shortDesc, {
-          fontSize: '8px',
+        const descText = TextFactory.create(scene, -100, y, shortDesc, 'tiny', {
           color: '#667788',
-          fontFamily: 'monospace',
         });
         this.panel.addContent(descText);
 
@@ -185,10 +172,8 @@ export class RunOverviewPanel {
 
     const activeSynergies = rm.getActiveSynergies();
     if (activeSynergies.length === 0) {
-      const noSynText = scene.add.text(-240, y, UI.runOverview.noSynergies, {
-        fontSize: '9px',
+      const noSynText = TextFactory.create(scene, -240, y, UI.runOverview.noSynergies, 'small', {
         color: '#666677',
-        fontFamily: 'monospace',
       });
       this.panel.addContent(noSynText);
       y += 14;
@@ -198,10 +183,8 @@ export class RunOverviewPanel {
         if (!def) continue;
 
         // Synergy name + count
-        const nameText = scene.add.text(-240, y, `${def.name} [${as.count}]`, {
-          fontSize: '9px',
+        const nameText = TextFactory.create(scene, -240, y, `${def.name} [${as.count}]`, 'small', {
           color: colorToString(Theme.colors.gold),
-          fontFamily: 'monospace',
           fontStyle: 'bold',
         });
         this.panel.addContent(nameText);
@@ -212,10 +195,8 @@ export class RunOverviewPanel {
           const reached = as.count >= threshold.count;
           const marker = reached ? '✓' : '○';
           const color = reached ? colorToString(Theme.colors.success) : '#555566';
-          const thresholdText = scene.add.text(-228, y, `${marker} (${threshold.count}) ${threshold.description}`, {
-            fontSize: '8px',
+          const thresholdText = TextFactory.create(scene, -228, y, `${marker} (${threshold.count}) ${threshold.description}`, 'tiny', {
             color,
-            fontFamily: 'monospace',
           });
           this.panel.addContent(thresholdText);
           y += 12;
@@ -241,10 +222,8 @@ export class RunOverviewPanel {
       `${completedNodes}/${map.length}`,
     ].join('  |  ');
 
-    const statsText = scene.add.text(-240, y, statsLine, {
-      fontSize: '9px',
+    const statsText = TextFactory.create(scene, -240, y, statsLine, 'small', {
       color: '#aabbcc',
-      fontFamily: 'monospace',
     });
     this.panel.addContent(statsText);
     y += 16;
@@ -257,10 +236,8 @@ export class RunOverviewPanel {
 
     for (const heroState of heroes) {
       const heroData = rm.getHeroData(heroState.id);
-      const nameText = scene.add.text(-240, y, heroData.name, {
-        fontSize: '9px',
+      const nameText = TextFactory.create(scene, -240, y, heroData.name, 'small', {
         color: '#ffffff',
-        fontFamily: 'monospace',
         fontStyle: 'bold',
       });
       this.panel.addContent(nameText);
@@ -275,17 +252,13 @@ export class RunOverviewPanel {
           const itemDef = (itemsData as any[]).find((it: any) => it.id === equip.id);
           const itemName = itemDef?.name ?? equip.id;
           const rarityColor = getRarityColor(itemDef?.rarity ?? 'common');
-          const itemText = scene.add.text(-228, y, `${slotLabel}: ${itemName}`, {
-            fontSize: '8px',
+          const itemText = TextFactory.create(scene, -228, y, `${slotLabel}: ${itemName}`, 'tiny', {
             color: colorToString(rarityColor),
-            fontFamily: 'monospace',
           });
           this.panel.addContent(itemText);
         } else {
-          const emptyText = scene.add.text(-228, y, `${slotLabel}: (空)`, {
-            fontSize: '8px',
+          const emptyText = TextFactory.create(scene, -228, y, `${slotLabel}: (空)`, 'tiny', {
             color: '#444455',
-            fontFamily: 'monospace',
           });
           this.panel.addContent(emptyText);
         }
@@ -298,10 +271,8 @@ export class RunOverviewPanel {
     this.panel.setContentHeight(y + 170);
 
     // ---- Fixed close button (outside scrollable content) ----
-    this.closeText = scene.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 + PANEL_HEIGHT / 2 - 16, UI.runOverview.close, {
-      fontSize: '10px',
+    this.closeText = TextFactory.create(scene, GAME_WIDTH / 2, GAME_HEIGHT / 2 + PANEL_HEIGHT / 2 - 16, UI.runOverview.close, 'label', {
       color: '#888888',
-      fontFamily: 'monospace',
     }).setOrigin(0.5).setDepth(801);
 
     this.closeHit = scene.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2 + PANEL_HEIGHT / 2 - 16, 80, 24, 0x000000, 0)
@@ -321,10 +292,8 @@ export class RunOverviewPanel {
     y += 4;
 
     // Section title
-    const headerText = scene.add.text(-240, y, `[ ${label} ]`, {
-      fontSize: '10px',
+    const headerText = TextFactory.create(scene, -240, y, `[ ${label} ]`, 'label', {
       color: colorToString(color),
-      fontFamily: 'monospace',
       fontStyle: 'bold',
     });
     this.panel.addContent(headerText);

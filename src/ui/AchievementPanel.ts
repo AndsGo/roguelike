@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { GAME_WIDTH, GAME_HEIGHT } from '../constants';
 import { Panel } from './Panel';
 import { Theme, colorToString } from './Theme';
+import { TextFactory } from './TextFactory';
 import { AchievementManager, AchievementDef } from '../managers/AchievementManager';
 import { MetaManager } from '../managers/MetaManager';
 import { ACHIEVEMENT_ICONS } from '../i18n';
@@ -57,10 +58,8 @@ export class AchievementPanel {
     // Summary line
     const unlockedCount = unlocked.size;
     const totalCount = achievements.length;
-    const summaryText = scene.add.text(0, y, `已解锁: ${unlockedCount}/${totalCount}`, {
-      fontSize: '11px',
+    const summaryText = TextFactory.create(scene, 0, y, `已解锁: ${unlockedCount}/${totalCount}`, 'body', {
       color: colorToString(Theme.colors.secondary),
-      fontFamily: 'monospace',
     }).setOrigin(0.5);
     this.panel.addContent(summaryText);
     y += 22;
@@ -75,10 +74,8 @@ export class AchievementPanel {
     this.panel.setContentHeight(achievements.length * ROW_HEIGHT + 80);
 
     // Fixed close button (outside scrollable content, always visible)
-    this.closeText = scene.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 + AchievementPanel.PANEL_HEIGHT / 2 - 16, '[ 关闭 ]', {
-      fontSize: '10px',
+    this.closeText = TextFactory.create(scene, GAME_WIDTH / 2, GAME_HEIGHT / 2 + AchievementPanel.PANEL_HEIGHT / 2 - 16, '[ 关闭 ]', 'label', {
       color: '#888888',
-      fontFamily: 'monospace',
     }).setOrigin(0.5).setDepth(801);
 
     this.closeHit = scene.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2 + AchievementPanel.PANEL_HEIGHT / 2 - 16, 80, 24, 0x000000, 0)
@@ -99,27 +96,21 @@ export class AchievementPanel {
 
     // Icon (map text icon name to emoji)
     const iconChar = ACHIEVEMENT_ICONS[ach.icon] ?? ach.icon;
-    const iconText = scene.add.text(leftX + 6, y + 2, iconChar, {
-      fontSize: '16px',
+    const iconText = TextFactory.create(scene, leftX + 6, y + 2, iconChar, 'subtitle', {
       color: isUnlocked ? '#ffffff' : '#555555',
-      fontFamily: 'monospace',
     }).setOrigin(0, 0.5);
     this.panel.addContent(iconText);
 
     // Name
-    const nameText = scene.add.text(leftX + 30, y - 4, ach.name, {
-      fontSize: '10px',
+    const nameText = TextFactory.create(scene, leftX + 30, y - 4, ach.name, 'label', {
       color: isUnlocked ? '#ffffff' : '#888888',
-      fontFamily: 'monospace',
       fontStyle: isUnlocked ? 'bold' : 'normal',
     });
     this.panel.addContent(nameText);
 
     // Description
-    const descText = scene.add.text(leftX + 30, y + 10, ach.description, {
-      fontSize: '8px',
+    const descText = TextFactory.create(scene, leftX + 30, y + 10, ach.description, 'tiny', {
       color: isUnlocked ? '#aabbcc' : '#555566',
-      fontFamily: 'monospace',
       wordWrap: { width: 320 },
     });
     this.panel.addContent(descText);
@@ -127,10 +118,8 @@ export class AchievementPanel {
     // Status badge
     const statusText = isUnlocked ? '✓ 已完成' : '未完成';
     const statusColor = isUnlocked ? colorToString(Theme.colors.success) : '#666666';
-    const badge = scene.add.text(leftX + 380, y - 4, statusText, {
-      fontSize: '9px',
+    const badge = TextFactory.create(scene, leftX + 380, y - 4, statusText, 'small', {
       color: statusColor,
-      fontFamily: 'monospace',
     });
     this.panel.addContent(badge);
 
@@ -148,10 +137,8 @@ export class AchievementPanel {
           rewardStr = `解锁遗物`;
           break;
       }
-      const rewardText = scene.add.text(leftX + 380, y + 10, rewardStr, {
-        fontSize: '8px',
+      const rewardText = TextFactory.create(scene, leftX + 380, y + 10, rewardStr, 'tiny', {
         color: isUnlocked ? colorToString(Theme.colors.gold) : '#555555',
-        fontFamily: 'monospace',
       });
       this.panel.addContent(rewardText);
     }
