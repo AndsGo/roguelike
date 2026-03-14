@@ -184,11 +184,11 @@ describe('Content Integrity', () => {
   });
 
   describe('Content counts', () => {
-    it('has 23 heroes', () => expect(heroes.length).toBe(23));
-    it('has at least 44 skills', () => expect(skills.length).toBeGreaterThanOrEqual(44));
+    it('has 26 heroes', () => expect(heroes.length).toBe(26));
+    it('has at least 72 skills', () => expect(skills.length).toBeGreaterThanOrEqual(72));
     it('has at least 48 items', () => expect(items.length).toBeGreaterThanOrEqual(48));
     it('has at least 35 relics', () => expect(relics.length).toBeGreaterThanOrEqual(35));
-    it('has at least 34 events', () => expect(events.length).toBeGreaterThanOrEqual(34));
+    it('has at least 46 events', () => expect(events.length).toBeGreaterThanOrEqual(46));
     it('has 17 synergy definitions', () => expect(SYNERGY_DEFINITIONS.length).toBe(17));
   });
 

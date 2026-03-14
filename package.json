@@ -1,6 +1,6 @@
 {
   "name": "roguelike-auto-battler",
-  "version": "1.12.1",
+  "version": "1.13.0",
   "private": true,
   "type": "module",
   "scripts": {
