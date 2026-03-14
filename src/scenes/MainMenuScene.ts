@@ -108,7 +108,7 @@ export class MainMenuScene extends Phaser.Scene {
     const dailyLabel = dailyCompleted ? UI.daily.completed : UI.daily.title;
     const dailyBtn = new Button(this, GAME_WIDTH / 2, btnY, dailyLabel, 180, 36, () => {
       if (dailyCompleted) return;
-      this.startDailyChallenge();
+      this.showDailyChallengePreview();
     }, dailyCompleted ? 0x555555 : Theme.colors.gold);
     if (dailyCompleted) {
       dailyBtn.setAlpha(0.6);
@@ -199,6 +199,77 @@ export class MainMenuScene extends Phaser.Scene {
 
   private startNewGame(): void {
     this.showDifficultySelection();
+  }
+
+  private showDailyChallengePreview(): void {
+    const seed = DailyChallengeManager.getTodaysSeed();
+    const modifiers = DailyChallengeManager.getDailyModifiers(seed);
+
+    const panelW = 320;
+    const panelH = 220;
+    const cx = GAME_WIDTH / 2;
+    const cy = GAME_HEIGHT / 2;
+
+    const backdrop = this.add.rectangle(cx, cy, GAME_WIDTH, GAME_HEIGHT, 0x000000, 0.6)
+      .setInteractive().setDepth(799);
+
+    const panelBg = this.add.graphics().setDepth(800);
+    panelBg.fillStyle(Theme.colors.panel, 0.97);
+    panelBg.fillRoundedRect(cx - panelW / 2, cy - panelH / 2, panelW, panelH, 8);
+    panelBg.lineStyle(2, Theme.colors.panelBorder, 0.8);
+    panelBg.strokeRoundedRect(cx - panelW / 2, cy - panelH / 2, panelW, panelH, 8);
+
+    const diffLabel = modifiers.difficulty === 'nightmare' ? '噩梦' : '困难';
+
+    const titleText = TextFactory.create(this, cx, cy - panelH / 2 + 20, `${UI.daily.previewTitle} - ${modifiers.title}`, 'subtitle', {
+      color: colorToString(Theme.colors.gold),
+    }).setOrigin(0.5).setDepth(801);
+
+    const diffText = TextFactory.create(this, cx, cy - panelH / 2 + 40, UI.daily.difficulty(diffLabel), 'body', {
+      color: '#cccccc',
+    }).setOrigin(0.5).setDepth(801);
+
+    const rulesLabelText = TextFactory.create(this, cx, cy - panelH / 2 + 60, UI.daily.rulesLabel, 'label', {
+      color: colorToString(Theme.colors.gold),
+    }).setOrigin(0.5).setDepth(801);
+
+    const ruleTexts: Phaser.GameObjects.Text[] = [];
+    modifiers.rules.forEach((rule, i) => {
+      const { icon, text } = DailyChallengeManager.formatDailyRule(rule);
+      const rt = TextFactory.create(this, cx, cy - panelH / 2 + 80 + i * 22, `${icon} ${text}`, 'label', {
+        color: '#ffffff',
+      }).setOrigin(0.5).setDepth(801);
+      ruleTexts.push(rt);
+    });
+
+    const modalElements: Phaser.GameObjects.GameObject[] = [backdrop, panelBg, titleText, diffText, rulesLabelText, ...ruleTexts];
+
+    const cleanup = () => {
+      modalElements.forEach(el => el.destroy());
+      startBtn.destroy();
+      backBtn.destroy();
+    };
+
+    backdrop.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
+      const hw = panelW / 2;
+      const hh = panelH / 2;
+      if (pointer.x < cx - hw || pointer.x > cx + hw ||
+          pointer.y < cy - hh || pointer.y > cy + hh) {
+        cleanup();
+      }
+    });
+
+    const btnY2 = cy + panelH / 2 - 30;
+    const startBtn = new Button(this, cx - 55, btnY2, UI.daily.startBtn, 90, 28, () => {
+      cleanup();
+      this.startDailyChallenge();
+    }, Theme.colors.success);
+    startBtn.setDepth(801);
+
+    const backBtn = new Button(this, cx + 55, btnY2, UI.daily.backBtn, 80, 28, () => {
+      cleanup();
+    }, 0x555555);
+    backBtn.setDepth(801);
   }
 
   private startDailyChallenge(): void {
