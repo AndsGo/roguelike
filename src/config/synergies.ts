@@ -12,7 +12,7 @@ export const SYNERGY_DEFINITIONS: SynergyConfig[] = [
     type: 'race',
     key: 'human',
     thresholds: [
-      { count: 2, description: '全属性+5%', effects: [{ type: 'stat_boost', stat: 'attack', value: 5 }, { type: 'stat_boost', stat: 'defense', value: 5 }] },
+      { count: 2, description: '全属性+10%', effects: [{ type: 'stat_boost', stat: 'attack', value: 10 }, { type: 'stat_boost', stat: 'defense', value: 10 }] },
       { count: 4, description: '全属性+15%', effects: [{ type: 'stat_boost', stat: 'attack', value: 15 }, { type: 'stat_boost', stat: 'defense', value: 15 }] },
     ],
   },

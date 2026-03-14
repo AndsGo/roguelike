@@ -83,11 +83,11 @@ describe('SynergySystem', () => {
     expect(humanSynergy).toBeDefined();
     expect(humanSynergy!.activeThreshold).toBe(4);
 
-    // Each human should get +5 attack (from threshold 2) + +15 attack (from threshold 4) = +20
+    // Each human should get +10 attack (from threshold 2) + +15 attack (from threshold 4) = +25
     const bonusH1 = result.heroBonuses.get('h1');
     expect(bonusH1).toBeDefined();
-    expect(bonusH1!.attack).toBe(20); // 5 + 15
-    expect(bonusH1!.defense).toBe(20); // 5 + 15
+    expect(bonusH1!.attack).toBe(25); // 10 + 15
+    expect(bonusH1!.defense).toBe(25); // 10 + 15
   });
 
   it('activates multiple synergies simultaneously', () => {
@@ -117,8 +117,8 @@ describe('SynergySystem', () => {
 
     synergy.calculateActiveSynergies(heroes, dataMap);
     const bonus = synergy.getSynergyBonuses('h1');
-    expect(bonus.attack).toBe(5);
-    expect(bonus.defense).toBe(5);
+    expect(bonus.attack).toBe(10);
+    expect(bonus.defense).toBe(10);
   });
 
   it('getSynergyBonuses returns empty object before calculation', () => {

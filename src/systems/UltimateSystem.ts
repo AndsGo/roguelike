@@ -1,5 +1,7 @@
 import { EventBus } from './EventBus';
 import { SkillData, GameEventMap } from '../types';
+import heroesData from '../data/heroes.json';
+import { CLERIC_ENERGY_MULTIPLIER } from '../constants';
 
 const PASSIVE_RATE = 2;      // energy per second
 const ATTACK_ENERGY = 3;     // per basic attack
@@ -90,7 +92,9 @@ export class UltimateSystem {
       if (state.energy < MAX_ENERGY) {
         const hero = this.heroRefs.find(h => h.unitId === heroId);
         if (hero && !hero.isAlive) continue;
-        this.addEnergy(heroId, PASSIVE_RATE * dt);
+        const hData = (heroesData as { id: string; class: string }[]).find(h => h.id === heroId);
+        const classMult = hData?.class === 'cleric' ? CLERIC_ENERGY_MULTIPLIER : 1.0;
+        this.addEnergy(heroId, PASSIVE_RATE * classMult * dt);
       }
     }
   }
