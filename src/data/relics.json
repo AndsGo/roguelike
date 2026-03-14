@@ -202,7 +202,7 @@
   {
     "id": "fire_emblem",
     "name": "火焰纹章",
-    "description": "火属性伤害+20%",
+    "description": "火属性伤害+20%，融化反应额外施加灼烧",
     "rarity": "rare",
     "triggerEvent": "unit:damage",
     "effect": { "type": "on_damage", "value": 0.2 }
@@ -210,7 +210,7 @@
   {
     "id": "ice_crystal_pendant",
     "name": "冰晶坠饰",
-    "description": "冰属性伤害+20%",
+    "description": "冰属性伤害+20%，超导反应持续时间+2秒",
     "rarity": "rare",
     "triggerEvent": "unit:damage",
     "effect": { "type": "on_damage", "value": 0.2 }
@@ -218,7 +218,7 @@
   {
     "id": "lightning_rod",
     "name": "避雷针",
-    "description": "雷属性伤害+20%",
+    "description": "雷属性伤害+20%，超载反应弹射1个额外目标",
     "rarity": "rare",
     "triggerEvent": "unit:damage",
     "effect": { "type": "on_damage", "value": 0.2 }
@@ -226,15 +226,15 @@
   {
     "id": "dark_grimoire",
     "name": "黑暗魔典",
-    "description": "暗属性伤害+20%",
+    "description": "暗属性伤害+20%，暗属性英雄攻击时15%概率吸血",
     "rarity": "rare",
     "triggerEvent": "unit:damage",
-    "effect": { "type": "on_damage", "value": 0.2 }
+    "effect": { "type": "on_damage", "value": 0.2, "chance": 0.15 }
   },
   {
     "id": "holy_scripture",
     "name": "圣典",
-    "description": "光属性伤害+20%",
+    "description": "光属性伤害+20%，圣属性英雄免死一次(每场战斗)",
     "rarity": "rare",
     "triggerEvent": "unit:damage",
     "effect": { "type": "on_damage", "value": 0.2 }

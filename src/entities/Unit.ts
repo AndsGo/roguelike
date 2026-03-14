@@ -350,6 +350,12 @@ export class Unit extends Phaser.GameObjects.Container {
       return;
     }
 
+    // Check holy_scripture shield
+    if (RelicSystem.shouldApplyHolyShield(this)) {
+      this.healthBar.updateHealth(this.currentHp, this.currentStats.maxHp);
+      return;
+    }
+
     this.isAlive = false;
     this.target = null;
 

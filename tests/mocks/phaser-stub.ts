@@ -231,7 +231,7 @@ class Scene {
       return { remove: () => {} };
     },
     now: Date.now(),
-    addEvent: () => ({ remove: () => {} }),
+    addEvent: () => ({ remove: () => {}, destroy: () => {} }),
   };
 
   physics = {

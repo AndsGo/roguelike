@@ -116,6 +116,40 @@ export class ElementSystem {
       target.statusEffects.push(statusEffect);
     }
 
+    // --- Relic reaction-bound secondary effects ---
+
+    // fire_emblem: burn DoT on melt (fire+ice)
+    if (reaction.name === '融化' && RelicSystem.hasRelic('fire_emblem') && reactionDamage > 0) {
+      const burnDot: StatusEffect = {
+        id: `fire_emblem_burn_${Date.now()}`,
+        type: 'dot',
+        name: 'burn',
+        duration: 3,
+        value: Math.round(reactionDamage * 0.15),
+        element: 'fire',
+      };
+      target.statusEffects.push(burnDot);
+    }
+
+    // ice_crystal_pendant: extend defense_down on superconduct (ice+lightning)
+    if (reaction.name === '超导' && RelicSystem.hasRelic('ice_crystal_pendant')) {
+      const defDown = target.statusEffects.find(e => e.name === 'defense_down');
+      if (defDown) {
+        defDown.duration += 2; // 5s → 7s
+      }
+    }
+
+    // lightning_rod: chain 50% reaction damage on overload (fire+lightning)
+    if (reaction.name === '超载' && RelicSystem.hasRelic('lightning_rod') && reactionDamage > 0) {
+      const chainDamage = Math.round(reactionDamage * 0.5);
+      if (chainDamage > 0) {
+        const chainTargets = RelicSystem.getSplashTargets(target.unitId, 1);
+        for (const t of chainTargets) {
+          t.takeDamage(chainDamage);
+        }
+      }
+    }
+
     // Emit element reaction event
     EventBus.getInstance().emit('element:reaction', {
       element1: incomingElement,

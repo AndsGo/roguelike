@@ -52,6 +52,7 @@ export class RelicSystem {
   private listeners: Array<{ event: GameEventType; handler: (...args: any[]) => void }> = [];
   private rng: SeededRNG = new SeededRNG(Date.now());
   private phoenixUsed: boolean = false;
+  private holyScriptureUsed: boolean = false;
   private shieldTimer: number = 0;
 
   private constructor() {
@@ -95,6 +96,7 @@ export class RelicSystem {
     inst.heroes = [];
     inst.enemies = [];
     inst.phoenixUsed = false;
+    inst.holyScriptureUsed = false;
     inst.shieldTimer = 0;
   }
 
@@ -108,6 +110,7 @@ export class RelicSystem {
   static resetBattleFlags(): void {
     const inst = RelicSystem.getInstance();
     inst.phoenixUsed = false;
+    inst.holyScriptureUsed = false;
   }
 
   /** Reset singleton — for testing */
@@ -118,6 +121,7 @@ export class RelicSystem {
       RelicSystem.instance.heroes = [];
       RelicSystem.instance.enemies = [];
       RelicSystem.instance.phoenixUsed = false;
+      RelicSystem.instance.holyScriptureUsed = false;
       RelicSystem.instance.shieldTimer = 0;
     }
   }
@@ -170,6 +174,23 @@ export class RelicSystem {
     // Revive with 30% HP
     const reviveHp = Math.round(unit.currentStats.maxHp * 0.3);
     unit.currentHp = reviveHp;
+    return true;
+  }
+
+  /** Check if holy_scripture should prevent death for a holy hero */
+  static shouldApplyHolyShield(unit: Unit): boolean {
+    const inst = RelicSystem.getInstance();
+    if (!RelicSystem.hasRelic('holy_scripture')) return false;
+    if (inst.holyScriptureUsed) return false;
+    if (!unit.isHero) return false;
+    if (unit.element !== 'holy') return false;
+
+    inst.holyScriptureUsed = true;
+    const relic = inst.relics.find(r => r.id === 'holy_scripture');
+    if (relic) relic.triggerCount++;
+
+    unit.currentHp = 1;
+    unit.addShield(Math.round(unit.currentStats.maxHp * 0.15), 8);
     return true;
   }
 
@@ -530,6 +551,14 @@ export class RelicSystem {
             const randomEnemy = this.rng.pick(otherEnemies);
             randomEnemy.takeDamage(val);
           }
+        }
+        break;
+
+      case 'dark_grimoire':
+        // Dark-element hero lifesteal: heal 20% of damage dealt
+        if (source && source.isHero && source.isAlive && source.element === 'dark') {
+          const healAmount = Math.round(damage * 0.2);
+          if (healAmount > 0) source.heal(healAmount);
         }
         break;
     }
