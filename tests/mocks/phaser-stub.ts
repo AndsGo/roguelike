@@ -79,20 +79,23 @@ class Rectangle extends MockGameObject {
 
 class Text extends MockGameObject {
   text = '';
+  style: Record<string, any> = {};
 
-  constructor(scene?: any, x?: number, y?: number, text?: string) {
+  constructor(scene?: any, x?: number, y?: number, text?: string, styleObj?: Record<string, any>) {
     super();
     this.scene = scene;
     this.x = x ?? 0;
     this.y = y ?? 0;
     this.text = text ?? '';
+    this.style = styleObj ? { ...styleObj } : {};
   }
 
   setText(t: string) { this.text = t; return this; }
-  setStyle() { return this; }
+  setStyle(s: Record<string, any>) { this.style = { ...this.style, ...s }; return this; }
   setColor() { return this; }
   setFontSize() { return this; }
   setWordWrapWidth() { return this; }
+  setResolution(_r: number) { return this; }
 }
 
 class Graphics extends MockGameObject {
@@ -177,7 +180,7 @@ class Scene {
 
   add = {
     rectangle: (x: number, y: number, w: number, h: number, color: number, alpha?: number) => { const o = new Rectangle(this, x, y, w, h, color); this._children.push(o); return o; },
-    text: (x: number, y: number, text: string, _style?: object) => { const o = new Text(this, x, y, text); this._children.push(o); return o; },
+    text: (x: number, y: number, text: string, style?: Record<string, any>) => { const o = new Text(this, x, y, text, style); this._children.push(o); return o; },
     graphics: () => { const o = new Graphics(); o.scene = this; this._children.push(o); return o; },
     image: (x: number, y: number, key: string) => { const o = new Image(this, x, y, key); this._children.push(o); return o; },
     existing: (obj: any) => { this._children.push(obj); return obj; },
@@ -351,6 +354,12 @@ const Phaser = {
   Scale: {
     FIT: 'FIT',
     CENTER_BOTH: 'CENTER_BOTH',
+  },
+  Textures: {
+    FilterMode: {
+      LINEAR: 1,
+      NEAREST: 0,
+    },
   },
   AUTO: 'AUTO',
   CANVAS: 'CANVAS',
