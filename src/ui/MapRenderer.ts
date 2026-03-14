@@ -3,6 +3,7 @@ import { GAME_WIDTH, GAME_HEIGHT } from '../constants';
 import { MapNode, NodeType, ActConfig, HeroState, HeroData } from '../types';
 import { Theme, colorToString, getRoleColor, getNodeColor } from './Theme';
 import { UI, SLOT_LABELS } from '../i18n';
+import { computeNodeLayers } from '../utils/map-utils';
 
 export const NODE_COLORS: Record<NodeType, number> = Theme.colors.node as Record<NodeType, number>;
 
@@ -32,25 +33,25 @@ export class MapRenderer {
   /** Build layer structure from node graph via BFS. */
   static buildLayers(map: MapNode[], acts: ActConfig[]): LayerInfo[] {
     const layers: LayerInfo[] = [];
-    const nodeLayer = new Map<number, number>();
+    const nodeLayer = computeNodeLayers(map);
+
+    // Act assignment: separate BFS tracking boss transitions
     const nodeAct = new Map<number, number>();
-    const queue: { idx: number; layer: number; act: number }[] = [{ idx: 0, layer: 0, act: 0 }];
-    nodeLayer.set(0, 0);
+    const actQueue: { idx: number; act: number }[] = [{ idx: 0, act: 0 }];
+    const visited = new Set<number>();
     nodeAct.set(0, 0);
+    visited.add(0);
 
-    while (queue.length > 0) {
-      const { idx, layer, act } = queue.shift()!;
+    while (actQueue.length > 0) {
+      const { idx, act } = actQueue.shift()!;
       const node = map[idx];
-
       for (const connIdx of node.connections) {
-        if (connIdx < map.length && !nodeLayer.has(connIdx)) {
+        if (connIdx < map.length && !visited.has(connIdx)) {
+          visited.add(connIdx);
           let nextAct = act;
-          if (node.type === 'boss') {
-            nextAct = act + 1;
-          }
-          nodeLayer.set(connIdx, layer + 1);
+          if (node.type === 'boss') nextAct = act + 1;
           nodeAct.set(connIdx, Math.min(nextAct, acts.length - 1));
-          queue.push({ idx: connIdx, layer: layer + 1, act: nextAct });
+          actQueue.push({ idx: connIdx, act: nextAct });
         }
       }
     }
