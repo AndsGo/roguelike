@@ -202,7 +202,7 @@ describe('SynergySystem', () => {
     expect(iceSynergy!.activeThreshold).toBe(2);
 
     const dmgBonus = result.damageBonuses.get('ice');
-    expect(dmgBonus).toBe(0.15);
+    expect(dmgBonus).toBe(0.20);
   });
 
   it('activates lightning element synergy with 2 lightning heroes', () => {
@@ -218,7 +218,7 @@ describe('SynergySystem', () => {
     expect(lightningSynergy!.count).toBe(2);
 
     const dmgBonus = result.damageBonuses.get('lightning');
-    expect(dmgBonus).toBe(0.15);
+    expect(dmgBonus).toBe(0.20);
   });
 
   it('ice synergy damage multiplier applies correctly', () => {
@@ -230,7 +230,7 @@ describe('SynergySystem', () => {
 
     synergy.calculateActiveSynergies(heroes, dataMap);
     const mult = synergy.getSynergyDamageMultiplier('ice');
-    expect(mult).toBeCloseTo(1.15);
+    expect(mult).toBeCloseTo(1.20);
     // Non-ice element should be unaffected
     expect(synergy.getSynergyDamageMultiplier('fire')).toBeCloseTo(1.0);
   });

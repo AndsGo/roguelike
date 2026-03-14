@@ -145,7 +145,7 @@ export const SYNERGY_DEFINITIONS: SynergyConfig[] = [
     type: 'element',
     key: 'fire',
     thresholds: [
-      { count: 2, description: '火属性伤害+15%', effects: [{ type: 'damage_bonus', element: 'fire', value: 0.15 }] },
+      { count: 2, description: '火属性伤害+20%', effects: [{ type: 'damage_bonus', element: 'fire', value: 0.20 }] },
     ],
   },
   {
@@ -155,7 +155,7 @@ export const SYNERGY_DEFINITIONS: SynergyConfig[] = [
     type: 'element',
     key: 'dark',
     thresholds: [
-      { count: 2, description: '暗属性伤害+15%', effects: [{ type: 'damage_bonus', element: 'dark', value: 0.15 }] },
+      { count: 2, description: '暗属性伤害+20%', effects: [{ type: 'damage_bonus', element: 'dark', value: 0.20 }] },
     ],
   },
   {
@@ -165,7 +165,7 @@ export const SYNERGY_DEFINITIONS: SynergyConfig[] = [
     type: 'element',
     key: 'holy',
     thresholds: [
-      { count: 2, description: '圣属性伤害+15%', effects: [{ type: 'damage_bonus', element: 'holy', value: 0.15 }] },
+      { count: 2, description: '圣属性伤害+20%', effects: [{ type: 'damage_bonus', element: 'holy', value: 0.20 }] },
     ],
   },
   {
@@ -175,7 +175,7 @@ export const SYNERGY_DEFINITIONS: SynergyConfig[] = [
     type: 'element',
     key: 'ice',
     thresholds: [
-      { count: 2, description: '冰属性伤害+15%', effects: [{ type: 'damage_bonus', element: 'ice', value: 0.15 }] },
+      { count: 2, description: '冰属性伤害+20%', effects: [{ type: 'damage_bonus', element: 'ice', value: 0.20 }] },
     ],
   },
   {
@@ -185,7 +185,7 @@ export const SYNERGY_DEFINITIONS: SynergyConfig[] = [
     type: 'element',
     key: 'lightning',
     thresholds: [
-      { count: 2, description: '雷属性伤害+15%', effects: [{ type: 'damage_bonus', element: 'lightning', value: 0.15 }] },
+      { count: 2, description: '雷属性伤害+20%', effects: [{ type: 'damage_bonus', element: 'lightning', value: 0.20 }] },
     ],
   },
 ];
