@@ -34,7 +34,7 @@ const COLORBLIND_ELEMENT: Record<string, number> = {
   ice: 0x3399ff,       // bright blue (same family, higher contrast)
   lightning: 0xffff00,  // pure yellow (unchanged)
   dark: 0x8833cc,      // violet-purple (shifted from magenta)
-  holy: 0xffffff,      // white (unchanged)
+  holy: 0xffd700,      // gold (visible on light backgrounds)
 };
 
 /** Colorblind-safe rarity palette — uses luminance + saturation variation */
@@ -116,7 +116,7 @@ export const Theme = {
       ice: 0x35c9ff,
       lightning: 0xffeb3b,
       dark: 0x9c27b0,
-      holy: 0xffffff,
+      holy: 0xffd700,
     } as Record<string, number>,
 
     /** Unicode symbols for elements (colorblind-friendly indicators) */
