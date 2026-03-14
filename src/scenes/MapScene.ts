@@ -16,6 +16,7 @@ import { RunOverviewPanel } from '../ui/RunOverviewPanel';
 import { FormationPanel } from '../ui/FormationPanel';
 import { TutorialSystem } from '../systems/TutorialSystem';
 import { TextFactory } from '../ui/TextFactory';
+import { DailyChallengeManager, DailyRule } from '../managers/DailyChallengeManager';
 
 export class MapScene extends Phaser.Scene {
   private mapContainer!: Phaser.GameObjects.Container;
@@ -388,6 +389,21 @@ export class MapScene extends Phaser.Scene {
     TextFactory.create(this, GAME_WIDTH - 15, 8, UI.map.gold(rm.getGold()), 'body', {
       color: colorToString(Theme.colors.gold),
     }).setOrigin(1, 0).setScrollFactor(0).setDepth(101);
+
+    // Daily challenge rules banner
+    const runState = rm.getState();
+    if (runState.isDaily && runState.dailyModifiers?.rules) {
+      const rules = runState.dailyModifiers.rules as DailyRule[];
+      const ruleText = rules.map((r: any) => DailyChallengeManager.formatDailyRuleShort(r)).join('  ');
+
+      const bannerBg = this.add.graphics().setScrollFactor(0).setDepth(101);
+      bannerBg.fillStyle(0xccaa00, 0.15);
+      bannerBg.fillRoundedRect(10, 30, GAME_WIDTH - 20, 18, 4);
+
+      TextFactory.create(this, GAME_WIDTH / 2, 39, `每日挑战: ${ruleText}`, 'small', {
+        color: '#ccaa44',
+      }).setOrigin(0.5).setScrollFactor(0).setDepth(102);
+    }
 
     // Overview button
     const overviewBtn = TextFactory.create(this, GAME_WIDTH - 15, 26, '[概览]', 'small', {
