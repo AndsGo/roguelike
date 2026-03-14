@@ -25,7 +25,7 @@
       "magicPower": 0,
       "magicResist": 2
     },
-    "skills": [],
+    "skills": ["acid_spit"],
     "spriteKey": "enemy_slime",
     "goldReward": 8,
     "expReward": 20
@@ -56,7 +56,7 @@
       "magicPower": 0,
       "magicResist": 1
     },
-    "skills": [],
+    "skills": ["goblin_rush"],
     "spriteKey": "enemy_goblin",
     "goldReward": 10,
     "expReward": 25
@@ -213,7 +213,7 @@
       "magicPower": 3,
       "magicResist": 2
     },
-    "skills": [],
+    "skills": ["lizard_flame"],
     "spriteKey": "enemy_fire_lizard",
     "goldReward": 12,
     "expReward": 28

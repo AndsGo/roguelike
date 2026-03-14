@@ -78,5 +78,8 @@
   "forge_mend": { "type": "aoe_ally", "color": "0xffff88" },
   "void_debuff": { "type": "aoe_enemy", "color": "0x8844aa" },
   "chimera_shift": { "type": "melee_impact", "color": "0xcc88ff" },
-  "forge_slam": { "type": "aoe_enemy", "color": "0xffaa44" }
+  "forge_slam": { "type": "aoe_enemy", "color": "0xffaa44" },
+  "acid_spit": { "type": "projectile", "color": "0x88cc44" },
+  "goblin_rush": { "type": "melee_dash", "color": "0xcc8844" },
+  "lizard_flame": { "type": "projectile", "color": "0xff6b35" }
 }

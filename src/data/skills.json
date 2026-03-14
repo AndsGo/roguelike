@@ -1206,5 +1206,46 @@
     "scalingStat": "attack",
     "scalingRatio": 1.3,
     "range": 120
+  },
+  {
+    "id": "acid_spit",
+    "name": "酸液喷射",
+    "description": "喷射酸液，造成伤害并减速目标",
+    "damageType": "physical",
+    "scalingStat": "attack",
+    "scalingRatio": 0.8,
+    "targetType": "enemy",
+    "cooldown": 6,
+    "baseDamage": 15,
+    "range": 150,
+    "statusEffect": "slow",
+    "effectDuration": 3
+  },
+  {
+    "id": "goblin_rush",
+    "name": "哥布林冲锋",
+    "description": "冲向目标造成伤害并击晕",
+    "damageType": "physical",
+    "scalingStat": "attack",
+    "scalingRatio": 1.2,
+    "targetType": "enemy",
+    "cooldown": 8,
+    "baseDamage": 25,
+    "range": 300,
+    "statusEffect": "stun",
+    "effectDuration": 1
+  },
+  {
+    "id": "lizard_flame",
+    "name": "蜥蜴火焰",
+    "description": "喷射火焰，造成魔法伤害",
+    "damageType": "magical",
+    "scalingStat": "magicPower",
+    "scalingRatio": 1.0,
+    "targetType": "enemy",
+    "cooldown": 7,
+    "baseDamage": 30,
+    "range": 120,
+    "element": "fire"
   }
 ]
