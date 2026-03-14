@@ -414,6 +414,13 @@ export const UI = {
     info: '每天一次固定挑战，全球同步种子',
     score: (n: number) => `得分: ${n}`,
     challengeComplete: '每日挑战完成!',
+    previewTitle: '每日挑战',
+    difficulty: (name: string) => `难度: ${name}`,
+    rulesLabel: '今日规则:',
+    startBtn: '开始挑战',
+    backBtn: '返回',
+    leaderboardTitle: '每日排行',
+    yourRank: (rank: number, total: number) => `排名: 第${rank}名 / ${total}人`,
   },
 
   // Tutorial

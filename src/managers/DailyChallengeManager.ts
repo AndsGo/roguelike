@@ -10,7 +10,8 @@ export interface DailyModifiers {
 }
 
 export interface DailyRule {
-  type: 'enemy_element' | 'hero_restriction' | 'gold_modifier' | 'hp_modifier';
+  type: 'enemy_element' | 'hero_restriction' | 'gold_modifier' | 'hp_modifier'
+    | 'double_crit' | 'gold_rush' | 'element_chaos' | 'speed_frenzy';
   label: string;
   value: any;
 }
@@ -145,27 +146,59 @@ export class DailyChallengeManager {
   private static buildRulePool(rng: SeededRNG): DailyRule[] {
     const element = rng.pick(ELEMENTS);
     const pool: DailyRule[] = [
-      {
-        type: 'enemy_element',
-        label: `敌人强化: ${ELEMENT_LABELS[element]}+20%`,
-        value: element,
-      },
-      {
-        type: 'gold_modifier',
-        label: rng.chance(0.5) ? '金币-30%' : '金币+50%',
-        value: 0, // placeholder, set below
-      },
-      {
-        type: 'hp_modifier',
-        label: '英雄HP-20%',
-        value: 0.8,
-      },
+      { type: 'enemy_element', label: `敌人强化: ${ELEMENT_LABELS[element]}+20%`, value: element },
+      { type: 'gold_modifier', label: rng.chance(0.5) ? '金币-30%' : '金币+50%', value: 0 },
+      { type: 'hp_modifier', label: '英雄HP-20%', value: 0.8 },
+      { type: 'double_crit', label: '暴击伤害翻倍', value: null },
+      { type: 'gold_rush', label: '金币×2，敌人HP+30%', value: null },
+      { type: 'element_chaos', label: '英雄元素随机化', value: null },
+      { type: 'speed_frenzy', label: '全体攻速+30%', value: null },
     ];
 
-    // Set gold modifier value based on label
-    const goldRule = pool[1];
+    const goldRule = pool.find(r => r.type === 'gold_modifier')!;
     goldRule.value = goldRule.label === '金币-30%' ? 0.7 : 1.5;
 
-    return rng.shuffle(pool);
+    const shuffled = rng.shuffle(pool);
+
+    // Mutual exclusion: gold_rush and gold_modifier cannot co-exist
+    const result: DailyRule[] = [];
+    let hasGoldType = false;
+    for (const rule of shuffled) {
+      if ((rule.type === 'gold_modifier' || rule.type === 'gold_rush') && hasGoldType) continue;
+      if (rule.type === 'gold_modifier' || rule.type === 'gold_rush') hasGoldType = true;
+      result.push(rule);
+    }
+
+    return result;
+  }
+
+  static formatDailyRule(rule: DailyRule): { icon: string; text: string } {
+    switch (rule.type) {
+      case 'enemy_element': return { icon: '⚔', text: `${ELEMENT_LABELS[rule.value] ?? rule.value}属性敌人攻击+20%` };
+      case 'gold_modifier': return { icon: '💰', text: `金币收益 ×${rule.value}` };
+      case 'hp_modifier': return { icon: '❤', text: `英雄最大HP ×${rule.value}` };
+      case 'double_crit': return { icon: '💥', text: '所有单位暴击伤害 ×2' };
+      case 'gold_rush': return { icon: '🏆', text: '金币 ×2，敌人HP +30%' };
+      case 'element_chaos': return { icon: '🌀', text: '英雄元素随机化' };
+      case 'speed_frenzy': return { icon: '⚡', text: '所有单位攻速 +30%' };
+      case 'hero_restriction': return { icon: '🚫', text: `禁用${rule.value ?? ''}职业英雄` };
+      default: return { icon: '•', text: rule.type };
+    }
+  }
+
+  static formatDailyRuleShort(rule: DailyRule): string {
+    const { icon, text } = DailyChallengeManager.formatDailyRule(rule);
+    return `${icon}${text}`;
+  }
+
+  static generateGhostScores(seed: number): { name: string; score: number }[] {
+    const rng = new SeededRNG(seed + 99999);
+    const namePool = ['影行者', '剑圣', '魔导师', '守护者', '猎手',
+                       '审判者', '风行者', '炼金师', '驭龙者', '星术士',
+                       '铁壁', '暗刃', '圣盾', '雷鸣', '冰心',
+                       '烈焰使', '月光', '战鬼', '灵铸', '破晓'];
+    const names = rng.pickN(namePool, 5);
+    const scores = names.map(name => ({ name, score: rng.nextInt(200, 1200) }));
+    return scores.sort((a, b) => b.score - a.score);
   }
 }
