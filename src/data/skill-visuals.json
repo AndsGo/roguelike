@@ -81,5 +81,14 @@
   "forge_slam": { "type": "aoe_enemy", "color": "0xffaa44" },
   "acid_spit": { "type": "projectile", "color": "0x88cc44" },
   "goblin_rush": { "type": "melee_dash", "color": "0xcc8844" },
-  "lizard_flame": { "type": "projectile", "color": "0xff6b35" }
+  "lizard_flame": { "type": "projectile", "color": "0xff6b35" },
+  "frost_shield": { "type": "aoe_ally", "color": "0x88ccff" },
+  "glacial_pulse": { "type": "aoe_enemy", "color": "0x66aaff" },
+  "ult_frozen_sanctuary": { "type": "aoe_ally", "color": "0xaaddff" },
+  "holy_blessing": { "type": "aoe_ally", "color": "0xffd700" },
+  "radiant_burst": { "type": "aoe_enemy", "color": "0xffee44" },
+  "ult_divine_empowerment": { "type": "aoe_ally", "color": "0xffdd88" },
+  "frost_arrow": { "type": "projectile", "color": "0x88ccff" },
+  "dragon_ice_breath": { "type": "aoe_enemy", "color": "0x66bbff" },
+  "ult_glacial_barrage": { "type": "projectile", "color": "0xaaeeff", "count": 3 }
 }

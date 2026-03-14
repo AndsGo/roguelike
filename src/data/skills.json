@@ -1247,5 +1247,59 @@
     "baseDamage": 30,
     "range": 120,
     "element": "fire"
+  },
+  {
+    "id": "frost_shield", "name": "霜盾", "description": "为目标施加冰霜护盾，降低受到的伤害",
+    "damageType": "magical", "scalingStat": "magicPower", "scalingRatio": -0.6,
+    "targetType": "ally", "cooldown": 8, "baseDamage": -40, "range": 300,
+    "element": "ice", "statusEffect": "buff", "effectDuration": 5
+  },
+  {
+    "id": "glacial_pulse", "name": "冰川脉冲", "description": "释放冰川能量，对所有敌人造成冰属性伤害并减速",
+    "damageType": "magical", "scalingStat": "magicPower", "scalingRatio": 0.7,
+    "targetType": "all_enemies", "cooldown": 10, "baseDamage": 25, "range": 300,
+    "element": "ice", "statusEffect": "slow", "effectDuration": 3
+  },
+  {
+    "id": "ult_frozen_sanctuary", "name": "冰封圣域", "description": "召唤冰封圣域，大幅治疗全体友军",
+    "damageType": "magical", "scalingStat": "magicPower", "scalingRatio": -1.2,
+    "targetType": "all_allies", "cooldown": 0, "baseDamage": -60, "range": 999,
+    "element": "ice", "isUltimate": true
+  },
+  {
+    "id": "holy_blessing", "name": "圣光祝福", "description": "为目标施加圣光祝福，提升攻击力",
+    "damageType": "magical", "scalingStat": "magicPower", "scalingRatio": -0.5,
+    "targetType": "ally", "cooldown": 9, "baseDamage": -30, "range": 280,
+    "element": "holy", "statusEffect": "buff", "effectDuration": 6
+  },
+  {
+    "id": "radiant_burst", "name": "光辉爆发", "description": "释放圣光能量，对所有敌人造成圣属性伤害",
+    "damageType": "magical", "scalingStat": "magicPower", "scalingRatio": 0.8,
+    "targetType": "all_enemies", "cooldown": 10, "baseDamage": 30, "range": 300,
+    "element": "holy"
+  },
+  {
+    "id": "ult_divine_empowerment", "name": "神圣赋能", "description": "神圣之力赋予全体友军，大幅提升攻击力和攻击速度",
+    "damageType": "magical", "scalingStat": "magicPower", "scalingRatio": -0.8,
+    "targetType": "all_allies", "cooldown": 0, "baseDamage": -40, "range": 999,
+    "element": "holy", "isUltimate": true, "statusEffect": "buff", "effectDuration": 8
+  },
+  {
+    "id": "frost_arrow", "name": "霜冻箭", "description": "射出冰冻箭矢，造成物理伤害并减速目标",
+    "damageType": "physical", "scalingStat": "attack", "scalingRatio": 1.1,
+    "targetType": "enemy", "cooldown": 6, "baseDamage": 40, "range": 350,
+    "element": "ice", "statusEffect": "slow", "effectDuration": 2
+  },
+  {
+    "id": "dragon_ice_breath", "name": "龙息寒流", "description": "喷射冰属性龙息，对所有敌人造成伤害",
+    "damageType": "magical", "scalingStat": "attack", "scalingRatio": 0.6,
+    "targetType": "all_enemies", "cooldown": 12, "baseDamage": 35, "range": 250,
+    "element": "ice"
+  },
+  {
+    "id": "ult_glacial_barrage", "name": "冰川弹幕", "description": "释放连续冰箭弹幕，对单体造成大量物理伤害",
+    "damageType": "physical", "scalingStat": "attack", "scalingRatio": 2.0,
+    "targetType": "enemy", "cooldown": 0, "baseDamage": 80, "range": 350,
+    "element": "ice", "isUltimate": true
   }
 ]
