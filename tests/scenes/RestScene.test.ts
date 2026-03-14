@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { createMockLocalStorage } from '../mocks/phaser';
+import { REST_HEAL_PERCENT, REST_TRAIN_EXP, REST_SCAVENGE_GOLD_MIN, REST_SCAVENGE_GOLD_MAX } from '../../src/constants';
 
 const mockStorage = createMockLocalStorage();
 Object.defineProperty(globalThis, 'localStorage', { value: mockStorage, writable: true });
@@ -74,6 +75,64 @@ describe('RestScene', () => {
         const hpTexts = SceneTestHarness.findText(scene, firstHero.name);
         expect(hpTexts.length).toBeGreaterThan(0);
       }
+    });
+  });
+
+  describe('3-choice overhaul', () => {
+    it('displays train and scavenge buttons alongside rest', () => {
+      const scene = createRestScene();
+      const trainTexts = SceneTestHarness.findText(scene, '训练');
+      const scavengeTexts = SceneTestHarness.findText(scene, '搜索');
+      expect(trainTexts.length).toBeGreaterThan(0);
+      expect(scavengeTexts.length).toBeGreaterThan(0);
+    });
+
+    it('REST_TRAIN_EXP is 120', () => {
+      expect(REST_TRAIN_EXP).toBe(120);
+    });
+
+    it('REST_SCAVENGE_GOLD range is 40-60', () => {
+      expect(REST_SCAVENGE_GOLD_MIN).toBe(40);
+      expect(REST_SCAVENGE_GOLD_MAX).toBe(60);
+    });
+
+    it('train choice awards exp to all heroes', () => {
+      const heroes = rm.getHeroes();
+      const expBefore = heroes.map(h => h.exp);
+      const scene = createRestScene();
+      (scene as any).executeChoice('train', rm);
+      for (let i = 0; i < heroes.length; i++) {
+        expect(heroes[i].exp !== expBefore[i] || heroes[i].level > 1).toBe(true);
+      }
+    });
+
+    it('scavenge choice adds gold', () => {
+      const goldBefore = rm.getGold();
+      const scene = createRestScene();
+      (scene as any).executeChoice('scavenge', rm);
+      const goldAfter = rm.getGold();
+      expect(goldAfter).toBeGreaterThan(goldBefore);
+      expect(goldAfter - goldBefore).toBeGreaterThanOrEqual(REST_SCAVENGE_GOLD_MIN);
+      expect(goldAfter - goldBefore).toBeLessThanOrEqual(REST_SCAVENGE_GOLD_MAX);
+    });
+
+    it('rest choice heals heroes', () => {
+      rm.damageAllHeroes(0.5);
+      const hpBefore = rm.getHeroes().map(h => h.currentHp);
+      const scene = createRestScene();
+      (scene as any).executeChoice('rest', rm);
+      const hpAfter = rm.getHeroes().map(h => h.currentHp);
+      for (let i = 0; i < hpAfter.length; i++) {
+        expect(hpAfter[i]).toBeGreaterThanOrEqual(hpBefore[i]);
+      }
+    });
+
+    it('choice can only be made once', () => {
+      const scene = createRestScene();
+      (scene as any).executeChoice('scavenge', rm);
+      const goldAfterFirst = rm.getGold();
+      (scene as any).executeChoice('scavenge', rm);
+      expect(rm.getGold()).toBe(goldAfterFirst);
     });
   });
 });
