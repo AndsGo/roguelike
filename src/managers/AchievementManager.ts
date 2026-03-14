@@ -135,15 +135,33 @@ export class AchievementManager {
     }
   }
 
+  private static listeners: Array<{ event: string; fn: () => void }> = [];
+
   /** Register EventBus listeners for automatic checking */
   static init(): void {
     AchievementManager.getInstance();
-    const bus = EventBus.getInstance();
+    AchievementManager.registerListeners();
+  }
 
-    // Check achievements on key events
-    bus.on('battle:end', () => { AchievementManager.checkAchievements(); });
-    bus.on('node:complete', () => { AchievementManager.checkAchievements(); });
-    bus.on('run:end', () => { AchievementManager.checkAchievements(); });
+  /** Register achievement-checking listeners on EventBus */
+  static registerListeners(): void {
+    AchievementManager.unregisterListeners();
+    const bus = EventBus.getInstance();
+    const fn = () => { AchievementManager.checkAchievements(); };
+    const events = ['battle:end', 'node:complete', 'run:end'] as const;
+    for (const event of events) {
+      bus.on(event, fn);
+      AchievementManager.listeners.push({ event, fn });
+    }
+  }
+
+  /** Unregister EventBus listeners (for teardown) */
+  static unregisterListeners(): void {
+    const bus = EventBus.getInstance();
+    for (const { event, fn } of AchievementManager.listeners) {
+      bus.off(event as 'battle:end', fn);
+    }
+    AchievementManager.listeners = [];
   }
 
   /**

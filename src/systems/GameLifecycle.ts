@@ -2,10 +2,16 @@ import { EventBus } from './EventBus';
 import { AudioManager } from './AudioManager';
 import { ErrorHandler } from './ErrorHandler';
 import { StatsManager } from '../managers/StatsManager';
+import { AchievementManager } from '../managers/AchievementManager';
 
 /**
  * Centralized teardown for all singleton managers and systems.
  * Call teardownAll() when returning to MainMenu or before a full reset.
+ *
+ * Lifecycle order matters:
+ *   1. Unregister individual system listeners (StatsManager, AchievementManager, AudioManager)
+ *   2. Clear transient buffers (ErrorHandler)
+ *   3. Reset EventBus last (catches any remaining orphaned listeners)
  */
 export class GameLifecycle {
   /**
@@ -16,7 +22,10 @@ export class GameLifecycle {
     // 1. StatsManager — unregister EventBus listeners
     StatsManager.teardown();
 
-    // 2. AudioManager — unregister SFX listeners, stop BGM
+    // 2. AchievementManager — unregister EventBus listeners
+    AchievementManager.unregisterListeners();
+
+    // 3. AudioManager — unregister SFX listeners, stop BGM
     try {
       const audio = AudioManager.getInstance();
       audio.unregisterSfxListeners();
@@ -25,10 +34,10 @@ export class GameLifecycle {
       // AudioManager may not be initialized
     }
 
-    // 3. ErrorHandler — clear transient error buffer
+    // 4. ErrorHandler — clear transient error buffer
     ErrorHandler.clear();
 
-    // 4. EventBus — clear all remaining listeners (must be last)
+    // 5. EventBus — clear all remaining listeners (must be last)
     EventBus.getInstance().reset();
   }
 
@@ -37,7 +46,8 @@ export class GameLifecycle {
    * Call this after newRun() sets up the RunManager state.
    */
   static prepareNewRun(): void {
-    // EventBus is already reset by RunManager.newRun()
+    // EventBus is already reset by teardownAll()
     StatsManager.reinitForNewRun();
+    AchievementManager.registerListeners();
   }
 }
