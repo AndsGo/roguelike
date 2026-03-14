@@ -260,7 +260,7 @@ export class ShopScene extends Phaser.Scene {
       .setInteractive({ useHandCursor: true });
     container.add(buyHit);
 
-    buyHit.on('pointerdown', () => {
+    buyHit.on('pointerup', () => {
       this.buyItem(item, container, priceText);
     });
 
