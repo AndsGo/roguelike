@@ -177,11 +177,11 @@ export class RelicSystem {
   static update(delta: number): void {
     const inst = RelicSystem.getInstance();
 
-    // shield_charm: every 5 seconds, heal all heroes by 20
+    // shield_charm: every 8 seconds, heal all heroes by 20
     if (RelicSystem.hasRelic('shield_charm')) {
       inst.shieldTimer += delta;
-      if (inst.shieldTimer >= 5000) {
-        inst.shieldTimer -= 5000;
+      if (inst.shieldTimer >= 8000) {
+        inst.shieldTimer -= 8000;
         for (const hero of inst.heroes) {
           if (hero.isAlive) {
             hero.heal(20);

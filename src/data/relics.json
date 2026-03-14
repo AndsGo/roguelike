@@ -146,7 +146,7 @@
   {
     "id": "shield_charm",
     "name": "护盾饰品",
-    "description": "每5秒获得一个小护盾",
+    "description": "每8秒获得一个小护盾",
     "rarity": "rare",
     "triggerEvent": "battle:turn",
     "effect": { "type": "passive", "value": 20 }
@@ -290,10 +290,10 @@
   {
     "id": "overflow_shield",
     "name": "溢疗护盾",
-    "description": "治疗溢出部分转为护盾(最多20%maxHP)",
+    "description": "治疗溢出部分转为护盾(最多10%maxHP)",
     "rarity": "legendary",
     "triggerEvent": "unit:heal",
-    "effect": { "type": "formula_mod", "value": 0.2 }
+    "effect": { "type": "formula_mod", "value": 0.1 }
   },
   {
     "id": "chain_reaction",
@@ -306,10 +306,10 @@
   {
     "id": "glass_cannon",
     "name": "玻璃大炮",
-    "description": "攻击+60%，受到伤害+30%",
+    "description": "攻击+40%，受到伤害+30%",
     "rarity": "legendary",
     "triggerEvent": "unit:damage",
-    "effect": { "type": "formula_mod", "value": 0.6 }
+    "effect": { "type": "formula_mod", "value": 0.4 }
   },
   {
     "id": "mono_element_crown",

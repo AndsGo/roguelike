@@ -1000,7 +1000,7 @@
     "targetType": "enemy",
     "baseDamage": 40,
     "scalingStat": "attack",
-    "scalingRatio": 1.8,
+    "scalingRatio": 1.3,
     "range": 80
   },
   {
@@ -1026,7 +1026,7 @@
     "targetType": "enemy",
     "baseDamage": 80,
     "scalingStat": "attack",
-    "scalingRatio": 3.0,
+    "scalingRatio": 2.0,
     "range": 80,
     "isUltimate": true
   },

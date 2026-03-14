@@ -189,7 +189,7 @@
     "baseStats": {
       "maxHp": 420,
       "hp": 420,
-      "attack": 62,
+      "attack": 58,
       "defense": 12,
       "magicPower": 0,
       "magicResist": 10,
@@ -197,7 +197,7 @@
       "attackSpeed": 1.5,
       "attackRange": 50,
       "critChance": 0.28,
-      "critDamage": 2.2
+      "critDamage": 2.0
     },
     "scalingPerLevel": {
       "maxHp": 22,
@@ -609,7 +609,7 @@
     "baseStats": {
       "maxHp": 480,
       "hp": 480,
-      "attack": 72,
+      "attack": 62,
       "defense": 15,
       "magicPower": 10,
       "magicResist": 12,
@@ -617,7 +617,7 @@
       "attackSpeed": 1.2,
       "attackRange": 80,
       "critChance": 0.25,
-      "critDamage": 2.2
+      "critDamage": 2.0
     },
     "scalingPerLevel": {
       "maxHp": 28,
