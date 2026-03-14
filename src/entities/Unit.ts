@@ -6,6 +6,7 @@ import { EventBus } from '../systems/EventBus';
 import { RelicSystem } from '../systems/RelicSystem';
 import { Theme, darkenColor, getElementColor, getRoleColor } from '../ui/Theme';
 import { getOrCreateTexture, getDisplaySize, ChibiConfig } from '../systems/UnitRenderer';
+import { UI } from '../i18n';
 
 /** Default enemy color (no element) */
 const ENEMY_BASE_COLOR = 0xff4444;
@@ -53,6 +54,7 @@ export class Unit extends Phaser.GameObjects.Container {
   private statusIcons: Phaser.GameObjects.Text;
   private statusOverlay: Phaser.GameObjects.Graphics;
   private stunTween: Phaser.Tweens.Tween | null = null;
+  private statusTooltip: Phaser.GameObjects.Container | null = null;
   isBoss: boolean = false;
 
   constructor(
@@ -137,6 +139,8 @@ export class Unit extends Phaser.GameObjects.Container {
       fontFamily: 'monospace',
     }).setOrigin(0.5).setVisible(false);
     this.add(this.statusIcons);
+    this.statusIcons.setInteractive({ useHandCursor: true });
+    this.statusIcons.on('pointerup', () => this.toggleStatusTooltip());
 
     scene.add.existing(this);
   }
@@ -449,6 +453,9 @@ export class Unit extends Phaser.GameObjects.Container {
   /** Update visual indicators for active status effects */
   updateStatusVisuals(): void {
     if (!this.scene) return;
+    if (this.statusEffects.length === 0) {
+      this.hideStatusTooltip();
+    }
     const hasBurn = this.statusEffects.some(e => e.type === 'dot' && e.element === 'fire');
     const hasFreeze = this.statusEffects.some(e => e.type === 'stun');
     const hasBuff = this.statusEffects.some(e => e.type === 'buff');
@@ -548,5 +555,76 @@ export class Unit extends Phaser.GameObjects.Container {
   /** Show or hide the unit name label */
   setNameVisible(visible: boolean): void {
     this.nameLabel.setVisible(visible);
+  }
+
+  private toggleStatusTooltip(): void {
+    if (this.statusTooltip) {
+      this.hideStatusTooltip();
+    } else {
+      this.showStatusTooltip();
+    }
+  }
+
+  private showStatusTooltip(): void {
+    if (this.statusEffects.length === 0) return;
+    this.hideStatusTooltip();
+
+    const container = this.scene.add.container(this.x + 30, this.y - this.spriteHeight / 2 - 10);
+    container.setDepth(500);
+
+    const lineHeight = 16;
+    const padding = 6;
+    const width = 130;
+    const height = this.statusEffects.length * lineHeight + padding * 2;
+
+    const bg = this.scene.add.graphics();
+    bg.fillStyle(0x1a1a2e, 0.9);
+    bg.fillRoundedRect(0, 0, width, height, 4);
+    bg.lineStyle(1, 0x334466, 0.8);
+    bg.strokeRoundedRect(0, 0, width, height, 4);
+    container.add(bg);
+
+    const nameMap: Record<string, string> = {
+      dot: UI.battle.statusDot,
+      hot: UI.battle.statusHot,
+      stun: UI.battle.statusStun,
+      buff: UI.battle.statusBuff,
+      debuff: UI.battle.statusDebuff,
+      slow: UI.battle.statusSlow,
+      taunt: UI.battle.statusTaunt,
+    };
+
+    const iconMap: Record<string, string> = {
+      dot: '🔥', hot: '♥', stun: '✦', buff: '▲', debuff: '▼', slow: '❄', taunt: '⊕',
+    };
+
+    this.statusEffects.forEach((effect, i) => {
+      const name = nameMap[effect.type] ?? effect.type;
+      const icon = iconMap[effect.type] ?? '•';
+      const remaining = Math.max(0, effect.duration / 1000);
+      const valueStr = effect.value ? `${Math.abs(effect.value)}` : '';
+      const line = `${icon} ${name}  ${valueStr}  ${remaining.toFixed(1)}s`;
+
+      const text = this.scene.add.text(padding, padding + i * lineHeight, line, {
+        fontSize: '9px',
+        color: effect.type === 'buff' || effect.type === 'hot' ? '#88ff88' : '#ff8888',
+        fontFamily: 'monospace',
+      });
+      container.add(text);
+    });
+
+    this.statusTooltip = container;
+  }
+
+  private hideStatusTooltip(): void {
+    if (this.statusTooltip) {
+      this.statusTooltip.destroy();
+      this.statusTooltip = null;
+    }
+  }
+
+  destroy(fromScene?: boolean): void {
+    this.hideStatusTooltip();
+    super.destroy(fromScene);
   }
 }
