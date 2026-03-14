@@ -49,6 +49,9 @@ export const REST_HEAL_PERCENT = 0.3;
 export const REST_TRAIN_EXP = 120;
 export const REST_SCAVENGE_GOLD_MIN = 40;
 export const REST_SCAVENGE_GOLD_MAX = 60;
+export const MAP_SHORTCUT_CHANCE = 0.15;
+export const MAP_HIDDEN_NODE_CHANCE = 0.10;
+export const MAP_HIDDEN_NODE_COST = 30;
 
 // ============ Equipment ============
 

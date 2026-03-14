@@ -215,6 +215,9 @@ export interface MapNode {
   completed: boolean;
   connections: number[]; // indices of connected next nodes (supports branching)
   data?: BattleNodeData | ShopNodeData | EventNodeData;
+  hidden?: boolean;
+  revealCost?: number;
+  shortcutConnections?: number[];
 }
 
 export interface BattleNodeData {

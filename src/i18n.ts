@@ -43,6 +43,10 @@ export const UI = {
     continueBtn: '继续',
     runStats: (heroes: number, relics: number, completed: number, total: number) =>
       `英雄:${heroes}  遗物:${relics}  进度:${completed}/${total}`,
+    hiddenNode: '???',
+    hiddenCost: (cost: number) => `${cost}G 揭示`,
+    hiddenNoGold: '金币不足',
+    hiddenRevealed: '发现了隐藏路径！',
   },
 
   formation: {
