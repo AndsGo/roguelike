@@ -124,7 +124,14 @@ describe('MapGenerator', () => {
         for (const c of node.connections) {
           expect(c).toBeGreaterThanOrEqual(0);
           expect(c).toBeLessThanOrEqual(maxIndex);
-          expect(c).toBeGreaterThan(node.index); // connections go forward
+          // Hidden nodes inherit parent's forward connections (may point backward in index)
+          if (!node.hidden) {
+            // Non-hidden connections generally go forward, except to hidden nodes appended at end
+            const target = nodes[c];
+            if (!target?.hidden) {
+              expect(c).toBeGreaterThan(node.index);
+            }
+          }
         }
       }
     });

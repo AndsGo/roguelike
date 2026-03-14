@@ -17,6 +17,7 @@ function makeRng(overrides: Partial<{
     pick: <T>(arr: T[]) => arr[0],
     pickN: <T>(arr: T[], n: number) => arr.slice(0, n),
     getState: () => 0,
+    next: () => 0,
     ...overrides,
   } as any;
 }
