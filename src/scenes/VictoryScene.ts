@@ -7,6 +7,7 @@ import { RunEndPanel } from '../ui/RunEndPanel';
 import { UI } from '../i18n';
 import { BaseEndScene } from './BaseEndScene';
 import heroesData from '../data/heroes.json';
+import { TextFactory } from '../ui/TextFactory';
 
 export class VictoryScene extends BaseEndScene {
   constructor() {
@@ -58,28 +59,22 @@ export class VictoryScene extends BaseEndScene {
     const { metaReward, newAchievements } = this.settleRewards(true, rm.getFloor(), context);
 
     // Final team
-    this.add.text(GAME_WIDTH / 2, 135, UI.victory.finalTeam, {
-      fontSize: '11px',
+    TextFactory.create(this, GAME_WIDTH / 2, 135, UI.victory.finalTeam, 'body', {
       color: '#8899cc',
-      fontFamily: 'monospace',
     }).setOrigin(0.5);
 
     const heroes = rm.getHeroes();
     heroes.forEach((hero, i) => {
       const data = rm.getHeroData(hero.id);
-      this.add.text(GAME_WIDTH / 2, 155 + i * 18, `${data.name} Lv.${hero.level}`, {
-        fontSize: '10px',
+      TextFactory.create(this, GAME_WIDTH / 2, 155 + i * 18, `${data.name} Lv.${hero.level}`, 'label', {
         color: '#ffffff',
-        fontFamily: 'monospace',
       }).setOrigin(0.5);
     });
 
     const rewardY = 155 + heroes.length * 18 + 15;
 
-    this.add.text(GAME_WIDTH / 2, rewardY, UI.victory.finalGold(rm.getGold()), {
-      fontSize: '12px',
+    TextFactory.create(this, GAME_WIDTH / 2, rewardY, UI.victory.finalGold(rm.getGold()), 'body', {
       color: colorToString(Theme.colors.gold),
-      fontFamily: 'monospace',
     }).setOrigin(0.5);
 
     this.createSoulsText(rewardY + 22, UI.victory.soulsEarned(metaReward));

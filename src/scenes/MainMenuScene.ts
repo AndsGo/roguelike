@@ -17,6 +17,7 @@ import { DIFFICULTY_LEVELS } from '../config/difficulty';
 import { DailyChallengeManager } from '../managers/DailyChallengeManager';
 import { RunManager } from '../managers/RunManager';
 import heroesData from '../data/heroes.json';
+import { TextFactory } from '../ui/TextFactory';
 
 export class MainMenuScene extends Phaser.Scene {
   private upgradePanel: Panel | null = null;
@@ -53,12 +54,9 @@ export class MainMenuScene extends Phaser.Scene {
     }
 
     // Title
-    const title = this.add.text(GAME_WIDTH / 2, 80, UI.mainMenu.title, {
-      fontSize: '32px',
+    const title = TextFactory.create(this, GAME_WIDTH / 2, 80, UI.mainMenu.title, 'title', {
       color: colorToString(Theme.colors.secondary),
-      fontFamily: 'monospace',
       align: 'center',
-      fontStyle: 'bold',
       stroke: '#000000',
       strokeThickness: 4,
     }).setOrigin(0.5);
@@ -74,10 +72,8 @@ export class MainMenuScene extends Phaser.Scene {
     });
 
     // Subtitle
-    this.add.text(GAME_WIDTH / 2, 155, UI.mainMenu.subtitle, {
-      fontSize: '11px',
+    TextFactory.create(this, GAME_WIDTH / 2, 155, UI.mainMenu.subtitle, 'body', {
       color: '#8899cc',
-      fontFamily: 'monospace',
     }).setOrigin(0.5);
 
     // Button layout
@@ -146,10 +142,8 @@ export class MainMenuScene extends Phaser.Scene {
     // Audio toggle buttons (top-right corner)
     const audio = AudioManager.getInstance();
     const bgmLabel = audio.isBgmEnabled() ? UI.audio.bgmOn : UI.audio.bgmOff;
-    const bgmBtn = this.add.text(GAME_WIDTH - 15, 12, bgmLabel, {
-      fontSize: '9px',
+    const bgmBtn = TextFactory.create(this, GAME_WIDTH - 15, 12, bgmLabel, 'small', {
       color: audio.isBgmEnabled() ? '#88cc88' : '#888888',
-      fontFamily: 'monospace',
     }).setOrigin(1, 0).setInteractive({ useHandCursor: true });
     bgmBtn.on('pointerup', () => {
       const enabled = audio.toggleBgm();
@@ -158,10 +152,8 @@ export class MainMenuScene extends Phaser.Scene {
     });
 
     const sfxLabel = audio.isSfxEnabled() ? UI.audio.sfxOn : UI.audio.sfxOff;
-    const sfxBtn = this.add.text(GAME_WIDTH - 15, 26, sfxLabel, {
-      fontSize: '9px',
+    const sfxBtn = TextFactory.create(this, GAME_WIDTH - 15, 26, sfxLabel, 'small', {
       color: audio.isSfxEnabled() ? '#88cc88' : '#888888',
-      fontFamily: 'monospace',
     }).setOrigin(1, 0).setInteractive({ useHandCursor: true });
     sfxBtn.on('pointerup', () => {
       const enabled = audio.toggleSfx();
@@ -170,10 +162,8 @@ export class MainMenuScene extends Phaser.Scene {
     });
 
     // Settings gear button (top-right)
-    const settingsBtn = this.add.text(GAME_WIDTH - 15, 44, '[设置]', {
-      fontSize: '9px',
+    const settingsBtn = TextFactory.create(this, GAME_WIDTH - 15, 44, '[设置]', 'small', {
       color: '#888888',
-      fontFamily: 'monospace',
     }).setOrigin(1, 0).setInteractive({ useHandCursor: true });
     settingsBtn.on('pointerup', () => {
       SceneTransition.fadeTransition(this, 'SettingsScene', { returnScene: 'MainMenuScene' });
@@ -182,10 +172,8 @@ export class MainMenuScene extends Phaser.Scene {
     // Skip tutorial button (only shown if tutorials not yet skipped)
     TutorialSystem.init();
     if (!TutorialSystem.allSkipped()) {
-      const skipBtn = this.add.text(GAME_WIDTH - 15, btnY - 10, UI.tutorial.skipAll, {
-        fontSize: '9px',
+      const skipBtn = TextFactory.create(this, GAME_WIDTH - 15, btnY - 10, UI.tutorial.skipAll, 'small', {
         color: '#666688',
-        fontFamily: 'monospace',
       }).setOrigin(1, 0.5).setInteractive({ useHandCursor: true });
       skipBtn.on('pointerup', () => {
         TutorialSystem.skipAll();
@@ -199,17 +187,13 @@ export class MainMenuScene extends Phaser.Scene {
     const meta = MetaManager.getMetaData();
     const currency = MetaManager.getMetaCurrency();
     const statsStr = UI.mainMenu.stats(meta.totalRuns, meta.totalVictories, meta.unlockedHeroes.length, heroesData.length, currency);
-    this.add.text(GAME_WIDTH / 2, GAME_HEIGHT - 38, statsStr, {
-      fontSize: '9px',
+    TextFactory.create(this, GAME_WIDTH / 2, GAME_HEIGHT - 38, statsStr, 'small', {
       color: '#666688',
-      fontFamily: 'monospace',
     }).setOrigin(0.5);
 
     // Version
-    this.add.text(GAME_WIDTH / 2, GAME_HEIGHT - 18, UI.mainMenu.version, {
-      fontSize: '9px',
+    TextFactory.create(this, GAME_WIDTH / 2, GAME_HEIGHT - 18, UI.mainMenu.version, 'small', {
       color: '#555577',
-      fontFamily: 'monospace',
     }).setOrigin(0.5);
   }
 
@@ -248,11 +232,8 @@ export class MainMenuScene extends Phaser.Scene {
     panelBg.lineStyle(2, Theme.colors.panelBorder, 0.8);
     panelBg.strokeRoundedRect(GAME_WIDTH / 2 - panelW / 2, GAME_HEIGHT / 2 - panelH / 2, panelW, panelH, 8);
 
-    const titleText = this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 - panelH / 2 + 22, UI.difficulty.title, {
-      fontSize: '14px',
+    const titleText = TextFactory.create(this, GAME_WIDTH / 2, GAME_HEIGHT / 2 - panelH / 2 + 22, UI.difficulty.title, 'subtitle', {
       color: colorToString(Theme.colors.secondary),
-      fontFamily: 'monospace',
-      fontStyle: 'bold',
     }).setOrigin(0.5).setDepth(800);
 
     const allElements: Phaser.GameObjects.GameObject[] = [overlay, panelBg, titleText];
@@ -288,8 +269,8 @@ export class MainMenuScene extends Phaser.Scene {
 
       // Name
       const nameColor = isLocked ? '#666666' : '#ffffff';
-      const nameText = this.add.text(leftX, y, diff.name, {
-        fontSize: '12px', color: nameColor, fontFamily: 'monospace', fontStyle: 'bold',
+      const nameText = TextFactory.create(this, leftX, y, diff.name, 'body', {
+        color: nameColor, fontStyle: 'bold',
       }).setDepth(800);
       allElements.push(nameText);
 
@@ -297,10 +278,8 @@ export class MainMenuScene extends Phaser.Scene {
       const descStr = isLocked
         ? UI.difficulty.locked(UI.difficulty.victoryReq(reqVictories))
         : `${diff.description}  ${UI.difficulty.multiplier(diff.enemyStatMultiplier)}  ${UI.difficulty.rewardMultiplier(diff.goldMultiplier)}`;
-      const descText = this.add.text(leftX, y + 16, descStr, {
-        fontSize: '8px',
+      const descText = TextFactory.create(this, leftX, y + 16, descStr, 'tiny', {
         color: isLocked ? '#555555' : '#8899aa',
-        fontFamily: 'monospace',
       }).setDepth(800);
       allElements.push(descText);
 
@@ -315,8 +294,8 @@ export class MainMenuScene extends Phaser.Scene {
         buttons.push(btn);
       } else {
         // Locked indicator
-        const lockText = this.add.text(GAME_WIDTH / 2 + panelW / 2 - 50, y + 10, '\uD83D\uDD12', {
-          fontSize: '14px', color: '#555555', fontFamily: 'monospace',
+        const lockText = TextFactory.create(this, GAME_WIDTH / 2 + panelW / 2 - 50, y + 10, '\uD83D\uDD12', 'subtitle', {
+          color: '#555555',
         }).setOrigin(0.5).setDepth(800);
         allElements.push(lockText);
       }
@@ -342,10 +321,8 @@ export class MainMenuScene extends Phaser.Scene {
     panelBg.lineStyle(2, Theme.colors.panelBorder, 0.8);
     panelBg.strokeRoundedRect(GAME_WIDTH / 2 - 160, GAME_HEIGHT / 2 - 55, 320, 110, 8);
 
-    const msg = this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 - 25, UI.mainMenu.confirmOverwrite, {
-      fontSize: '13px',
+    const msg = TextFactory.create(this, GAME_WIDTH / 2, GAME_HEIGHT / 2 - 25, UI.mainMenu.confirmOverwrite, 'body', {
       color: colorToString(Theme.colors.danger),
-      fontFamily: 'monospace',
       align: 'center',
     }).setOrigin(0.5).setDepth(800);
 
@@ -469,10 +446,8 @@ export class MainMenuScene extends Phaser.Scene {
     const currency = MetaManager.getMetaCurrency();
 
     // Currency display
-    const currencyText = this.add.text(0, -130, UI.mainMenu.souls(currency), {
-      fontSize: '13px',
+    const currencyText = TextFactory.create(this, 0, -130, UI.mainMenu.souls(currency), 'body', {
       color: colorToString(Theme.colors.gold),
-      fontFamily: 'monospace',
       fontStyle: 'bold',
     }).setOrigin(0.5);
     panel.addContent(currencyText);
@@ -485,10 +460,8 @@ export class MainMenuScene extends Phaser.Scene {
       const isMaxed = level >= maxLevel;
 
       // Upgrade name
-      const nameText = this.add.text(-220, y, UPGRADE_NAMES[def.id] ?? def.id, {
-        fontSize: '11px',
+      const nameText = TextFactory.create(this, -220, y, UPGRADE_NAMES[def.id] ?? def.id, 'body', {
         color: '#ffffff',
-        fontFamily: 'monospace',
       });
       panel.addContent(nameText);
 
@@ -497,10 +470,8 @@ export class MainMenuScene extends Phaser.Scene {
       for (let l = 0; l < maxLevel; l++) {
         pipsStr += l < level ? '[*]' : '[ ]';
       }
-      const pipsText = this.add.text(-40, y, pipsStr, {
-        fontSize: '9px',
+      const pipsText = TextFactory.create(this, -40, y, pipsStr, 'small', {
         color: isMaxed ? colorToString(Theme.colors.success) : '#aaaaaa',
-        fontFamily: 'monospace',
       });
       panel.addContent(pipsText);
 
@@ -509,10 +480,8 @@ export class MainMenuScene extends Phaser.Scene {
         const cost = costs ? costs[level] : 999;
         const canAfford = currency >= cost;
 
-        const costText = this.add.text(140, y, `${cost} 灵魂`, {
-          fontSize: '9px',
+        const costText = TextFactory.create(this, 140, y, `${cost} 灵魂`, 'small', {
           color: canAfford ? colorToString(Theme.colors.gold) : colorToString(Theme.colors.danger),
-          fontFamily: 'monospace',
         });
         panel.addContent(costText);
 
@@ -522,10 +491,8 @@ export class MainMenuScene extends Phaser.Scene {
         buyBg.fillRoundedRect(200, y - 8, 40, 20, 3);
         panel.addContent(buyBg);
 
-        const buyText = this.add.text(220, y + 2, UI.mainMenu.buy, {
-          fontSize: '9px',
+        const buyText = TextFactory.create(this, 220, y + 2, UI.mainMenu.buy, 'small', {
           color: canAfford ? '#ffffff' : '#888888',
-          fontFamily: 'monospace',
         }).setOrigin(0.5);
         panel.addContent(buyText);
 
@@ -543,10 +510,8 @@ export class MainMenuScene extends Phaser.Scene {
           panel.addContent(buyHit);
         }
       } else {
-        const maxText = this.add.text(180, y, UI.mainMenu.max, {
-          fontSize: '10px',
+        const maxText = TextFactory.create(this, 180, y, UI.mainMenu.max, 'label', {
           color: colorToString(Theme.colors.success),
-          fontFamily: 'monospace',
           fontStyle: 'bold',
         });
         panel.addContent(maxText);
@@ -563,8 +528,8 @@ export class MainMenuScene extends Phaser.Scene {
     panel.addContent(divider);
 
     // Section title
-    const mutTitle = this.add.text(0, mutationStartY + 12, UI.mutation.title, {
-      fontSize: '12px', color: '#cc44cc', fontFamily: 'monospace', fontStyle: 'bold',
+    const mutTitle = TextFactory.create(this, 0, mutationStartY + 12, UI.mutation.title, 'body', {
+      color: '#cc44cc', fontStyle: 'bold',
     }).setOrigin(0.5);
     panel.addContent(mutTitle);
 
@@ -572,8 +537,8 @@ export class MainMenuScene extends Phaser.Scene {
 
     if (!tierUnlocked) {
       const remaining = MetaManager.MUTATION_GATE - MetaManager.getTotalUpgradeLevels();
-      const lockText = this.add.text(0, mutationStartY + 36, UI.mutation.locked(remaining), {
-        fontSize: '10px', color: '#888888', fontFamily: 'monospace',
+      const lockText = TextFactory.create(this, 0, mutationStartY + 36, UI.mutation.locked(remaining), 'label', {
+        color: '#888888',
       }).setOrigin(0.5);
       panel.addContent(lockText);
     } else {
@@ -586,27 +551,23 @@ export class MainMenuScene extends Phaser.Scene {
         const desc = mutStrings[`desc_${def.id}`] ?? '';
 
         // Mutation name
-        const nameText = this.add.text(-220, my, owned ? `✓ ${name}` : name, {
-          fontSize: '10px',
+        const nameText = TextFactory.create(this, -220, my, owned ? `✓ ${name}` : name, 'label', {
           color: owned ? '#44ff44' : '#ffffff',
-          fontFamily: 'monospace',
           fontStyle: 'bold',
         });
         panel.addContent(nameText);
 
         // Description
-        const descText = this.add.text(-220, my + 13, desc, {
-          fontSize: '8px', color: '#aaaaaa', fontFamily: 'monospace',
+        const descText = TextFactory.create(this, -220, my + 13, desc, 'tiny', {
+          color: '#aaaaaa',
         });
         panel.addContent(descText);
 
         if (!owned) {
           // Cost
           const canAfford = currency >= def.cost;
-          const costText = this.add.text(140, my, `${def.cost} 灵魂`, {
-            fontSize: '9px',
+          const costText = TextFactory.create(this, 140, my, `${def.cost} 灵魂`, 'small', {
             color: canAfford ? colorToString(Theme.colors.gold) : colorToString(Theme.colors.danger),
-            fontFamily: 'monospace',
           });
           panel.addContent(costText);
 
@@ -616,10 +577,8 @@ export class MainMenuScene extends Phaser.Scene {
           buyBg.fillRoundedRect(200, my - 8, 40, 20, 3);
           panel.addContent(buyBg);
 
-          const buyText = this.add.text(220, my + 2, UI.mainMenu.buy, {
-            fontSize: '9px',
+          const buyText = TextFactory.create(this, 220, my + 2, UI.mainMenu.buy, 'small', {
             color: canAfford ? '#ffffff' : '#888888',
-            fontFamily: 'monospace',
           }).setOrigin(0.5);
           panel.addContent(buyText);
 
@@ -635,8 +594,8 @@ export class MainMenuScene extends Phaser.Scene {
             panel.addContent(buyHit);
           }
         } else {
-          const ownedText = this.add.text(180, my, UI.mutation.unlocked, {
-            fontSize: '10px', color: '#44ff44', fontFamily: 'monospace',
+          const ownedText = TextFactory.create(this, 180, my, UI.mutation.unlocked, 'label', {
+            color: '#44ff44',
           });
           panel.addContent(ownedText);
         }
@@ -652,10 +611,8 @@ export class MainMenuScene extends Phaser.Scene {
 
     // Fixed close button (outside scrollable content, always visible)
     const panelHeight = 340;
-    this.upgradeCloseText = this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 + panelHeight / 2 - 16, UI.mainMenu.close, {
-      fontSize: '10px',
+    this.upgradeCloseText = TextFactory.create(this, GAME_WIDTH / 2, GAME_HEIGHT / 2 + panelHeight / 2 - 16, UI.mainMenu.close, 'label', {
       color: '#888888',
-      fontFamily: 'monospace',
     }).setOrigin(0.5).setDepth(801);
 
     this.upgradeCloseHit = this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2 + panelHeight / 2 - 16, 80, 24, 0x000000, 0)

@@ -15,6 +15,7 @@ import { NodeTooltip } from '../ui/NodeTooltip';
 import { RunOverviewPanel } from '../ui/RunOverviewPanel';
 import { FormationPanel } from '../ui/FormationPanel';
 import { TutorialSystem } from '../systems/TutorialSystem';
+import { TextFactory } from '../ui/TextFactory';
 
 export class MapScene extends Phaser.Scene {
   private mapContainer!: Phaser.GameObjects.Container;
@@ -224,13 +225,13 @@ export class MapScene extends Phaser.Scene {
         hg.strokeCircle(pos.x, pos.y, radius);
         this.mapContainer.add(hg);
 
-        const labelText = this.add.text(pos.x, pos.y, '?', {
-          fontSize: '10px', color: '#888888', fontFamily: 'monospace', fontStyle: 'bold',
+        const labelText = TextFactory.create(this, pos.x, pos.y, '?', 'label', {
+          color: '#888888', fontStyle: 'bold',
         }).setOrigin(0.5);
         this.mapContainer.add(labelText);
 
-        const costText = this.add.text(pos.x, pos.y + radius + 8, UI.map.hiddenCost(node.revealCost ?? MAP_HIDDEN_NODE_COST), {
-          fontSize: '8px', color: '#ccaa44', fontFamily: 'monospace',
+        const costText = TextFactory.create(this, pos.x, pos.y + radius + 8, UI.map.hiddenCost(node.revealCost ?? MAP_HIDDEN_NODE_COST), 'tiny', {
+          color: '#ccaa44',
         }).setOrigin(0.5);
         this.mapContainer.add(costText);
 
@@ -241,8 +242,8 @@ export class MapScene extends Phaser.Scene {
           if (this.isDragging) return;
           const rm2 = RunManager.getInstance();
           if (rm2.getGold() < (node.revealCost ?? MAP_HIDDEN_NODE_COST)) {
-            const noGold = this.add.text(pos.x, pos.y - 20, UI.map.hiddenNoGold, {
-              fontSize: '10px', color: '#ff4444', fontFamily: 'monospace',
+            const noGold = TextFactory.create(this, pos.x, pos.y - 20, UI.map.hiddenNoGold, 'label', {
+              color: '#ff4444',
             }).setOrigin(0.5);
             this.mapContainer.add(noGold);
             this.tweens.add({ targets: noGold, alpha: 0, y: pos.y - 40, duration: 1000, onComplete: () => noGold.destroy() });
@@ -320,19 +321,15 @@ export class MapScene extends Phaser.Scene {
 
       // Node icon
       const labelAlpha = isCompleted ? 0.4 : isAccessible ? 1 : 0.25;
-      const label = this.add.text(pos.x, pos.y, NODE_LABELS[node.type], {
-        fontSize: node.type === 'boss' ? '12px' : '10px',
+      const label = TextFactory.create(this, pos.x, pos.y, NODE_LABELS[node.type], node.type === 'boss' ? 'body' : 'label', {
         color: '#ffffff',
-        fontFamily: 'monospace',
       }).setOrigin(0.5).setAlpha(labelAlpha);
       this.mapContainer.add(label);
 
       // Type name below
       const typeName = UI.nodeType[node.type] ?? node.type;
-      const typeLabel = this.add.text(pos.x, pos.y + radius + 6, typeName, {
-        fontSize: '9px',
+      const typeLabel = TextFactory.create(this, pos.x, pos.y + radius + 6, typeName, 'small', {
         color: '#7799aa',
-        fontFamily: 'monospace',
       }).setOrigin(0.5).setAlpha(labelAlpha);
       this.mapContainer.add(typeLabel);
 
@@ -377,33 +374,24 @@ export class MapScene extends Phaser.Scene {
     headerBg.lineBetween(0, headerHeight, GAME_WIDTH, headerHeight);
 
     // Title
-    this.add.text(GAME_WIDTH / 2, 16, UI.map.title, {
-      fontSize: '14px',
+    TextFactory.create(this, GAME_WIDTH / 2, 16, UI.map.title, 'subtitle', {
       color: '#ffffff',
-      fontFamily: 'monospace',
-      fontStyle: 'bold',
     }).setOrigin(0.5).setScrollFactor(0).setDepth(101);
 
     // Act + Floor indicator
     const currentAct = rm.getCurrentAct();
-    this.add.text(GAME_WIDTH / 2, 34, UI.map.floorLabel(currentAct + 1, acts[currentAct]?.name ?? '', rm.getFloor()), {
-      fontSize: '9px',
+    TextFactory.create(this, GAME_WIDTH / 2, 34, UI.map.floorLabel(currentAct + 1, acts[currentAct]?.name ?? '', rm.getFloor()), 'small', {
       color: '#8899cc',
-      fontFamily: 'monospace',
     }).setOrigin(0.5).setScrollFactor(0).setDepth(101);
 
     // Gold display
-    this.add.text(GAME_WIDTH - 15, 8, UI.map.gold(rm.getGold()), {
-      fontSize: '11px',
+    TextFactory.create(this, GAME_WIDTH - 15, 8, UI.map.gold(rm.getGold()), 'body', {
       color: colorToString(Theme.colors.gold),
-      fontFamily: 'monospace',
     }).setOrigin(1, 0).setScrollFactor(0).setDepth(101);
 
     // Overview button
-    const overviewBtn = this.add.text(GAME_WIDTH - 15, 26, '[概览]', {
-      fontSize: '9px',
+    const overviewBtn = TextFactory.create(this, GAME_WIDTH - 15, 26, '[概览]', 'small', {
       color: colorToString(Theme.colors.ui.accent),
-      fontFamily: 'monospace',
     }).setOrigin(1, 0).setScrollFactor(0).setDepth(101);
     const overviewHit = this.add.rectangle(overviewBtn.x - overviewBtn.width / 2, overviewBtn.y + 6, overviewBtn.width + 10, 16, 0x000000, 0)
       .setInteractive({ useHandCursor: true })
@@ -416,10 +404,8 @@ export class MapScene extends Phaser.Scene {
 
     // Run stats (hero count, relics, node progress)
     const completedCount = map.filter(n => n.completed).length;
-    this.add.text(15, 8, UI.map.runStats(rm.getHeroes().length, rm.getRelics().length, completedCount, map.length), {
-      fontSize: '9px',
+    TextFactory.create(this, 15, 8, UI.map.runStats(rm.getHeroes().length, rm.getRelics().length, completedCount, map.length), 'small', {
       color: '#7788aa',
-      fontFamily: 'monospace',
     }).setOrigin(0, 0).setScrollFactor(0).setDepth(101);
 
     // Interactive hero panel at bottom
@@ -570,25 +556,18 @@ export class MapScene extends Phaser.Scene {
     });
 
     // "Entering Act X" title
-    const title = this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 - 50, UI.map.enterAct(actIndex + 1), {
-      fontSize: '22px',
+    const title = TextFactory.create(this, GAME_WIDTH / 2, GAME_HEIGHT / 2 - 50, UI.map.enterAct(actIndex + 1), 'title', {
       color: '#ffffff',
-      fontFamily: 'monospace',
-      fontStyle: 'bold',
     }).setOrigin(0.5).setScrollFactor(0).setDepth(201).setAlpha(0);
 
     // Act name
-    const name = this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 - 15, act.name, {
-      fontSize: '16px',
+    const name = TextFactory.create(this, GAME_WIDTH / 2, GAME_HEIGHT / 2 - 15, act.name, 'subtitle', {
       color: colorToString(Theme.colors.secondary),
-      fontFamily: 'monospace',
     }).setOrigin(0.5).setScrollFactor(0).setDepth(201).setAlpha(0);
 
     // Description
-    const desc = this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 + 15, act.description, {
-      fontSize: '10px',
+    const desc = TextFactory.create(this, GAME_WIDTH / 2, GAME_HEIGHT / 2 + 15, act.description, 'label', {
       color: '#aaaacc',
-      fontFamily: 'monospace',
     }).setOrigin(0.5).setScrollFactor(0).setDepth(201).setAlpha(0);
 
     // Fade in text

@@ -11,6 +11,7 @@ import { HeroData } from '../types';
 import heroesData from '../data/heroes.json';
 import { AudioManager } from '../systems/AudioManager';
 import { calculateSynergyTags, formatSynergyTags } from '../utils/synergy-helpers';
+import { TextFactory } from '../ui/TextFactory';
 
 const BASE_MAX_SELECTION = 3;
 const MIN_SELECTION = 2;
@@ -51,20 +52,15 @@ export class HeroDraftScene extends Phaser.Scene {
     this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, Theme.colors.background);
 
     // Title
-    this.add.text(GAME_WIDTH / 2, 18, UI.heroDraft.title, {
-      fontSize: '16px',
+    TextFactory.create(this, GAME_WIDTH / 2, 18, UI.heroDraft.title, 'subtitle', {
       color: colorToString(Theme.colors.secondary),
-      fontFamily: 'monospace',
-      fontStyle: 'bold',
     }).setOrigin(0.5);
 
     // Subtitle
     const draftMax = BASE_MAX_SELECTION + (MetaManager.hasMutation('extra_draft_pick') ? 1 : 0);
     const subtitleText = draftMax > BASE_MAX_SELECTION ? `选择2-${draftMax}名英雄开始冒险` : UI.heroDraft.subtitle;
-    this.add.text(GAME_WIDTH / 2, 38, subtitleText, {
-      fontSize: '10px',
+    TextFactory.create(this, GAME_WIDTH / 2, 38, subtitleText, 'label', {
       color: '#8899cc',
-      fontFamily: 'monospace',
     }).setOrigin(0.5);
 
     // All heroes from data
@@ -107,10 +103,8 @@ export class HeroDraftScene extends Phaser.Scene {
 
     // Selection text
     const maxSelection = BASE_MAX_SELECTION + (MetaManager.hasMutation('extra_draft_pick') ? 1 : 0);
-    this.selectionText = this.add.text(GAME_WIDTH / 2, bottomY, UI.heroDraft.selected(0, maxSelection), {
-      fontSize: '11px',
+    this.selectionText = TextFactory.create(this, GAME_WIDTH / 2, bottomY, UI.heroDraft.selected(0, maxSelection), 'body', {
       color: '#aaaacc',
-      fontFamily: 'monospace',
     }).setOrigin(0.5);
 
     // Start button (disabled initially)
@@ -128,10 +122,8 @@ export class HeroDraftScene extends Phaser.Scene {
       0x555555,
     );
 
-    this.synergyText = this.add.text(GAME_WIDTH / 2, bottomY - 28, UI.heroDraft.synergyPlaceholder, {
-      fontSize: '9px',
+    this.synergyText = TextFactory.create(this, GAME_WIDTH / 2, bottomY - 28, UI.heroDraft.synergyPlaceholder, 'small', {
       color: '#666666',
-      fontFamily: 'monospace',
     }).setOrigin(0.5);
 
     this.updateSelectionUI();
@@ -159,13 +151,12 @@ export class HeroDraftScene extends Phaser.Scene {
       lockOverlay.fillRoundedRect(-CARD_W / 2, -CARD_H / 2, CARD_W, CARD_H, 4);
       container.add(lockOverlay);
 
-      const lockIcon = this.add.text(0, -8, '\uD83D\uDD12', {
-        fontSize: '18px', fontFamily: 'monospace',
+      const lockIcon = TextFactory.create(this, 0, -8, '\uD83D\uDD12', 'title', {
       }).setOrigin(0.5);
       container.add(lockIcon);
 
-      const lockedText = this.add.text(0, 24, UI.heroDraft.locked, {
-        fontSize: '8px', color: '#666666', fontFamily: 'monospace',
+      const lockedText = TextFactory.create(this, 0, 24, UI.heroDraft.locked, 'tiny', {
+        color: '#666666',
       }).setOrigin(0.5);
       container.add(lockedText);
       return;
@@ -179,8 +170,8 @@ export class HeroDraftScene extends Phaser.Scene {
     container.add(roleBar);
 
     // Hero name
-    const nameText = this.add.text(0, -CARD_H / 2 + 14, hero.name, {
-      fontSize: '9px', color: '#ffffff', fontFamily: 'monospace',
+    const nameText = TextFactory.create(this, 0, -CARD_H / 2 + 14, hero.name, 'small', {
+      color: '#ffffff',
     }).setOrigin(0.5);
     container.add(nameText);
 
@@ -188,8 +179,8 @@ export class HeroDraftScene extends Phaser.Scene {
     const elemStr = hero.element ? ELEMENT_LABELS[hero.element] ?? '' : '';
     const roleStr = ROLE_SHORT[hero.role] ?? '';
     const tagLine = [roleStr, elemStr].filter(Boolean).join(' ');
-    const tagText = this.add.text(0, -CARD_H / 2 + 27, tagLine, {
-      fontSize: '8px', color: '#88aacc', fontFamily: 'monospace',
+    const tagText = TextFactory.create(this, 0, -CARD_H / 2 + 27, tagLine, 'tiny', {
+      color: '#88aacc',
     }).setOrigin(0.5);
     container.add(tagText);
 
@@ -197,8 +188,8 @@ export class HeroDraftScene extends Phaser.Scene {
     const raceStr = hero.race ? (RACE_NAMES[hero.race] ?? hero.race) : '';
     const classStr = hero.class ? (CLASS_NAMES[hero.class] ?? hero.class) : '';
     const raceClass = [raceStr, classStr].filter(Boolean).join('/');
-    const rcText = this.add.text(0, -CARD_H / 2 + 39, raceClass, {
-      fontSize: '7px', color: '#667788', fontFamily: 'monospace',
+    const rcText = TextFactory.create(this, 0, -CARD_H / 2 + 39, raceClass, 'tiny', {
+      color: '#667788',
     }).setOrigin(0.5);
     container.add(rcText);
 
@@ -208,19 +199,19 @@ export class HeroDraftScene extends Phaser.Scene {
     const defStr = `防:${stats.defense}`;
     const hpStr = `HP:${stats.maxHp}`;
 
-    const hpText = this.add.text(0, 2, hpStr, {
-      fontSize: '8px', color: '#aaaaaa', fontFamily: 'monospace',
+    const hpText = TextFactory.create(this, 0, 2, hpStr, 'tiny', {
+      color: '#aaaaaa',
     }).setOrigin(0.5);
     container.add(hpText);
-    const atkDefText = this.add.text(0, 14, `${atkStr}  ${defStr}`, {
-      fontSize: '8px', color: '#aaaaaa', fontFamily: 'monospace',
+    const atkDefText = TextFactory.create(this, 0, 14, `${atkStr}  ${defStr}`, 'tiny', {
+      color: '#aaaaaa',
     }).setOrigin(0.5);
     container.add(atkDefText);
 
     // Speed / AtkSpd
     const spdStr = `速:${stats.speed}  攻速:${stats.attackSpeed.toFixed(1)}`;
-    const spdText = this.add.text(0, 26, spdStr, {
-      fontSize: '7px', color: '#888888', fontFamily: 'monospace',
+    const spdText = TextFactory.create(this, 0, 26, spdStr, 'tiny', {
+      color: '#888888',
     }).setOrigin(0.5);
     container.add(spdText);
 

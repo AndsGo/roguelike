@@ -8,6 +8,7 @@ import { MetaManager } from '../managers/MetaManager';
 import { TutorialSystem } from '../systems/TutorialSystem';
 import { UI } from '../i18n';
 import { KeybindingConfig, KeyAction, ACTION_LABELS } from '../config/keybindings';
+import { TextFactory } from '../ui/TextFactory';
 
 /**
  * Settings scene accessible from MainMenu and BattlePauseMenu.
@@ -30,11 +31,8 @@ export class SettingsScene extends Phaser.Scene {
     this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, 0x0a0a1e);
 
     // Title
-    this.add.text(GAME_WIDTH / 2, 30, UI.settings.title, {
-      fontSize: '20px',
+    TextFactory.create(this, GAME_WIDTH / 2, 30, UI.settings.title, 'title', {
       color: colorToString(Theme.colors.secondary),
-      fontFamily: 'monospace',
-      fontStyle: 'bold',
     }).setOrigin(0.5);
 
     const leftCol = 160;
@@ -63,11 +61,9 @@ export class SettingsScene extends Phaser.Scene {
     y += 5;
 
     // ---- Tutorial Reset ----
-    const tutorialLabel = this.add.text(leftCol, y,
-      UI.settings.resetTutorials, {
-        fontSize: '11px',
+    const tutorialLabel = TextFactory.create(this, leftCol, y,
+      UI.settings.resetTutorials, 'body', {
         color: '#ffffff',
-        fontFamily: 'monospace',
       }).setOrigin(0, 0.5);
 
     const tutorialBtn = new Button(this, rightCol, y,
@@ -85,10 +81,8 @@ export class SettingsScene extends Phaser.Scene {
 
     // ---- Colorblind Mode ----
     const cbSettings = getAccessibility();
-    this.add.text(leftCol, y, '色盲模式', {
-      fontSize: '11px',
+    TextFactory.create(this, leftCol, y, '色盲模式', 'body', {
       color: '#ffffff',
-      fontFamily: 'monospace',
     }).setOrigin(0, 0.5);
 
     const cbLabel = cbSettings.colorblindMode ? UI.settings.on : UI.settings.off;
@@ -102,10 +96,8 @@ export class SettingsScene extends Phaser.Scene {
     y += 32;
 
     // ---- Keybindings Section ----
-    this.add.text(leftCol, y, UI.settings.keybindings, {
-      fontSize: '11px',
+    TextFactory.create(this, leftCol, y, UI.settings.keybindings, 'body', {
       color: colorToString(Theme.colors.secondary),
-      fontFamily: 'monospace',
       fontStyle: 'bold',
     }).setOrigin(0, 0.5);
 
@@ -133,15 +125,13 @@ export class SettingsScene extends Phaser.Scene {
       const row = Math.floor(i / kbCols);
       const rowY = y + row * kbRowHeight;
 
-      this.add.text(col, rowY, ACTION_LABELS[action], {
-        fontSize: '9px', color: '#aaaaaa', fontFamily: 'monospace',
+      TextFactory.create(this, col, rowY, ACTION_LABELS[action], 'small', {
+        color: '#aaaaaa',
       }).setOrigin(0, 0.5);
 
-      const keyText = this.add.text(col + 65, rowY,
-        `[${KeybindingConfig.getDisplayKey(action)}]`, {
-          fontSize: '9px',
+      const keyText = TextFactory.create(this, col + 65, rowY,
+        `[${KeybindingConfig.getDisplayKey(action)}]`, 'small', {
           color: colorToString(Theme.colors.gold),
-          fontFamily: 'monospace',
         }).setOrigin(0, 0.5).setInteractive({ useHandCursor: true });
 
       keyText.on('pointerup', () => {
@@ -168,10 +158,8 @@ export class SettingsScene extends Phaser.Scene {
     onChange: (value: number) => void,
   ): number {
     // Label
-    this.add.text(x, y, label, {
-      fontSize: '11px',
+    TextFactory.create(this, x, y, label, 'body', {
       color: '#ffffff',
-      fontFamily: 'monospace',
     }).setOrigin(0, 0.5);
 
     const sliderX = 320;
@@ -188,11 +176,9 @@ export class SettingsScene extends Phaser.Scene {
     this.drawSliderFill(trackFill, sliderX, sliderY, sliderWidth, initialValue);
 
     // Value text
-    const valueText = this.add.text(sliderX + sliderWidth + 16, sliderY,
-      `${Math.round(initialValue * 100)}%`, {
-        fontSize: '10px',
+    const valueText = TextFactory.create(this, sliderX + sliderWidth + 16, sliderY,
+      `${Math.round(initialValue * 100)}%`, 'label', {
         color: colorToString(Theme.colors.secondary),
-        fontFamily: 'monospace',
       }).setOrigin(0, 0.5);
 
     // Handle
@@ -244,10 +230,8 @@ export class SettingsScene extends Phaser.Scene {
       ? UI.settings.saveInfo(slot, info.floor, info.heroCount)
       : UI.settings.saveEmpty(slot);
 
-    const label = this.add.text(x, y, labelText, {
-      fontSize: '10px',
+    const label = TextFactory.create(this, x, y, labelText, 'label', {
       color: hasSave ? '#ffffff' : '#666666',
-      fontFamily: 'monospace',
     }).setOrigin(0, 0.5);
 
     if (hasSave) {
@@ -274,11 +258,9 @@ export class SettingsScene extends Phaser.Scene {
     panelBg.lineStyle(2, Theme.colors.panelBorder, 0.8);
     panelBg.strokeRoundedRect(GAME_WIDTH / 2 - 150, GAME_HEIGHT / 2 - 45, 300, 90, 8);
 
-    const msg = this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 - 15,
-      UI.settings.deleteSaveConfirm(slot), {
-        fontSize: '12px',
+    const msg = TextFactory.create(this, GAME_WIDTH / 2, GAME_HEIGHT / 2 - 15,
+      UI.settings.deleteSaveConfirm(slot), 'body', {
         color: colorToString(Theme.colors.danger),
-        fontFamily: 'monospace',
         align: 'center',
       }).setOrigin(0.5);
 
@@ -355,10 +337,8 @@ export class SettingsScene extends Phaser.Scene {
   }
 
   private createMetaResetRow(leftCol: number, rightCol: number, y: number): void {
-    this.add.text(leftCol, y, UI.settings.resetMeta, {
-      fontSize: '11px',
+    TextFactory.create(this, leftCol, y, UI.settings.resetMeta, 'body', {
       color: colorToString(Theme.colors.danger),
-      fontFamily: 'monospace',
     }).setOrigin(0, 0.5);
 
     let confirmStep = 0;

@@ -34,6 +34,7 @@ import { UltimateSystem } from '../systems/UltimateSystem';
 import { UltimateBar } from '../ui/UltimateBar';
 import { BossPhaseSystem } from '../systems/BossPhaseSystem';
 import bossPhaseData from '../data/boss-phases.json';
+import { TextFactory } from '../ui/TextFactory';
 
 export class BattleScene extends Phaser.Scene {
   private battleSystem!: BattleSystem;
@@ -159,10 +160,8 @@ export class BattleScene extends Phaser.Scene {
     }
     const typeLabel = node.type === 'boss' ? UI.battle.boss : node.type === 'elite' ? UI.battle.elite : UI.battle.battle;
     const labelColor = node.type === 'boss' ? colorToString(Theme.colors.danger) : '#ffffff';
-    this.add.text(GAME_WIDTH / 2, 12, typeLabel, {
-      fontSize: '12px',
+    TextFactory.create(this, GAME_WIDTH / 2, 12, typeLabel, 'body', {
       color: labelColor,
-      fontFamily: 'monospace',
       fontStyle: 'bold',
     }).setOrigin(0.5);
 
@@ -263,19 +262,14 @@ export class BattleScene extends Phaser.Scene {
       bossUnit.x = BOSS_ENTRANCE.START_X;
 
       // Title card
-      const titleName = this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 - 15, bossUnit.unitName, {
-        fontSize: '20px',
+      const titleName = TextFactory.create(this, GAME_WIDTH / 2, GAME_HEIGHT / 2 - 15, bossUnit.unitName, 'title', {
         color: '#ffaa00',
-        fontFamily: 'monospace',
-        fontStyle: 'bold',
         stroke: '#000000',
         strokeThickness: 4,
       }).setOrigin(0.5).setDepth(BOSS_ENTRANCE.TITLE_DEPTH).setAlpha(0);
 
-      const titleSub = this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 + 12, 'BOSS', {
-        fontSize: '12px',
+      const titleSub = TextFactory.create(this, GAME_WIDTH / 2, GAME_HEIGHT / 2 + 12, 'BOSS', 'body', {
         color: '#ff4444',
-        fontFamily: 'monospace',
         fontStyle: 'bold',
         stroke: '#000000',
         strokeThickness: 3,
@@ -367,8 +361,8 @@ export class BattleScene extends Phaser.Scene {
 
     // Wave indicator for gauntlet
     if (this.isGauntlet) {
-      this.waveIndicator = this.add.text(GAME_WIDTH / 2, 45, UI.wave.indicator(1, this.battleSystem.getTotalWaves()), {
-        fontSize: '11px', color: '#cc44cc', fontFamily: 'monospace', fontStyle: 'bold',
+      this.waveIndicator = TextFactory.create(this, GAME_WIDTH / 2, 45, UI.wave.indicator(1, this.battleSystem.getTotalWaves()), 'body', {
+        color: '#cc44cc', fontStyle: 'bold',
         stroke: '#000000', strokeThickness: 2,
       }).setOrigin(0.5).setDepth(200);
     }
@@ -610,10 +604,8 @@ export class BattleScene extends Phaser.Scene {
     this.healerGraphics.setVisible(false);
 
     // Threat toggle button (bottom-right area, near stats button)
-    const threatBtn = this.add.text(GAME_WIDTH - 10, GAME_HEIGHT - 78, '[威胁线]', {
-      fontSize: '9px',
+    const threatBtn = TextFactory.create(this, GAME_WIDTH - 10, GAME_HEIGHT - 78, '[威胁线]', 'small', {
       color: '#888888',
-      fontFamily: 'monospace',
     }).setOrigin(1, 1);
     const threatHit = this.add.rectangle(GAME_WIDTH - 35, GAME_HEIGHT - 83, 64, 22, 0x000000, 0)
       .setInteractive({ useHandCursor: true });
@@ -646,25 +638,19 @@ export class BattleScene extends Phaser.Scene {
     // Act modifier indicator
     const actModDesc = this.battleSystem.actModifier?.getActDescription();
     if (actModDesc) {
-      this.add.text(GAME_WIDTH / 2, 26, actModDesc, {
-        fontSize: '9px',
+      TextFactory.create(this, GAME_WIDTH / 2, 26, actModDesc, 'small', {
         color: '#887766',
-        fontFamily: 'monospace',
       }).setOrigin(0.5);
     }
 
     // Gold display (top-right, near battle type label)
-    this.add.text(GAME_WIDTH - 15, 10, `${rm.getGold()}G`, {
-      fontSize: '10px',
+    TextFactory.create(this, GAME_WIDTH - 15, 10, `${rm.getGold()}G`, 'label', {
       color: colorToString(Theme.colors.gold),
-      fontFamily: 'monospace',
     }).setOrigin(1, 0);
 
     // Pause button (top-right)
-    const pauseBtn = this.add.text(GAME_WIDTH - 15, 26, UI.battle.pauseBtn, {
-      fontSize: '9px',
+    const pauseBtn = TextFactory.create(this, GAME_WIDTH - 15, 26, UI.battle.pauseBtn, 'small', {
       color: '#888888',
-      fontFamily: 'monospace',
     }).setOrigin(1, 0).setInteractive({ useHandCursor: true });
     pauseBtn.on('pointerup', () => this.togglePause());
 
@@ -715,10 +701,8 @@ export class BattleScene extends Phaser.Scene {
     this.targetingOverlays.push(dim);
 
     // Instruction text
-    const instruction = this.add.text(GAME_WIDTH / 2, 20, '选择目标 (ESC取消)', {
-      fontSize: '11px',
+    const instruction = TextFactory.create(this, GAME_WIDTH / 2, 20, '选择目标 (ESC取消)', 'body', {
       color: '#ffcc00',
-      fontFamily: 'monospace',
       fontStyle: 'bold',
       stroke: '#000000',
       strokeThickness: 2,
@@ -817,11 +801,8 @@ export class BattleScene extends Phaser.Scene {
     panelBg.strokeRoundedRect(GAME_WIDTH / 2 - pw / 2, GAME_HEIGHT / 2 - ph / 2, pw, ph, 8);
 
     // Title
-    const title = this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 - 60, UI.battle.pause, {
-      fontSize: '16px',
+    const title = TextFactory.create(this, GAME_WIDTH / 2, GAME_HEIGHT / 2 - 60, UI.battle.pause, 'subtitle', {
       color: colorToString(Theme.colors.secondary),
-      fontFamily: 'monospace',
-      fontStyle: 'bold',
     }).setOrigin(0.5).setDepth(102);
 
     // Continue button
@@ -901,8 +882,8 @@ export class BattleScene extends Phaser.Scene {
     }
 
     // Show "Wave N" text overlay
-    const waveText = this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 - 30, UI.wave.indicator(waveIndex + 1, totalWaves), {
-      fontSize: '24px', color: '#cc44cc', fontFamily: 'monospace', fontStyle: 'bold',
+    const waveText = TextFactory.create(this, GAME_WIDTH / 2, GAME_HEIGHT / 2 - 30, UI.wave.indicator(waveIndex + 1, totalWaves), 'title', {
+      color: '#cc44cc', fontStyle: 'bold',
       stroke: '#000000', strokeThickness: 4,
     }).setOrigin(0.5).setAlpha(0).setDepth(WAVE_TRANSITION.TEXT_DEPTH);
 
@@ -1025,10 +1006,8 @@ export class BattleScene extends Phaser.Scene {
     // Victory/defeat text with animation
     const text = isVictory ? UI.battle.victory : UI.battle.defeat;
     const color = isVictory ? colorToString(Theme.colors.success) : colorToString(Theme.colors.danger);
-    const resultText = this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 - 30, text, {
-      fontSize: '28px',
+    const resultText = TextFactory.create(this, GAME_WIDTH / 2, GAME_HEIGHT / 2 - 30, text, 'title', {
       color,
-      fontFamily: 'monospace',
       fontStyle: 'bold',
       stroke: '#000000',
       strokeThickness: 4,

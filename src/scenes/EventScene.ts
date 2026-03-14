@@ -12,6 +12,7 @@ import { UI, getHeroDisplayName, ELEMENT_NAMES } from '../i18n';
 import { AudioManager } from '../systems/AudioManager';
 import { MetaManager } from '../managers/MetaManager';
 import { TutorialSystem } from '../systems/TutorialSystem';
+import { TextFactory } from '../ui/TextFactory';
 
 /** Classify the risk level of an event choice based on worst-case effects. */
 export function getChoiceRiskLevel(choice: EventChoice): { label: string; color: string } {
@@ -97,27 +98,20 @@ export class EventScene extends Phaser.Scene {
     const bottomBar = this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT - barHeight / 2, GAME_WIDTH, barHeight, 0x000000).setDepth(50);
 
     // Title (starts invisible)
-    const title = this.add.text(GAME_WIDTH / 2, 38, event.title, {
-      fontSize: '18px',
+    const title = TextFactory.create(this, GAME_WIDTH / 2, 38, event.title, 'title', {
       color: colorToString(getNodeColor('event')),
-      fontFamily: 'monospace',
-      fontStyle: 'bold',
     }).setOrigin(0.5).setAlpha(0);
 
     // Description (starts invisible)
-    const desc = this.add.text(GAME_WIDTH / 2, 85, event.description, {
-      fontSize: '11px',
+    const desc = TextFactory.create(this, GAME_WIDTH / 2, 85, event.description, 'body', {
       color: '#cccccc',
-      fontFamily: 'monospace',
       wordWrap: { width: 600 },
       align: 'center',
     }).setOrigin(0.5).setAlpha(0);
 
     // Gold display
-    this.add.text(GAME_WIDTH - 15, 12, `${rm.getGold()}G`, {
-      fontSize: '11px',
+    TextFactory.create(this, GAME_WIDTH - 15, 12, `${rm.getGold()}G`, 'body', {
       color: colorToString(Theme.colors.gold),
-      fontFamily: 'monospace',
     }).setOrigin(1, 0);
 
     // Step 1: Title fade-in (200ms delay)
@@ -188,10 +182,8 @@ export class EventScene extends Phaser.Scene {
           const label = this.getOutcomeSentiment(o);
           return `${UI.event.probability(pct)} ${label}`;
         });
-        const hintText = this.add.text(GAME_WIDTH / 2, btnY + 24, hints.join('  |  '), {
-          fontSize: '8px',
+        const hintText = TextFactory.create(this, GAME_WIDTH / 2, btnY + 24, hints.join('  |  '), 'tiny', {
           color: '#888899',
-          fontFamily: 'monospace',
           align: 'center',
         }).setOrigin(0.5).setAlpha(0);
 
@@ -206,10 +198,8 @@ export class EventScene extends Phaser.Scene {
 
       // Risk level tag
       const risk = getChoiceRiskLevel(choice);
-      const riskTag = this.add.text(GAME_WIDTH / 2 + 215, btnY, `[${risk.label}]`, {
-        fontSize: '9px',
+      const riskTag = TextFactory.create(this, GAME_WIDTH / 2 + 215, btnY, `[${risk.label}]`, 'small', {
         color: risk.color,
-        fontFamily: 'monospace',
       }).setOrigin(0, 0.5).setAlpha(0);
 
       this.tweens.add({
@@ -364,10 +354,8 @@ export class EventScene extends Phaser.Scene {
       onComplete: () => flash.destroy(),
     });
 
-    const outcomeText = this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 - 40, outcome.description, {
-      fontSize: '14px',
+    const outcomeText = TextFactory.create(this, GAME_WIDTH / 2, GAME_HEIGHT / 2 - 40, outcome.description, 'subtitle', {
       color: '#ffffff',
-      fontFamily: 'monospace',
       wordWrap: { width: 600 },
       align: 'center',
     }).setOrigin(0.5).setAlpha(0);
@@ -393,10 +381,8 @@ export class EventScene extends Phaser.Scene {
     const fadeTargets: Phaser.GameObjects.GameObject[] = [outcomeText];
 
     if (effectTexts.length > 0) {
-      const effectLabel = this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 + 10, effectTexts.join('\n'), {
-        fontSize: '12px',
+      const effectLabel = TextFactory.create(this, GAME_WIDTH / 2, GAME_HEIGHT / 2 + 10, effectTexts.join('\n'), 'body', {
         color: '#aaccff',
-        fontFamily: 'monospace',
         align: 'center',
       }).setOrigin(0.5).setAlpha(0);
       fadeTargets.push(effectLabel);

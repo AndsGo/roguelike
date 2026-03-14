@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { GAME_WIDTH, GAME_HEIGHT } from '../constants';
 import { AudioManager, BGM_KEYS, SFX_KEYS } from '../systems/AudioManager';
 import { SaveManager } from '../managers/SaveManager';
+import { TextFactory } from '../ui/TextFactory';
 
 export class BootScene extends Phaser.Scene {
   constructor() {
@@ -21,10 +22,8 @@ export class BootScene extends Phaser.Scene {
     const progressBar = this.add.rectangle(barX + 2, barY, 0, barHeight - 4, 0x4488ff);
     progressBar.setOrigin(0, 0.5);
 
-    const loadingText = this.add.text(GAME_WIDTH / 2, barY - 30, 'Loading...', {
-      fontSize: '14px',
+    const loadingText = TextFactory.create(this, GAME_WIDTH / 2, barY - 30, 'Loading...', 'subtitle', {
       color: '#ffffff',
-      fontFamily: 'monospace',
     }).setOrigin(0.5);
 
     this.load.on('progress', (value: number) => {
@@ -59,11 +58,9 @@ export class BootScene extends Phaser.Scene {
   }
 
   private showStorageWarning(): void {
-    const msg = this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 + 40,
-      '⚠ 存储不可用 - 游戏进度将无法保存', {
-        fontSize: '12px',
+    const msg = TextFactory.create(this, GAME_WIDTH / 2, GAME_HEIGHT / 2 + 40,
+      '⚠ 存储不可用 - 游戏进度将无法保存', 'body', {
         color: '#ff8844',
-        fontFamily: 'monospace',
       }).setOrigin(0.5);
 
     this.time.delayedCall(3000, () => {

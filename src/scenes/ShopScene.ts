@@ -11,6 +11,7 @@ import { UI, formatStat, formatStatDiff, SLOT_LABELS } from '../i18n';
 import { AudioManager } from '../systems/AudioManager';
 import { TutorialSystem } from '../systems/TutorialSystem';
 import { calculateSynergyTags, formatSynergyTags } from '../utils/synergy-helpers';
+import { TextFactory } from '../ui/TextFactory';
 
 export class ShopScene extends Phaser.Scene {
   private nodeIndex!: number;
@@ -41,25 +42,18 @@ export class ShopScene extends Phaser.Scene {
     this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, Theme.colors.background);
 
     // Title
-    this.add.text(GAME_WIDTH / 2, 22, UI.shop.title, {
-      fontSize: '20px',
+    TextFactory.create(this, GAME_WIDTH / 2, 22, UI.shop.title, 'title', {
       color: colorToString(Theme.colors.success),
-      fontFamily: 'monospace',
-      fontStyle: 'bold',
     }).setOrigin(0.5);
 
     // Gold display
-    this.goldText = this.add.text(GAME_WIDTH - 15, 12, `${rm.getGold()}G`, {
-      fontSize: '12px',
+    this.goldText = TextFactory.create(this, GAME_WIDTH - 15, 12, `${rm.getGold()}G`, 'body', {
       color: colorToString(Theme.colors.gold),
-      fontFamily: 'monospace',
     }).setOrigin(1, 0);
 
     // Hero selection
-    this.add.text(20, 50, UI.shop.selectHero, {
-      fontSize: '10px',
+    TextFactory.create(this, 20, 50, UI.shop.selectHero, 'label', {
       color: '#8899cc',
-      fontFamily: 'monospace',
     });
 
     const heroes = rm.getHeroes();
@@ -74,10 +68,8 @@ export class ShopScene extends Phaser.Scene {
       bg.strokeRoundedRect(0, -10, 85, 22, 4);
       btnContainer.add(bg);
 
-      const text = this.add.text(42, 1, data.name, {
-        fontSize: '10px',
+      const text = TextFactory.create(this, 42, 1, data.name, 'label', {
         color: '#ffffff',
-        fontFamily: 'monospace',
       }).setOrigin(0.5);
       btnContainer.add(text);
 
@@ -117,10 +109,8 @@ export class ShopScene extends Phaser.Scene {
     const text = formatSynergyTags(tags);
 
     if (text) {
-      this.add.text(GAME_WIDTH / 2, 105, `${UI.shop.synergyLabel} ${text}`, {
-        fontSize: '9px',
+      TextFactory.create(this, GAME_WIDTH / 2, 105, `${UI.shop.synergyLabel} ${text}`, 'small', {
         color: '#ccaa44',
-        fontFamily: 'monospace',
       }).setOrigin(0.5);
     }
   }
@@ -152,27 +142,21 @@ export class ShopScene extends Phaser.Scene {
     container.add(rarityDot);
 
     // Item name
-    const nameText = this.add.text(-38, -34, item.name, {
-      fontSize: '11px',
+    const nameText = TextFactory.create(this, -38, -34, item.name, 'body', {
       color: colorToString(rarityColor),
-      fontFamily: 'monospace',
     });
     container.add(nameText);
 
     // Slot tag
     const slotLabel = SLOT_LABELS[item.slot] ?? item.slot;
-    const slotTag = this.add.text(140, -34, `[${slotLabel}]`, {
-      fontSize: '9px',
+    const slotTag = TextFactory.create(this, 140, -34, `[${slotLabel}]`, 'small', {
       color: '#666688',
-      fontFamily: 'monospace',
     }).setOrigin(1, 0);
     container.add(slotTag);
 
     // Description
-    const desc = this.add.text(-55, -16, item.description, {
-      fontSize: '9px',
+    const desc = TextFactory.create(this, -55, -16, item.description, 'small', {
       color: '#888888',
-      fontFamily: 'monospace',
       wordWrap: { width: 190 },
     });
     container.add(desc);
@@ -181,27 +165,21 @@ export class ShopScene extends Phaser.Scene {
     const statStr = Object.entries(item.stats)
       .map(([k, v]) => formatStat(k, v as number))
       .join(' ');
-    const statsText = this.add.text(-55, 2, statStr, {
-      fontSize: '9px',
+    const statsText = TextFactory.create(this, -55, 2, statStr, 'small', {
       color: '#aaccff',
-      fontFamily: 'monospace',
     });
     container.add(statsText);
 
     // Comparison text (updated when hero is selected)
-    const compareText = this.add.text(-55, 14, '', {
-      fontSize: '9px',
+    const compareText = TextFactory.create(this, -55, 14, '', 'small', {
       color: '#888888',
-      fontFamily: 'monospace',
     });
     container.add(compareText);
 
     // Price
     const canAfford = rm.getGold() >= item.cost;
-    const priceText = this.add.text(-55, 28, `${item.cost}G`, {
-      fontSize: '10px',
+    const priceText = TextFactory.create(this, -55, 28, `${item.cost}G`, 'label', {
       color: canAfford ? colorToString(Theme.colors.gold) : colorToString(Theme.colors.danger),
-      fontFamily: 'monospace',
     });
     container.add(priceText);
 
@@ -211,10 +189,8 @@ export class ShopScene extends Phaser.Scene {
     buyBg.fillRoundedRect(100, 22, 48, 22, 4);
     container.add(buyBg);
 
-    const buyLabel = this.add.text(124, 33, UI.shop.buy, {
-      fontSize: '10px',
+    const buyLabel = TextFactory.create(this, 124, 33, UI.shop.buy, 'label', {
       color: '#ffffff',
-      fontFamily: 'monospace',
     }).setOrigin(0.5);
     container.add(buyLabel);
 
@@ -339,10 +315,8 @@ export class ShopScene extends Phaser.Scene {
   }
 
   private showMessage(text: string): void {
-    const msg = this.add.text(GAME_WIDTH / 2, GAME_HEIGHT - 65, text, {
-      fontSize: '11px',
+    const msg = TextFactory.create(this, GAME_WIDTH / 2, GAME_HEIGHT - 65, text, 'body', {
       color: '#ffffff',
-      fontFamily: 'monospace',
       stroke: '#000000',
       strokeThickness: 2,
     }).setOrigin(0.5);

@@ -6,6 +6,7 @@ import { RunEndPanel } from '../ui/RunEndPanel';
 import { UI } from '../i18n';
 import { BaseEndScene } from './BaseEndScene';
 import heroesData from '../data/heroes.json';
+import { TextFactory } from '../ui/TextFactory';
 
 export class GameOverScene extends BaseEndScene {
   constructor() {
@@ -23,16 +24,12 @@ export class GameOverScene extends BaseEndScene {
 
     // Run stats
     const node = rm.getCurrentNode() + 1;
-    this.add.text(GAME_WIDTH / 2, 160, UI.gameOver.reached(node), {
-      fontSize: '12px',
+    TextFactory.create(this, GAME_WIDTH / 2, 160, UI.gameOver.reached(node), 'body', {
       color: '#aaaaaa',
-      fontFamily: 'monospace',
     }).setOrigin(0.5);
 
-    this.add.text(GAME_WIDTH / 2, 182, UI.gameOver.goldEarned(rm.getGold()), {
-      fontSize: '12px',
+    TextFactory.create(this, GAME_WIDTH / 2, 182, UI.gameOver.goldEarned(rm.getGold()), 'body', {
       color: colorToString(Theme.colors.gold),
-      fontFamily: 'monospace',
     }).setOrigin(0.5);
 
     // Build run-end context for hero unlock checks

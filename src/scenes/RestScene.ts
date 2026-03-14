@@ -8,6 +8,7 @@ import { SaveManager } from '../managers/SaveManager';
 import { ParticleManager } from '../systems/ParticleManager';
 import { UI } from '../i18n';
 import { TutorialSystem } from '../systems/TutorialSystem';
+import { TextFactory } from '../ui/TextFactory';
 
 export class RestScene extends Phaser.Scene {
   private nodeIndex!: number;
@@ -31,25 +32,18 @@ export class RestScene extends Phaser.Scene {
     const particles = new ParticleManager(this);
     particles.createBuffEffect(GAME_WIDTH / 2, 80, 0xff6633);
 
-    this.add.text(GAME_WIDTH / 2, 55, UI.rest.title, {
-      fontSize: '20px',
+    TextFactory.create(this, GAME_WIDTH / 2, 55, UI.rest.title, 'title', {
       color: colorToString(getNodeColor('rest')),
-      fontFamily: 'monospace',
-      fontStyle: 'bold',
     }).setOrigin(0.5);
 
-    this.add.text(GAME_WIDTH / 2, 100, UI.rest.campfireText, {
-      fontSize: '11px',
+    TextFactory.create(this, GAME_WIDTH / 2, 100, UI.rest.campfireText, 'body', {
       color: '#aaaacc',
-      fontFamily: 'monospace',
     }).setOrigin(0.5);
 
     // Show current HP
     const heroes = rm.getHeroes();
-    this.add.text(GAME_WIDTH / 2, 140, UI.rest.teamStatus, {
-      fontSize: '10px',
+    TextFactory.create(this, GAME_WIDTH / 2, 140, UI.rest.teamStatus, 'label', {
       color: '#8899cc',
-      fontFamily: 'monospace',
     }).setOrigin(0.5);
 
     heroes.forEach((hero, i) => {
@@ -58,10 +52,8 @@ export class RestScene extends Phaser.Scene {
       const ratio = hero.currentHp / maxHp;
       const hpColor = ratio > 0.6 ? '#44ff44' : ratio > 0.3 ? '#ffaa00' : '#ff4444';
 
-      this.add.text(GAME_WIDTH / 2, 165 + i * 22, `${data.name}: ${hero.currentHp}/${maxHp} HP`, {
-        fontSize: '10px',
+      TextFactory.create(this, GAME_WIDTH / 2, 165 + i * 22, `${data.name}: ${hero.currentHp}/${maxHp} HP`, 'label', {
         color: hpColor,
-        fontFamily: 'monospace',
       }).setOrigin(0.5);
     });
 
@@ -76,8 +68,8 @@ export class RestScene extends Phaser.Scene {
       this.executeChoice('rest', rm);
     }, Theme.colors.success);
 
-    this.add.text(btnStartX, btnY + 28, UI.rest.restDesc(healPercent), {
-      fontSize: '9px', color: '#88aa88', fontFamily: 'monospace',
+    TextFactory.create(this, btnStartX, btnY + 28, UI.rest.restDesc(healPercent), 'small', {
+      color: '#88aa88',
     }).setOrigin(0.5);
 
     // Train button
@@ -85,8 +77,8 @@ export class RestScene extends Phaser.Scene {
       this.executeChoice('train', rm);
     }, Theme.colors.primary);
 
-    this.add.text(btnStartX + btnSpacing, btnY + 28, UI.rest.trainDesc(REST_TRAIN_EXP), {
-      fontSize: '9px', color: '#8888aa', fontFamily: 'monospace',
+    TextFactory.create(this, btnStartX + btnSpacing, btnY + 28, UI.rest.trainDesc(REST_TRAIN_EXP), 'small', {
+      color: '#8888aa',
     }).setOrigin(0.5);
 
     // Scavenge button
@@ -94,8 +86,8 @@ export class RestScene extends Phaser.Scene {
       this.executeChoice('scavenge', rm);
     }, Theme.colors.secondary);
 
-    this.add.text(btnStartX + btnSpacing * 2, btnY + 28, UI.rest.scavengeDesc(REST_SCAVENGE_GOLD_MIN, REST_SCAVENGE_GOLD_MAX), {
-      fontSize: '9px', color: '#aaaa88', fontFamily: 'monospace',
+    TextFactory.create(this, btnStartX + btnSpacing * 2, btnY + 28, UI.rest.scavengeDesc(REST_SCAVENGE_GOLD_MIN, REST_SCAVENGE_GOLD_MAX), 'small', {
+      color: '#aaaa88',
     }).setOrigin(0.5);
   }
 
@@ -166,11 +158,8 @@ export class RestScene extends Phaser.Scene {
     const healParticles = new ParticleManager(this);
     healParticles.createHealEffect(GAME_WIDTH / 2, GAME_HEIGHT / 2 - 40);
 
-    const title = this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 - 40, message, {
-      fontSize: '18px',
+    const title = TextFactory.create(this, GAME_WIDTH / 2, GAME_HEIGHT / 2 - 40, message, 'title', {
       color: colorToString(color),
-      fontFamily: 'monospace',
-      fontStyle: 'bold',
     }).setOrigin(0.5).setAlpha(0);
 
     const fadeTargets: Phaser.GameObjects.GameObject[] = [title];
@@ -179,10 +168,8 @@ export class RestScene extends Phaser.Scene {
     heroes.forEach((hero, i) => {
       const data = rm.getHeroData(hero.id);
       const maxHp = rm.getMaxHp(hero, data);
-      const heroText = this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 + i * 22, `${data.name}: ${hero.currentHp}/${maxHp} HP (Lv.${hero.level})`, {
-        fontSize: '10px',
+      const heroText = TextFactory.create(this, GAME_WIDTH / 2, GAME_HEIGHT / 2 + i * 22, `${data.name}: ${hero.currentHp}/${maxHp} HP (Lv.${hero.level})`, 'label', {
         color: colorToString(color),
-        fontFamily: 'monospace',
       }).setOrigin(0.5).setAlpha(0);
       fadeTargets.push(heroText);
     });

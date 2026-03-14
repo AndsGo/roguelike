@@ -9,6 +9,7 @@ import { DailyChallengeManager } from '../managers/DailyChallengeManager';
 import { RunManager } from '../managers/RunManager';
 import { BuildReviewPanel } from '../ui/BuildReviewPanel';
 import { UI } from '../i18n';
+import { TextFactory } from '../ui/TextFactory';
 
 /**
  * Base class for GameOverScene and VictoryScene.
@@ -37,11 +38,8 @@ export abstract class BaseEndScene extends Phaser.Scene {
     color: number,
     fontSize: string = '36px',
   ): Phaser.GameObjects.Text {
-    const title = this.add.text(GAME_WIDTH / 2, y, text, {
-      fontSize,
+    const title = TextFactory.create(this, GAME_WIDTH / 2, y, text, 'title', {
       color: colorToString(color),
-      fontFamily: 'monospace',
-      fontStyle: 'bold',
       stroke: '#000000',
       strokeThickness: 4,
     }).setOrigin(0.5).setScale(0);
@@ -59,10 +57,8 @@ export abstract class BaseEndScene extends Phaser.Scene {
 
   /** Create centered subtitle text. */
   protected createSubtitle(text: string, y: number, color: string): Phaser.GameObjects.Text {
-    return this.add.text(GAME_WIDTH / 2, y, text, {
-      fontSize: '13px',
+    return TextFactory.create(this, GAME_WIDTH / 2, y, text, 'body', {
       color,
-      fontFamily: 'monospace',
     }).setOrigin(0.5);
   }
 
@@ -82,10 +78,8 @@ export abstract class BaseEndScene extends Phaser.Scene {
     y: number,
     text: string,
   ): Phaser.GameObjects.Text {
-    return this.add.text(GAME_WIDTH / 2, y, text, {
-      fontSize: '12px',
+    return TextFactory.create(this, GAME_WIDTH / 2, y, text, 'body', {
       color: colorToString(Theme.colors.secondary),
-      fontFamily: 'monospace',
       fontStyle: 'bold',
     }).setOrigin(0.5);
   }
@@ -121,17 +115,13 @@ export abstract class BaseEndScene extends Phaser.Scene {
     DailyChallengeManager.updateBestScore(totalScore);
 
     // Display daily challenge completion banner
-    this.add.text(GAME_WIDTH / 2, baseY, `[ ${UI.daily.challengeComplete} ]`, {
-      fontSize: '13px',
+    TextFactory.create(this, GAME_WIDTH / 2, baseY, `[ ${UI.daily.challengeComplete} ]`, 'body', {
       color: '#ffcc00',
-      fontFamily: 'monospace',
       fontStyle: 'bold',
     }).setOrigin(0.5);
 
-    this.add.text(GAME_WIDTH / 2, baseY + 18, UI.daily.score(totalScore), {
-      fontSize: '11px',
+    TextFactory.create(this, GAME_WIDTH / 2, baseY + 18, UI.daily.score(totalScore), 'body', {
       color: '#ffffff',
-      fontFamily: 'monospace',
     }).setOrigin(0.5);
 
     return totalScore;
