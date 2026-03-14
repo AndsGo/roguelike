@@ -688,5 +688,95 @@
     },
     "skills": ["lightning_volley", "static_charge", "ult_thunderstrike_barrage"],
     "spriteKey": "hero_storm_falcon"
+  },
+  {
+    "id": "frost_whisperer",
+    "name": "霜语者",
+    "role": "support",
+    "element": "ice",
+    "race": "elf",
+    "class": "cleric",
+    "baseStats": {
+      "maxHp": 520,
+      "hp": 520,
+      "attack": 25,
+      "defense": 20,
+      "magicPower": 60,
+      "magicResist": 28,
+      "speed": 60,
+      "attackSpeed": 0.85,
+      "attackRange": 280,
+      "critChance": 0.08,
+      "critDamage": 1.5
+    },
+    "scalingPerLevel": {
+      "maxHp": 32,
+      "attack": 2,
+      "defense": 2,
+      "magicPower": 5,
+      "magicResist": 2
+    },
+    "skills": ["frost_shield", "glacial_pulse", "ult_frozen_sanctuary"],
+    "spriteKey": "hero_frost_whisperer"
+  },
+  {
+    "id": "holy_emissary",
+    "name": "圣光使者",
+    "role": "support",
+    "element": "holy",
+    "race": "human",
+    "class": "paladin",
+    "baseStats": {
+      "maxHp": 580,
+      "hp": 580,
+      "attack": 35,
+      "defense": 22,
+      "magicPower": 55,
+      "magicResist": 30,
+      "speed": 65,
+      "attackSpeed": 0.9,
+      "attackRange": 250,
+      "critChance": 0.1,
+      "critDamage": 1.6
+    },
+    "scalingPerLevel": {
+      "maxHp": 38,
+      "attack": 3,
+      "defense": 2,
+      "magicPower": 4,
+      "magicResist": 2
+    },
+    "skills": ["holy_blessing", "radiant_burst", "ult_divine_empowerment"],
+    "spriteKey": "hero_holy_emissary"
+  },
+  {
+    "id": "ice_dragon_hunter",
+    "name": "冰龙猎手",
+    "role": "ranged_dps",
+    "element": "ice",
+    "race": "dragon",
+    "class": "ranger",
+    "baseStats": {
+      "maxHp": 480,
+      "hp": 480,
+      "attack": 62,
+      "defense": 14,
+      "magicPower": 20,
+      "magicResist": 15,
+      "speed": 75,
+      "attackSpeed": 1.2,
+      "attackRange": 350,
+      "critChance": 0.15,
+      "critDamage": 1.8
+    },
+    "scalingPerLevel": {
+      "maxHp": 30,
+      "attack": 8,
+      "defense": 1,
+      "magicPower": 1,
+      "magicResist": 1
+    },
+    "skills": ["frost_arrow", "dragon_ice_breath", "ult_glacial_barrage"],
+    "spriteKey": "hero_ice_dragon_hunter"
   }
 ]

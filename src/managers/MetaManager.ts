@@ -93,6 +93,9 @@ export class MetaManager {
     forest_stalker: { type: 'hero_used', heroId: 'beast_warden', threshold: 3, description: 'Use beast_warden in 3 runs' },
     magma_warden: { type: 'boss_kill', bossId: 'thunder_titan', description: 'Defeat Thunder Titan' },
     storm_falcon: { type: 'element_wins', element: 'lightning', threshold: 5, description: 'Win 5 runs with lightning heroes' },
+    frost_whisperer: { type: 'element_wins', element: 'ice', threshold: 3, description: '使用冰属性英雄获胜3次' },
+    holy_emissary: { type: 'hero_used', heroId: 'knight', description: '使用骑士获胜一次' },
+    ice_dragon_hunter: { type: 'boss_kill', threshold: 1, bossId: 'frost_queen', description: '击败冰霜女王' },
   };
 
   private constructor() {}
