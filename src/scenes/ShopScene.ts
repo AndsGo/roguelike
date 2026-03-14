@@ -2,16 +2,15 @@ import Phaser from 'phaser';
 import { GAME_WIDTH, GAME_HEIGHT } from '../constants';
 import { RunManager } from '../managers/RunManager';
 import { ShopGenerator } from '../systems/ShopGenerator';
-import { ItemData, HeroState, HeroData } from '../types';
+import { ItemData, HeroState } from '../types';
 import { Button } from '../ui/Button';
 import { Theme, colorToString, getRarityColor } from '../ui/Theme';
 import { SceneTransition } from '../systems/SceneTransition';
 import { SaveManager } from '../managers/SaveManager';
 import { UI, formatStat, formatStatDiff, SLOT_LABELS } from '../i18n';
 import { AudioManager } from '../systems/AudioManager';
-import { SYNERGY_DEFINITIONS } from '../config/synergies';
-import heroesData from '../data/heroes.json';
 import { TutorialSystem } from '../systems/TutorialSystem';
+import { calculateSynergyTags, formatSynergyTags } from '../utils/synergy-helpers';
 
 export class ShopScene extends Phaser.Scene {
   private nodeIndex!: number;
@@ -114,52 +113,16 @@ export class ShopScene extends Phaser.Scene {
   }
 
   private buildSynergyBar(heroes: HeroState[]): void {
-    // Count race/class/element for synergy progress
-    const raceCounts = new Map<string, number>();
-    const classCounts = new Map<string, number>();
-    const elementCounts = new Map<string, number>();
+    const tags = calculateSynergyTags(heroes.map(h => h.id));
+    const text = formatSynergyTags(tags);
 
-    for (const h of heroes) {
-      const data = (heroesData as HeroData[]).find(hd => hd.id === h.id);
-      if (!data) continue;
-      if (data.race) raceCounts.set(data.race, (raceCounts.get(data.race) ?? 0) + 1);
-      if (data.class) classCounts.set(data.class, (classCounts.get(data.class) ?? 0) + 1);
-      if (data.element) elementCounts.set(data.element, (elementCounts.get(data.element) ?? 0) + 1);
+    if (text) {
+      this.add.text(GAME_WIDTH / 2, 105, `${UI.shop.synergyLabel} ${text}`, {
+        fontSize: '9px',
+        color: '#ccaa44',
+        fontFamily: 'monospace',
+      }).setOrigin(0.5);
     }
-
-    const tags: string[] = [];
-    for (const syn of SYNERGY_DEFINITIONS) {
-      const counts = syn.type === 'race' ? raceCounts : syn.type === 'class' ? classCounts : elementCounts;
-      const count = counts.get(syn.key) ?? 0;
-      if (count === 0) continue;
-
-      // Find the highest reached threshold and the next one
-      let activeThreshold = 0;
-      let nextThreshold = 0;
-      for (const th of syn.thresholds) {
-        if (count >= th.count) {
-          activeThreshold = th.count;
-        } else if (nextThreshold === 0) {
-          nextThreshold = th.count;
-        }
-      }
-
-      if (activeThreshold > 0) {
-        tags.push(UI.shop.synergyActive(syn.name, count, activeThreshold));
-      } else if (nextThreshold > 0) {
-        tags.push(UI.shop.synergyProgress(syn.name, count, nextThreshold));
-      }
-    }
-
-    if (tags.length === 0) return;
-
-    const label = this.add.text(20, 98, `${UI.shop.synergyLabel} ${tags.join('  ')}`, {
-      fontSize: '9px',
-      color: '#99aa77',
-      fontFamily: 'monospace',
-      wordWrap: { width: GAME_WIDTH - 40 },
-    });
-    label.setDepth(1);
   }
 
   private highlightHeroButton(selectedIndex: number): void {

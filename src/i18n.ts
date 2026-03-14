@@ -274,6 +274,8 @@ export const UI = {
     startBtn: '开始冒险',
     needMore: '至少选择2名英雄',
     backBtn: '返回',
+    synergyPlaceholder: '选择英雄查看羁绊',
+    noSynergy: '无羁绊',
   },
 
   // Audio

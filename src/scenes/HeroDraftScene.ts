@@ -10,6 +10,7 @@ import { UI, RACE_NAMES, CLASS_NAMES } from '../i18n';
 import { HeroData } from '../types';
 import heroesData from '../data/heroes.json';
 import { AudioManager } from '../systems/AudioManager';
+import { calculateSynergyTags, formatSynergyTags } from '../utils/synergy-helpers';
 
 const BASE_MAX_SELECTION = 3;
 const MIN_SELECTION = 2;
@@ -32,6 +33,7 @@ export class HeroDraftScene extends Phaser.Scene {
   private cardBorders: Map<string, Phaser.GameObjects.Graphics> = new Map();
   private startBtn: Button | null = null;
   private selectionText: Phaser.GameObjects.Text | null = null;
+  private synergyText!: Phaser.GameObjects.Text;
   private difficulty: string = 'normal';
   private heroPopup: HeroDetailPopup | null = null;
 
@@ -125,6 +127,12 @@ export class HeroDraftScene extends Phaser.Scene {
       () => SceneTransition.fadeTransition(this, 'MainMenuScene'),
       0x555555,
     );
+
+    this.synergyText = this.add.text(GAME_WIDTH / 2, bottomY - 28, UI.heroDraft.synergyPlaceholder, {
+      fontSize: '9px',
+      color: '#666666',
+      fontFamily: 'monospace',
+    }).setOrigin(0.5);
 
     this.updateSelectionUI();
   }
@@ -290,6 +298,21 @@ export class HeroDraftScene extends Phaser.Scene {
         border.strokeRoundedRect(-CARD_W / 2, -CARD_H / 2, CARD_W, CARD_H, 4);
       }
     }
+
+    this.updateSynergyPreview();
+  }
+
+  private updateSynergyPreview(): void {
+    if (!this.synergyText) return;
+    if (this.selectedIds.length === 0) {
+      this.synergyText.setText(UI.heroDraft.synergyPlaceholder);
+      this.synergyText.setColor('#666666');
+      return;
+    }
+    const tags = calculateSynergyTags(this.selectedIds);
+    const text = formatSynergyTags(tags);
+    this.synergyText.setText(text || UI.heroDraft.noSynergy);
+    this.synergyText.setColor('#ccaa44');
   }
 
   private showHeroDetail(hero: HeroData): void {
