@@ -28,6 +28,7 @@ import { UI } from '../i18n';
 import { KeybindingConfig } from '../config/keybindings';
 import { BOSS_ENTRANCE, WAVE_TRANSITION } from '../config/visual';
 import { RunOverviewPanel } from '../ui/RunOverviewPanel';
+import { TutorialSystem } from '../systems/TutorialSystem';
 import { DailyChallengeManager, DailyRule } from '../managers/DailyChallengeManager';
 import { UltimateSystem } from '../systems/UltimateSystem';
 import { UltimateBar } from '../ui/UltimateBar';
@@ -692,6 +693,8 @@ export class BattleScene extends Phaser.Scene {
         }
       });
     });
+
+    TutorialSystem.showTipIfNeeded(this, 'first_battle');
   }
 
   private enterTargetingMode(unitId: string, skillId: string, targetType: string): void {

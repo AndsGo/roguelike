@@ -13,6 +13,7 @@ import { UI } from '../i18n';
 import { NodeTooltip } from '../ui/NodeTooltip';
 import { RunOverviewPanel } from '../ui/RunOverviewPanel';
 import { FormationPanel } from '../ui/FormationPanel';
+import { TutorialSystem } from '../systems/TutorialSystem';
 
 export class MapScene extends Phaser.Scene {
   private mapContainer!: Phaser.GameObjects.Container;
@@ -361,6 +362,8 @@ export class MapScene extends Phaser.Scene {
       this.showActTransition(this.pendingActTransition);
       this.pendingActTransition = null;
     }
+
+    TutorialSystem.showTipIfNeeded(this, 'first_map');
   }
 
   private setupDragScroll(): void {

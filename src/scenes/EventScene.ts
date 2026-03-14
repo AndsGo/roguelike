@@ -11,6 +11,7 @@ import { ShopGenerator } from '../systems/ShopGenerator';
 import { UI, getHeroDisplayName, ELEMENT_NAMES } from '../i18n';
 import { AudioManager } from '../systems/AudioManager';
 import { MetaManager } from '../managers/MetaManager';
+import { TutorialSystem } from '../systems/TutorialSystem';
 
 /** Classify the risk level of an event choice based on worst-case effects. */
 export function getChoiceRiskLevel(choice: EventChoice): { label: string; color: string } {
@@ -219,6 +220,8 @@ export class EventScene extends Phaser.Scene {
         ease: 'Sine.easeOut',
       });
     });
+
+    TutorialSystem.showTipIfNeeded(this, 'first_event');
   }
 
   /** Classify an outcome as positive/negative/neutral based on its effects. */

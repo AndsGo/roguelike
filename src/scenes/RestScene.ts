@@ -7,6 +7,7 @@ import { SceneTransition } from '../systems/SceneTransition';
 import { SaveManager } from '../managers/SaveManager';
 import { ParticleManager } from '../systems/ParticleManager';
 import { UI } from '../i18n';
+import { TutorialSystem } from '../systems/TutorialSystem';
 
 export class RestScene extends Phaser.Scene {
   private nodeIndex!: number;
@@ -131,5 +132,7 @@ export class RestScene extends Phaser.Scene {
       duration: 300,
       ease: 'Sine.easeOut',
     });
+
+    TutorialSystem.showTipIfNeeded(this, 'first_rest');
   }
 }
