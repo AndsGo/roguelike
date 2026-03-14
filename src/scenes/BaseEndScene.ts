@@ -124,6 +124,30 @@ export abstract class BaseEndScene extends Phaser.Scene {
       color: '#ffffff',
     }).setOrigin(0.5);
 
+    // Simulated leaderboard
+    const dailySeed = DailyChallengeManager.getTodaysSeed();
+    const ghosts = DailyChallengeManager.generateGhostScores(dailySeed);
+    const playerEntry = { name: '你', score: totalScore, isPlayer: true };
+    const ghostEntries = ghosts.map(g => ({ ...g, isPlayer: false }));
+    const leaderboard = [...ghostEntries, playerEntry].sort((a, b) => b.score - a.score);
+
+    TextFactory.create(this, GAME_WIDTH / 2, baseY + 42, UI.daily.leaderboardTitle, 'label', {
+      color: '#ccaa44', fontStyle: 'bold',
+    }).setOrigin(0.5);
+
+    leaderboard.forEach((entry, i) => {
+      const color = entry.isPlayer ? '#ffdd44' : '#aaaacc';
+      const prefix = entry.isPlayer ? '→ ' : '  ';
+      const suffix = entry.isPlayer ? ' ←' : '';
+      const line = `${prefix}${i + 1}. ${entry.name}  ${entry.score}${suffix}`;
+      TextFactory.create(this, GAME_WIDTH / 2, baseY + 60 + i * 16, line, 'small', { color }).setOrigin(0.5);
+    });
+
+    const playerRank = leaderboard.findIndex(e => e.isPlayer) + 1;
+    TextFactory.create(this, GAME_WIDTH / 2, baseY + 60 + leaderboard.length * 16 + 4, UI.daily.yourRank(playerRank, leaderboard.length), 'small', {
+      color: '#888888',
+    }).setOrigin(0.5);
+
     return totalScore;
   }
 }
