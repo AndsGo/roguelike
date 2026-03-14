@@ -3,6 +3,8 @@ import { SeededRNG } from '../utils/rng';
 import { MetaManager } from '../managers/MetaManager';
 import enemiesData from '../data/enemies.json';
 import actsData from '../data/acts.json';
+import { computeNodeLayers, buildLayerGroups } from '../utils/map-utils';
+import { MAP_SHORTCUT_CHANCE, MAP_HIDDEN_NODE_CHANCE, MAP_HIDDEN_NODE_COST } from '../constants';
 
 // Node type templates for each act (per-layer distribution)
 // Each act: [battle, battle, event/shop, battle, elite, battle, rest, boss]
@@ -133,6 +135,10 @@ export class MapGenerator {
         }
       }
     }
+
+    // Map variants
+    MapGenerator.addShortcuts(allNodes, rng);
+    MapGenerator.addHiddenNodes(allNodes, rng, acts);
 
     return allNodes;
   }
@@ -279,5 +285,109 @@ export class MapGenerator {
   static getAct(index: number): ActConfig | null {
     const acts = actsData as ActConfig[];
     return index < acts.length ? acts[index] : null;
+  }
+
+  private static addShortcuts(nodes: MapNode[], rng: SeededRNG): void {
+    const layerMap = computeNodeLayers(nodes);
+    const layerGroups = buildLayerGroups(layerMap);
+
+    // Find boss layers (act boundaries)
+    const bossLayers: number[] = [];
+    for (const [nodeIdx, layer] of layerMap) {
+      if (nodes[nodeIdx].type === 'boss') bossLayers.push(layer);
+    }
+    bossLayers.sort((a, b) => a - b);
+
+    let actStartLayer = 0;
+    for (const bossLayer of bossLayers) {
+      if (rng.next() >= MAP_SHORTCUT_CHANCE) {
+        actStartLayer = bossLayer + 1;
+        continue;
+      }
+
+      // Valid source layers: not first of act, sourceLayer+2 <= bossLayer-1
+      const validSourceLayers: number[] = [];
+      for (let l = actStartLayer + 1; l <= bossLayer; l++) {
+        if (l + 2 <= bossLayer - 1 && layerGroups.has(l) && layerGroups.has(l + 2)) {
+          validSourceLayers.push(l);
+        }
+      }
+
+      if (validSourceLayers.length === 0) {
+        actStartLayer = bossLayer + 1;
+        continue;
+      }
+
+      const sourceLayer = rng.pick(validSourceLayers);
+      const sourceNodeIdx = rng.pick(layerGroups.get(sourceLayer)!);
+      const targetNodeIdx = rng.pick(layerGroups.get(sourceLayer + 2)!);
+
+      const sourceNode = nodes[sourceNodeIdx];
+      if (!sourceNode.shortcutConnections) sourceNode.shortcutConnections = [];
+      if (!sourceNode.shortcutConnections.includes(targetNodeIdx)) {
+        sourceNode.shortcutConnections.push(targetNodeIdx);
+      }
+
+      actStartLayer = bossLayer + 1;
+    }
+  }
+
+  private static addHiddenNodes(nodes: MapNode[], rng: SeededRNG, acts: ActConfig[]): void {
+    const layerMap = computeNodeLayers(nodes);
+    const layerGroups = buildLayerGroups(layerMap);
+
+    const bossLayers: number[] = [];
+    for (const [nodeIdx, layer] of layerMap) {
+      if (nodes[nodeIdx].type === 'boss') bossLayers.push(layer);
+    }
+    bossLayers.sort((a, b) => a - b);
+
+    let actStartLayer = 0;
+    let actIndex = 0;
+    for (const bossLayer of bossLayers) {
+      if (rng.next() >= MAP_HIDDEN_NODE_CHANCE) {
+        actStartLayer = bossLayer + 1;
+        actIndex++;
+        continue;
+      }
+
+      // Valid parent layers: not first, not boss, not boss-1
+      const validParentLayers: number[] = [];
+      for (let l = actStartLayer + 1; l <= bossLayer - 2; l++) {
+        if (layerGroups.has(l)) validParentLayers.push(l);
+      }
+
+      if (validParentLayers.length === 0) {
+        actStartLayer = bossLayer + 1;
+        actIndex++;
+        continue;
+      }
+
+      const parentLayer = rng.pick(validParentLayers);
+      const parentNodeIdx = rng.pick(layerGroups.get(parentLayer)!);
+      const parentNode = nodes[parentNodeIdx];
+
+      const act = acts[actIndex % acts.length] as ActConfig;
+      const hiddenType: NodeType = rng.next() < 0.5 ? 'event' : 'shop';
+
+      const hiddenNode: MapNode = {
+        index: nodes.length,
+        type: hiddenType,
+        completed: false,
+        connections: [...parentNode.connections],
+        hidden: true,
+        revealCost: MAP_HIDDEN_NODE_COST,
+      };
+
+      if (hiddenType === 'event') {
+        hiddenNode.data = this.generateEventData(rng, act);
+      }
+
+      nodes.push(hiddenNode);
+      parentNode.connections.push(hiddenNode.index);
+
+      actStartLayer = bossLayer + 1;
+      actIndex++;
+    }
   }
 }
