@@ -226,12 +226,12 @@ export const WEAPON_TEMPLATES: Record<ClassType, PixelLayer> = {
     [_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _],
   ],
   mage: [
-    // Orb glow at hand position
+    // Enlarged orb + staff handle
     [_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _],
-    [_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _],
-    [_, _, _, _, _, _, _, _, _, _, _, _,WG, _, _, _],
-    [_, _, _, _, _, _, _, _, _, _, _,WG,WG,WG, _, _],
-    [_, _, _, _, _, _, _, _, _, _, _, _,WG, _, _, _],
+    [_, _, _, _, _, _, _, _, _, _, _,WG,WG, _, _, _],
+    [_, _, _, _, _, _, _, _, _, _,WG,WG,WG,WG, _, _],
+    [_, _, _, _, _, _, _, _, _, _, _,WG,WG, _, _, _],
+    [_, _, _, _, _, _, _, _, _, _, _, _,W, _, _, _],
     [_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _],
     [_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _],
     [_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _],
@@ -250,12 +250,12 @@ export const WEAPON_TEMPLATES: Record<ClassType, PixelLayer> = {
     [_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _],
   ],
   cleric: [
-    // Cross/plus symbol at hand
+    // Enlarged 5×3 wide cross
+    [_, _, _, _, _, _, _, _, _, _, _, _, _,WG, _, _],
+    [_, _, _, _, _, _, _, _, _, _, _,WG,WG,WG,WG,WG],
+    [_, _, _, _, _, _, _, _, _, _, _, _, _,WG, _, _],
+    [_, _, _, _, _, _, _, _, _, _, _, _, _,WG, _, _],
     [_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _],
-    [_, _, _, _, _, _, _, _, _, _, _, _, _,WG, _, _],
-    [_, _, _, _, _, _, _, _, _, _, _, _,WG,WG,WG, _],
-    [_, _, _, _, _, _, _, _, _, _, _, _, _,WG, _, _],
-    [_, _, _, _, _, _, _, _, _, _, _, _, _,WG, _, _],
     [_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _],
     [_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _],
     [_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _],
@@ -309,9 +309,9 @@ export const SKIN_TONES: Record<RaceType, number> = {
 
 export const WEAPON_COLORS: Record<ClassType, { base: number; glow: number }> = {
   warrior:  { base: 0xaaaacc, glow: 0xccccee },
-  mage:     { base: 0x6688ff, glow: 0x99bbff },
+  mage:     { base: 0x7744ff, glow: 0xaa88ff },   // saturated purple-blue
   ranger:   { base: 0x886644, glow: 0xaa8866 },
-  cleric:   { base: 0xffcc44, glow: 0xffee88 },
+  cleric:   { base: 0xffdd44, glow: 0xffff99 },   // bright gold
   assassin: { base: 0x888888, glow: 0xaaaaaa },
   paladin:  { base: 0x8899bb, glow: 0xbbccdd },
 };
