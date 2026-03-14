@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { ElementSystem } from '../../src/systems/ElementSystem';
 import { EventBus } from '../../src/systems/EventBus';
 import {
@@ -8,6 +8,8 @@ import {
   getReactionKey,
   hasElementAdvantage,
 } from '../../src/config/elements';
+import { REACTION_DAMAGE_BONUS_CAP } from '../../src/config/balance';
+import { RelicSystem } from '../../src/systems/RelicSystem';
 import { createMockUnit } from '../mocks/phaser';
 
 describe('ElementSystem', () => {
@@ -287,6 +289,31 @@ describe('ElementSystem', () => {
       );
       expect(reactionDmg).toBe(0);
       expect(target.currentHp).toBe(500); // 无伤害
+    });
+  });
+
+  describe('reaction damage cap', () => {
+    it('REACTION_DAMAGE_BONUS_CAP is 1.0', () => {
+      expect(REACTION_DAMAGE_BONUS_CAP).toBe(1.0);
+    });
+
+    it('caps reaction bonus even when relics provide > 100%', () => {
+      const spy = vi.spyOn(RelicSystem, 'getReactionDamageBonus').mockReturnValue(1.5);
+
+      const mockTarget = createMockUnit({ stats: { maxHp: 1000, hp: 500 } });
+      const mockAttacker = createMockUnit({ stats: {} });
+      const meltReaction = { name: '融化', description: '', damageMultiplier: 1.5, statusEffect: 'wet', duration: 3 };
+
+      const reactionDmg = ElementSystem.applyElementReaction(
+        meltReaction, 'fire' as any, 'ice' as any, mockTarget as any, 100, mockAttacker as any,
+      );
+
+      // With baseDamage=100 and melt reaction (1.5x multiplier):
+      // uncapped: 100 * (1.5-1) * (1+1.5) = 100 * 0.5 * 2.5 = 125
+      // capped:   100 * (1.5-1) * (1+1.0) = 100 * 0.5 * 2.0 = 100
+      expect(reactionDmg).toBe(100);
+
+      spy.mockRestore();
     });
   });
 

@@ -52,4 +52,6 @@ export {
   DAMAGE_NUMBER_RISE,
   // Gauntlet
   GAUNTLET_REWARD_MULTIPLIER,
+  // Reaction
+  REACTION_DAMAGE_BONUS_CAP,
 } from './config/balance';

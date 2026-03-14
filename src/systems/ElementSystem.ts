@@ -1,5 +1,6 @@
 import { ElementType, StatusEffect } from '../types';
 import { EventBus } from './EventBus';
+import { REACTION_DAMAGE_BONUS_CAP } from '../config/balance';
 import {
   ELEMENT_ADVANTAGE_MULTIPLIER,
   ELEMENT_DISADVANTAGE_MULTIPLIER,
@@ -83,7 +84,8 @@ export class ElementSystem {
   ): number {
     // Calculate reaction bonus damage
     const reactionBonus = RelicSystem.getReactionDamageBonus();
-    const reactionDamage = Math.round(baseDamage * (reaction.damageMultiplier - 1) * (1 + reactionBonus));
+    const cappedBonus = Math.min(reactionBonus, REACTION_DAMAGE_BONUS_CAP);
+    const reactionDamage = Math.round(baseDamage * (reaction.damageMultiplier - 1) * (1 + cappedBonus));
 
     if (reactionDamage > 0) {
       target.takeDamage(reactionDamage);

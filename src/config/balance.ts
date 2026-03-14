@@ -71,3 +71,7 @@ export const DAMAGE_NUMBER_RISE = 30;
 // ============ Gauntlet ============
 
 export const GAUNTLET_REWARD_MULTIPLIER = 0.8; // per-wave multiplier (3 waves × 0.8 = 2.4x total)
+
+// ============ Reaction ============
+
+export const REACTION_DAMAGE_BONUS_CAP = 1.0; // max 100% reaction damage bonus from relics/synergies
