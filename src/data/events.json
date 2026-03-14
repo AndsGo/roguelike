@@ -860,5 +860,272 @@
         ]
       }
     ]
+  },
+  {
+    "id": "event_fairy_circle",
+    "title": "精灵之环",
+    "description": "一圈发光的蘑菇形成了一个完美的圆环，空气中弥漫着魔法的气息...",
+    "choices": [
+      {
+        "text": "进入精灵之环祈祷",
+        "outcomes": [
+          { "probability": 0.6, "description": "精灵的祝福恢复了全队的伤势！", "effects": [{ "type": "heal", "value": 0.15, "target": "all" }] },
+          { "probability": 0.4, "description": "精灵的魔法反噬，随机一名队员受伤。", "effects": [{ "type": "damage", "value": 0.1, "target": "random" }] }
+        ]
+      },
+      {
+        "text": "绕路离开",
+        "outcomes": [
+          { "probability": 1.0, "description": "你绕道而行，平安离开。", "effects": [{ "type": "gold", "value": 20 }] }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "event_wounded_traveler",
+    "title": "受伤的旅人",
+    "description": "路边躺着一个受伤的旅人，他虚弱地向你求助...",
+    "choices": [
+      {
+        "text": "花费30金币治疗旅人",
+        "outcomes": [
+          { "probability": 0.7, "description": "旅人感激地赠送了你一件物品作为报答！", "effects": [{ "type": "gold", "value": -30 }, { "type": "item", "value": 1 }] },
+          { "probability": 0.3, "description": "旅人感激地道谢后离开了。", "effects": [{ "type": "gold", "value": -30 }] }
+        ]
+      },
+      {
+        "text": "搜刮旅人的物品",
+        "outcomes": [
+          { "probability": 1.0, "description": "你趁人之危搜刮了旅人，但内心感到不安。", "effects": [{ "type": "gold", "value": 40 }, { "type": "stat_boost", "value": -3 }] }
+        ]
+      },
+      {
+        "text": "无视继续前进",
+        "outcomes": [
+          { "probability": 1.0, "description": "你冷漠地走过，不去理会。", "effects": [] }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "event_ancient_tree",
+    "title": "远古之树",
+    "description": "一棵巨大的古树散发着淡淡的绿光，树干上刻满了远古符文...",
+    "choices": [
+      {
+        "text": "触摸古树",
+        "outcomes": [
+          { "probability": 0.5, "description": "古树的力量涌入体内，队伍得到了强化！", "effects": [{ "type": "stat_boost", "value": 3 }] },
+          { "probability": 0.5, "description": "古树的诅咒降临，队伍受到了削弱。", "effects": [{ "type": "stat_boost", "value": -3 }] }
+        ]
+      },
+      {
+        "text": "采集树果",
+        "outcomes": [
+          { "probability": 1.0, "description": "你采集了古树的果实，全队恢复了体力。", "effects": [{ "type": "heal", "value": 0.1, "target": "all" }] }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "event_lost_ranger",
+    "title": "迷路的游侠",
+    "description": "一个年轻的游侠在树林中迷了路，他看起来很焦急...",
+    "choices": [
+      {
+        "text": "指引方向",
+        "outcomes": [
+          { "probability": 1.0, "description": "游侠感激地给予了你报酬，并分享了战斗技巧。", "effects": [{ "type": "gold", "value": 25 }, { "type": "stat_boost", "value": 2 }] }
+        ]
+      },
+      {
+        "text": "赠送补给（花费20金币）",
+        "outcomes": [
+          { "probability": 0.7, "description": "游侠深受感动，回赠了一件珍贵物品！", "effects": [{ "type": "gold", "value": -20 }, { "type": "item", "value": 1 }] },
+          { "probability": 0.3, "description": "游侠道谢后匆匆离去。", "effects": [{ "type": "gold", "value": -20 }] }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "event_lava_pool",
+    "title": "熔岩池",
+    "description": "一片灼热的熔岩池冒着滚滚热气，池边散落着矿石...",
+    "choices": [
+      {
+        "text": "在熔岩池淬炼武器",
+        "outcomes": [
+          { "probability": 0.6, "description": "炽热的熔岩淬炼让武器更加锋利，队伍得到强化！", "effects": [{ "type": "stat_boost", "value": 5 }] },
+          { "probability": 0.4, "description": "高温灼伤了一名队员，淬炼失败。", "effects": [{ "type": "damage", "value": 0.15, "target": "random" }] }
+        ]
+      },
+      {
+        "text": "安全通过",
+        "outcomes": [
+          { "probability": 1.0, "description": "你小心绕过熔岩池，安全通过。", "effects": [] }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "event_fire_spirit",
+    "title": "火焰精灵",
+    "description": "一团跳动的火焰凝聚成了人形，它好奇地注视着你...",
+    "choices": [
+      {
+        "text": "花费40金币请求祝福",
+        "outcomes": [
+          { "probability": 1.0, "description": "火焰精灵接受了供奉，赐予了你强大的力量！", "effects": [{ "type": "gold", "value": -40 }, { "type": "stat_boost", "value": 8 }] }
+        ]
+      },
+      {
+        "text": "挑战精灵",
+        "outcomes": [
+          { "probability": 0.7, "description": "你击败了火焰精灵，获得了它的遗物！", "effects": [{ "type": "relic", "value": 1, "relicId": "fire_emblem" }] },
+          { "probability": 0.3, "description": "精灵的反击波及了全队，你们被迫撤退。", "effects": [{ "type": "damage", "value": 0.2, "target": "all" }] }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "event_dwarven_forge",
+    "title": "矮人锻炉",
+    "description": "你发现了一座被遗弃的矮人锻炉，炉火仍未熄灭...",
+    "choices": [
+      {
+        "text": "花费60金币升级装备",
+        "outcomes": [
+          { "probability": 1.0, "description": "矮人锻炉的神奇工艺为你的装备带来了提升！", "effects": [{ "type": "gold", "value": -60 }, { "type": "item", "value": 1 }] }
+        ]
+      },
+      {
+        "text": "学习锻造技术",
+        "outcomes": [
+          { "probability": 1.0, "description": "你从锻炉的工艺中学习到了战斗技巧，略有提升。", "effects": [{ "type": "stat_boost", "value": 2 }] }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "event_volcanic_vent",
+    "title": "火山通风口",
+    "description": "地面上冒出的热气中隐约可见宝物的光芒...",
+    "choices": [
+      {
+        "text": "冒险穿越",
+        "outcomes": [
+          { "probability": 0.5, "description": "你在热气中找到了大量宝藏！", "effects": [{ "type": "gold", "value": 80 }] },
+          { "probability": 0.5, "description": "热气喷发，全队受到了伤害。", "effects": [{ "type": "damage", "value": 0.1, "target": "all" }] }
+        ]
+      },
+      {
+        "text": "绕路而行",
+        "outcomes": [
+          { "probability": 1.0, "description": "你安全绕过通风口，继续前行。", "effects": [] }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "event_shadow_altar",
+    "title": "暗影祭坛",
+    "description": "一座散发着不祥气息的暗影祭坛矗立在你面前...",
+    "choices": [
+      {
+        "text": "献祭HP（全队-20%HP）",
+        "outcomes": [
+          { "probability": 1.0, "description": "暗影之力接受了血祭，赐予了你一件黑暗遗物！", "effects": [{ "type": "damage", "value": 0.2, "target": "all" }, { "type": "relic", "value": 1, "relicId": "dark_grimoire" }] }
+        ]
+      },
+      {
+        "text": "破坏祭坛",
+        "outcomes": [
+          { "probability": 1.0, "description": "你打碎了祭坛，从碎片中找到了一些金币。", "effects": [{ "type": "gold", "value": 50 }] }
+        ]
+      },
+      {
+        "text": "无视离开",
+        "outcomes": [
+          { "probability": 1.0, "description": "你选择不去理会这座不祥的祭坛。", "effects": [] }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "event_lost_soul",
+    "title": "迷失的灵魂",
+    "description": "一个半透明的灵魂在空中徘徊，发出悲伤的低语...",
+    "choices": [
+      {
+        "text": "净化灵魂",
+        "outcomes": [
+          { "probability": 1.0, "description": "灵魂得到了安息，感激地留下了祝福与财富。", "effects": [{ "type": "heal", "value": 0.25, "target": "all" }, { "type": "gold", "value": 40 }] }
+        ]
+      },
+      {
+        "text": "吸收灵魂之力",
+        "outcomes": [
+          { "probability": 1.0, "description": "你吸收了灵魂的力量，但这伤害了队伍。", "effects": [{ "type": "stat_boost", "value": 10 }, { "type": "damage", "value": 0.15, "target": "all" }] }
+        ]
+      },
+      {
+        "text": "放过灵魂",
+        "outcomes": [
+          { "probability": 1.0, "description": "灵魂感激地给予了你一些金币后离去。", "effects": [{ "type": "gold", "value": 20 }] }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "event_abyssal_merchant",
+    "title": "深渊商人",
+    "description": "一个戴着面具的商人从暗影中走出，他的商品散发着诡异的光芒...",
+    "choices": [
+      {
+        "text": "花费80金币购买深渊宝物",
+        "outcomes": [
+          { "probability": 1.0, "description": "商人取出了一件神秘的物品，价值远超预期。", "effects": [{ "type": "gold", "value": -80 }, { "type": "item", "value": 1 }] }
+        ]
+      },
+      {
+        "text": "交易灵魂碎片",
+        "outcomes": [
+          { "probability": 1.0, "description": "商人接受了灵魂碎片，换给了你一件寒冰遗物，但代价是痛苦。", "effects": [{ "type": "damage", "value": 0.1, "target": "random" }, { "type": "relic", "value": 1, "relicId": "ice_crystal_pendant" }] }
+        ]
+      },
+      {
+        "text": "谢绝离开",
+        "outcomes": [
+          { "probability": 1.0, "description": "你婉拒了商人，他消失在暗影之中。", "effects": [] }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "event_dark_ritual",
+    "title": "黑暗仪式",
+    "description": "你撞见了一群暗影教徒正在进行神秘的仪式...",
+    "choices": [
+      {
+        "text": "打断仪式",
+        "outcomes": [
+          { "probability": 0.7, "description": "教徒们惊慌逃散，留下了祭品和金币！", "effects": [{ "type": "gold", "value": 60 }] },
+          { "probability": 0.3, "description": "仪式爆发，黑暗能量波及了全队。", "effects": [{ "type": "damage", "value": 0.15, "target": "all" }] }
+        ]
+      },
+      {
+        "text": "观察仪式",
+        "outcomes": [
+          { "probability": 1.0, "description": "从仪式中你领悟了一些黑暗力量的奥秘。", "effects": [{ "type": "stat_boost", "value": 5 }] }
+        ]
+      },
+      {
+        "text": "参与仪式",
+        "outcomes": [
+          { "probability": 0.5, "description": "仪式赐予了你强大的黑暗力量！", "effects": [{ "type": "stat_boost", "value": 15 }] },
+          { "probability": 0.5, "description": "仪式的反噬削弱了你的队伍。", "effects": [{ "type": "stat_boost", "value": -10 }] }
+        ]
+      }
+    ]
   }
 ]
