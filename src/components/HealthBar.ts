@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { Theme, getElementColor } from '../ui/Theme';
 import { ElementType } from '../types';
 import { ANIM, OPACITY, SCALE } from '../config/visual';
+import { TextFactory } from '../ui/TextFactory';
 
 export class HealthBar extends Phaser.GameObjects.Container {
   private bgBar: Phaser.GameObjects.Graphics;
@@ -65,9 +66,9 @@ export class HealthBar extends Phaser.GameObjects.Container {
     if (this.levelText) {
       this.levelText.setText(`${level}`);
     } else {
-      this.levelText = this.scene.add.text(
-        this.barWidth / 2 + 6, 0, `${level}`,
-        { fontSize: '9px', color: '#aaaaaa', fontFamily: 'monospace' },
+      this.levelText = TextFactory.create(
+        this.scene, this.barWidth / 2 + 6, 0, `${level}`, 'small',
+        { color: '#aaaaaa' },
       ).setOrigin(0, 0.5);
       this.add(this.levelText);
     }

@@ -3,6 +3,7 @@ import { DAMAGE_NUMBER_DURATION, DAMAGE_NUMBER_RISE } from '../constants';
 import { Theme, colorToString, getElementColor } from '../ui/Theme';
 import { ElementType } from '../types';
 import { ANIM, SCALE, PARTICLE, DEPTH, UI_THRESHOLDS } from '../config/visual';
+import { TextFactory } from '../ui/TextFactory';
 
 export interface DamageNumberConfig {
   isHeal?: boolean;
@@ -90,11 +91,12 @@ export class DamageNumber extends Phaser.GameObjects.Text {
 
       // Sparkle particles around crit text
       for (let s = 0; s < PARTICLE.SPARKLE_COUNT; s++) {
-        const sparkle = scene.add.text(
+        const sparkle = TextFactory.create(
+          scene,
           x + (Math.random() - 0.5) * 30,
           y + (Math.random() - 0.5) * 20,
-          '*',
-          { fontSize: '12px', color: '#ffd700', fontFamily: 'monospace', stroke: '#000000', strokeThickness: 1 },
+          '*', 'body',
+          { color: '#ffd700', stroke: '#000000', strokeThickness: 1 },
         ).setOrigin(0.5).setDepth(DEPTH.DAMAGE_NUMBER);
         scene.tweens.add({
           targets: sparkle,
@@ -112,10 +114,8 @@ export class DamageNumber extends Phaser.GameObjects.Text {
 
     // Combo display
     if (comboCount && comboCount >= UI_THRESHOLDS.COMBO_DISPLAY_MIN) {
-      const comboText = scene.add.text(x, y + 14, `x${comboCount} COMBO!`, {
-        fontSize: '10px',
+      const comboText = TextFactory.create(scene, x, y + 14, `x${comboCount} COMBO!`, 'label', {
         color: colorToString(Theme.colors.secondary),
-        fontFamily: 'monospace',
         fontStyle: 'bold',
         stroke: '#000000',
         strokeThickness: 2,

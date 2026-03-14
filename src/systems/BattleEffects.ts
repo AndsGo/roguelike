@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { GAME_WIDTH, GAME_HEIGHT } from '../config/balance';
 import { Unit } from '../entities/Unit';
 import { Theme } from '../ui/Theme';
+import { TextFactory } from '../ui/TextFactory';
 
 /**
  * Visual effects for battle: screen shake, hit flash, crit slow-mo,
@@ -115,10 +116,8 @@ export class BattleEffects {
 
   /** Floating skill name text above caster */
   showSkillName(x: number, y: number, name: string, color: number = 0xffff88): void {
-    const text = this.scene.add.text(x, y - 30, name, {
-      fontSize: '10px',
+    const text = TextFactory.create(this.scene, x, y - 30, name, 'label', {
       color: `#${color.toString(16).padStart(6, '0')}`,
-      fontFamily: 'monospace',
       fontStyle: 'bold',
       stroke: '#000000',
       strokeThickness: 2,
@@ -187,10 +186,8 @@ export class BattleEffects {
 
   /** Combo break indicator text */
   showComboBreak(x: number, y: number): void {
-    const text = this.scene.add.text(x, y - 20, '连击断!', {
-      fontSize: '14px',
+    const text = TextFactory.create(this.scene, x, y - 20, '连击断!', 'subtitle', {
       color: '#ff6644',
-      fontFamily: 'monospace',
       fontStyle: 'bold',
       stroke: '#000000',
       strokeThickness: 3,
@@ -221,10 +218,8 @@ export class BattleEffects {
     const label = isAdvantage ? '克制!' : '抵抗!';
     const color = isAdvantage ? '#ff6644' : '#6688cc';
 
-    const text = this.scene.add.text(x + 15, y - 10, label, {
-      fontSize: '9px',
+    const text = TextFactory.create(this.scene, x + 15, y - 10, label, 'small', {
       color,
-      fontFamily: 'monospace',
       fontStyle: 'bold',
       stroke: '#000000',
       strokeThickness: 2,
@@ -242,10 +237,8 @@ export class BattleEffects {
 
   /** Skill interrupt text ("打断!") */
   showInterruptText(x: number, y: number): void {
-    const text = this.scene.add.text(x, y - 15, '打断!', {
-      fontSize: '12px',
+    const text = TextFactory.create(this.scene, x, y - 15, '打断!', 'body', {
       color: '#ff4466',
-      fontFamily: 'monospace',
       fontStyle: 'bold',
       stroke: '#000000',
       strokeThickness: 3,

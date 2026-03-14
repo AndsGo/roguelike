@@ -3,6 +3,7 @@ import { EventBus } from './EventBus';
 import { ErrorHandler } from './ErrorHandler';
 import { SaveManager } from '../managers/SaveManager';
 import { GAME_WIDTH, GAME_HEIGHT } from '../config/balance';
+import { TextFactory } from '../ui/TextFactory';
 
 /** A tutorial tip shown once to the player */
 export interface TutorialTip {
@@ -204,19 +205,19 @@ export class TutorialSystem {
         .setDepth(901).setStrokeStyle(2, 0x4488ff);
       allElements.push(panelBg);
 
-      const title = scene.add.text(panelCx, panelCy - 35, tip.title, {
-        fontSize: '16px', color: '#ffdd44', fontFamily: 'monospace', fontStyle: 'bold',
+      const title = TextFactory.create(scene, panelCx, panelCy - 35, tip.title, 'subtitle', {
+        color: '#ffdd44',
       }).setOrigin(0.5).setDepth(902);
       allElements.push(title);
 
-      const message = scene.add.text(panelCx, panelCy + 5, tip.message, {
-        fontSize: '11px', color: '#ccccdd', fontFamily: 'monospace',
+      const message = TextFactory.create(scene, panelCx, panelCy + 5, tip.message, 'body', {
+        color: '#ccccdd',
         wordWrap: { width: panelWidth - 30 }, align: 'center',
       }).setOrigin(0.5).setDepth(902);
       allElements.push(message);
 
-      const closeText = scene.add.text(panelCx, panelCy + 45, '[ 点击继续 ]', {
-        fontSize: '10px', color: '#888899', fontFamily: 'monospace',
+      const closeText = TextFactory.create(scene, panelCx, panelCy + 45, '[ 点击继续 ]', 'label', {
+        color: '#888899',
       }).setOrigin(0.5).setDepth(902);
       allElements.push(closeText);
 
@@ -249,19 +250,19 @@ export class TutorialSystem {
         .setDepth(901).setStrokeStyle(2, 0x4488ff);
       allElements.push(panel);
 
-      const title = scene.add.text(cx, cy - 35, tip.title, {
-        fontSize: '16px', color: '#ffdd44', fontFamily: 'monospace', fontStyle: 'bold',
+      const title = TextFactory.create(scene, cx, cy - 35, tip.title, 'subtitle', {
+        color: '#ffdd44',
       }).setOrigin(0.5).setDepth(902);
       allElements.push(title);
 
-      const message = scene.add.text(cx, cy + 5, tip.message, {
-        fontSize: '11px', color: '#ccccdd', fontFamily: 'monospace',
+      const message = TextFactory.create(scene, cx, cy + 5, tip.message, 'body', {
+        color: '#ccccdd',
         wordWrap: { width: panelWidth - 30 }, align: 'center',
       }).setOrigin(0.5).setDepth(902);
       allElements.push(message);
 
-      const closeText = scene.add.text(cx, cy + 45, '[ 点击继续 ]', {
-        fontSize: '10px', color: '#888899', fontFamily: 'monospace',
+      const closeText = TextFactory.create(scene, cx, cy + 45, '[ 点击继续 ]', 'label', {
+        color: '#888899',
       }).setOrigin(0.5).setDepth(902);
       allElements.push(closeText);
 

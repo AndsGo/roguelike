@@ -7,6 +7,7 @@ import { RelicSystem } from '../systems/RelicSystem';
 import { Theme, darkenColor, getElementColor, getRoleColor } from '../ui/Theme';
 import { getOrCreateTexture, getDisplaySize, ChibiConfig } from '../systems/UnitRenderer';
 import { UI } from '../i18n';
+import { TextFactory } from '../ui/TextFactory';
 
 /** Default enemy color (no element) */
 const ENEMY_BASE_COLOR = 0xff4444;
@@ -99,10 +100,8 @@ export class Unit extends Phaser.GameObjects.Container {
 
     // Name label
     const displayName = name.length > 8 ? name.substring(0, 8) : name;
-    this.nameLabel = scene.add.text(0, -this.spriteHeight / 2 - 14, displayName, {
-      fontSize: '9px',
+    this.nameLabel = TextFactory.create(scene, 0, -this.spriteHeight / 2 - 14, displayName, 'small', {
       color: '#ffffff',
-      fontFamily: 'monospace',
     }).setOrigin(0.5);
     this.add(this.nameLabel);
 
@@ -119,10 +118,8 @@ export class Unit extends Phaser.GameObjects.Container {
       const sym = `${shapeSym}${elementSymbols[this.element] ?? this.element[0].toUpperCase()}`;
       const elColor = getElementColor(this.element);
       const colorStr = elColor !== undefined ? '#' + elColor.toString(16).padStart(6, '0') : '#ffffff';
-      const elementLabel = scene.add.text(0, this.spriteHeight / 2 + 13, sym, {
-        fontSize: '8px',
+      const elementLabel = TextFactory.create(scene, 0, this.spriteHeight / 2 + 13, sym, 'tiny', {
         color: colorStr,
-        fontFamily: 'monospace',
         fontStyle: 'bold',
         stroke: '#000000',
         strokeThickness: 2,
@@ -133,10 +130,8 @@ export class Unit extends Phaser.GameObjects.Container {
     // Status effect visuals (pre-created to avoid per-frame allocation)
     this.statusOverlay = scene.add.graphics();
     this.add(this.statusOverlay);
-    this.statusIcons = scene.add.text(0, -this.spriteHeight / 2 - 24, '', {
-      fontSize: '9px',
+    this.statusIcons = TextFactory.create(scene, 0, -this.spriteHeight / 2 - 24, '', 'small', {
       color: '#ffcc00',
-      fontFamily: 'monospace',
     }).setOrigin(0.5).setVisible(false);
     this.add(this.statusIcons);
     this.statusIcons.setInteractive({ useHandCursor: true });
@@ -605,10 +600,8 @@ export class Unit extends Phaser.GameObjects.Container {
       const valueStr = effect.value ? `${Math.abs(effect.value)}` : '';
       const line = `${icon} ${name}  ${valueStr}  ${remaining.toFixed(1)}s`;
 
-      const text = this.scene.add.text(padding, padding + i * lineHeight, line, {
-        fontSize: '9px',
+      const text = TextFactory.create(this.scene, padding, padding + i * lineHeight, line, 'small', {
         color: effect.type === 'buff' || effect.type === 'hot' ? '#88ff88' : '#ff8888',
-        fontFamily: 'monospace',
       });
       container.add(text);
     });
