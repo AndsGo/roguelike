@@ -72,5 +72,11 @@ describe('GameOverScene', () => {
       const nodeTexts = SceneTestHarness.findText(scene, '到达');
       expect(nodeTexts.length).toBeGreaterThan(0);
     });
+
+    it('renders retry button', () => {
+      const scene = createScene();
+      const retryTexts = SceneTestHarness.findText(scene, '再来一次');
+      expect(retryTexts.length).toBeGreaterThan(0);
+    });
   });
 });

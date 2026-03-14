@@ -181,6 +181,7 @@ export const UI = {
     achievementsUnlocked: (n: number) => `解锁成就: ${n}`,
     andMore: (n: number) => `...还有${n}个`,
     unlockedHeroes: (names: string) => `已解锁英雄: ${names}`,
+    retry: '再来一次',
     mainMenu: '主菜单',
   },
 

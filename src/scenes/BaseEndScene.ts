@@ -90,6 +90,14 @@ export abstract class BaseEndScene extends Phaser.Scene {
     }).setOrigin(0.5);
   }
 
+  /** Create a "retry" button that jumps directly to HeroDraftScene, preserving difficulty. */
+  protected createRetryButton(y: number): void {
+    const difficulty = RunManager.getInstance().getDifficulty();
+    new Button(this, GAME_WIDTH / 2, y, UI.gameOver.retry, 180, 45, () => {
+      SceneTransition.fadeTransition(this, 'HeroDraftScene', { difficulty }, TRANSITION.NORMAL);
+    }, Theme.colors.primary);
+  }
+
   /** Create a "build review" button that opens the BuildReviewPanel. */
   protected createBuildReviewButton(y: number): void {
     new Button(this, GAME_WIDTH / 2, y, UI.buildReview.title, 160, 36, () => {
