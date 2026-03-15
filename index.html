@@ -2,15 +2,57 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <title>Roguelike Auto-Battler</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { background: #111; overflow: hidden; display: flex; justify-content: center; align-items: center; height: 100vh; }
-    canvas { image-rendering: pixelated; image-rendering: crisp-edges; }
+    body { background: #111; overflow: hidden; display: flex; justify-content: center; align-items: center; height: 100vh; touch-action: none; }
+    canvas { image-rendering: pixelated; image-rendering: crisp-edges; touch-action: manipulation; }
+
+    /* 手机竖屏旋转提示 */
+    #rotate-hint {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.9);
+      color: white;
+      font-size: 24px;
+      justify-content: center;
+      align-items: center;
+      z-index: 99999;
+      flex-direction: column;
+      gap: 12px;
+    }
+    @media (orientation: portrait) and (max-width: 768px) {
+      #rotate-hint { display: flex; }
+    }
   </style>
 </head>
 <body>
+  <div id="rotate-hint">
+    <div style="font-size: 48px;">↻</div>
+    <div>请旋转手机至横屏</div>
+  </div>
+  <script>
+    // 移动设备首次触摸时请求全屏 + 横屏锁定
+    (function() {
+      var isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+      if (!isMobile) return;
+
+      document.addEventListener('touchend', function onFirstTouch() {
+        document.removeEventListener('touchend', onFirstTouch);
+        var el = document.documentElement;
+        var rfs = el.requestFullscreen || el.webkitRequestFullscreen;
+        if (rfs) {
+          rfs.call(el).then(function() {
+            if (screen.orientation && screen.orientation.lock) {
+              screen.orientation.lock('landscape').catch(function() {});
+            }
+          }).catch(function() {});
+        }
+      }, { once: true });
+    })();
+  </script>
   <script type="module" src="/src/main.ts"></script>
 </body>
 </html>
