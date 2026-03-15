@@ -6,11 +6,11 @@
 
 | 项目 | 数据 |
 |------|------|
-| 开发周期 | 2026-02-26 ~ 2026-03-13 |
-| Claude 会话数 | 30+ 次 |
-| Git 提交数 | 55+ |
-| 代码规模 | 200+ 文件, 35,000+ 行 |
-| 测试用例 | 841 (62 个测试套件) |
+| 开发周期 | 2026-02-26 ~ 2026-03-15 |
+| Claude 会话数 | 25+ 次 |
+| Git 提交数 | 100+ |
+| 代码规模 | 200+ 文件, 40,000+ 行 |
+| 测试用例 | 977 (77 个测试套件) |
 | 技术栈 | TypeScript + Phaser 3 + Vite |
 
 ---
@@ -100,6 +100,16 @@ Day 15 (Mar 13) — 第四幕
  │   ├─ 第四幕门控 (需击败暗影领主)
  │   └─ 13 个任务 + 双阶段审查 → 841 测试通过
  └─ README + DEVELOPMENT 文档更新
+
+Day 16-17 (Mar 14-15) — 评估报告驱动的系统性优化
+ ├─ 5人AI评估团队 → 综合评估报告 (3.1/5.0)
+ ├─ v1.12.0: Phase 1 紧急修复 (7个P0: 数值/防御/反应/教程/重试/按钮/颜色)
+ ├─ v1.12.1: Phase 2a 平衡补丁 (7个P1: 元素倍率/羁绊/坦克/敌人技能/反击)
+ ├─ v1.13.0: Phase 2b 内容补充 (3英雄/12事件/3Boss阶段/休息多选)
+ ├─ v1.14.0: Phase 3 深度提升 (选人羁绊预览/地图捷径+隐藏节点)
+ ├─ v1.15.0: Phase 4 视觉打磨 (TextFactory 280调用迁移/治疗闪光/武器模板/状态提示/平衡)
+ └─ v1.16.0: 每日挑战增强 (规则预览/7种修饰/视觉指示/模拟排行榜)
+     → 977 测试通过, 77 套件, 零 TypeScript 错误
 ```
 
 ---
@@ -803,6 +813,81 @@ src/
 
 ---
 
+### v1.12.0 ~ v1.12.1 — 评估报告驱动的紧急修复与平衡 (Mar 14)
+
+**起因:** 5 人 AI 评估团队产出综合评估报告 (3.1/5.0)，识别 7 个 P0 + 12 个 P1 问题
+
+**v1.12.0 — Phase 1 紧急修复 (7 个 P0):**
+- 暗影刺客/森林潜行者 DPS Nerf (攻击/暴击/技能缩放下调)
+- 溢出护盾上限 20%→10%, 护盾符咒冷却 5s→8s
+- 防御公式添加软上限 (defense=80 处开始递减)
+- 反应伤害加成总计上限 100%
+- 教程系统激活 (5 个场景添加 showTipIfNeeded 调用)
+- GameOver 添加"再来一次"按钮
+- 商店按钮统一为 pointerup + 圣元素颜色白→金
+
+**v1.12.1 — Phase 2a 平衡补丁 (7 个 P1):**
+- 元素克制倍率 1.2x/0.85x → 1.35x/0.7x
+- 5 个元素羁绊 +15% → +20%
+- 坦克防御成长 +1-2/级, 岩浆守护者速度 30→50
+- 3 个第 1 幕敌人技能 (acid_spit, goblin_rush, lizard_flame)
+- 战士终极技能 ult_iron_bastion 添加反击光环 + 团队护盾
+- 5 个元素遗物独特副效果 (灼烧/减防/连锁/吸血/护盾)
+
+### v1.13.0 — Phase 2b 内容补充 (Mar 14-15)
+
+**使用 Subagent-Driven Development 执行 (7 个任务)**
+
+**新内容:**
+- **3 名新英雄:** frost_whisperer (精灵/牧师/冰/辅助), holy_emissary (人类/圣骑士/圣/辅助), ice_dragon_hunter (龙族/游侠/冰/远程)
+- **9 个新技能:** 6 regular + 3 ultimates
+- **12 个新事件:** Acts 1-3 每幕 +4 (精灵之环、受伤旅人、熔岩池、暗影祭坛等)
+- **3 个 Boss 阶段配置:** frost_queen (2 阶段), thunder_titan (3 阶段), shadow_lord (3 阶段)
+
+**系统改进:**
+- RestScene 多选项改造: 休息(回复HP) / 训练(获得经验) / 搜索(获得金币)
+- 3 个新常量: REST_TRAIN_EXP, REST_SCAVENGE_GOLD_MIN/MAX
+
+### v1.14.0 — Phase 3 深度提升 (Mar 15)
+
+**新功能:**
+- **选人界面羁绊预览:** 从 ShopScene 提取 `calculateSynergyTags()` / `formatSynergyTags()` 到共享工具 `src/utils/synergy-helpers.ts`，HeroDraftScene 实时显示已选英雄的羁绊激活/进度
+- **地图随机变体:**
+  - **捷径:** 15%/幕概率，`shortcutConnections` 字段存储跳层连接（不影响 BFS 层分配），青色虚线渲染
+  - **隐藏节点:** 10%/幕概率，30 金币揭示，event/shop 类型，灰色"?"显示，点击揭示后 scene.restart()
+- **地图工具函数:** `src/utils/map-utils.ts` — `computeNodeLayers()` + `buildLayerGroups()` 从 MapRenderer 提取
+- MapNode 类型扩展: `hidden?`, `revealCost?`, `shortcutConnections?`
+- RunManager.getAccessibleNodes() 更新: 支持 shortcutConnections + 过滤 hidden
+
+### v1.15.0 — Phase 4 视觉打磨 + 平衡调整 (Mar 15)
+
+**视觉改进:**
+- **TextFactory 文字系统:** `src/ui/TextFactory.ts` — 6 种预设 (title/subtitle/body/label/small/tiny), `setResolution(2)` + `setFilter(LINEAR)` 消除 pixelArt 模糊。280 个 `scene.add.text()` 全量迁移到 TextFactory.create()
+- **治疗闪光效果:** Unit.heal() 中添加绿色闪光 (0x44ff88, 120ms)
+- **Idle 动画去同步:** playIdle() 添加 0-400ms 随机延迟 + onStart 重捕获 baseY
+- **武器模板差异化:** 法师 orb 扩大+紫蓝色, 牧师 cross 加宽+明亮金色
+- **状态效果点击提示:** 点击状态图标弹出详情面板 (名称/数值/剩余时间)
+
+**平衡调整:**
+- 牧师能量加速: 被动充能 ×1.5 (CLERIC_ENERGY_MULTIPLIER)
+- 人类羁绊增强: 2 人门槛 +5% → +10% 攻防
+- 暗影打击增强: 30+0.7x → 45+1.0x (缩小与 backstab 差距)
+
+**基础设施:**
+- 移除未使用的 Theme.fonts (被 TextFactory 替代)
+
+### v1.16.0 — 每日挑战体验优化 (Mar 15)
+
+**问题:** 每日挑战与普通游戏几乎无可感知差异——规则不可见、无视觉区分、规则池太小、分数无对比意义
+
+**解决方案 (4 个特性):**
+- **规则预览面板:** 点击"每日挑战"后弹出模态面板，展示标题、难度、规则列表，确认后开始
+- **扩展规则池 (3→7):** 新增 double_crit (暴击×2), gold_rush (金币×2+敌人HP+30%), element_chaos (英雄元素随机化), speed_frenzy (攻速+30%)。gold_rush/gold_modifier 互斥
+- **游戏内视觉指示:** MapScene 金色规则横幅 + BattleScene 金色边框
+- **模拟排行榜:** 从每日种子生成 5 个幽灵分数，玩家分数插入排名。确定性 (同天同分数)，20 个中文名池
+
+---
+
 ## 八、经验总结
 
 ### 8.1 高效的用户-AI协作模式
@@ -836,11 +921,16 @@ src/
 
 | 指标 | 数值 |
 |------|------|
-| 用户消息总数 | ~60条 |
-| Claude会话数 | 20+ |
+| 用户消息总数 | ~80条 |
+| Claude会话数 | 25+ |
 | Agent Swarm次数 | 10次 |
+| Subagent任务数 | 50+ (v1.11.0~v1.16.0) |
 | 最大Agent数 | 5 (研究/测试) |
 | Bug发现总数 | 100+ |
-| 测试用例 | 841 (62套件) |
-| 代码行数 | 35,000+ |
-| 开发耗时 | ~16天 |
+| 测试用例 | 977 (77套件) |
+| 英雄数 | 26 |
+| 技能数 | 92 |
+| 事件数 | 49 |
+| 代码行数 | 40,000+ |
+| 版本数 | v1.0.0 ~ v1.16.0 |
+| 开发耗时 | ~18天 |
