@@ -14,7 +14,7 @@ export class StatusEffectSystem {
    * Handles DoT/HoT, buff/debuff expiration, stun duration.
    */
   static tick(unit: Unit, delta: number): void {
-    if (!unit.isAlive) return;
+    if (!unit.isAlive || unit.statusEffects.length === 0) return;
 
     const dt = delta / 1000;
     const expiredIndices: number[] = [];

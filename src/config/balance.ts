@@ -42,6 +42,10 @@ export const ELITE_BATTLE_GOLD_MIN = 40;
 export const ELITE_BATTLE_GOLD_MAX = 65;
 export const BOSS_BATTLE_GOLD = 120;
 
+// ============ Boss ============
+
+export const MAX_ENEMIES = 10; // 场上敌人安全上限（含 boss）
+
 // ============ Map ============
 
 export const MAP_NODE_COUNT = 15;

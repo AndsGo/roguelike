@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { BossPhaseSystem } from '../../src/systems/BossPhaseSystem';
 import { EventBus } from '../../src/systems/EventBus';
+import { MAX_ENEMIES } from '../../src/config/balance';
 
 // Minimal Enemy mock
 function makeBossUnit(maxHp: number) {
@@ -89,6 +90,12 @@ describe('BossPhaseSystem', () => {
     expect(handler).not.toHaveBeenCalled();
 
     system.deactivate();
+  });
+
+  it('MAX_ENEMIES constant is defined and reasonable', () => {
+    expect(MAX_ENEMIES).toBe(10);
+    // heart_of_the_forge spawns max 6 adds + boss + 1-2 initial = 8-9, under cap
+    expect(MAX_ENEMIES).toBeGreaterThanOrEqual(9);
   });
 
   it('deactivate removes listener', () => {

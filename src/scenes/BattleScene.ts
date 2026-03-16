@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { GAME_WIDTH, GAME_HEIGHT, BATTLE_GROUND_Y, HERO_START_X, ENEMY_START_X, UNIT_SPACING_Y, FRONT_ROW_X, BACK_ROW_X } from '../constants';
+import { GAME_WIDTH, GAME_HEIGHT, BATTLE_GROUND_Y, HERO_START_X, ENEMY_START_X, UNIT_SPACING_Y, FRONT_ROW_X, BACK_ROW_X, MAX_ENEMIES } from '../constants';
 import { RunManager } from '../managers/RunManager';
 import { BattleSystem } from '../systems/BattleSystem';
 import { Hero } from '../entities/Hero';
@@ -585,18 +585,35 @@ export class BattleScene extends Phaser.Scene {
       const aliveEnemies = this.allUnits.filter(u => u instanceof Enemy && u.isAlive);
       const bossUnit = aliveEnemies.find(u => (u as Enemy).isBoss) as Enemy | undefined;
       const spawnLevel = bossUnit?.level ?? 1;
+      let currentEnemyCount = aliveEnemies.length;
 
       for (let i = 0; i < data.spawns.length; i++) {
+        // 安全上限检查：场上敌人不超过 MAX_ENEMIES
+        if (currentEnemyCount >= MAX_ENEMIES) break;
+
         const spawnData = (enemiesData as EnemyData[]).find(e => e.id === data.spawns[i]);
         if (!spawnData) continue;
 
-        const yIndex = aliveEnemies.length + i;
-        const x = ENEMY_START_X + 40;
+        const yIndex = currentEnemyCount + i;
+        const targetX = ENEMY_START_X + 40;
         const y = BATTLE_GROUND_Y - ((yIndex - 1) / 2) * UNIT_SPACING_Y;
 
-        const enemy = new Enemy(this, x, y, spawnData, spawnLevel);
-        this.allUnits.push(enemy);
-        this.battleSystem.addUnit(enemy);
+        // 从屏幕右侧滑入，分批延迟入场
+        const enemy = new Enemy(this, WAVE_TRANSITION.SLIDE_START_X, y, spawnData, spawnLevel);
+        const delay = i * 300;
+
+        this.time.delayedCall(delay, () => {
+          this.allUnits.push(enemy);
+          this.battleSystem.addUnit(enemy);
+          this.tweens.add({
+            targets: enemy,
+            x: targetX,
+            duration: WAVE_TRANSITION.SLIDE_DURATION,
+            ease: 'Power2',
+          });
+        });
+
+        currentEnemyCount++;
       }
 
       // Apply boss effect
