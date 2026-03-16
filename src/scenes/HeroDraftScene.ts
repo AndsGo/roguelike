@@ -16,7 +16,7 @@ import { TextFactory } from '../ui/TextFactory';
 const BASE_MAX_SELECTION = 3;
 const MIN_SELECTION = 2;
 const CARD_W = 74;
-const CARD_H = 110;
+const CARD_H = 100;
 const CARD_GAP = 4;
 const COLS = 10;
 
@@ -67,30 +67,22 @@ export class HeroDraftScene extends Phaser.Scene {
     const allHeroes = heroesData as HeroData[];
     const unlockedHeroes = MetaManager.getUnlockedHeroes();
 
-    // Calculate grid layout
+    // Dynamic multi-row grid layout
     const totalCards = allHeroes.length;
-    const row1Count = Math.min(COLS, totalCards);
-    const row2Count = totalCards - row1Count;
-    const gridStartY = 56;
+    const rowCount = Math.ceil(totalCards / COLS);
+    const gridStartY = 52;
 
-    // Row 1
-    const row1Width = row1Count * (CARD_W + CARD_GAP) - CARD_GAP;
-    const row1StartX = GAME_WIDTH / 2 - row1Width / 2;
-    for (let i = 0; i < row1Count; i++) {
-      const hero = allHeroes[i];
-      const x = row1StartX + i * (CARD_W + CARD_GAP) + CARD_W / 2;
-      const y = gridStartY + CARD_H / 2;
-      this.createHeroCard(hero, x, y, unlockedHeroes.includes(hero.id));
-    }
+    for (let row = 0; row < rowCount; row++) {
+      const rowStart = row * COLS;
+      const rowEnd = Math.min(rowStart + COLS, totalCards);
+      const colsInRow = rowEnd - rowStart;
+      const rowWidth = colsInRow * (CARD_W + CARD_GAP) - CARD_GAP;
+      const rowStartX = GAME_WIDTH / 2 - rowWidth / 2;
 
-    // Row 2
-    if (row2Count > 0) {
-      const row2Width = row2Count * (CARD_W + CARD_GAP) - CARD_GAP;
-      const row2StartX = GAME_WIDTH / 2 - row2Width / 2;
-      for (let i = 0; i < row2Count; i++) {
-        const hero = allHeroes[row1Count + i];
-        const x = row2StartX + i * (CARD_W + CARD_GAP) + CARD_W / 2;
-        const y = gridStartY + CARD_H + CARD_GAP + CARD_H / 2;
+      for (let col = 0; col < colsInRow; col++) {
+        const hero = allHeroes[rowStart + col];
+        const x = rowStartX + col * (CARD_W + CARD_GAP) + CARD_W / 2;
+        const y = gridStartY + row * (CARD_H + CARD_GAP) + CARD_H / 2;
         this.createHeroCard(hero, x, y, unlockedHeroes.includes(hero.id));
       }
     }
