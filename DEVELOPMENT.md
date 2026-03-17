@@ -6,11 +6,11 @@
 
 | 项目 | 数据 |
 |------|------|
-| 开发周期 | 2026-02-26 ~ 2026-03-15 |
-| Claude 会话数 | 25+ 次 |
-| Git 提交数 | 100+ |
+| 开发周期 | 2026-02-26 ~ 2026-03-17 |
+| Claude 会话数 | 28+ 次 |
+| Git 提交数 | 210+ |
 | 代码规模 | 200+ 文件, 40,000+ 行 |
-| 测试用例 | 977 (77 个测试套件) |
+| 测试用例 | 978 (78 个测试套件) |
 | 技术栈 | TypeScript + Phaser 3 + Vite |
 
 ---
@@ -110,6 +110,14 @@ Day 16-17 (Mar 14-15) — 评估报告驱动的系统性优化
  ├─ v1.15.0: Phase 4 视觉打磨 (TextFactory 280调用迁移/治疗闪光/武器模板/状态提示/平衡)
  └─ v1.16.0: 每日挑战增强 (规则预览/7种修饰/视觉指示/模拟排行榜)
      → 977 测试通过, 77 套件, 零 TypeScript 错误
+
+Day 18-19 (Mar 16-17) — 移动端适配与稳定性修复
+ ├─ v1.17.0: 移动浏览器适配 (FIT缩放 + 横屏锁定 + 旋转提示 + 触控CSS)
+ ├─ Boss 召唤安全上限 (MAX_ENEMIES=10) + 分批入场动画
+ ├─ 战斗性能优化 (StatusEffectSystem 空数组跳过)
+ ├─ 英雄选择界面溢出修复 (动态多行网格, 支持 26+ 英雄)
+ └─ 截图更新 + README/DEVELOPMENT 文档更新
+     → 978 测试通过, 78 套件, 零 TypeScript 错误
 ```
 
 ---
@@ -886,6 +894,28 @@ src/
 - **游戏内视觉指示:** MapScene 金色规则横幅 + BattleScene 金色边框
 - **模拟排行榜:** 从每日种子生成 5 个幽灵分数，玩家分数插入排名。确定性 (同天同分数)，20 个中文名池
 
+### v1.17.0 — 移动端适配与稳定性修复 (Mar 16-17)
+
+**移动浏览器适配 (仅修改 index.html):**
+- viewport meta: `maximum-scale=1.0, user-scalable=no, viewport-fit=cover` 禁止缩放
+- 横屏锁定: 首次 `touchend` 请求全屏 + `screen.orientation.lock('landscape')`
+- iOS 旋转提示: CSS media query 在手机竖屏时显示遮罩 (`max-width: 768px`)
+- 触控 CSS: `touch-action: none` (body) + `touch-action: manipulation` (canvas)
+- 保持 FIT 缩放模式不变 (ENVELOP 在 19.5:9 手机上裁切 ~87px/侧，不可接受)
+
+**Boss 召唤安全上限:**
+- `MAX_ENEMIES = 10` 常量 (balance.ts)，防止异常大量敌人生成
+- `onBossPhase` 召唤前检查存活敌人数，超限跳过召唤但保留 boss effect
+- 召唤物分批入场: 300ms stagger + 从右侧滑入动画 (复用 WAVE_TRANSITION 参数)
+
+**性能优化:**
+- `StatusEffectSystem.tick()` 对无状态效果的单位提前 return，减少无谓循环
+
+**英雄选择界面修复:**
+- CARD_H 110→100px，gridStartY 56→52
+- 硬编码 2 行布局改为动态 N 行: `Math.ceil(total/COLS)` 行循环
+- 26 个英雄排列为 10+10+6 三行，底部 360px 离面板 380px 有 20px 余量
+
 ---
 
 ## 八、经验总结
@@ -927,10 +957,10 @@ src/
 | Subagent任务数 | 50+ (v1.11.0~v1.16.0) |
 | 最大Agent数 | 5 (研究/测试) |
 | Bug发现总数 | 100+ |
-| 测试用例 | 977 (77套件) |
+| 测试用例 | 978 (78套件) |
 | 英雄数 | 26 |
 | 技能数 | 92 |
 | 事件数 | 49 |
 | 代码行数 | 40,000+ |
-| 版本数 | v1.0.0 ~ v1.16.0 |
-| 开发耗时 | ~18天 |
+| 版本数 | v1.0.0 ~ v1.17.0 |
+| 开发耗时 | ~20天 |
