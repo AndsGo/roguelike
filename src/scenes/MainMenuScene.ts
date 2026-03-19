@@ -506,13 +506,7 @@ export class MainMenuScene extends Phaser.Scene {
   private renderUpgradeContent(panel: Panel): void {
     const upgrades = MetaManager.PERMANENT_UPGRADES;
 
-    const UPGRADE_COSTS: Record<string, number[]> = {
-      starting_gold: [50, 100, 200, 400, 800],
-      starting_hp: [50, 100, 200, 400, 800],
-      exp_bonus: [50, 100, 200, 400, 800],
-      crit_bonus: [100, 300, 600],
-      relic_chance: [100, 300, 600],
-    };
+    const UPGRADE_COSTS = MetaManager.UPGRADE_COSTS;
 
     const currency = MetaManager.getMetaCurrency();
 

@@ -42,7 +42,7 @@
     "icon": "star",
     "reward": { "type": "meta_currency", "value": 500 },
     "conditionType": "heroes_count",
-    "conditionParams": { "threshold": 20 }
+    "conditionParams": { "threshold": 26 }
   },
   {
     "id": "floor_10",

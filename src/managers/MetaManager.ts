@@ -20,7 +20,7 @@ export class MetaManager {
   private meta!: MetaProgressionData;
 
   /** Cost per level for each upgrade (meta currency) */
-  private static UPGRADE_COSTS: Record<string, number[]> = {
+  static UPGRADE_COSTS: Record<string, number[]> = {
     starting_gold: [50, 80, 150, 300, 600],
     starting_hp: [50, 80, 150, 300, 600],
     exp_bonus: [50, 80, 150, 300, 600],
@@ -91,10 +91,10 @@ export class MetaManager {
     thunder_monk: { type: 'full_element_team', element: 'lightning', description: 'Win with mono-lightning team' },
     elemental_weaver: { type: 'victory', threshold: 3, description: 'Win 3 runs' },
     forest_stalker: { type: 'hero_used', heroId: 'beast_warden', threshold: 3, description: 'Use beast_warden in 3 runs' },
-    magma_warden: { type: 'full_element_team', element: 'fire', description: 'Win with mono-fire team' },
+    magma_warden: { type: 'relic_count', threshold: 10, description: 'Finish with 10+ relics' },
     storm_falcon: { type: 'element_wins', element: 'lightning', threshold: 5, description: 'Win 5 runs with lightning heroes' },
     frost_whisperer: { type: 'element_wins', element: 'ice', threshold: 3, description: '使用冰属性英雄获胜3次' },
-    holy_emissary: { type: 'victory', threshold: 3, description: 'Win 3 runs' },
+    holy_emissary: { type: 'victory', threshold: 5, description: 'Win 5 runs' },
     ice_dragon_hunter: { type: 'boss_kill', threshold: 1, bossId: 'frost_queen', description: '击败冰霜女王' },
   };
 

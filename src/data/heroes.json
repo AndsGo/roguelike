@@ -134,10 +134,10 @@
       "magicPower": 0,
       "magicResist": 12,
       "speed": 120,
-      "attackSpeed": 1.4,
+      "attackSpeed": 1.25,
       "attackRange": 50,
       "critChance": 0.25,
-      "critDamage": 2.0
+      "critDamage": 1.8
     },
     "scalingPerLevel": {
       "maxHp": 25,
@@ -321,7 +321,7 @@
     },
     "scalingPerLevel": {
       "maxHp": 35,
-      "attack": 10,
+      "attack": 8,
       "defense": 2,
       "magicPower": 0,
       "magicResist": 1
@@ -404,7 +404,7 @@
       "magicPower": 35,
       "magicResist": 25,
       "speed": 90,
-      "attackSpeed": 1.0,
+      "attackSpeed": 1.15,
       "attackRange": 50,
       "critChance": 0.12,
       "critDamage": 1.7

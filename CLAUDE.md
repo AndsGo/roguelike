@@ -68,7 +68,7 @@ Units are 16×20 pixel grids composited from layered templates (`src/data/pixel-
 
 ### Data Files
 
-All game content is in `src/data/` as JSON: heroes (19), enemies (21), skills (46), items (48), relics (35), events (34), achievements (25), acts (3). Type interfaces in `src/types/index.ts`.
+All game content is in `src/data/` as JSON: heroes (26), enemies (28), skills (93), items (52), relics (48), events (49), achievements (26), acts (4). Type interfaces in `src/types/index.ts`.
 
 ### Seeded RNG
 
@@ -82,7 +82,7 @@ All game content is in `src/data/` as JSON: heroes (19), enemies (21), skills (4
 
 **Test helpers:** `tests/helpers/scene-harness.ts` — `createScene()`, `tickFrames()`, `findText()`.
 
-**44 test suites, 615 tests.** Key test categories:
+**78 test suites, 978 tests.** Key test categories:
 - Content integrity (cross-reference validation between heroes/skills/items)
 - Manager unit tests (RunManager, SaveManager, MetaManager, StatsManager)
 - System tests (BattleEffects, DamageSystem, StatusEffects, Difficulty)
