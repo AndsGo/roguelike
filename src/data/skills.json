@@ -36,7 +36,7 @@
     "targetType": "all_enemies",
     "baseDamage": 30,
     "scalingStat": "attack",
-    "scalingRatio": 0.6,
+    "scalingRatio": 0.75,
     "range": 250,
     "aoeRadius": 0
   },

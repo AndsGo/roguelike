@@ -68,8 +68,8 @@
     "element": "dark",
     "race": "undead",
     "baseStats": {
-      "maxHp": 160,
-      "hp": 160,
+      "maxHp": 280,
+      "hp": 280,
       "attack": 38,
       "defense": 8,
       "magicPower": 0,
@@ -99,8 +99,8 @@
     "element": "dark",
     "race": "undead",
     "baseStats": {
-      "maxHp": 150,
-      "hp": 150,
+      "maxHp": 260,
+      "hp": 260,
       "attack": 10,
       "defense": 8,
       "magicPower": 50,
@@ -442,8 +442,8 @@
     "element": "dark",
     "race": "undead",
     "baseStats": {
-      "maxHp": 200,
-      "hp": 200,
+      "maxHp": 320,
+      "hp": 320,
       "attack": 28,
       "defense": 8,
       "magicPower": 45,
@@ -473,8 +473,8 @@
     "element": "dark",
     "race": "human",
     "baseStats": {
-      "maxHp": 240,
-      "hp": 240,
+      "maxHp": 340,
+      "hp": 340,
       "attack": 15,
       "defense": 14,
       "magicPower": 48,

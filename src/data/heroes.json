@@ -194,10 +194,10 @@
       "magicPower": 0,
       "magicResist": 10,
       "speed": 130,
-      "attackSpeed": 1.35,
+      "attackSpeed": 1.3,
       "attackRange": 50,
       "critChance": 0.22,
-      "critDamage": 2.0
+      "critDamage": 1.85
     },
     "scalingPerLevel": {
       "maxHp": 22,
@@ -681,7 +681,7 @@
     },
     "scalingPerLevel": {
       "maxHp": 30,
-      "attack": 4.5,
+      "attack": 6,
       "defense": 1,
       "magicPower": 2.5,
       "magicResist": 1

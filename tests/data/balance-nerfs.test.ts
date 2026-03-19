@@ -13,9 +13,9 @@ describe('v1.12.0 Balance Nerfs', () => {
     expect(hero.baseStats.attack).toBe(58);
   });
 
-  it('shadow_assassin critDamage nerfed to 2.0', () => {
+  it('shadow_assassin critDamage nerfed to 1.85', () => {
     const hero = heroes.find(h => h.id === 'shadow_assassin')!;
-    expect(hero.baseStats.critDamage).toBe(2.0);
+    expect(hero.baseStats.critDamage).toBe(1.85);
   });
 
   it('forest_stalker attack nerfed to 62', () => {
