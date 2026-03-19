@@ -108,6 +108,7 @@ src/
 
 | 版本 | 主要内容 |
 |------|---------|
+| v1.18.2 | 第三轮评估：rogue/berserker nerf、dragon_knight buff、UPGRADE_COSTS统一、解锁条件差异化 |
 | v1.18.1 | 第二轮评估修复：frost_queen HP同步、shadow_assassin进一步nerf、Act4难度调整、教程触发补全 |
 | v1.18.0 | 体验报告驱动修复：数据完整性、战斗平衡、UX/UI 全面优化 |
 | v1.17.0 | Boss 召唤安全上限、战斗性能优化、英雄选择溢出修复、移动端浏览器适配 |
