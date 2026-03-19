@@ -41,6 +41,6 @@
     "bossPool": ["heart_of_the_forge"],
     "eventPool": ["forge_trial", "element_shard", "master_smith", "ancient_altar", "blacksmith", "elemental_rift", "elemental_shrine"],
     "elementAffinity": null,
-    "difficultyMultiplier": 2.2
+    "difficultyMultiplier": 2.0
   }
 ]

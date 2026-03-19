@@ -567,7 +567,7 @@
     "race": "elf",
     "baseStats": {
       "maxHp": 2800,
-      "hp": 2400,
+      "hp": 2800,
       "attack": 30,
       "defense": 35,
       "magicPower": 100,

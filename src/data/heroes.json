@@ -201,7 +201,7 @@
     },
     "scalingPerLevel": {
       "maxHp": 22,
-      "attack": 9,
+      "attack": 7,
       "defense": 1,
       "magicPower": 0,
       "magicResist": 1

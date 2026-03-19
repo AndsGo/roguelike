@@ -314,10 +314,10 @@
   {
     "id": "mono_element_crown",
     "name": "元素统一王冠",
-    "description": "全队同元素时伤害+40%",
+    "description": "全队同元素时伤害+28%",
     "rarity": "legendary",
     "triggerEvent": "battle:start",
-    "effect": { "type": "passive", "value": 0.4 }
+    "effect": { "type": "passive", "value": 0.28 }
   },
   {
     "id": "diversity_badge",

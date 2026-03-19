@@ -740,6 +740,18 @@ export class BattleScene extends Phaser.Scene {
     });
 
     TutorialSystem.showTipIfNeeded(this, 'first_battle');
+
+    // Trigger elite/boss tutorial tips based on node type
+    if (node.type === 'elite') {
+      TutorialSystem.showTipIfNeeded(this, 'first_elite');
+    } else if (node.type === 'boss') {
+      TutorialSystem.showTipIfNeeded(this, 'first_boss');
+    }
+
+    // Trigger synergy tutorial tip if any synergies are active
+    if (rm.getState().activeSynergies && rm.getState().activeSynergies.length > 0) {
+      TutorialSystem.showTipIfNeeded(this, 'first_synergy');
+    }
   }
 
   private enterTargetingMode(unitId: string, skillId: string, targetType: string): void {
