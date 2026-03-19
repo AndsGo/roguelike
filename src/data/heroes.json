@@ -194,9 +194,9 @@
       "magicPower": 0,
       "magicResist": 10,
       "speed": 130,
-      "attackSpeed": 1.5,
+      "attackSpeed": 1.35,
       "attackRange": 50,
-      "critChance": 0.28,
+      "critChance": 0.22,
       "critDamage": 2.0
     },
     "scalingPerLevel": {

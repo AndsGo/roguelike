@@ -38,9 +38,9 @@ describe('v1.12.0 Balance Nerfs', () => {
     expect(skill.scalingRatio).toBe(2.0);
   });
 
-  it('glass_cannon effect value nerfed to 0.4', () => {
+  it('glass_cannon effect value nerfed to 0.25', () => {
     const relic = relics.find(r => r.id === 'glass_cannon')!;
-    expect(relic.effect.value).toBe(0.4);
+    expect(relic.effect.value).toBe(0.25);
   });
 
   it('overflow_shield effect value nerfed to 0.1', () => {

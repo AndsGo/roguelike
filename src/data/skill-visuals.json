@@ -72,6 +72,7 @@
   "lightning_volley": { "type": "projectile", "color": "0x88aaff", "count": 3 },
   "static_charge": { "type": "projectile", "color": "0xaaccff" },
   "ult_thunderstrike_barrage": { "type": "projectile", "color": "0x4488ff", "count": 5 },
+  "shadow_arrow": { "type": "projectile", "color": "0x8844aa" },
   "forge_fire_strike": { "type": "melee_impact", "color": "0xff4400" },
   "frost_guard": { "type": "aoe_self", "color": "0x88ddff" },
   "spark_barrage": { "type": "projectile", "color": "0x88aaff", "count": 2 },

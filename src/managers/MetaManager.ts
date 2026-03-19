@@ -77,7 +77,7 @@ export class MetaManager {
     rogue: { type: 'default', description: 'Default hero' },
     knight: { type: 'runs', threshold: 5, description: 'Complete 5 runs' },
     shadow_assassin: { type: 'victory', threshold: 2, description: 'Win 2 runs' },
-    elementalist: { type: 'element_wins', element: 'lightning', threshold: 2, description: 'Win with 2+ lightning heroes' },
+    elementalist: { type: 'element_wins', element: 'lightning', threshold: 3, description: 'Win with 3+ lightning heroes' },
     druid: { type: 'no_healer_win', description: 'Win without a healer' },
     necromancer: { type: 'boss_kill', bossId: 'thunder_titan', description: 'Defeat Thunder Titan' },
     berserker: { type: 'relic_count', threshold: 8, description: 'Finish with 8+ relics' },
@@ -91,10 +91,10 @@ export class MetaManager {
     thunder_monk: { type: 'full_element_team', element: 'lightning', description: 'Win with mono-lightning team' },
     elemental_weaver: { type: 'victory', threshold: 3, description: 'Win 3 runs' },
     forest_stalker: { type: 'hero_used', heroId: 'beast_warden', threshold: 3, description: 'Use beast_warden in 3 runs' },
-    magma_warden: { type: 'boss_kill', bossId: 'thunder_titan', description: 'Defeat Thunder Titan' },
+    magma_warden: { type: 'boss_kill', bossId: 'shadow_lord', description: 'Defeat Shadow Lord' },
     storm_falcon: { type: 'element_wins', element: 'lightning', threshold: 5, description: 'Win 5 runs with lightning heroes' },
     frost_whisperer: { type: 'element_wins', element: 'ice', threshold: 3, description: '使用冰属性英雄获胜3次' },
-    holy_emissary: { type: 'hero_used', heroId: 'knight', description: '使用骑士获胜一次' },
+    holy_emissary: { type: 'victory', threshold: 3, description: 'Win 3 runs' },
     ice_dragon_hunter: { type: 'boss_kill', threshold: 1, bossId: 'frost_queen', description: '击败冰霜女王' },
   };
 

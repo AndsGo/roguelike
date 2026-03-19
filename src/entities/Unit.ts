@@ -31,6 +31,10 @@ export class Unit extends Phaser.GameObjects.Container {
   // Stat modifiers from synergies/relics (added to getEffectiveStats pipeline)
   synergyBonuses: Partial<UnitStats> = {};
 
+  // Effective stats cache (dirty-flag optimization)
+  private _effectiveStatsCache: UnitStats | null = null;
+  private _statsDirty: boolean = true;
+
   // Combat state
   isAlive: boolean = true;
   attackCooldownTimer: number = 0;
@@ -214,10 +218,20 @@ export class Unit extends Phaser.GameObjects.Container {
     this.healthBar.setY(this.spriteHeight / 2 + 4);
   }
 
+  /** Mark effective stats cache as stale (call when statusEffects, synergyBonuses, or relics change) */
+  invalidateStats(): void {
+    this._statsDirty = true;
+    this._effectiveStatsCache = null;
+  }
+
   /**
    * Effective stats pipeline: base + equipment/level (currentStats) + buff/debuff + synergy
    */
   getEffectiveStats(): UnitStats {
+    if (!this._statsDirty && this._effectiveStatsCache) {
+      return this._effectiveStatsCache;
+    }
+
     const stats = { ...this.currentStats };
 
     // Apply buff/debuff status effects
@@ -253,6 +267,8 @@ export class Unit extends Phaser.GameObjects.Container {
       }
     }
 
+    this._effectiveStatsCache = stats;
+    this._statsDirty = false;
     return stats;
   }
 

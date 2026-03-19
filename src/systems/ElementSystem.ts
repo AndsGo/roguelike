@@ -13,6 +13,7 @@ import { Unit } from '../entities/Unit';
 import { RelicSystem } from './RelicSystem';
 import { SeededRNG } from '../utils/rng';
 import { MetaManager } from '../managers/MetaManager';
+import { nextEffectId } from '../utils/id-generator';
 
 /**
  * Handles element-based combat mechanics:
@@ -105,7 +106,7 @@ export class ElementSystem {
     // Apply reaction status effect if defined
     if (reaction.statusEffect && reaction.duration) {
       const statusEffect: StatusEffect = {
-        id: `reaction_${reaction.name}_${Date.now()}`,
+        id: nextEffectId(`reaction_${reaction.name}`),
         type: 'debuff',
         name: reaction.statusEffect,
         duration: reaction.duration,
@@ -114,6 +115,7 @@ export class ElementSystem {
         element: incomingElement,
       };
       target.statusEffects.push(statusEffect);
+      target.invalidateStats();
     }
 
     // --- Relic reaction-bound secondary effects ---
@@ -121,7 +123,7 @@ export class ElementSystem {
     // fire_emblem: burn DoT on melt (fire+ice)
     if (reaction.name === '融化' && RelicSystem.hasRelic('fire_emblem') && reactionDamage > 0) {
       const burnDot: StatusEffect = {
-        id: `fire_emblem_burn_${Date.now()}`,
+        id: nextEffectId('fire_emblem_burn'),
         type: 'dot',
         name: 'burn',
         duration: 3,
@@ -129,6 +131,7 @@ export class ElementSystem {
         element: 'fire',
       };
       target.statusEffects.push(burnDot);
+      target.invalidateStats();
     }
 
     // ice_crystal_pendant: extend defense_down on superconduct (ice+lightning)
@@ -166,7 +169,7 @@ export class ElementSystem {
       if (spreadTargets.length > 0) {
         const spreadTarget = spreadTargets[0];
         const spreadEffect: StatusEffect = {
-          id: `reaction_chain_${Date.now()}`,
+          id: nextEffectId('reaction_chain'),
           type: 'debuff',
           name: `element_${incomingElement}`,
           duration: 3,
@@ -174,6 +177,7 @@ export class ElementSystem {
           element: incomingElement,
         };
         spreadTarget.statusEffects.push(spreadEffect);
+        spreadTarget.invalidateStats();
       }
     }
 

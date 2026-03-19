@@ -170,9 +170,9 @@ describe('SynergySystem', () => {
     ]);
 
     const result = synergy.calculateActiveSynergies(heroes, dataMap);
-    // Dragon (2): +25% all damage
+    // Dragon (2): +18% all damage
     const dmgBonus = result.damageBonuses.get('all');
-    expect(dmgBonus).toBe(0.25);
+    expect(dmgBonus).toBe(0.18);
   });
 
   it('reset clears the cache', () => {
@@ -241,15 +241,15 @@ describe('SynergySystem', () => {
       makeHeroState('h3'), makeHeroState('h4'),
     ];
     const dataMap = new Map<string, HeroData>([
-      ['h1', makeHeroData('h1', { race: 'dragon' })], // dragon (2): +25% all damage
+      ['h1', makeHeroData('h1', { race: 'dragon' })], // dragon (2): +18% all damage
       ['h2', makeHeroData('h2', { race: 'dragon' })],
       ['h3', makeHeroData('h3', { race: 'undead' })], // undead needs 4 for dark damage bonus
       ['h4', makeHeroData('h4', { race: 'undead' })],
     ]);
 
     synergy.calculateActiveSynergies(heroes, dataMap);
-    // Dragon gives 0.25 to 'all'
+    // Dragon gives 0.18 to 'all'
     const mult = synergy.getSynergyDamageMultiplier('fire');
-    expect(mult).toBeCloseTo(1.25); // 1.0 + 0.25 (all)
+    expect(mult).toBeCloseTo(1.18); // 1.0 + 0.18 (all)
   });
 });

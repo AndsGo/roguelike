@@ -171,9 +171,21 @@ class SkillSlot extends Phaser.GameObjects.Container {
     this.add(this.cdOverlay);
 
     // Interactive hit area
+    let pressX = 0;
+    let pressY = 0;
     const hitArea = scene.add.rectangle(SLOT_SIZE / 2, SLOT_SIZE / 2, SLOT_SIZE + 4, SLOT_SIZE + 4, 0x000000, 0)
       .setInteractive({ useHandCursor: true });
-    hitArea.on('pointerdown', () => this.tryFire());
+    hitArea.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
+      pressX = pointer.x;
+      pressY = pointer.y;
+    });
+    hitArea.on('pointerup', (pointer: Phaser.Input.Pointer) => {
+      const dx = pointer.x - pressX;
+      const dy = pointer.y - pressY;
+      if (dx * dx + dy * dy < 400) { // < 20px movement
+        this.tryFire();
+      }
+    });
     hitArea.on('pointerover', () => this.showTooltip());
     hitArea.on('pointerout', () => this.hideTooltip());
     this.add(hitArea);

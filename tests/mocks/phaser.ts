@@ -208,6 +208,10 @@ export function createMockUnit(overrides: {
     isInRange(other: { x: number; y: number }) {
       return this.distanceTo(other) <= this.getEffectiveStats().attackRange;
     },
+
+    invalidateStats() {
+      // no-op for mock
+    },
   };
 
   return unit;

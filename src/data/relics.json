@@ -306,10 +306,10 @@
   {
     "id": "glass_cannon",
     "name": "玻璃大炮",
-    "description": "攻击+40%，受到伤害+30%",
+    "description": "攻击+25%，受到伤害+30%",
     "rarity": "legendary",
     "triggerEvent": "unit:damage",
-    "effect": { "type": "formula_mod", "value": 0.4 }
+    "effect": { "type": "formula_mod", "value": 0.25 }
   },
   {
     "id": "mono_element_crown",

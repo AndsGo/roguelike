@@ -79,8 +79,11 @@ export class StatusEffectSystem {
     }
 
     // Remove expired effects (reverse order)
-    for (let i = expiredIndices.length - 1; i >= 0; i--) {
-      unit.statusEffects.splice(expiredIndices[i], 1);
+    if (expiredIndices.length > 0) {
+      for (let i = expiredIndices.length - 1; i >= 0; i--) {
+        unit.statusEffects.splice(expiredIndices[i], 1);
+      }
+      unit.invalidateStats();
     }
   }
 }

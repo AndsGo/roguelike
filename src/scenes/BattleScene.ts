@@ -629,6 +629,7 @@ export class BattleScene extends Phaser.Scene {
                 stat: 'defense', value: 9999,
                 duration: data.effect.value / 1000,
               });
+              boss.invalidateStats();
               this.effects.showSkillName(boss.x, boss.y - 40, UI.battle.bossShield, 0x44aaff);
               break;
             case 'enrage':
@@ -637,6 +638,7 @@ export class BattleScene extends Phaser.Scene {
                 stat: 'attack', value: data.effect.value,
                 duration: 999,
               });
+              boss.invalidateStats();
               this.effects.showSkillName(boss.x, boss.y - 40, UI.battle.bossEnrage, 0xff4444);
               break;
             case 'damage_reduction':
@@ -645,6 +647,7 @@ export class BattleScene extends Phaser.Scene {
                 stat: 'defense', value: data.effect.value,
                 duration: 999,
               });
+              boss.invalidateStats();
               this.effects.showSkillName(boss.x, boss.y - 40, UI.battle.bossDamageReduction, 0xffaa44);
               break;
           }

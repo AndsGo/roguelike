@@ -105,7 +105,7 @@ export class HeroDraftScene extends Phaser.Scene {
       () => this.startRun(),
       Theme.colors.primary,
     );
-    this.startBtn.setAlpha(0.4);
+    this.startBtn.setEnabled(false);
 
     // Back button
     new Button(
@@ -270,7 +270,7 @@ export class HeroDraftScene extends Phaser.Scene {
     // Update start button
     const canStart = this.selectedIds.length >= MIN_SELECTION;
     if (this.startBtn) {
-      this.startBtn.setAlpha(canStart ? 1 : 0.4);
+      this.startBtn.setEnabled(canStart);
     }
 
     // Update card borders

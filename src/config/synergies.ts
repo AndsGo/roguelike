@@ -67,7 +67,7 @@ export const SYNERGY_DEFINITIONS: SynergyConfig[] = [
     type: 'race',
     key: 'dragon',
     thresholds: [
-      { count: 2, description: '全伤害+25%', effects: [{ type: 'damage_bonus', value: 0.25 }] },
+      { count: 2, description: '全伤害+18%', effects: [{ type: 'damage_bonus', value: 0.18 }] },
     ],
   },
 
@@ -123,7 +123,7 @@ export const SYNERGY_DEFINITIONS: SynergyConfig[] = [
     key: 'assassin',
     thresholds: [
       { count: 2, description: '暴击率+15%', effects: [{ type: 'stat_boost', stat: 'critChance', value: 0.15 }] },
-      { count: 3, description: '暴击伤害+1.0', effects: [{ type: 'stat_boost', stat: 'critDamage', value: 1.0 }] },
+      { count: 3, description: '暴击伤害+0.5', effects: [{ type: 'stat_boost', stat: 'critDamage', value: 0.5 }] },
     ],
   },
   {

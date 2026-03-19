@@ -751,7 +751,7 @@
     "targetType": "enemy",
     "baseDamage": 300,
     "scalingStat": "attack",
-    "scalingRatio": 2.5,
+    "scalingRatio": 2.0,
     "range": 50,
     "element": "dark",
     "isUltimate": true
@@ -1154,6 +1154,19 @@
     "scalingRatio": 0.8,
     "range": 300,
     "element": "lightning"
+  },
+  {
+    "id": "shadow_arrow",
+    "name": "暗影箭",
+    "description": "发射暗影之箭，造成物理伤害",
+    "cooldown": 6,
+    "damageType": "physical",
+    "targetType": "enemy",
+    "baseDamage": 30,
+    "scalingStat": "attack",
+    "scalingRatio": 0.8,
+    "range": 250,
+    "element": "dark"
   },
   {
     "id": "forge_mend",

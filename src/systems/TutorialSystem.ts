@@ -26,6 +26,7 @@ const TIPS_KEY = 'roguelike_seen_tips';
 export class TutorialSystem {
   private static seenTips: Set<string> = new Set();
   private static initialized = false;
+  private static activeScene: Phaser.Scene | null = null;
 
   static TIPS: TutorialTip[] = [
     {
@@ -109,12 +110,25 @@ export class TutorialSystem {
     const eventTips = TutorialSystem.TIPS.filter(t => t.trigger.includes(':'));
     for (const tip of eventTips) {
       if (tip.trigger === 'element:reaction') {
-        bus.on('element:reaction', () => {});
+        bus.on('element:reaction', () => {
+          if (TutorialSystem.activeScene) {
+            TutorialSystem.showTipIfNeeded(TutorialSystem.activeScene, 'first_element');
+          }
+        });
       }
       if (tip.trigger === 'relic:acquire') {
-        bus.on('relic:acquire', () => {});
+        bus.on('relic:acquire', () => {
+          if (TutorialSystem.activeScene) {
+            TutorialSystem.showTipIfNeeded(TutorialSystem.activeScene, 'first_relic');
+          }
+        });
       }
     }
+  }
+
+  /** Set the currently active scene for event-triggered tips */
+  static setScene(scene: Phaser.Scene): void {
+    TutorialSystem.activeScene = scene;
   }
 
   /**
@@ -122,6 +136,7 @@ export class TutorialSystem {
    * Call this from scenes when entering or on specific triggers.
    */
   static showTipIfNeeded(scene: Phaser.Scene, tipId: string): void {
+    TutorialSystem.activeScene = scene;
     if (TutorialSystem.seenTips.has(tipId)) return;
 
     const tip = TutorialSystem.TIPS.find(t => t.id === tipId);

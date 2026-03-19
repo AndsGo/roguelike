@@ -1,4 +1,13 @@
 {
+  "dragon_boss": {
+    "phases": [
+      {
+        "hpPercent": 0.50,
+        "spawns": [],
+        "bossEffect": { "type": "enrage", "value": 25 }
+      }
+    ]
+  },
   "heart_of_the_forge": {
     "phases": [
       {

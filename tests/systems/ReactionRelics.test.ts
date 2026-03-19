@@ -33,6 +33,7 @@ function createMockUnit(overrides: Record<string, any> = {}) {
     role: overrides.role ?? 'melee_dps',
     element: overrides.element ?? 'fire',
     classType: overrides.classType ?? 'warrior',
+    invalidateStats: vi.fn(),
   } as any;
 }
 

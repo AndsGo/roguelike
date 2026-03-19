@@ -2,6 +2,7 @@ import { RelicState, RelicEffect, UnitStats, GameEventType } from '../types';
 import { EventBus } from './EventBus';
 import { Unit } from '../entities/Unit';
 import { SeededRNG } from '../utils/rng';
+import { nextEffectId } from '../utils/id-generator';
 import relicsData from '../data/relics.json';
 
 interface RelicDef {
@@ -631,12 +632,13 @@ export class RelicSystem {
         // chance% to stun target for 1s
         if (this.rng.chance(def.effect.chance ?? 0.25)) {
           target.statusEffects.push({
-            id: `relic_stun_${Date.now()}`,
+            id: nextEffectId('relic_stun'),
             type: 'stun',
             name: 'stun',
             duration: 1,
             value: 0,
           });
+          target.invalidateStats();
         }
         break;
       }
@@ -660,13 +662,14 @@ export class RelicSystem {
       case 'elemental_resonance': {
         // Apply element resist debuff
         target.statusEffects.push({
-          id: `relic_elres_down_${Date.now()}`,
+          id: nextEffectId('relic_elres_down'),
           type: 'debuff',
           name: 'element_resist_down',
           duration: def.effect.duration ?? 5,
           value: -(def.effect.value ?? 15),
           stat: 'magicResist',
         });
+        target.invalidateStats();
         break;
       }
     }

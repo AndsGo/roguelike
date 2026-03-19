@@ -191,8 +191,8 @@ describe('MetaManager', () => {
     }
 
     it('element_wins: unlocks with enough element heroes on victory', () => {
-      // elementalist requires 2+ lightning heroes on victory
-      const ctx = makeContext({ partyElements: ['lightning', 'lightning', 'fire'] });
+      // elementalist requires 3+ lightning heroes on victory
+      const ctx = makeContext({ partyElements: ['lightning', 'lightning', 'lightning'] });
       MetaManager.recordRunEnd(true, 15, ctx);
       expect(MetaManager.isHeroUnlocked('elementalist')).toBe(true);
     });

@@ -9,6 +9,7 @@ import { TargetingSystem } from './TargetingSystem';
 import { MetaManager } from '../managers/MetaManager';
 import skillsData from '../data/skills.json';
 import advancementsData from '../data/skill-advancements.json';
+import { nextEffectId } from '../utils/id-generator';
 
 export class SkillSystem {
   private rng: SeededRNG;
@@ -248,13 +249,14 @@ export class SkillSystem {
     // Special: ult_iron_bastion — apply counter_aura to caster + shield to all allies
     if (skill.id === 'ult_iron_bastion') {
       const counterAura: StatusEffect = {
-        id: `counter_aura_${Date.now()}`,
+        id: nextEffectId('counter_aura'),
         type: 'counter_aura',
         name: 'counter_aura',
         duration: 8,
         value: 0.15,
       };
       unit.statusEffects.push(counterAura);
+      unit.invalidateStats();
 
       const alliedUnits = unit.isHero ? allies : enemies;
       for (const ally of alliedUnits) {
@@ -317,7 +319,7 @@ export class SkillSystem {
       case 'status': {
         if (effect.statusEffectId && effect.statusDuration) {
           const statusEffect: StatusEffect = {
-            id: `${effect.statusEffectId}_${Date.now()}`,
+            id: nextEffectId(effect.statusEffectId),
             type: this.mapEffectType(effect.statusEffectId),
             name: effect.statusEffectId,
             duration: effect.statusDuration,
@@ -325,6 +327,7 @@ export class SkillSystem {
             element: effectElement,
           };
           target.statusEffects.push(statusEffect);
+          target.invalidateStats();
         }
         break;
       }
@@ -344,7 +347,7 @@ export class SkillSystem {
     const effectType = this.mapEffectType(skill.statusEffect!);
     const skillElement = skill.element ?? source.element;
     const effect: StatusEffect = {
-      id: `${skill.statusEffect}_${Date.now()}`,
+      id: nextEffectId(skill.statusEffect!),
       type: effectType,
       name: skill.statusEffect!,
       duration: skill.effectDuration!,
@@ -360,6 +363,7 @@ export class SkillSystem {
     }
 
     target.statusEffects.push(effect);
+    target.invalidateStats();
 
     // Emit status apply event
     EventBus.getInstance().emit('status:apply', {

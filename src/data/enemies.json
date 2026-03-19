@@ -87,7 +87,7 @@
       "magicPower": 0,
       "magicResist": 1
     },
-    "skills": [],
+    "skills": ["shadow_arrow"],
     "spriteKey": "enemy_skeleton_archer",
     "goldReward": 12,
     "expReward": 30
@@ -566,7 +566,7 @@
     "element": "ice",
     "race": "elf",
     "baseStats": {
-      "maxHp": 2400,
+      "maxHp": 2800,
       "hp": 2400,
       "attack": 30,
       "defense": 35,
@@ -660,6 +660,7 @@
     "name": "火焰铸体",
     "role": "melee_dps",
     "element": "fire",
+    "race": "demon",
     "baseStats": {
       "maxHp": 450,
       "hp": 450,
@@ -690,6 +691,7 @@
     "name": "寒冰哨兵",
     "role": "tank",
     "element": "ice",
+    "race": "demon",
     "baseStats": {
       "maxHp": 700,
       "hp": 700,
@@ -720,6 +722,7 @@
     "name": "雷光行者",
     "role": "ranged_dps",
     "element": "lightning",
+    "race": "beast",
     "baseStats": {
       "maxHp": 350,
       "hp": 350,
@@ -750,6 +753,7 @@
     "name": "圣光铸师",
     "role": "healer",
     "element": "holy",
+    "race": "human",
     "baseStats": {
       "maxHp": 400,
       "hp": 400,
@@ -780,6 +784,7 @@
     "name": "虚空织工",
     "role": "support",
     "element": "dark",
+    "race": "undead",
     "baseStats": {
       "maxHp": 380,
       "hp": 380,
@@ -810,6 +815,7 @@
     "name": "元素嵌合体",
     "role": "melee_dps",
     "element": null,
+    "race": "dragon",
     "baseStats": {
       "maxHp": 2000,
       "hp": 2000,
@@ -845,7 +851,7 @@
       "maxHp": 5000,
       "hp": 5000,
       "attack": 55,
-      "defense": 80,
+      "defense": 65,
       "magicPower": 50,
       "magicResist": 40,
       "speed": 30,
@@ -857,7 +863,7 @@
     "scalingPerLevel": {
       "maxHp": 300,
       "attack": 4,
-      "defense": 5,
+      "defense": 4,
       "magicPower": 3,
       "magicResist": 3
     },

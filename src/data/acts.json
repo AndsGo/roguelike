@@ -5,7 +5,7 @@
     "description": "充满神秘生物的魔法森林",
     "nodeCount": 8,
     "enemyPool": ["slime", "goblin", "ice_wolf", "fire_lizard", "light_sprite"],
-    "bossPool": ["frost_queen"],
+    "bossPool": ["frost_queen", "dragon_boss"],
     "eventPool": ["healing_spring", "wandering_warrior", "frozen_lake", "ancient_library", "mushroom_grove", "frozen_cavern", "wandering_ice_mage", "holy_spring", "event_fairy_circle", "event_wounded_traveler", "event_ancient_tree", "event_lost_ranger"],
     "elementAffinity": "ice",
     "difficultyMultiplier": 1.1
@@ -40,6 +40,7 @@
     "enemyPool": ["flame_construct", "frost_sentinel", "lightning_strider", "holy_smith", "void_weaver", "elemental_chimera"],
     "bossPool": ["heart_of_the_forge"],
     "eventPool": ["forge_trial", "element_shard", "master_smith", "ancient_altar", "blacksmith", "elemental_rift", "elemental_shrine"],
+    "elementAffinity": null,
     "difficultyMultiplier": 2.2
   }
 ]
