@@ -129,15 +129,15 @@ export class MapScene extends Phaser.Scene {
 
         if (isAccessiblePath) {
           // Glowing path to accessible nodes
-          connGraphics.lineStyle(3, 0xffffff, 0.15);
+          connGraphics.lineStyle(4, 0xffffff, 0.2);
           MapRenderer.drawCurvedLine(connGraphics, fromPos.x, fromPos.y, toPos.x, toPos.y);
-          connGraphics.lineStyle(2, 0x88aaff, 0.5);
+          connGraphics.lineStyle(2, 0x99bbff, 0.7);
           MapRenderer.drawCurvedLine(connGraphics, fromPos.x, fromPos.y, toPos.x, toPos.y);
         } else if (isCompleted) {
-          connGraphics.lineStyle(2, 0x444466, 0.4);
+          connGraphics.lineStyle(2, 0x556677, 0.5);
           MapRenderer.drawCurvedLine(connGraphics, fromPos.x, fromPos.y, toPos.x, toPos.y);
         } else {
-          connGraphics.lineStyle(1, 0x222244, 0.25);
+          connGraphics.lineStyle(2, 0x3a4466, 0.4);
           MapRenderer.drawCurvedLine(connGraphics, fromPos.x, fromPos.y, toPos.x, toPos.y);
         }
       }

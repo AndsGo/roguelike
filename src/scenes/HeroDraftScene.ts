@@ -6,7 +6,7 @@ import { RunManager } from '../managers/RunManager';
 import { MetaManager } from '../managers/MetaManager';
 import { SceneTransition } from '../systems/SceneTransition';
 import { HeroDetailPopup } from '../ui/HeroDetailPopup';
-import { UI, RACE_NAMES, CLASS_NAMES } from '../i18n';
+import { UI, RACE_NAMES, CLASS_NAMES, formatUnlockCondition } from '../i18n';
 import { HeroData } from '../types';
 import heroesData from '../data/heroes.json';
 import { AudioManager } from '../systems/AudioManager';
@@ -143,14 +143,18 @@ export class HeroDraftScene extends Phaser.Scene {
       lockOverlay.fillRoundedRect(-CARD_W / 2, -CARD_H / 2, CARD_W, CARD_H, 4);
       container.add(lockOverlay);
 
-      const lockIcon = TextFactory.create(this, 0, -8, '\uD83D\uDD12', 'title', {
+      const lockIcon = TextFactory.create(this, 0, -14, '\uD83D\uDD12', 'title', {
       }).setOrigin(0.5);
       container.add(lockIcon);
 
-      const lockedText = TextFactory.create(this, 0, 24, UI.heroDraft.locked, 'tiny', {
-        color: '#666666',
+      const unlockCond = MetaManager.getHeroUnlockCondition(hero.id);
+      const condStr = unlockCond ? formatUnlockCondition(unlockCond) : UI.heroDraft.locked;
+      const condText = TextFactory.create(this, 0, 16, condStr, 'tiny', {
+        color: '#aa8833',
+        wordWrap: { width: CARD_W - 8 },
+        align: 'center',
       }).setOrigin(0.5);
-      container.add(lockedText);
+      container.add(condText);
       return;
     }
 

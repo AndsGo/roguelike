@@ -54,7 +54,7 @@ export class MainMenuScene extends Phaser.Scene {
     }
 
     // Title
-    const title = TextFactory.create(this, GAME_WIDTH / 2, 80, UI.mainMenu.title, 'title', {
+    const title = TextFactory.create(this, GAME_WIDTH / 2, 72, UI.mainMenu.title, 'title', {
       color: colorToString(Theme.colors.secondary),
       align: 'center',
       stroke: '#000000',
@@ -72,13 +72,13 @@ export class MainMenuScene extends Phaser.Scene {
     });
 
     // Subtitle
-    TextFactory.create(this, GAME_WIDTH / 2, 155, UI.mainMenu.subtitle, 'body', {
+    TextFactory.create(this, GAME_WIDTH / 2, 145, UI.mainMenu.subtitle, 'body', {
       color: '#8899cc',
     }).setOrigin(0.5);
 
     // Button layout
-    const btnSpacing = 44;
-    let btnY = 200;
+    const btnSpacing = 34;
+    let btnY = 185;
 
     // Continue button (if save exists)
     if (SaveManager.hasSave(0)) {
@@ -86,7 +86,7 @@ export class MainMenuScene extends Phaser.Scene {
       const saveLabel = saveInfo
         ? UI.mainMenu.continueBtn(saveInfo.floor, saveInfo.heroCount)
         : UI.mainMenu.continue;
-      new Button(this, GAME_WIDTH / 2, btnY, saveLabel, 280, 36, () => {
+      new Button(this, GAME_WIDTH / 2, btnY, saveLabel, 280, 30, () => {
         SaveManager.loadGame(0);
         SceneTransition.fadeTransition(this, 'MapScene');
       }, Theme.colors.success);
@@ -94,7 +94,7 @@ export class MainMenuScene extends Phaser.Scene {
     }
 
     // New Game button
-    new Button(this, GAME_WIDTH / 2, btnY, UI.mainMenu.newGame, 180, 36, () => {
+    new Button(this, GAME_WIDTH / 2, btnY, UI.mainMenu.newGame, 180, 30, () => {
       if (SaveManager.hasSave(0)) {
         this.showNewGameConfirmation();
       } else {
@@ -106,7 +106,7 @@ export class MainMenuScene extends Phaser.Scene {
     // Daily Challenge button
     const dailyCompleted = DailyChallengeManager.isCompletedToday();
     const dailyLabel = dailyCompleted ? UI.daily.completed : UI.daily.title;
-    const dailyBtn = new Button(this, GAME_WIDTH / 2, btnY, dailyLabel, 180, 36, () => {
+    const dailyBtn = new Button(this, GAME_WIDTH / 2, btnY, dailyLabel, 180, 30, () => {
       if (dailyCompleted) return;
       this.showDailyChallengePreview();
     }, dailyCompleted ? 0x555555 : Theme.colors.gold);
@@ -116,25 +116,25 @@ export class MainMenuScene extends Phaser.Scene {
     btnY += btnSpacing;
 
     // Upgrades button
-    new Button(this, GAME_WIDTH / 2, btnY, UI.mainMenu.upgrades, 180, 36, () => {
+    new Button(this, GAME_WIDTH / 2, btnY, UI.mainMenu.upgrades, 180, 30, () => {
       this.showUpgradePanel();
     }, Theme.colors.panelBorder);
     btnY += btnSpacing;
 
     // Achievements button
-    new Button(this, GAME_WIDTH / 2, btnY, '成就', 180, 36, () => {
+    new Button(this, GAME_WIDTH / 2, btnY, '成就', 180, 30, () => {
       this.showAchievementPanel();
     }, Theme.colors.panelBorder);
     btnY += btnSpacing;
 
     // Help button
-    new Button(this, GAME_WIDTH / 2, btnY, '帮助', 180, 36, () => {
+    new Button(this, GAME_WIDTH / 2, btnY, '帮助', 180, 30, () => {
       this.showHelpPanel();
     }, Theme.colors.panelBorder);
     btnY += btnSpacing;
 
     // Codex button
-    new Button(this, GAME_WIDTH / 2, btnY, UI.codex.title, 180, 36, () => {
+    new Button(this, GAME_WIDTH / 2, btnY, UI.codex.title, 180, 30, () => {
       this.showCodexPanel();
     }, Theme.colors.panelBorder);
     btnY += btnSpacing;
@@ -477,7 +477,7 @@ export class MainMenuScene extends Phaser.Scene {
 
     // Full-screen overlay (click to close)
     this.upgradeOverlay = this.add.rectangle(
-      GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, 0x000000, 0.5,
+      GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, 0x000000, 0.95,
     ).setInteractive({ useHandCursor: true }).setDepth(799);
     this.upgradeOverlay.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
       // Only close when clicking outside the panel area

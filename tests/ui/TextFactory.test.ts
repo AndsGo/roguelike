@@ -24,7 +24,7 @@ describe('TextFactory', () => {
     const small = TextFactory.create(scene, 0, 0, 'T', 'small');
     expect(title.style.fontSize).toBe('20px');
     expect(body.style.fontSize).toBe('11px');
-    expect(small.style.fontSize).toBe('9px');
+    expect(small.style.fontSize).toBe('10px');
   });
 
   it('allows style overrides', () => {

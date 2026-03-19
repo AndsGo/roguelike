@@ -148,10 +148,22 @@ export class BattleHUD extends Phaser.GameObjects.Container {
     this.enemies.forEach((enemy, i) => {
       const container = this.scene.add.container(GAME_WIDTH - 108, 32 + i * 22);
 
+      // Mini colored box (element indicator, placed first to avoid name overlap)
+      const box = this.scene.add.graphics();
+      box.fillStyle(0xff4444, 0.8);
+      box.fillRoundedRect(0, -6, 12, 12, 2);
+      container.add(box);
+
+      // Name (after indicator box)
+      const name = TextFactory.create(this.scene, 16, 0, enemy.unitName.substring(0, 5), 'small', {
+        color: '#ff8888',
+      }).setOrigin(0, 0.5);
+      container.add(name);
+
       // Mini HP bar
       const hpBg = this.scene.add.graphics();
       hpBg.fillStyle(0x333333, 1);
-      hpBg.fillRect(0, -3, 40, 5);
+      hpBg.fillRect(58, -3, 40, 5);
       container.add(hpBg);
 
       const hpFill = this.scene.add.graphics();
@@ -161,18 +173,6 @@ export class BattleHUD extends Phaser.GameObjects.Container {
       container.setData('isHero', false);
       container.setData('lastRatio', -1);
       container.setData('lastAlive', true);
-
-      // Name
-      const name = TextFactory.create(this.scene, 44, 0, enemy.unitName.substring(0, 6), 'small', {
-        color: '#ff8888',
-      }).setOrigin(0, 0.5);
-      container.add(name);
-
-      // Mini colored box
-      const box = this.scene.add.graphics();
-      box.fillStyle(0xff4444, 0.8);
-      box.fillRoundedRect(88, -6, 12, 12, 2);
-      container.add(box);
 
       this.enemyPortraits.push(container);
       this.add(container);
@@ -359,7 +359,7 @@ export class BattleHUD extends Phaser.GameObjects.Container {
         hpFill.clear();
         const color = ratio > 0.6 ? 0x44ff44 : ratio > 0.3 ? 0xffaa00 : 0xff4444;
         const isHero = container.getData('isHero') as boolean;
-        const barX = isHero ? 60 : 0;
+        const barX = isHero ? 60 : 58;
         hpFill.fillStyle(color, 1);
         hpFill.fillRect(barX, -3, 40 * ratio, 5);
         container.setData('lastRatio', ratio);

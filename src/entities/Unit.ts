@@ -102,11 +102,14 @@ export class Unit extends Phaser.GameObjects.Container {
     this.sprite.setOrigin(0.5);
     this.add(this.sprite);
 
-    // Name label
+    // Name label (hidden by default for heroes — HUD already shows hero info)
     const displayName = name.length > 8 ? name.substring(0, 8) : name;
     this.nameLabel = TextFactory.create(scene, 0, -this.spriteHeight / 2 - 14, displayName, 'small', {
       color: '#ffffff',
     }).setOrigin(0.5);
+    if (isHero) {
+      this.nameLabel.setVisible(false);
+    }
     this.add(this.nameLabel);
 
     // Health bar
