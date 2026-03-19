@@ -6,9 +6,9 @@ const PRESETS: Record<TextPreset, Phaser.Types.GameObjects.Text.TextStyle> = {
   title:    { fontSize: '20px', fontFamily: 'monospace', fontStyle: 'bold' },
   subtitle: { fontSize: '14px', fontFamily: 'monospace', fontStyle: 'bold' },
   body:     { fontSize: '11px', fontFamily: 'monospace' },
-  label:    { fontSize: '10px', fontFamily: 'monospace' },
-  small:    { fontSize: '10px', fontFamily: 'monospace' },
-  tiny:     { fontSize: '10px', fontFamily: 'monospace' },
+  label:    { fontSize: '10px', fontFamily: 'monospace', fontStyle: 'bold' },
+  small:    { fontSize: '9px', fontFamily: 'monospace' },
+  tiny:     { fontSize: '8px', fontFamily: 'monospace' },
 };
 
 export class TextFactory {

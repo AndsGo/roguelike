@@ -45,8 +45,8 @@ export const SYNERGY_DEFINITIONS: SynergyConfig[] = [
     type: 'race',
     key: 'demon',
     thresholds: [
-      { count: 2, description: '攻击+20%', effects: [{ type: 'stat_boost', stat: 'attack', value: 20 }] },
-      { count: 3, description: '法力+30%', effects: [{ type: 'stat_boost', stat: 'magicPower', value: 30 }] },
+      { count: 2, description: '攻击+12', effects: [{ type: 'stat_boost', stat: 'attack', value: 12 }] },
+      { count: 3, description: '法力+20', effects: [{ type: 'stat_boost', stat: 'magicPower', value: 20 }] },
     ],
   },
   {

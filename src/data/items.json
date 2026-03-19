@@ -455,7 +455,7 @@
     "description": "蕴含熔炉力量的核心",
     "slot": "accessory",
     "rarity": "epic",
-    "cost": 280,
+    "cost": 200,
     "stats": { "magicPower": 30, "critChance": 0.10 }
   },
   {

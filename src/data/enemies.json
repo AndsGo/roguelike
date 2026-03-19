@@ -162,8 +162,8 @@
     "element": "fire",
     "race": "dragon",
     "baseStats": {
-      "maxHp": 1800,
-      "hp": 1800,
+      "maxHp": 2200,
+      "hp": 2200,
       "attack": 70,
       "defense": 45,
       "magicPower": 90,
