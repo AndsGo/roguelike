@@ -1107,9 +1107,9 @@
     "cooldown": 0,
     "damageType": "magical",
     "targetType": "all_enemies",
-    "baseDamage": 30,
+    "baseDamage": 140,
     "scalingStat": "attack",
-    "scalingRatio": 0.6,
+    "scalingRatio": 1.3,
     "range": 400,
     "element": "lightning",
     "isUltimate": true

@@ -35,7 +35,7 @@ export const SYNERGY_DEFINITIONS: SynergyConfig[] = [
     key: 'undead',
     thresholds: [
       { count: 2, description: '法抗+10', effects: [{ type: 'stat_boost', stat: 'magicResist', value: 10 }] },
-      { count: 4, description: '暗属性伤害+20%', effects: [{ type: 'damage_bonus', element: 'dark', value: 0.2 }] },
+      { count: 3, description: '暗属性伤害+20%', effects: [{ type: 'damage_bonus', element: 'dark', value: 0.2 }] },
     ],
   },
   {

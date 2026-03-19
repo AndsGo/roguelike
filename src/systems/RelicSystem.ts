@@ -297,7 +297,7 @@ export class RelicSystem {
     const elements = heroElements.filter(Boolean);
     if (elements.length === 0) return 0;
     const allSame = elements.every(e => e === elements[0]);
-    return allSame ? 0.4 : 0;
+    return allSame ? 0.28 : 0;
   }
 
   /** diversity_badge: +8% attackSpeed per unique class */
@@ -368,7 +368,7 @@ export class RelicSystem {
     const inst = RelicSystem.getInstance();
     let total = 0;
     for (const relic of inst.relics) {
-      if (relic.id === 'glass_cannon') total += 0.6;
+      if (relic.id === 'glass_cannon') total += 0.25;
       if (relic.id === 'heart_of_dragon') total += 0.2;
     }
     // mono_element_crown: +40% if all heroes same element

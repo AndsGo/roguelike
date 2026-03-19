@@ -271,10 +271,10 @@ describe('RelicSystem', () => {
   });
 
   describe('build-defining relics', () => {
-    it('mono_element_crown: +40% damage when all heroes same element', () => {
+    it('mono_element_crown: +28% damage when all heroes same element', () => {
       RelicSystem.activate([{ id: 'mono_element_crown', triggerCount: 0 }]);
       const bonus = RelicSystem.getConditionalDamageBonus(['fire', 'fire', 'fire']);
-      expect(bonus).toBeCloseTo(0.4);
+      expect(bonus).toBeCloseTo(0.28);
     });
 
     it('mono_element_crown: no bonus with mixed elements', () => {
@@ -317,7 +317,7 @@ describe('RelicSystem', () => {
       // But we can test the component method directly
       RelicSystem.activate([{ id: 'mono_element_crown', triggerCount: 0 }]);
       const bonus = RelicSystem.getConditionalDamageBonus(['ice', 'ice']);
-      expect(bonus).toBeCloseTo(0.4);
+      expect(bonus).toBeCloseTo(0.28);
     });
 
     it('kill_momentum: registers handler on unit:kill', () => {
