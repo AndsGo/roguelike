@@ -12,6 +12,9 @@ import heroesData from '../data/heroes.json';
 import { AudioManager } from '../systems/AudioManager';
 import { calculateSynergyTags, formatSynergyTags } from '../utils/synergy-helpers';
 import { TextFactory } from '../ui/TextFactory';
+import { getOrCreateTexture, ChibiConfig } from '../systems/UnitRenderer';
+import { drawRoleIcon, drawElementIcon } from '../ui/PixelIcons';
+import { getElementColor } from '../ui/Theme';
 
 const BASE_MAX_SELECTION = 3;
 const MIN_SELECTION = 2;
@@ -158,55 +161,62 @@ export class HeroDraftScene extends Phaser.Scene {
       return;
     }
 
-    // Role color bar at top
+    // Role color border at top
     const roleColor = getRoleColor(hero.role);
     const roleBar = this.add.graphics();
-    roleBar.fillStyle(roleColor, 0.7);
+    roleBar.fillStyle(roleColor, 0.9);
     roleBar.fillRoundedRect(-CARD_W / 2, -CARD_H / 2, CARD_W, 3, 1);
     container.add(roleBar);
 
+    // Role pixel icon (top-left, 8×8 scale=1)
+    const roleIconG = this.add.graphics();
+    drawRoleIcon(roleIconG, -CARD_W / 2 + 3, -CARD_H / 2 + 5, hero.role, 1);
+    container.add(roleIconG);
+
+    // Element pixel icon (top-right, 8×8 scale=1)
+    if (hero.element) {
+      const elIconG = this.add.graphics();
+      drawElementIcon(elIconG, CARD_W / 2 - 11, -CARD_H / 2 + 5, hero.element, 1);
+      container.add(elIconG);
+    }
+
+    // Chibi sprite (centered, compact)
+    const chibiConfig: ChibiConfig = {
+      role: hero.role as ChibiConfig['role'],
+      race: (hero.race ?? 'human') as ChibiConfig['race'],
+      classType: (hero.class ?? 'warrior') as ChibiConfig['classType'],
+      fillColor: roleColor,
+      borderColor: 0x000000,
+      isHero: true,
+      isBoss: false,
+    };
+    const textureKey = getOrCreateTexture(this, chibiConfig);
+    const sprite = this.add.image(0, -16, textureKey).setScale(1.2);
+    container.add(sprite);
+
     // Hero name
-    const nameText = TextFactory.create(this, 0, -CARD_H / 2 + 14, hero.name, 'small', {
+    const nameText = TextFactory.create(this, 0, 12, hero.name, 'small', {
       color: '#ffffff',
     }).setOrigin(0.5);
     container.add(nameText);
 
-    // Role + Element
-    const elemStr = hero.element ? ELEMENT_LABELS[hero.element] ?? '' : '';
+    // Role tag (role-colored)
     const roleStr = ROLE_SHORT[hero.role] ?? '';
+    const elemStr = hero.element ? ELEMENT_LABELS[hero.element] ?? '' : '';
     const tagLine = [roleStr, elemStr].filter(Boolean).join(' ');
-    const tagText = TextFactory.create(this, 0, -CARD_H / 2 + 27, tagLine, 'tiny', {
-      color: '#88aacc',
+    const tagText = TextFactory.create(this, 0, 24, tagLine, 'tiny', {
+      color: colorToString(roleColor),
     }).setOrigin(0.5);
     container.add(tagText);
 
-    // Race / Class
-    const raceStr = hero.race ? (RACE_NAMES[hero.race] ?? hero.race) : '';
-    const classStr = hero.class ? (CLASS_NAMES[hero.class] ?? hero.class) : '';
-    const raceClass = [raceStr, classStr].filter(Boolean).join('/');
-    const rcText = TextFactory.create(this, 0, -CARD_H / 2 + 39, raceClass, 'tiny', {
-      color: '#667788',
-    }).setOrigin(0.5);
-    container.add(rcText);
-
-    // Key stats (added to container so they move with the card)
+    // Key stats summary (compact)
     const stats = hero.baseStats;
-    const atkStr = `攻:${stats.attack}`;
-    const defStr = `防:${stats.defense}`;
-    const hpStr = `HP:${stats.maxHp}`;
-
-    const hpText = TextFactory.create(this, 0, 2, hpStr, 'tiny', {
-      color: '#aaaaaa',
-    }).setOrigin(0.5);
-    container.add(hpText);
-    const atkDefText = TextFactory.create(this, 0, 14, `${atkStr}  ${defStr}`, 'tiny', {
+    const atkDefText = TextFactory.create(this, 0, 36, `攻:${stats.attack}  防:${stats.defense}`, 'tiny', {
       color: '#aaaaaa',
     }).setOrigin(0.5);
     container.add(atkDefText);
 
-    // Speed / AtkSpd
-    const spdStr = `速:${stats.speed}  攻速:${stats.attackSpeed.toFixed(1)}`;
-    const spdText = TextFactory.create(this, 0, 26, spdStr, 'tiny', {
+    const spdText = TextFactory.create(this, 0, 46, `速:${stats.speed}  攻速:${stats.attackSpeed.toFixed(1)}`, 'tiny', {
       color: '#888888',
     }).setOrigin(0.5);
     container.add(spdText);
