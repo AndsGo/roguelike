@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { SynergySystem } from '../../src/systems/SynergySystem';
-import { HeroState, HeroData } from '../../src/types';
+import { HeroState, HeroData, ElementType } from '../../src/types';
 
 function makeHeroState(id: string): HeroState {
   return {
@@ -233,6 +233,23 @@ describe('SynergySystem', () => {
     expect(mult).toBeCloseTo(1.20);
     // Non-ice element should be unaffected
     expect(synergy.getSynergyDamageMultiplier('fire')).toBeCloseTo(1.0);
+  });
+
+  it('uses temporaryElement for element synergy counting', () => {
+    const heroes: HeroState[] = [
+      makeHeroState('h1'),
+      { ...makeHeroState('h2'), temporaryElement: 'fire' as ElementType },
+    ];
+    const dataMap = new Map<string, HeroData>([
+      ['h1', makeHeroData('h1', { element: 'fire' })],
+      ['h2', makeHeroData('h2', { element: 'ice' })],
+    ]);
+    const result = synergy.calculateActiveSynergies(heroes, dataMap);
+    const fireSynergy = result.activeSynergies.find(s => s.synergyId === 'synergy_fire');
+    expect(fireSynergy).toBeDefined();
+    expect(fireSynergy!.count).toBe(2);
+    const iceSynergy = result.activeSynergies.find(s => s.synergyId === 'synergy_ice');
+    expect(iceSynergy).toBeUndefined();
   });
 
   it('getSynergyDamageMultiplier includes element-specific and all bonuses', () => {

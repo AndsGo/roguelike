@@ -82,32 +82,37 @@ export class SkillSystem {
       const cd = unit.skillCooldowns.get(skill.id) ?? 0;
       if (cd > 0) continue;
 
-      // Check if target type matches
-      if (skill.targetType === 'ally' || skill.targetType === 'all_allies') {
-        if (unit.role !== 'healer' && unit.role !== 'support') continue;
-      }
-
-      // Check range to target
-      if (unit.target && unit.distanceTo(unit.target) <= skill.range) {
-        return skill;
-      }
-
       // Self-targeted skills are always usable
       if (skill.targetType === 'self') return skill;
 
-      // AOE skills that hit all - check if any enemy is in range
-      if (skill.targetType === 'all_enemies') {
-        const targets = unit.isHero ? enemies : allies;
-        if (targets.some(t => t.isAlive && unit.distanceTo(t) <= skill.range)) {
-          return skill;
-        }
+      // Ally-targeted single skill — resolve via selectAllyTarget
+      if (skill.targetType === 'ally') {
+        if (unit.role !== 'healer' && unit.role !== 'support') continue;
+        const allyPool = unit.isHero ? allies : enemies;
+        if (this.selectAllyTarget(unit, allyPool, skill)) return skill;
+        continue;
       }
 
+      // All-allies skill
       if (skill.targetType === 'all_allies') {
-        const targets = unit.isHero ? allies : enemies;
-        if (targets.some(t => t.isAlive)) {
+        if (unit.role !== 'healer' && unit.role !== 'support') continue;
+        const allyPool = unit.isHero ? allies : enemies;
+        if (allyPool.some(t => t.isAlive)) return skill;
+        continue;
+      }
+
+      // AOE enemy skill
+      if (skill.targetType === 'all_enemies') {
+        const enemyPool = unit.isHero ? enemies : allies;
+        if (enemyPool.some(t => t.isAlive && unit.distanceTo(t) <= skill.range)) {
           return skill;
         }
+        continue;
+      }
+
+      // Single enemy skill — check range to combat target
+      if (unit.target && unit.distanceTo(unit.target) <= skill.range) {
+        return skill;
       }
     }
     return null;
@@ -128,9 +133,12 @@ export class SkillSystem {
       case 'enemy':
         if (unit.target && unit.target.isAlive) targets = [unit.target];
         break;
-      case 'ally':
-        if (unit.target && unit.target.isAlive) targets = [unit.target];
+      case 'ally': {
+        const allyPool = unit.isHero ? allies : enemies;
+        const allyTarget = this.selectAllyTarget(unit, allyPool, skill);
+        if (allyTarget) targets = [allyTarget];
         break;
+      }
       case 'self':
         targets = [unit];
         break;
@@ -371,6 +379,35 @@ export class SkillSystem {
       effectId: effect.id,
       effectType: effectType,
     });
+  }
+
+  /**
+   * Select the best ally target for a support skill.
+   * Responsibility stays in SkillSystem — TargetingSystem handles enemy targeting only.
+   */
+  private selectAllyTarget(caster: Unit, allies: Unit[], skill: SkillData): Unit | null {
+    const living = allies.filter(a => a.isAlive && a !== caster);
+    if (living.length === 0) return caster.isAlive ? caster : null;
+
+    // Healing skill (negative baseDamage) → lowest HP %
+    if (skill.baseDamage < 0) {
+      let target = living[0];
+      let lowestPercent = target.currentHp / target.getEffectiveStats().maxHp;
+      for (let i = 1; i < living.length; i++) {
+        const percent = living[i].currentHp / living[i].getEffectiveStats().maxHp;
+        if (percent < lowestPercent) {
+          lowestPercent = percent;
+          target = living[i];
+        }
+      }
+      return lowestPercent < 0.9 ? target : null;
+    }
+
+    // Shield/buff → prefer tanks or front-row
+    const tanks = living.filter(a => a.role === 'tank' || a.formation === 'front');
+    if (tanks.length > 0) return tanks[0];
+
+    return living[0];
   }
 
   private mapEffectType(effectName: string): StatusEffectType {

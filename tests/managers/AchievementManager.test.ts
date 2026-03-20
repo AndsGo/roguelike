@@ -102,6 +102,26 @@ describe('AchievementManager', () => {
     });
   });
 
+  describe('hell_victory condition', () => {
+    it('hell_victory is not unlocked by normal-difficulty victory', () => {
+      MetaManager.recordRunEnd(true, 20, {
+        partyHeroIds: ['warrior'], partyElements: ['fire'],
+        partyRoles: ['tank'], relicCount: 3, difficulty: 'normal',
+      });
+      AchievementManager.checkAchievements();
+      expect(MetaManager.hasAchievement('hell_victory')).toBe(false);
+    });
+
+    it('hell_victory is unlocked by hell-difficulty victory', () => {
+      MetaManager.recordRunEnd(true, 20, {
+        partyHeroIds: ['warrior'], partyElements: ['fire'],
+        partyRoles: ['tank'], relicCount: 3, difficulty: 'hell',
+      });
+      AchievementManager.checkAchievements();
+      expect(MetaManager.hasAchievement('hell_victory')).toBe(true);
+    });
+  });
+
   describe('getProgress', () => {
     it('returns unlocked: false for locked achievement', () => {
       const progress = AchievementManager.getProgress('first_victory');

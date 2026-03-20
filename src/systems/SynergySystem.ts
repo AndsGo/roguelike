@@ -55,10 +55,11 @@ export class SynergySystem {
         list.push(heroState.id);
         classCounts.set(data.class, list);
       }
-      if (data.element) {
-        const list = elementCounts.get(data.element) ?? [];
+      const effectiveElement = heroState.temporaryElement ?? data.element;
+      if (effectiveElement) {
+        const list = elementCounts.get(effectiveElement) ?? [];
         list.push(heroState.id);
-        elementCounts.set(data.element, list);
+        elementCounts.set(effectiveElement, list);
       }
     }
 

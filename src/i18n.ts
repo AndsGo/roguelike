@@ -423,6 +423,12 @@ export const UI = {
     yourRank: (rank: number, total: number) => `排名: 第${rank}名 / ${total}人`,
   },
 
+  // Achievement
+  achievement: {
+    completed: '已完成',
+    inProgress: '进行中',
+  },
+
   // Tutorial
   tutorial: {
     clickToContinue: '[ 点击继续 ]',

@@ -143,23 +143,6 @@ export class MapGenerator {
     return allNodes;
   }
 
-  /**
-   * Generate map for a single act (used when transitioning between acts).
-   */
-  static generateForAct(rng: SeededRNG, actIndex: number, floor: number): MapNode[] {
-    const acts = actsData as ActConfig[];
-    if (actIndex >= acts.length) return [];
-    // Delegate to main generate but just return relevant nodes
-    // For simplicity, regenerate all and slice
-    const allNodes = this.generate(rng, floor);
-    let start = 0;
-    for (let i = 0; i < actIndex; i++) {
-      // Count nodes generated for previous acts (approximate via nodeCount)
-      start += acts[i].nodeCount; // Note: actual count may vary due to branching
-    }
-    return allNodes;
-  }
-
   private static generateBattleData(
     rng: SeededRNG,
     type: NodeType,

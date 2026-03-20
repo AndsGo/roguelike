@@ -4,7 +4,7 @@ import { RunManager } from '../managers/RunManager';
 import { BattleSystem } from '../systems/BattleSystem';
 import { Hero } from '../entities/Hero';
 import { Enemy } from '../entities/Enemy';
-import { BattleNodeData, EnemyData, BattleResult, ElementType } from '../types';
+import { BattleNodeData, EnemyData, BattleResult, ElementType, HeroData } from '../types';
 import { BattleHUD } from '../ui/BattleHUD';
 import { BattleEffects } from '../systems/BattleEffects';
 import { ParticleManager } from '../systems/ParticleManager';
@@ -207,7 +207,13 @@ export class BattleScene extends Phaser.Scene {
 
     RelicSystem.activateWithUnits(rm.getRelics(), heroes, enemies, rng);
     this.ultimateSystem = new UltimateSystem();
-    this.battleSystem.setUnits(heroes, enemies);
+
+    // Build heroDataMap for synergy injection
+    const heroDataMap = new Map<string, HeroData>();
+    for (const state of heroStates) {
+      heroDataMap.set(state.id, rm.getHeroData(state.id));
+    }
+    this.battleSystem.setUnits(heroes, enemies, heroStates, heroDataMap);
 
     // Detect gauntlet waves
     this.isGauntlet = node.type === 'gauntlet' && !!(battleData as BattleNodeData).waves;

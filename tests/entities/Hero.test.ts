@@ -6,7 +6,7 @@ Object.defineProperty(globalThis, 'localStorage', { value: mockStorage, writable
 
 import Phaser from 'phaser';
 import { Hero } from '../../src/entities/Hero';
-import { HeroData, HeroState, UnitStats } from '../../src/types';
+import { HeroData, HeroState, UnitStats, ElementType } from '../../src/types';
 import { EventBus } from '../../src/systems/EventBus';
 
 function makeHeroData(overrides?: Partial<HeroData>): HeroData {
@@ -230,6 +230,22 @@ describe('Hero', () => {
       const hero = new Hero(scene, 100, 200, data, state);
 
       expect(hero.level).toBe(7);
+    });
+
+    it('Hero uses temporaryElement when set on heroState', () => {
+      const heroData = makeHeroData({ element: 'ice' });
+      const heroState = { ...makeHeroState(), temporaryElement: 'fire' as ElementType };
+      const scene = new Phaser.Scene();
+      const hero = new Hero(scene, 100, 200, heroData, heroState);
+      expect(hero.element).toBe('fire');
+    });
+
+    it('Hero uses heroData.element when no temporaryElement', () => {
+      const heroData = makeHeroData({ element: 'ice' });
+      const heroState = makeHeroState();
+      const scene = new Phaser.Scene();
+      const hero = new Hero(scene, 100, 200, heroData, heroState);
+      expect(hero.element).toBe('ice');
     });
   });
 });

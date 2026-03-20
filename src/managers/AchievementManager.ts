@@ -2,6 +2,7 @@ import { MetaProgressionData } from '../types';
 import { EventBus } from '../systems/EventBus';
 import { MetaManager } from './MetaManager';
 import { RunStats, StatsManager } from './StatsManager';
+import { UI } from '../i18n';
 import achievementsData from '../data/achievements.json';
 
 /** JSON schema for achievement definitions */
@@ -127,9 +128,7 @@ export class AchievementManager {
           return heroIds.length === 1 && s.nodesCompleted >= 15;
         };
       case 'hell_victory':
-        // This checks meta victories but should ideally check difficulty;
-        // preserved from original logic for backward compatibility
-        return (_s, m) => m.totalVictories >= 1;
+        return (_s, m) => (m.hellVictories ?? 0) >= 1;
       default:
         return () => false;
     }
@@ -234,7 +233,7 @@ export class AchievementManager {
 
     return {
       unlocked,
-      progress: unlocked ? '已完成' : '进行中',
+      progress: unlocked ? UI.achievement.completed : UI.achievement.inProgress,
     };
   }
 }

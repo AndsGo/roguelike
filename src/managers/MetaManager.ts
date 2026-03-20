@@ -295,6 +295,9 @@ export class MetaManager {
     if (victory) {
       inst.meta.totalVictories++;
     }
+    if (victory && context?.difficulty === 'hell') {
+      inst.meta.hellVictories = (inst.meta.hellVictories ?? 0) + 1;
+    }
     if (floor > inst.meta.highestFloor) {
       inst.meta.highestFloor = floor;
     }

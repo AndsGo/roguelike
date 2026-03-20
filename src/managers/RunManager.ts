@@ -464,8 +464,9 @@ export class RunManager {
       if (data.class) {
         classCounts.set(data.class, (classCounts.get(data.class) ?? 0) + 1);
       }
-      if (data.element) {
-        elementCounts.set(data.element, (elementCounts.get(data.element) ?? 0) + 1);
+      const effectiveElement = heroState.temporaryElement ?? data.element;
+      if (effectiveElement) {
+        elementCounts.set(effectiveElement, (elementCounts.get(effectiveElement) ?? 0) + 1);
       }
     }
 

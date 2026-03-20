@@ -97,4 +97,76 @@ describe('SkillSystem', () => {
       expect(result!.id).toBe('test_self');
     });
   });
+
+  describe('ally skill targeting', () => {
+    it('findReadySkill returns heal skill when ally is injured, even if enemy target is out of range', () => {
+      const healer = createMockUnit({
+        unitId: 'healer1', role: 'healer',
+        stats: { attackRange: 200, maxHp: 500, magicPower: 50 },
+      });
+      healer.isHero = true;
+      const ally = createMockUnit({
+        unitId: 'ally1',
+        stats: { maxHp: 500 },
+      });
+      ally.currentHp = 200;
+      ally.isAlive = true;
+      ally.isHero = true;
+
+      const enemy = createMockUnit({ unitId: 'enemy1' });
+      enemy.isAlive = true;
+      healer.target = enemy;
+      healer.distanceTo = (t: any) => t === enemy ? 9999 : 50;
+
+      const healSkill = {
+        id: 'heal', name: 'Heal', targetType: 'ally',
+        baseDamage: -80, scalingStat: 'magicPower', scalingRatio: 0.5,
+        cooldown: 5, range: 300, element: null, isUltimate: false,
+        effects: [],
+      };
+      healer.skills = [healSkill as any];
+      healer.skillCooldowns = new Map([['heal', 0]]);
+
+      const result = skillSystem.findReadySkill(
+        healer as any, [healer, ally] as any[], [enemy] as any[]
+      );
+      expect(result).not.toBeNull();
+      expect(result!.id).toBe('heal');
+    });
+
+    it('executeSkill targets lowest HP ally for ally-targeted heal skill', () => {
+      const healer = createMockUnit({
+        unitId: 'healer1', role: 'healer',
+        stats: { maxHp: 500, magicPower: 100, attack: 10 },
+      });
+      healer.isHero = true;
+      healer.isAlive = true;
+      healer.currentHp = 500;
+      const ally1 = createMockUnit({ unitId: 'ally1', stats: { maxHp: 500 } });
+      ally1.currentHp = 400;
+      ally1.isAlive = true;
+      ally1.isHero = true;
+      const ally2 = createMockUnit({ unitId: 'ally2', stats: { maxHp: 500 } });
+      ally2.currentHp = 100;
+      ally2.isAlive = true;
+      ally2.isHero = true;
+
+      const healSkill = {
+        id: 'heal', name: 'Heal', targetType: 'ally',
+        baseDamage: -80, scalingStat: 'magicPower', scalingRatio: 0.5,
+        cooldown: 5, range: 300, element: null, isUltimate: false,
+        effects: [],
+      };
+
+      const enemy = createMockUnit({ unitId: 'enemy1' });
+      healer.target = enemy;
+
+      skillSystem.executeSkill(
+        healer as any, healSkill as any,
+        [healer, ally1, ally2] as any[], [enemy] as any[]
+      );
+
+      expect(ally2.currentHp).toBeGreaterThan(100);
+    });
+  });
 });
