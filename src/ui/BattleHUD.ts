@@ -85,7 +85,7 @@ export class BattleHUD extends Phaser.GameObjects.Container {
 
     const statsHit = scene.add.rectangle(GAME_WIDTH - 30, GAME_HEIGHT - 70, 56, 24, 0x000000, 0)
       .setInteractive({ useHandCursor: true });
-    statsHit.on('pointerdown', () => this.toggleStats());
+    statsHit.on('pointerup', () => this.toggleStats());
     this.add(statsHit);
 
     // Skill bar (if skill queue provided)
@@ -204,7 +204,7 @@ export class BattleHUD extends Phaser.GameObjects.Container {
     // Padded hit zone covering the full speed button background
     const speedHit = this.scene.add.rectangle(btnX, btnY, 62, 28, 0x000000, 0)
       .setInteractive({ useHandCursor: true });
-    speedHit.on('pointerdown', () => {
+    speedHit.on('pointerup', () => {
       const speeds = [1, 2, 3];
       const idx = speeds.indexOf(this.currentSpeed);
       this.currentSpeed = speeds[(idx + 1) % speeds.length];

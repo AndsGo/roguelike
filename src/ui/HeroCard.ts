@@ -135,11 +135,16 @@ export class HeroCard extends Phaser.GameObjects.Container {
     // Click to expand details, right-click for full popup
     this.setSize(this.cardWidth, this.cardHeight);
     this.setInteractive({ useHandCursor: true });
-    this.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
-      if (pointer.rightButtonDown()) {
-        this.openDetailPopup();
-      } else {
-        this.toggleDetails();
+    let downX = 0, downY = 0;
+    this.on('pointerdown', (p: Phaser.Input.Pointer) => { downX = p.x; downY = p.y; });
+    this.on('pointerup', (pointer: Phaser.Input.Pointer) => {
+      const dx = pointer.x - downX, dy = pointer.y - downY;
+      if (dx * dx + dy * dy < 400) {
+        if (pointer.rightButtonReleased()) {
+          this.openDetailPopup();
+        } else {
+          this.toggleDetails();
+        }
       }
     });
 

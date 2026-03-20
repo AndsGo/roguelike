@@ -81,7 +81,7 @@ export class AchievementPanel {
     this.closeHit = scene.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2 + AchievementPanel.PANEL_HEIGHT / 2 - 16, 80, 24, 0x000000, 0)
       .setInteractive({ useHandCursor: true })
       .setDepth(801);
-    this.closeHit.on('pointerdown', () => this.close());
+    this.closeHit.on('pointerup', () => this.close());
   }
 
   private renderRow(ach: AchievementDef, isUnlocked: boolean, y: number): void {

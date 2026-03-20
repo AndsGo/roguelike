@@ -101,7 +101,7 @@
     "cooldown": 15,
     "damageType": "magical",
     "targetType": "all_allies",
-    "baseDamage": -40,
+    "baseDamage": -60,
     "scalingStat": "magicPower",
     "scalingRatio": 0.5,
     "range": 300,

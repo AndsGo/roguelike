@@ -76,7 +76,7 @@ export class CodexPanel {
     this.closeHit = scene.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2 + PANEL_HEIGHT / 2 - 16, 80, 24, 0x000000, 0)
       .setInteractive({ useHandCursor: true })
       .setDepth(801);
-    this.closeHit.on('pointerdown', () => this.close());
+    this.closeHit.on('pointerup', () => this.close());
   }
 
   private createTabs(): void {
@@ -108,7 +108,7 @@ export class CodexPanel {
         .setInteractive({ useHandCursor: true })
         .setDepth(801);
       this.tabHits.push(hit);
-      hit.on('pointerdown', () => {
+      hit.on('pointerup', () => {
         if (this.activeTab !== tab.key) {
           this.activeTab = tab.key;
           this.renderTab();
@@ -277,7 +277,7 @@ export class CodexPanel {
       // Clickable hit area
       const hitArea = scene.add.rectangle(x, y, CARD_WIDTH, CARD_HEIGHT, 0x000000, 0)
         .setInteractive({ useHandCursor: true });
-      hitArea.on('pointerdown', () => {
+      hitArea.on('pointerup', () => {
         if (!this.detailPopup) {
           this.detailPopup = new CodexDetailPopup(scene, data, isHero, () => {
             this.detailPopup = null;

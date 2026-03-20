@@ -212,7 +212,7 @@
     "description": "恶魔铸造的巨斧，力量强大但会侵蚀防御",
     "slot": "weapon",
     "rarity": "rare",
-    "cost": 110,
+    "cost": 135,
     "stats": { "attack": 38, "defense": -8 }
   },
   {

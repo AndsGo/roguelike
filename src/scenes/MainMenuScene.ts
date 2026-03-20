@@ -565,7 +565,7 @@ export class MainMenuScene extends Phaser.Scene {
         if (canAfford) {
           const buyHit = this.add.rectangle(220, y + 2, 56, 32, 0x000000, 0)
             .setInteractive({ useHandCursor: true });
-          buyHit.on('pointerdown', () => {
+          buyHit.on('pointerup', () => {
             if (MetaManager.purchaseUpgrade(def.id)) {
               // Refresh panel
               this.closeUpgradePanel();
@@ -650,7 +650,7 @@ export class MainMenuScene extends Phaser.Scene {
           if (canAfford) {
             const buyHit = this.add.rectangle(220, my + 2, 56, 32, 0x000000, 0)
               .setInteractive({ useHandCursor: true });
-            buyHit.on('pointerdown', () => {
+            buyHit.on('pointerup', () => {
               if (MetaManager.purchaseMutation(def.id)) {
                 this.closeUpgradePanel();
                 this.showUpgradePanel();
@@ -683,6 +683,6 @@ export class MainMenuScene extends Phaser.Scene {
     this.upgradeCloseHit = this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2 + panelHeight / 2 - 16, 80, 24, 0x000000, 0)
       .setInteractive({ useHandCursor: true })
       .setDepth(801);
-    this.upgradeCloseHit.on('pointerdown', () => this.closeUpgradePanel());
+    this.upgradeCloseHit.on('pointerup', () => this.closeUpgradePanel());
   }
 }

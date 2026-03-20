@@ -668,7 +668,7 @@ export class BattleScene extends Phaser.Scene {
     }).setOrigin(1, 1);
     const threatHit = this.add.rectangle(GAME_WIDTH - 35, GAME_HEIGHT - 83, 64, 22, 0x000000, 0)
       .setInteractive({ useHandCursor: true });
-    threatHit.on('pointerdown', () => {
+    threatHit.on('pointerup', () => {
       this.threatLinesVisible = !this.threatLinesVisible;
       this.threatGraphics.setVisible(this.threatLinesVisible);
       this.healerGraphics.setVisible(this.threatLinesVisible);
@@ -768,7 +768,7 @@ export class BattleScene extends Phaser.Scene {
       GAME_WIDTH / 2, GAME_HEIGHT / 2,
       GAME_WIDTH, GAME_HEIGHT, 0x000000, 0.3,
     ).setDepth(90).setInteractive();
-    dim.on('pointerdown', () => this.cancelTargetingMode());
+    dim.on('pointerup', () => this.cancelTargetingMode());
     this.targetingOverlays.push(dim);
 
     // Instruction text
@@ -805,7 +805,7 @@ export class BattleScene extends Phaser.Scene {
         .setInteractive({ useHandCursor: true })
         .setDepth(92);
       const targetId = target.unitId;
-      hitZone.on('pointerdown', () => {
+      hitZone.on('pointerup', () => {
         this.confirmTarget(targetId);
       });
       this.targetingOverlays.push(hitZone);

@@ -186,7 +186,7 @@ export class HelpPanel {
     this.closeHit = scene.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2 + HelpPanel.PANEL_HEIGHT / 2 - 16, 80, 24, 0x000000, 0)
       .setInteractive({ useHandCursor: true })
       .setDepth(801);
-    this.closeHit.on('pointerdown', () => this.close());
+    this.closeHit.on('pointerup', () => this.close());
   }
 
   close(onComplete?: () => void): void {
