@@ -1,10 +1,12 @@
 import Phaser from 'phaser';
 import { HeroData, HeroState, EquipmentSlot } from '../types';
 import { RunManager } from '../managers/RunManager';
-import { Theme, colorToString, getElementColor, getRarityColor, getRoleColor } from './Theme';
+import { Theme, colorToString, getRarityColor, getRoleColor } from './Theme';
 import { UI } from '../i18n';
 import { HeroDetailPopup } from './HeroDetailPopup';
 import { TextFactory } from './TextFactory';
+import { drawRoleIcon, drawElementIcon } from './PixelIcons';
+import { getOrCreateTexture, ChibiConfig } from '../systems/UnitRenderer';
 
 export class HeroCard extends Phaser.GameObjects.Container {
   private bg: Phaser.GameObjects.Graphics;
@@ -26,72 +28,69 @@ export class HeroCard extends Phaser.GameObjects.Container {
     this.heroData = heroData;
     this.heroState = heroState;
 
-    const rarityColor = getRoleColor(heroData.role);
+    const roleColor = getRoleColor(heroData.role);
 
     // Card background
     this.bg = scene.add.graphics();
     this.bg.fillStyle(Theme.colors.panel, 0.9);
     this.bg.fillRoundedRect(-this.cardWidth / 2, -this.cardHeight / 2, this.cardWidth, this.cardHeight, 6);
-    this.bg.lineStyle(2, rarityColor, 1);
+    this.bg.lineStyle(2, roleColor, 1);
     this.bg.strokeRoundedRect(-this.cardWidth / 2, -this.cardHeight / 2, this.cardWidth, this.cardHeight, 6);
     this.add(this.bg);
 
-    // Element icon (colored circle + symbol)
+    // ── Top identity zone (y: -80 to -34) ──
+
+    // Role pixel icon (8x8, scale=2) top-left
+    const iconG = scene.add.graphics();
+    drawRoleIcon(iconG, -this.cardWidth / 2 + 6, -this.cardHeight / 2 + 6, heroData.role, 2);
+    this.add(iconG);
+
+    // Element pixel icon (8x8, scale=2) top-right
     if (heroData.element) {
-      const elColor = getElementColor(heroData.element);
-      const elX = this.cardWidth / 2 - 16;
-      const elY = -this.cardHeight / 2 + 16;
-      const elCircle = scene.add.graphics();
-      elCircle.fillStyle(elColor, 1);
-      elCircle.fillCircle(elX, elY, 8);
-      elCircle.lineStyle(1, 0xffffff, 0.5);
-      elCircle.strokeCircle(elX, elY, 8);
-      this.add(elCircle);
-      const elSym = Theme.colors.elementSymbol[heroData.element] ?? '';
-      if (elSym) {
-        const symText = TextFactory.create(scene, elX, elY, elSym, 'tiny', {
-          color: '#000000', fontStyle: 'bold',
-        }).setOrigin(0.5);
-        this.add(symText);
-      }
+      const elIconG = scene.add.graphics();
+      drawElementIcon(elIconG, this.cardWidth / 2 - 22, -this.cardHeight / 2 + 6, heroData.element, 2);
+      this.add(elIconG);
     }
 
-    // Hero icon placeholder (role-based color)
-    const iconColor = getRoleColor(heroData.role);
-    const icon = scene.add.rectangle(0, -42, 32, 32, iconColor);
-    icon.setStrokeStyle(1, 0xffffff, 0.3);
-    this.add(icon);
+    // Chibi sprite centered
+    const chibiConfig: ChibiConfig = {
+      role: heroData.role as ChibiConfig['role'],
+      race: (heroData.race ?? 'human') as ChibiConfig['race'],
+      classType: (heroData.class ?? 'warrior') as ChibiConfig['classType'],
+      fillColor: getRoleColor(heroData.role),
+      borderColor: 0x000000,
+      isHero: true,
+      isBoss: false,
+    };
+    const textureKey = getOrCreateTexture(scene, chibiConfig);
+    const chibiSprite = scene.add.image(0, -52, textureKey);
+    chibiSprite.setOrigin(0.5);
+    this.add(chibiSprite);
 
-    // Role initial on icon
-    const roleInitial = TextFactory.create(scene, 0, -42, heroData.role.charAt(0).toUpperCase(), 'subtitle', {
-      color: '#ffffff',
-    }).setOrigin(0.5);
-    this.add(roleInitial);
+    // ── Middle status zone (y: -34 to +10) ──
 
-    // Name
-    const name = TextFactory.create(scene, 0, -17, heroData.name, 'body', {
+    // Name + Level
+    const name = TextFactory.create(scene, 0, -30, `${heroData.name} Lv.${heroState.level}`, 'body', {
       color: '#ffffff',
     }).setOrigin(0.5);
     this.add(name);
-
-    // Level
-    const level = TextFactory.create(scene, 0, -3, `Lv.${heroState.level}`, 'small', {
-      color: colorToString(Theme.colors.secondary),
-    }).setOrigin(0.5);
-    this.add(level);
 
     // HP bar
     const rm = RunManager.getInstance();
     const maxHp = rm.getMaxHp(heroState, heroData);
     const hpRatio = heroState.currentHp / maxHp;
-    this.drawMiniHpBar(scene, 0, 12, 100, 6, hpRatio);
+    this.drawMiniHpBar(scene, 0, -16, 100, 6, hpRatio);
 
-    const hpText = TextFactory.create(scene, 0, 24, `${heroState.currentHp}/${maxHp}`, 'small', {
-      color: '#cccccc',
+    // Role tag (tiny, role color)
+    const roleTag = UI.heroCard.roleTag[heroData.role] ?? heroData.role;
+    const roleTagText = TextFactory.create(scene, 0, -6, roleTag, 'tiny', {
+      color: colorToString(roleColor),
     }).setOrigin(0.5);
-    this.add(hpText);
+    this.add(roleTagText);
 
-    // Stats summary (include equipment bonuses)
+    // ── Bottom summary zone (y: +10 to +80) ──
+
+    // Stats summary (attack + defense with equipment bonuses)
     const stats = heroData.baseStats;
     const scaling = heroData.scalingPerLevel;
     const lvl = heroState.level;
@@ -106,7 +105,7 @@ export class HeroCard extends Phaser.GameObjects.Container {
     }
     const atk = stats.attack + scaling.attack * (lvl - 1) + (mainEqBonus['attack'] ?? 0);
     const def = stats.defense + scaling.defense * (lvl - 1) + (mainEqBonus['defense'] ?? 0);
-    const statsText = TextFactory.create(scene, 0, 38, UI.heroCard.atkDef(atk, def), 'small', {
+    const statsText = TextFactory.create(scene, 0, 18, UI.heroCard.atkDef(atk, def), 'small', {
       color: '#aaccff',
     }).setOrigin(0.5);
     this.add(statsText);
@@ -116,7 +115,7 @@ export class HeroCard extends Phaser.GameObjects.Container {
     const slotIcons = ['W', 'A', 'R'];
     for (let i = 0; i < 3; i++) {
       const sx = -30 + i * 30;
-      const sy = 56;
+      const sy = 40;
       const equipped = heroState.equipment[slotNames[i]];
       const slotColor = equipped
         ? getRarityColor(equipped.rarity)

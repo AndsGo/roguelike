@@ -55,6 +55,9 @@ export const UI = {
     back: '后排',
     autoAssign: '自动分配',
     tip: '前排英雄更容易被近战敌人攻击',
+    noFrontWarning: '前排无人，后排将直接承伤',
+    healerFrontWarning: '治疗在前排，生存风险高',
+    recommended: '推荐',
   },
 
   // Node types
@@ -237,6 +240,13 @@ export const UI = {
     magicRes: (v: number) => `法抗: ${v}`,
     range: (v: number) => `射程: ${v}`,
     skills: (s: string) => `技能: ${s}`,
+    roleTag: {
+      tank: '坦克',
+      melee_dps: '近战',
+      ranged_dps: '远程',
+      healer: '治疗',
+      support: '辅助',
+    } as Record<string, string>,
   },
 
   // Hero unlock
