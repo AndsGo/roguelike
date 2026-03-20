@@ -8,6 +8,7 @@ import Phaser from 'phaser';
 import { HeroCard } from '../../src/ui/HeroCard';
 import { RunManager } from '../../src/managers/RunManager';
 import { EventBus } from '../../src/systems/EventBus';
+import { getRoleColor } from '../../src/ui/Theme';
 
 describe('HeroCard', () => {
   let scene: Phaser.Scene;
@@ -103,21 +104,15 @@ describe('HeroCard', () => {
 
   describe('role colors', () => {
     it('returns correct color for tank', () => {
-      const card = createCard();
-      if (!card) return;
-      expect((card as any).getRoleColor('tank')).toBe(0x4488ff);
+      expect(getRoleColor('tank')).toBe(0x4488cc);
     });
 
     it('returns correct color for healer', () => {
-      const card = createCard();
-      if (!card) return;
-      expect((card as any).getRoleColor('healer')).toBe(0x44ff88);
+      expect(getRoleColor('healer')).toBe(0x44aa44);
     });
 
     it('returns fallback for unknown role', () => {
-      const card = createCard();
-      if (!card) return;
-      expect((card as any).getRoleColor('unknown')).toBe(0x888888);
+      expect(getRoleColor('unknown')).toBe(0xaaaaaa);
     });
   });
 });

@@ -136,12 +136,13 @@ export const Theme = {
       legendary: 0xff9800,
     } as Record<string, number>,
 
+    /** Role colors: ONLY for character positioning identity. Never for items/rarity. */
     role: {
-      tank: 0x4488ff,
-      melee_dps: 0xff8844,
-      ranged_dps: 0xff4488,
-      healer: 0x44ff88,
-      support: 0xaaaa44,
+      tank: 0x4488cc,
+      melee_dps: 0xdd8833,
+      ranged_dps: 0xcc4444,
+      healer: 0x44aa44,
+      support: 0xccaa33,
     } as Record<string, number>,
 
     node: {

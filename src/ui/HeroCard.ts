@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import { HeroData, HeroState, EquipmentSlot } from '../types';
 import { RunManager } from '../managers/RunManager';
-import { Theme, colorToString, getElementColor, getRarityColor } from './Theme';
+import { Theme, colorToString, getElementColor, getRarityColor, getRoleColor } from './Theme';
 import { UI } from '../i18n';
 import { HeroDetailPopup } from './HeroDetailPopup';
 import { TextFactory } from './TextFactory';
@@ -26,7 +26,7 @@ export class HeroCard extends Phaser.GameObjects.Container {
     this.heroData = heroData;
     this.heroState = heroState;
 
-    const rarityColor = this.getRarityBorderColor();
+    const rarityColor = getRoleColor(heroData.role);
 
     // Card background
     this.bg = scene.add.graphics();
@@ -57,7 +57,7 @@ export class HeroCard extends Phaser.GameObjects.Container {
     }
 
     // Hero icon placeholder (role-based color)
-    const iconColor = this.getRoleColor(heroData.role);
+    const iconColor = getRoleColor(heroData.role);
     const icon = scene.add.rectangle(0, -42, 32, 32, iconColor);
     icon.setStrokeStyle(1, 0xffffff, 0.3);
     this.add(icon);
@@ -255,32 +255,4 @@ export class HeroCard extends Phaser.GameObjects.Container {
     new HeroDetailPopup(this.scene, this.heroData, this.heroState);
   }
 
-  private getRarityBorderColor(): number {
-    // Use highest rarity equipment for card border
-    const slots: EquipmentSlot[] = ['weapon', 'armor', 'accessory'];
-    const rarityOrder = ['common', 'uncommon', 'rare', 'epic', 'legendary'];
-    let bestRarity = -1;
-    for (const slot of slots) {
-      const item = this.heroState.equipment[slot];
-      if (item) {
-        const idx = rarityOrder.indexOf(item.rarity);
-        if (idx > bestRarity) bestRarity = idx;
-      }
-    }
-    if (bestRarity >= 0) {
-      return getRarityColor(rarityOrder[bestRarity]);
-    }
-    return Theme.colors.panelBorder;
-  }
-
-  private getRoleColor(role: string): number {
-    switch (role) {
-      case 'tank': return 0x4488ff;
-      case 'melee_dps': return 0xff8844;
-      case 'ranged_dps': return 0xff4488;
-      case 'healer': return 0x44ff88;
-      case 'support': return 0xaaaa44;
-      default: return 0x888888;
-    }
-  }
 }
