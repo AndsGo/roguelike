@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { GAME_WIDTH, GAME_HEIGHT } from '../constants';
-import { Theme, colorToString } from './Theme';
+import { Theme, colorToString, getRoleColor, getElementColor } from './Theme';
 import { TextFactory } from './TextFactory';
 import { Unit } from '../entities/Unit';
 import { Hero } from '../entities/Hero';
@@ -111,18 +111,38 @@ export class BattleHUD extends Phaser.GameObjects.Container {
     this.heroes.forEach((hero, i) => {
       const container = this.scene.add.container(8, 32 + i * 22);
 
-      // Mini colored box
-      const box = this.scene.add.graphics();
-      const roleColor = hero.isHero ? 0x4488ff : 0xff4444;
-      box.fillStyle(roleColor, 0.8);
-      box.fillRoundedRect(0, -6, 12, 12, 2);
-      container.add(box);
+      // Role color bar (left 3px vertical strip)
+      const roleBar = this.scene.add.graphics();
+      const roleColor = getRoleColor(hero.role);
+      roleBar.fillStyle(roleColor, 1);
+      roleBar.fillRect(0, -6, 3, 12);
+      container.add(roleBar);
+
+      // Element dot (if hero has element)
+      if (hero.element) {
+        const elDot = this.scene.add.graphics();
+        elDot.fillStyle(getElementColor(hero.element), 1);
+        elDot.fillCircle(8, 0, 3);
+        container.add(elDot);
+      }
 
       // Name
-      const name = TextFactory.create(this.scene, 16, 0, hero.unitName.substring(0, 6), 'small', {
+      const name = TextFactory.create(this.scene, 14, 0, hero.unitName.substring(0, 6), 'small', {
         color: '#ffffff',
       }).setOrigin(0, 0.5);
       container.add(name);
+      container.setData('nameText', name);
+
+      // Flash tween for low HP warning (starts paused)
+      const flashTween = this.scene.tweens.add({
+        targets: name,
+        alpha: { from: 1, to: 0.3 },
+        duration: 400,
+        yoyo: true,
+        repeat: -1,
+        paused: true,
+      });
+      container.setData('flashTween', flashTween);
 
       // Mini HP bar
       const hpBg = this.scene.add.graphics();
@@ -368,6 +388,37 @@ export class BattleHUD extends Phaser.GameObjects.Container {
       if (alive !== lastAlive) {
         container.setAlpha(alive ? 1 : 0.3);
         container.setData('lastAlive', alive);
+      }
+
+      // Low HP flash (hero portraits only)
+      const isHero = container.getData('isHero') as boolean;
+      if (isHero) {
+        const flashTween = container.getData('flashTween') as Phaser.Tweens.Tween | null;
+        const nameText = container.getData('nameText') as Phaser.GameObjects.Text | null;
+        if (flashTween && nameText) {
+          if (ratio < 0.2 && alive) {
+            nameText.setColor('#ff4444');
+            if (!flashTween.isPlaying()) flashTween.resume();
+          } else {
+            nameText.setColor('#ffffff');
+            nameText.setAlpha(1);
+            if (flashTween.isPlaying()) flashTween.pause();
+          }
+        }
+      }
+
+      // Stun status indicator
+      const hasStun = (unit.statusEffects ?? []).some(e => e.type === 'stun');
+      let statusIcon = container.getData('statusIcon') as Phaser.GameObjects.Text | null;
+      if (hasStun && !statusIcon) {
+        statusIcon = TextFactory.create(this.scene, 104, 0, '!', 'tiny', {
+          color: '#ff4444', fontStyle: 'bold',
+        }).setOrigin(0.5);
+        container.add(statusIcon);
+        container.setData('statusIcon', statusIcon);
+      } else if (!hasStun && statusIcon) {
+        statusIcon.destroy();
+        container.setData('statusIcon', null);
       }
     }
   }

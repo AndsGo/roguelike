@@ -88,6 +88,16 @@ export class FormationPanel {
     this.drawColumn(frontHeroes, frontX, panelY + 80);
     this.drawColumn(backHeroes, backX, panelY + 80);
 
+    // Formation warnings
+    const heroStates = rm.getHeroes();
+    const warnings = this.getFormationWarnings(heroStates);
+    warnings.forEach((warn, i) => {
+      const warnText = TextFactory.create(scene, GAME_WIDTH / 2,
+        panelY + PANEL_H - 55 - i * 14,
+        warn, 'tiny', { color: '#ff8844' }).setOrigin(0.5).setDepth(800);
+      this.objects.push(warnText);
+    });
+
     // Auto-assign button
     const autoBtn = new Button(scene, GAME_WIDTH / 2, panelY + PANEL_H - 28,
       UI.formation.autoAssign, 100, 24, () => {
@@ -133,6 +143,18 @@ export class FormationPanel {
       }).setOrigin(0.5).setDepth(800);
       this.objects.push(name);
 
+      // Recommended position tag (show when misplaced)
+      const recommended = autoFormationByRole(data.role);
+      const current = rm.getHeroFormation(hero.id);
+      if (recommended !== current) {
+        const label = recommended === 'front' ? UI.formation.front : UI.formation.back;
+        const warnTag = TextFactory.create(this.scene, x, y + 33,
+          `${UI.formation.recommended}:${label}`, 'tiny', {
+          color: '#ffaa44',
+        }).setOrigin(0.5).setDepth(800);
+        this.objects.push(warnTag);
+      }
+
       // Hit zone for tap-to-toggle
       const hitZone = this.scene.add.rectangle(x, y + 5, 60, 50, 0x000000, 0)
         .setInteractive({ useHandCursor: true }).setDepth(801);
@@ -143,6 +165,24 @@ export class FormationPanel {
       });
       this.objects.push(hitZone);
     });
+  }
+
+  private getFormationWarnings(heroes: HeroState[]): string[] {
+    const rm = RunManager.getInstance();
+    const warnings: string[] = [];
+
+    const frontCount = heroes.filter(h => rm.getHeroFormation(h.id) === 'front').length;
+    if (frontCount === 0) warnings.push(UI.formation.noFrontWarning);
+
+    for (const h of heroes) {
+      const data = rm.getHeroData(h.id);
+      if (data.role === 'healer' && rm.getHeroFormation(h.id) === 'front') {
+        warnings.push(UI.formation.healerFrontWarning);
+        break;
+      }
+    }
+
+    return warnings;
   }
 
   private autoAssignAll(): void {

@@ -147,6 +147,15 @@ export class HeroDetailPopup extends Phaser.GameObjects.Container {
       { label: STAT_LABELS.attackRange, key: 'attackRange', base: heroData.baseStats.attackRange },
     ];
 
+    // Accordion state: only one stat row expanded at a time
+    let currentExpandedCleanup: (() => void) | null = null;
+
+    const formatValue = (val: number, isPercent?: boolean, suffix?: string): string => {
+      if (isPercent) return `${Math.round(val * 100)}%`;
+      if (suffix === 'x') return `${val.toFixed(1)}`;
+      return `${Math.round(val)}`;
+    };
+
     const renderStatLine = (x: number, y: number, label: string, key: keyof UnitStats, base: number, isPercent?: boolean, suffix?: string): void => {
       const eqb = (equipBonus as Record<string, number>)[key] ?? 0;
       const syb = (synergyBonus as Record<string, number>)[key] ?? 0;
@@ -154,51 +163,62 @@ export class HeroDetailPopup extends Phaser.GameObjects.Container {
       const total = base + eqb + syb + evb;
 
       let valueStr: string;
-      if (isPercent) {
-        valueStr = `${Math.round(total * 100)}%`;
-      } else if (suffix === 'x') {
-        valueStr = `${total.toFixed(1)}`;
-      } else {
-        valueStr = `${Math.round(total)}`;
-      }
-
-      // HP special: show current/max
       if (key === 'maxHp') {
         valueStr = `${heroState.currentHp}/${Math.round(total)}`;
+      } else {
+        valueStr = formatValue(total, isPercent, suffix);
       }
 
-      const mainText = TextFactory.create(scene, x, y, `${label}: ${valueStr}`, 'label', {
+      const hasBonuses = eqb !== 0 || syb !== 0 || evb !== 0;
+      const prefix = hasBonuses ? '▸ ' : '  ';
+
+      const mainText = TextFactory.create(scene, x, y, `${prefix}${label}: ${valueStr}`, 'label', {
         color: '#ccccdd',
       }).setDepth(801);
       this.add(mainText);
 
-      // Show bonus breakdown inline
-      const hasBonuses = eqb !== 0 || syb !== 0 || evb !== 0;
       if (hasBonuses) {
-        let offsetX = mainText.width + 4;
-        if (eqb !== 0) {
-          const eqStr = isPercent ? `${Math.round(eqb * 100)}%` : suffix === 'x' ? eqb.toFixed(1) : `${Math.round(eqb)}`;
-          const eqText = TextFactory.create(scene, x + offsetX, y, `+${eqStr}`, 'small', {
-            color: colorToString(Theme.colors.success),
-          }).setDepth(801);
-          this.add(eqText);
-          offsetX += eqText.width + 2;
-        }
-        if (syb !== 0) {
-          const syStr = isPercent ? `${Math.round(syb * 100)}%` : suffix === 'x' ? syb.toFixed(1) : `${Math.round(syb)}`;
-          const syText = TextFactory.create(scene, x + offsetX, y, `+${syStr}`, 'small', {
-            color: colorToString(Theme.colors.gold),
-          }).setDepth(801);
-          this.add(syText);
-          offsetX += syText.width + 2;
-        }
-        if (evb !== 0) {
-          const evStr = isPercent ? `${Math.round(evb * 100)}%` : suffix === 'x' ? evb.toFixed(1) : `${Math.round(evb)}`;
-          const evText = TextFactory.create(scene, x + offsetX, y, `+${evStr}`, 'small', {
-            color: '#88ddff',
-          }).setDepth(801);
-          this.add(evText);
-        }
+        const hitZone = scene.add.rectangle(x + 60, y + 5, 140, 16, 0x000000, 0)
+          .setOrigin(0, 0.5)
+          .setInteractive({ useHandCursor: true })
+          .setDepth(801);
+        this.add(hitZone);
+
+        let breakdown: Phaser.GameObjects.Text | null = null;
+        let expanded = false;
+
+        hitZone.on('pointerup', () => {
+          if (expanded && breakdown) {
+            breakdown.destroy();
+            breakdown = null;
+            mainText.setText(`▸ ${label}: ${valueStr}`);
+            expanded = false;
+            currentExpandedCleanup = null;
+          } else {
+            // Accordion: collapse previous
+            if (currentExpandedCleanup) currentExpandedCleanup();
+
+            const parts: string[] = [`基础${formatValue(base, isPercent, suffix)}`];
+            if (eqb !== 0) parts.push(`装备+${formatValue(eqb, isPercent, suffix)}`);
+            if (syb !== 0) parts.push(`羁绊+${formatValue(syb, isPercent, suffix)}`);
+            if (evb !== 0) parts.push(`事件+${formatValue(evb, isPercent, suffix)}`);
+
+            breakdown = TextFactory.create(scene, x + 12, y + 12, parts.join(' / '), 'tiny', {
+              color: '#aaaaaa',
+            }).setDepth(802);
+            this.add(breakdown);
+
+            mainText.setText(`▾ ${label}: ${valueStr}`);
+            expanded = true;
+
+            currentExpandedCleanup = () => {
+              if (breakdown) { breakdown.destroy(); breakdown = null; }
+              mainText.setText(`▸ ${label}: ${valueStr}`);
+              expanded = false;
+              currentExpandedCleanup = null;
+            };
+          }
+        });
       }
     };
 

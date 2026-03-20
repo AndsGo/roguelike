@@ -197,10 +197,16 @@ class Scene {
 
   tweens = {
     add: (config: any) => {
-      if (typeof config.onComplete === 'function') {
+      if (!config.paused && typeof config.onComplete === 'function') {
         config.onComplete();
       }
-      return {};
+      return {
+        isPlaying: () => false,
+        resume: () => {},
+        pause: () => {},
+        stop: () => {},
+        remove: () => {},
+      };
     },
     addCounter: (config: any) => {
       // Immediately call onUpdate with the 'to' value and then onComplete
