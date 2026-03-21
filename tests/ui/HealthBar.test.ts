@@ -16,29 +16,29 @@ describe('HealthBar', () => {
 
   describe('constructor', () => {
     it('creates without errors', () => {
-      const bar = new HealthBar(scene, 0, 0, 40, 5);
+      const bar = new HealthBar(scene, 0, 0);
       expect(bar).toBeDefined();
     });
 
-    it('stores dimensions', () => {
-      const bar = new HealthBar(scene, 10, 20, 60, 8);
-      expect((bar as any).barWidth).toBe(60);
-      expect((bar as any).barHeight).toBe(8);
+    it('stores dimensions from style', () => {
+      const bar = new HealthBar(scene, 10, 20, 'boss');
+      expect((bar as any).barWidth).toBe(56);
+      expect((bar as any).barHeight).toBe(7);
     });
 
     it('initializes ratios to 1', () => {
-      const bar = new HealthBar(scene, 0, 0, 40, 5);
+      const bar = new HealthBar(scene, 0, 0);
       expect((bar as any).currentRatio).toBe(1);
       expect((bar as any).delayedRatio).toBe(1);
     });
 
     it('initializes shield to 0', () => {
-      const bar = new HealthBar(scene, 0, 0, 40, 5);
+      const bar = new HealthBar(scene, 0, 0);
       expect((bar as any).shieldRatio).toBe(0);
     });
 
     it('creates all graphics layers', () => {
-      const bar = new HealthBar(scene, 0, 0, 40, 5);
+      const bar = new HealthBar(scene, 0, 0);
       expect((bar as any).bgBar).toBeDefined();
       expect((bar as any).fillBar).toBeDefined();
       expect((bar as any).delayBar).toBeDefined();
@@ -48,13 +48,13 @@ describe('HealthBar', () => {
 
   describe('updateHealth', () => {
     it('updates current ratio', () => {
-      const bar = new HealthBar(scene, 0, 0, 40, 5);
+      const bar = new HealthBar(scene, 0, 0);
       bar.updateHealth(50, 100);
       expect((bar as any).currentRatio).toBeCloseTo(0.5);
     });
 
     it('clamps ratio to [0, 1]', () => {
-      const bar = new HealthBar(scene, 0, 0, 40, 5);
+      const bar = new HealthBar(scene, 0, 0);
       bar.updateHealth(150, 100);
       expect((bar as any).currentRatio).toBe(1);
 
@@ -63,7 +63,7 @@ describe('HealthBar', () => {
     });
 
     it('sets delayed ratio on damage', () => {
-      const bar = new HealthBar(scene, 0, 0, 40, 5);
+      const bar = new HealthBar(scene, 0, 0);
       // Start at full
       bar.updateHealth(100, 100);
       // Take damage
@@ -73,7 +73,7 @@ describe('HealthBar', () => {
     });
 
     it('updates delayed ratio on heal', () => {
-      const bar = new HealthBar(scene, 0, 0, 40, 5);
+      const bar = new HealthBar(scene, 0, 0);
       bar.updateHealth(50, 100);
       bar.updateHealth(80, 100);
       // On heal, delayed ratio matches current immediately
@@ -83,19 +83,19 @@ describe('HealthBar', () => {
 
   describe('updateShield', () => {
     it('updates shield ratio', () => {
-      const bar = new HealthBar(scene, 0, 0, 40, 5);
+      const bar = new HealthBar(scene, 0, 0);
       bar.updateShield(30, 100);
       expect((bar as any).shieldRatio).toBeCloseTo(0.3);
     });
 
     it('clamps shield ratio', () => {
-      const bar = new HealthBar(scene, 0, 0, 40, 5);
+      const bar = new HealthBar(scene, 0, 0);
       bar.updateShield(200, 100);
       expect((bar as any).shieldRatio).toBe(1);
     });
 
     it('sets shield to zero', () => {
-      const bar = new HealthBar(scene, 0, 0, 40, 5);
+      const bar = new HealthBar(scene, 0, 0);
       bar.updateShield(50, 100);
       bar.updateShield(0, 100);
       expect((bar as any).shieldRatio).toBe(0);
@@ -104,13 +104,13 @@ describe('HealthBar', () => {
 
   describe('setElement', () => {
     it('creates element icon', () => {
-      const bar = new HealthBar(scene, 0, 0, 40, 5);
+      const bar = new HealthBar(scene, 0, 0);
       bar.setElement('fire');
       expect((bar as any).elementIcon).not.toBeNull();
     });
 
     it('clears element icon when no element', () => {
-      const bar = new HealthBar(scene, 0, 0, 40, 5);
+      const bar = new HealthBar(scene, 0, 0);
       bar.setElement('fire');
       bar.setElement(undefined);
       expect((bar as any).elementIcon).toBeNull();
@@ -119,13 +119,13 @@ describe('HealthBar', () => {
 
   describe('setLevel', () => {
     it('creates level text', () => {
-      const bar = new HealthBar(scene, 0, 0, 40, 5);
+      const bar = new HealthBar(scene, 0, 0);
       bar.setLevel(5);
       expect((bar as any).levelText).not.toBeNull();
     });
 
     it('updates existing level text', () => {
-      const bar = new HealthBar(scene, 0, 0, 40, 5);
+      const bar = new HealthBar(scene, 0, 0);
       bar.setLevel(5);
       const firstText = (bar as any).levelText;
       bar.setLevel(10);

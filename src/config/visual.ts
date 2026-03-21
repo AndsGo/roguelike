@@ -103,6 +103,44 @@ export const WAVE_TRANSITION = {
   TEXT_DEPTH: 500,
 } as const;
 
+// ─── Health Bar Styles ───
+export const HEALTH_BAR_STYLES = {
+  hero: {
+    borderColor: 0x4488cc,
+    borderAlpha: 0.5,
+    borderWidth: 1,
+    bgColor: 0x333333,
+    width: 40,
+    height: 5,
+  },
+  normal: {
+    borderColor: 0,
+    borderAlpha: 0,
+    borderWidth: 0,
+    bgColor: 0x442222,
+    width: 40,
+    height: 5,
+  },
+  elite: {
+    borderColor: 0x9944cc,
+    borderAlpha: 0.8,
+    borderWidth: 1,
+    bgColor: 0x332233,
+    width: 40,
+    height: 6,
+  },
+  boss: {
+    borderColor: 0xffd700,
+    borderAlpha: 0.9,
+    borderWidth: 2,
+    bgColor: 0x333322,
+    width: 56,
+    height: 7,
+  },
+} as const;
+
+export type HealthBarStyle = keyof typeof HEALTH_BAR_STYLES;
+
 // ─── Gameplay UI Thresholds ───
 export const UI_THRESHOLDS = {
   COMBO_DISPLAY_MIN: 5,

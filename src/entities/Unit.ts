@@ -1,7 +1,8 @@
 import Phaser from 'phaser';
 import { UnitStats, UnitRole, StatusEffect, SkillData, ElementType, RaceType, ClassType, MonsterType } from '../types';
 import { HealthBar } from '../components/HealthBar';
-import { HEALTH_BAR_WIDTH, HEALTH_BAR_HEIGHT, Y_MOVEMENT_DAMPING } from '../constants';
+import { Y_MOVEMENT_DAMPING } from '../constants';
+import { HealthBarStyle } from '../config/visual';
 import { EventBus } from '../systems/EventBus';
 import { RelicSystem } from '../systems/RelicSystem';
 import { Theme, darkenColor, getElementColor, getRoleColor } from '../ui/Theme';
@@ -114,7 +115,7 @@ export class Unit extends Phaser.GameObjects.Container {
     this.add(this.nameLabel);
 
     // Health bar
-    this.healthBar = new HealthBar(scene, 0, this.spriteHeight / 2 + 4, HEALTH_BAR_WIDTH, HEALTH_BAR_HEIGHT);
+    this.healthBar = new HealthBar(scene, 0, this.spriteHeight / 2 + 4, this.getHealthBarStyle());
     this.add(this.healthBar);
 
     // Element indicator below health bar
@@ -174,6 +175,12 @@ export class Unit extends Phaser.GameObjects.Container {
       return 0xffffff;
     }
     return 0xcc2222;
+  }
+
+  private getHealthBarStyle(): HealthBarStyle {
+    if (this.isHero) return 'hero';
+    if (this.isBoss) return 'boss';
+    return 'normal';
   }
 
   private computeSize(): { w: number; h: number } {

@@ -168,15 +168,28 @@ export class BattleHUD extends Phaser.GameObjects.Container {
     this.enemies.forEach((enemy, i) => {
       const container = this.scene.add.container(GAME_WIDTH - 108, 32 + i * 22);
 
-      // Mini colored box (element indicator, placed first to avoid name overlap)
-      const box = this.scene.add.graphics();
-      box.fillStyle(0xff4444, 0.8);
-      box.fillRoundedRect(0, -6, 12, 12, 2);
-      container.add(box);
+      // Left badge slot (mutually exclusive: boss > elite > element)
+      if (enemy.isBoss) {
+        const badge = TextFactory.create(this.scene, 2, 0, '♛', 'tiny', {
+          color: '#ffd700', fontStyle: 'bold',
+        }).setOrigin(0, 0.5);
+        container.add(badge);
+      } else if ((enemy as any).isElite) {
+        const badge = TextFactory.create(this.scene, 2, 0, '★', 'tiny', {
+          color: '#9944cc', fontStyle: 'bold',
+        }).setOrigin(0, 0.5);
+        container.add(badge);
+      } else if (enemy.element) {
+        const elDot = this.scene.add.graphics();
+        elDot.fillStyle(getElementColor(enemy.element), 1);
+        elDot.fillCircle(6, 0, 3);
+        container.add(elDot);
+      }
 
-      // Name (after indicator box)
-      const name = TextFactory.create(this.scene, 16, 0, enemy.unitName.substring(0, 5), 'small', {
-        color: '#ff8888',
+      // Name — threat-level colored
+      const nameColor = enemy.isBoss ? '#ffd700' : (enemy as any).isElite ? '#cc88ff' : '#ff8888';
+      const name = TextFactory.create(this.scene, 14, 0, enemy.unitName.substring(0, 5), 'small', {
+        color: nameColor,
       }).setOrigin(0, 0.5);
       container.add(name);
 
@@ -193,6 +206,7 @@ export class BattleHUD extends Phaser.GameObjects.Container {
       container.setData('isHero', false);
       container.setData('lastRatio', -1);
       container.setData('lastAlive', true);
+      container.setData('nameText', name);
 
       this.enemyPortraits.push(container);
       this.add(container);

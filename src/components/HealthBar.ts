@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import { Theme, getElementColor } from '../ui/Theme';
 import { ElementType } from '../types';
-import { ANIM, OPACITY, SCALE } from '../config/visual';
+import { ANIM, OPACITY, SCALE, HEALTH_BAR_STYLES, HealthBarStyle } from '../config/visual';
 import { TextFactory } from '../ui/TextFactory';
 
 export class HealthBar extends Phaser.GameObjects.Container {
@@ -17,19 +17,32 @@ export class HealthBar extends Phaser.GameObjects.Container {
   private lastDrawnRatio: number = -1;
   private lastDrawnDelayed: number = -1;
   private lastDrawnShield: number = -1;
+  private borderGfx: Phaser.GameObjects.Graphics | null = null;
   private levelText: Phaser.GameObjects.Text | null = null;
   private elementIcon: Phaser.GameObjects.Graphics | null = null;
 
-  constructor(scene: Phaser.Scene, x: number, y: number, width: number, height: number) {
+  constructor(scene: Phaser.Scene, x: number, y: number, style: HealthBarStyle = 'hero') {
     super(scene, x, y);
-    this.barWidth = width;
-    this.barHeight = height;
+    const styleConfig = HEALTH_BAR_STYLES[style];
+    this.barWidth = styleConfig.width;
+    this.barHeight = styleConfig.height;
 
     // Background
     this.bgBar = scene.add.graphics();
-    this.bgBar.fillStyle(Theme.colors.health.bg, 1);
-    this.bgBar.fillRoundedRect(-width / 2, -height / 2, width, height, 1);
+    this.bgBar.fillStyle(styleConfig.bgColor, 1);
+    this.bgBar.fillRoundedRect(-this.barWidth / 2, -this.barHeight / 2, this.barWidth, this.barHeight, 1);
     this.add(this.bgBar);
+
+    // Border (style-specific)
+    if (styleConfig.borderWidth > 0 && styleConfig.borderAlpha > 0) {
+      this.borderGfx = scene.add.graphics();
+      this.borderGfx.lineStyle(styleConfig.borderWidth, styleConfig.borderColor, styleConfig.borderAlpha);
+      this.borderGfx.strokeRoundedRect(
+        -this.barWidth / 2 - 1, -this.barHeight / 2 - 1,
+        this.barWidth + 2, this.barHeight + 2, 2,
+      );
+      this.add(this.borderGfx);
+    }
 
     // Delayed damage bar (red, shows after damage with delay)
     this.delayBar = scene.add.graphics();
