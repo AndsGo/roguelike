@@ -63,6 +63,7 @@ export class Unit extends Phaser.GameObjects.Container {
   private stunTween: Phaser.Tweens.Tween | null = null;
   private statusTooltip: Phaser.GameObjects.Container | null = null;
   isBoss: boolean = false;
+  isElite: boolean = false;
 
   constructor(
     scene: Phaser.Scene,
@@ -180,6 +181,7 @@ export class Unit extends Phaser.GameObjects.Container {
   private getHealthBarStyle(): HealthBarStyle {
     if (this.isHero) return 'hero';
     if (this.isBoss) return 'boss';
+    if (this.isElite) return 'elite';
     return 'normal';
   }
 
@@ -226,8 +228,30 @@ export class Unit extends Phaser.GameObjects.Container {
     });
     this.nameLabel.setY(-this.spriteHeight / 2 - 20);
 
-    // Reposition health bar
-    this.healthBar.setY(this.spriteHeight / 2 + 4);
+    // Recreate health bar with boss style
+    this.recreateHealthBar('boss');
+  }
+
+  /** Configure for elite display */
+  setElite(): void {
+    this.isElite = true;
+    this.recreateHealthBar('elite');
+  }
+
+  /** Recreate the health bar with a new style (e.g. after boss/elite upgrade) */
+  private recreateHealthBar(style: HealthBarStyle): void {
+    const hbY = this.healthBar.y;
+    const oldElement = this.element;
+    this.healthBar.destroy();
+    this.healthBar = new HealthBar(this.scene, 0, hbY, style);
+    this.add(this.healthBar);
+    this.healthBar.updateHealth(this.currentHp, this.currentStats.maxHp);
+    if (oldElement) this.healthBar.setElement(oldElement);
+  }
+
+  /** Pass phase thresholds to the health bar for boss notch rendering */
+  setPhaseThresholds(thresholds: number[]): void {
+    this.healthBar.setPhaseThresholds(thresholds);
   }
 
   /** Mark effective stats cache as stale (call when statusEffects, synergyBonuses, or relics change) */

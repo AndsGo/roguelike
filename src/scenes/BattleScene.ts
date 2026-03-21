@@ -205,6 +205,13 @@ export class BattleScene extends Phaser.Scene {
       })
       .filter((e): e is Enemy => e !== null);
 
+    // Mark enemies as elite for elite node battles
+    if (node.type === 'elite') {
+      for (const enemy of enemies) {
+        enemy.setElite();
+      }
+    }
+
     RelicSystem.activateWithUnits(rm.getRelics(), heroes, enemies, rng);
     this.ultimateSystem = new UltimateSystem();
 
@@ -401,6 +408,10 @@ export class BattleScene extends Phaser.Scene {
           bossId: bossEnemy.enemyData.id,
           phases: phaseConfig.phases as any,
         });
+
+        // Render phase threshold notches on the boss health bar
+        const thresholds = phaseConfig.phases.map(p => p.hpPercent);
+        bossEnemy.setPhaseThresholds(thresholds);
       }
     }
 

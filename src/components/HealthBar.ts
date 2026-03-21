@@ -20,6 +20,8 @@ export class HealthBar extends Phaser.GameObjects.Container {
   private borderGfx: Phaser.GameObjects.Graphics | null = null;
   private levelText: Phaser.GameObjects.Text | null = null;
   private elementIcon: Phaser.GameObjects.Graphics | null = null;
+  private phaseNotches: number[] = [];
+  private notchGfx: Phaser.GameObjects.Graphics | null = null;
 
   constructor(scene: Phaser.Scene, x: number, y: number, style: HealthBarStyle = 'hero') {
     super(scene, x, y);
@@ -180,6 +182,36 @@ export class HealthBar extends Phaser.GameObjects.Container {
     // Draw a bright outline around the entire bar to indicate shield is active
     this.shieldBar.lineStyle(1, 0x00eeff, 0.9);
     this.shieldBar.strokeRoundedRect(-halfW - 1, -halfH - 1, this.barWidth + 2, this.barHeight + 2, 2);
+  }
+
+  /** Set HP-ratio thresholds where phase notches should appear on the bar */
+  setPhaseThresholds(thresholds: number[]): void {
+    this.phaseNotches = thresholds.sort((a, b) => b - a);
+    this.drawNotches();
+  }
+
+  private drawNotches(): void {
+    if (this.notchGfx) {
+      this.notchGfx.destroy();
+      this.notchGfx = null;
+    }
+    if (this.phaseNotches.length === 0) return;
+
+    this.notchGfx = this.scene.add.graphics();
+    for (const threshold of this.phaseNotches) {
+      const x = -this.barWidth / 2 + this.barWidth * threshold;
+      // Vertical notch line through the bar
+      this.notchGfx.lineStyle(1, 0xffd700, 0.8);
+      this.notchGfx.lineBetween(x, -this.barHeight / 2 - 1, x, this.barHeight / 2 + 1);
+      // Small triangle marker above the bar
+      this.notchGfx.fillStyle(0xffd700, 0.6);
+      this.notchGfx.fillTriangle(
+        x - 2, -this.barHeight / 2 - 2,
+        x + 2, -this.barHeight / 2 - 2,
+        x, -this.barHeight / 2,
+      );
+    }
+    this.add(this.notchGfx);
   }
 
   private getHealthColor(ratio: number): number {

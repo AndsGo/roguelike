@@ -141,6 +141,32 @@ export const HEALTH_BAR_STYLES = {
 
 export type HealthBarStyle = keyof typeof HEALTH_BAR_STYLES;
 
+// ─── Unit Animation Parameters ───
+export const HERO_ANIM_PARAMS: Record<string, {
+  idleDuration: number; idleDelta: number;
+  attackDuration: number; attackDistance: number;
+  castDuration: number; castScale: number;
+}> = {
+  tank:       { idleDuration: 1000, idleDelta: 2, attackDuration: 120, attackDistance: 20, castDuration: 180, castScale: 1.1 },
+  melee_dps:  { idleDuration: 800,  idleDelta: 3, attackDuration: 70,  attackDistance: 35, castDuration: 150, castScale: 1.2 },
+  ranged_dps: { idleDuration: 800,  idleDelta: 3, attackDuration: 60,  attackDistance: 15, castDuration: 140, castScale: 1.15 },
+  healer:     { idleDuration: 1200, idleDelta: 4, attackDuration: 100, attackDistance: 10, castDuration: 200, castScale: 1.25 },
+  support:    { idleDuration: 1000, idleDelta: 4, attackDuration: 90,  attackDistance: 12, castDuration: 180, castScale: 1.2 },
+};
+
+export const MONSTER_ANIM_PARAMS: Record<string, {
+  idleDuration: number; idleDelta: number;
+  attackDuration: number; attackDistance: number;
+  castDuration: number; castScale: number;
+}> = {
+  beast:     { idleDuration: 600,  idleDelta: 2, attackDuration: 50,  attackDistance: 40, castDuration: 120, castScale: 1.1 },
+  undead:    { idleDuration: 1200, idleDelta: 2, attackDuration: 100, attackDistance: 25, castDuration: 160, castScale: 1.15 },
+  construct: { idleDuration: 1400, idleDelta: 1, attackDuration: 140, attackDistance: 15, castDuration: 200, castScale: 1.05 },
+  caster:    { idleDuration: 1000, idleDelta: 5, attackDuration: 80,  attackDistance: 8,  castDuration: 160, castScale: 1.3 },
+  humanoid:  { idleDuration: 800,  idleDelta: 3, attackDuration: 80,  attackDistance: 30, castDuration: 150, castScale: 1.2 },
+  draconic:  { idleDuration: 1000, idleDelta: 2, attackDuration: 100, attackDistance: 20, castDuration: 180, castScale: 1.15 },
+};
+
 // ─── Gameplay UI Thresholds ───
 export const UI_THRESHOLDS = {
   COMBO_DISPLAY_MIN: 5,
