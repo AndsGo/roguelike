@@ -71,6 +71,8 @@ export interface HeroState {
 
 // ============ Enemy ============
 
+export type MonsterType = 'beast' | 'undead' | 'construct' | 'caster' | 'humanoid' | 'draconic';
+
 export interface EnemyData {
   id: string;
   name: string;
@@ -78,6 +80,7 @@ export interface EnemyData {
   element?: ElementType;
   race?: RaceType;
   class?: ClassType;
+  monsterType?: MonsterType;
   baseStats: UnitStats;
   scalingPerLevel: UnitScaling;
   skills: string[];

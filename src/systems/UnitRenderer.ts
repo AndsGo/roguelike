@@ -7,13 +7,14 @@
  */
 
 import Phaser from 'phaser';
-import { UnitRole, RaceType, ClassType } from '../types';
+import { UnitRole, RaceType, ClassType, MonsterType } from '../types';
 import { darkenColor, lightenColor } from '../ui/Theme';
 import { Theme } from '../ui/Theme';
 import {
   P, PaletteIndex, PixelLayer,
   BODY_TEMPLATES, HEAD_TEMPLATES, FACE_HERO, FACE_ENEMY,
   LEG_TEMPLATE, WEAPON_TEMPLATES, CROWN_TEMPLATE,
+  MONSTER_BODY_TEMPLATES, MONSTER_HEAD_TEMPLATES,
   SKIN_TONES, WEAPON_COLORS, GRID_W, GRID_H,
 } from '../data/pixel-templates';
 
@@ -25,6 +26,7 @@ export interface ChibiConfig {
   borderColor: number;
   isHero: boolean;
   isBoss: boolean;
+  monsterType?: MonsterType;
 }
 
 // ── Texture cache ──
@@ -33,7 +35,8 @@ const generatedKeys = new Set<string>();
 
 /** Compute a cache key from config */
 function computeConfigHash(c: ChibiConfig): string {
-  return `chibi_${c.role}_${c.race}_${c.classType}_${c.fillColor.toString(16)}_${c.borderColor.toString(16)}_${c.isHero ? 'h' : 'e'}_${c.isBoss ? 'b' : 'n'}`;
+  const mt = c.monsterType ?? 'none';
+  return `chibi_${c.role}_${c.race}_${c.classType}_${c.fillColor.toString(16)}_${c.borderColor.toString(16)}_${c.isHero ? 'h' : 'e'}_${c.isBoss ? 'b' : 'n'}_${mt}`;
 }
 
 /**
@@ -123,18 +126,26 @@ function blitLayer(target: PaletteIndex[][], source: PixelLayer, offsetRow: numb
 }
 
 /** Compose all layers into a final pixel grid */
-function compositePixelGrid(config: ChibiConfig): PaletteIndex[][] {
-  const { role, race, classType, isHero, isBoss } = config;
+export function compositePixelGrid(config: ChibiConfig): PaletteIndex[][] {
+  const { role, race, classType, isHero, isBoss, monsterType } = config;
   const h = isBoss ? GRID_H + 3 : GRID_H;  // Extra rows for crown
   const grid = createEmptyGrid(GRID_W, h);
 
   const rowBase = isBoss ? 3 : 0;  // Shift everything down for crown space
 
-  // Layer 1: Head (rows 0-7)
-  blitLayer(grid, HEAD_TEMPLATES[race], rowBase, 0);
+  // Layer 1: Head — monsters use MONSTER_HEAD_TEMPLATES if monsterType is set
+  if (monsterType && MONSTER_HEAD_TEMPLATES[monsterType]) {
+    blitLayer(grid, MONSTER_HEAD_TEMPLATES[monsterType], rowBase, 0);
+  } else {
+    blitLayer(grid, HEAD_TEMPLATES[race], rowBase, 0);
+  }
 
-  // Layer 2: Body (rows 7-15, overlapping 1 row with head bottom)
-  blitLayer(grid, BODY_TEMPLATES[role], rowBase + 7, 0);
+  // Layer 2: Body — monsters use MONSTER_BODY_TEMPLATES if monsterType is set
+  if (monsterType && MONSTER_BODY_TEMPLATES[monsterType]) {
+    blitLayer(grid, MONSTER_BODY_TEMPLATES[monsterType], rowBase + 7, 0);
+  } else {
+    blitLayer(grid, BODY_TEMPLATES[role], rowBase + 7, 0);
+  }
 
   // Layer 3: Legs (rows 17-19)
   blitLayer(grid, LEG_TEMPLATE, rowBase + 17, 0);
@@ -142,8 +153,10 @@ function compositePixelGrid(config: ChibiConfig): PaletteIndex[][] {
   // Layer 4: Face (overlaid on head region)
   blitLayer(grid, isHero ? FACE_HERO : FACE_ENEMY, rowBase, 0);
 
-  // Layer 5: Weapon (overlaid on body region)
-  blitLayer(grid, WEAPON_TEMPLATES[classType], rowBase + 7, 0);
+  // Layer 5: Weapon — only for heroes and humanoid monsters
+  if (isHero || !monsterType || monsterType === 'humanoid') {
+    blitLayer(grid, WEAPON_TEMPLATES[classType], rowBase + 7, 0);
+  }
 
   // Layer 6: Boss crown (rows 0-2 when boss, above head)
   if (isBoss) {

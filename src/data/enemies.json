@@ -5,6 +5,7 @@
     "role": "tank",
     "element": null,
     "race": "beast",
+    "monsterType": "beast",
     "baseStats": {
       "maxHp": 220,
       "hp": 220,
@@ -36,6 +37,7 @@
     "role": "melee_dps",
     "element": null,
     "race": "beast",
+    "monsterType": "beast",
     "baseStats": {
       "maxHp": 180,
       "hp": 180,
@@ -67,6 +69,7 @@
     "role": "ranged_dps",
     "element": "dark",
     "race": "undead",
+    "monsterType": "undead",
     "baseStats": {
       "maxHp": 280,
       "hp": 280,
@@ -98,6 +101,7 @@
     "role": "ranged_dps",
     "element": "dark",
     "race": "undead",
+    "monsterType": "caster",
     "baseStats": {
       "maxHp": 260,
       "hp": 260,
@@ -129,6 +133,7 @@
     "role": "tank",
     "element": null,
     "race": "demon",
+    "monsterType": "humanoid",
     "baseStats": {
       "maxHp": 520,
       "hp": 520,
@@ -161,6 +166,7 @@
     "role": "ranged_dps",
     "element": "fire",
     "race": "dragon",
+    "monsterType": "draconic",
     "baseStats": {
       "maxHp": 2200,
       "hp": 2200,
@@ -193,6 +199,7 @@
     "role": "melee_dps",
     "element": "fire",
     "race": "beast",
+    "monsterType": "beast",
     "baseStats": {
       "maxHp": 250,
       "hp": 250,
@@ -224,6 +231,7 @@
     "role": "ranged_dps",
     "element": "fire",
     "race": "demon",
+    "monsterType": "caster",
     "baseStats": {
       "maxHp": 280,
       "hp": 280,
@@ -255,6 +263,7 @@
     "role": "tank",
     "element": "fire",
     "race": "human",
+    "monsterType": "humanoid",
     "baseStats": {
       "maxHp": 450,
       "hp": 450,
@@ -286,6 +295,7 @@
     "role": "melee_dps",
     "element": "ice",
     "race": "beast",
+    "monsterType": "beast",
     "baseStats": {
       "maxHp": 220,
       "hp": 220,
@@ -317,6 +327,7 @@
     "role": "tank",
     "element": "ice",
     "race": "demon",
+    "monsterType": "construct",
     "baseStats": {
       "maxHp": 580,
       "hp": 580,
@@ -348,6 +359,7 @@
     "role": "ranged_dps",
     "element": "ice",
     "race": "elf",
+    "monsterType": "caster",
     "baseStats": {
       "maxHp": 170,
       "hp": 170,
@@ -379,6 +391,7 @@
     "role": "ranged_dps",
     "element": "lightning",
     "race": "beast",
+    "monsterType": "beast",
     "baseStats": {
       "maxHp": 190,
       "hp": 190,
@@ -410,6 +423,7 @@
     "role": "tank",
     "element": "lightning",
     "race": "demon",
+    "monsterType": "construct",
     "baseStats": {
       "maxHp": 650,
       "hp": 650,
@@ -441,6 +455,7 @@
     "role": "melee_dps",
     "element": "dark",
     "race": "undead",
+    "monsterType": "undead",
     "baseStats": {
       "maxHp": 320,
       "hp": 320,
@@ -472,6 +487,7 @@
     "role": "support",
     "element": "dark",
     "race": "human",
+    "monsterType": "caster",
     "baseStats": {
       "maxHp": 340,
       "hp": 340,
@@ -503,6 +519,7 @@
     "role": "tank",
     "element": "holy",
     "race": "human",
+    "monsterType": "humanoid",
     "baseStats": {
       "maxHp": 480,
       "hp": 480,
@@ -534,6 +551,7 @@
     "role": "healer",
     "element": "holy",
     "race": "elf",
+    "monsterType": "caster",
     "baseStats": {
       "maxHp": 140,
       "hp": 140,
@@ -565,6 +583,7 @@
     "role": "ranged_dps",
     "element": "ice",
     "race": "elf",
+    "monsterType": "caster",
     "baseStats": {
       "maxHp": 2800,
       "hp": 2800,
@@ -597,6 +616,7 @@
     "role": "tank",
     "element": "lightning",
     "race": "demon",
+    "monsterType": "construct",
     "baseStats": {
       "maxHp": 3000,
       "hp": 3000,
@@ -629,6 +649,7 @@
     "role": "ranged_dps",
     "element": "dark",
     "race": "undead",
+    "monsterType": "undead",
     "baseStats": {
       "maxHp": 3500,
       "hp": 3500,
@@ -661,6 +682,7 @@
     "role": "melee_dps",
     "element": "fire",
     "race": "demon",
+    "monsterType": "construct",
     "baseStats": {
       "maxHp": 450,
       "hp": 450,
@@ -692,6 +714,7 @@
     "role": "tank",
     "element": "ice",
     "race": "demon",
+    "monsterType": "construct",
     "baseStats": {
       "maxHp": 700,
       "hp": 700,
@@ -723,6 +746,7 @@
     "role": "ranged_dps",
     "element": "lightning",
     "race": "beast",
+    "monsterType": "beast",
     "baseStats": {
       "maxHp": 350,
       "hp": 350,
@@ -754,6 +778,7 @@
     "role": "healer",
     "element": "holy",
     "race": "human",
+    "monsterType": "humanoid",
     "baseStats": {
       "maxHp": 400,
       "hp": 400,
@@ -785,6 +810,7 @@
     "role": "support",
     "element": "dark",
     "race": "undead",
+    "monsterType": "undead",
     "baseStats": {
       "maxHp": 380,
       "hp": 380,
@@ -816,6 +842,7 @@
     "role": "melee_dps",
     "element": null,
     "race": "dragon",
+    "monsterType": "beast",
     "baseStats": {
       "maxHp": 2000,
       "hp": 2000,
@@ -847,6 +874,7 @@
     "role": "tank",
     "element": null,
     "race": "dragon",
+    "monsterType": "construct",
     "baseStats": {
       "maxHp": 3800,
       "hp": 3800,

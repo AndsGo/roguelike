@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { UnitStats, UnitRole, StatusEffect, SkillData, ElementType, RaceType, ClassType } from '../types';
+import { UnitStats, UnitRole, StatusEffect, SkillData, ElementType, RaceType, ClassType, MonsterType } from '../types';
 import { HealthBar } from '../components/HealthBar';
 import { HEALTH_BAR_WIDTH, HEALTH_BAR_HEIGHT, Y_MOVEMENT_DAMPING } from '../constants';
 import { EventBus } from '../systems/EventBus';
@@ -21,6 +21,7 @@ export class Unit extends Phaser.GameObjects.Container {
   classType: ClassType;
   isHero: boolean;
   element: ElementType | undefined;
+  monsterType?: MonsterType;
   formation: 'front' | 'back' = 'front';
 
   // Stats
@@ -189,6 +190,7 @@ export class Unit extends Phaser.GameObjects.Container {
       borderColor: this.borderColor,
       isHero: this.isHero,
       isBoss: this.isBoss,
+      monsterType: this.monsterType,
     };
   }
 

@@ -7,7 +7,7 @@
  * to a Phaser texture via Graphics.generateTexture().
  */
 
-import { UnitRole, RaceType, ClassType } from '../types';
+import { UnitRole, RaceType, ClassType, MonsterType } from '../types';
 
 // ── Palette index constants ──
 
@@ -88,16 +88,16 @@ export const BODY_TEMPLATES: Record<UnitRole, PixelLayer> = {
     [O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O],
   ],
   support: [
-    // Medium-slim torso
-    [_, _, _, O, O, O, O, O, O, O, O, O, O, _, _, _],
+    // Robed torso with accent shoulder ornaments, wide flared bottom
+    [_, _, _, _, O, O, O, O, O, O, O, O, _, _, _, _],
+    [_, _, _, O, A, F, F, F, F, F, F, A, O, _, _, _],
+    [_, _, O, S, F, F, H, F, F, H, F, F, S, O, _, _],
     [_, _, O, S, F, F, F, F, F, F, F, F, S, O, _, _],
-    [_, _, O, F, F, H, F, F, F, F, H, F, F, O, _, _],
     [_, _, O, S, F, F, F, F, F, F, F, F, S, O, _, _],
-    [_, _, _, O, S, F, F, F, F, F, F, S, O, _, _, _],
-    [_, _, _, O, S, F, F, F, F, F, F, S, O, _, _, _],
-    [_, _, _, O, S, F, F, F, F, F, F, S, O, _, _, _],
-    [_, _, _, _, O, S, F, F, F, F, S, O, _, _, _, _],
-    [_, _, _, _, _, O, O, O, O, O, O, _, _, _, _, _],
+    [_, O, S, F, F, F, F, F, F, F, F, F, F, S, O, _],
+    [_, O, A, F, F, F, F, F, F, F, F, F, F, A, O, _],
+    [O, S, F, F, F, F, F, F, F, F, F, F, F, F, S, O],
+    [O, O, O, O, A, O, O, O, O, O, O, A, O, O, O, O],
   ],
 };
 
@@ -106,9 +106,9 @@ export const BODY_TEMPLATES: Record<UnitRole, PixelLayer> = {
 
 export const HEAD_TEMPLATES: Record<RaceType, PixelLayer> = {
   human: [
-    // Round head, no extras
-    [_, _, _, _, _, O, O, O, O, O, O, _, _, _, _, _],
-    [_, _, _, _, O, SK,SK,SK,SK,SK,SK, O, _, _, _, _],
+    // Round head with short hair outline, wider top
+    [_, _, _, O, O, O, O, O, O, O, O, O, O, _, _, _],
+    [_, _, _, O, A, A, A, O, A, A, A, A, O, _, _, _],
     [_, _, _, O, SK,SK,SK,SK,SK,SK,SK,SK, O, _, _, _],
     [_, _, _, O, SK,SK,SK,SK,SK,SK,SK,SK, O, _, _, _],
     [_, _, _, O, SK,SK,SK,SK,SK,SK,SK,SK, O, _, _, _],
@@ -117,12 +117,12 @@ export const HEAD_TEMPLATES: Record<RaceType, PixelLayer> = {
     [_, _, _, _, _, O, O, O, O, O, O, _, _, _, _, _],
   ],
   elf: [
-    // Round head + pointed ear pixels on sides
+    // Elegant head with large 4-5px pointed ears on rows 2-5
     [_, _, _, _, _, O, O, O, O, O, O, _, _, _, _, _],
     [_, _, _, _, O, SK,SK,SK,SK,SK,SK, O, _, _, _, _],
-    [_, _, _, O, SK,SK,SK,SK,SK,SK,SK,SK, O, _, _, _],
-    [_, _, O, A, SK,SK,SK,SK,SK,SK,SK,SK, A, O, _, _],
-    [_, O, A, O, SK,SK,SK,SK,SK,SK,SK,SK, O, A, O, _],
+    [_, _, A, O, SK,SK,SK,SK,SK,SK,SK,SK, O, A, _, _],
+    [_, A, A, O, SK,SK,SK,SK,SK,SK,SK,SK, O, A, A, _],
+    [_, _, A, O, SK,SK,SK,SK,SK,SK,SK,SK, O, A, _, _],
     [_, _, _, O, SK,SD,SK,SK,SK,SK,SD,SK, O, _, _, _],
     [_, _, _, _, O, SK,SK,SK,SK,SK,SK, O, _, _, _, _],
     [_, _, _, _, _, O, O, O, O, O, O, _, _, _, _, _],
@@ -139,10 +139,10 @@ export const HEAD_TEMPLATES: Record<RaceType, PixelLayer> = {
     [_, _, _, _, _, O, O, O, O, O, O, _, _, _, _, _],
   ],
   demon: [
-    // Round head + horn pixels on top
+    // Tall 4px horns (rows 0-1 both sides), aggressive look
+    [_, _, O, A, _, _, _, _, _, _, _, _, A, O, _, _],
     [_, _, _, O, A, _, _, _, _, _, _, A, O, _, _, _],
-    [_, _, _, _, O, A, _, _, _, _, A, O, _, _, _, _],
-    [_, _, _, _, O, SK,SK,SK,SK,SK,SK, O, _, _, _, _],
+    [_, _, _, O, A, O, O, O, O, O, O, A, O, _, _, _],
     [_, _, _, O, SK,SK,SK,SK,SK,SK,SK,SK, O, _, _, _],
     [_, _, _, O, SK,SK,SK,SK,SK,SK,SK,SK, O, _, _, _],
     [_, _, _, O, SK,SD,SK,SK,SK,SK,SD,SK, O, _, _, _],
@@ -150,14 +150,14 @@ export const HEAD_TEMPLATES: Record<RaceType, PixelLayer> = {
     [_, _, _, _, _, O, O, O, O, O, O, _, _, _, _, _],
   ],
   beast: [
-    // Round head + triangular ear bumps on top
-    [_, _, _, O, A, _, _, _, _, _, _, A, O, _, _, _],
+    // Large triangular ears (rows 0-1), snout hint row 6
+    [_, _, O, A, A, _, _, _, _, _, _, A, A, O, _, _],
     [_, _, _, O, A, O, O, O, O, O, O, A, O, _, _, _],
     [_, _, _, O, SK,SK,SK,SK,SK,SK,SK,SK, O, _, _, _],
     [_, _, _, O, SK,SK,SK,SK,SK,SK,SK,SK, O, _, _, _],
     [_, _, _, O, SK,SK,SK,SK,SK,SK,SK,SK, O, _, _, _],
     [_, _, _, O, SK,SD,SK,SK,SK,SK,SD,SK, O, _, _, _],
-    [_, _, _, _, O, SK,SK,SK,SK,SK,SK, O, _, _, _, _],
+    [_, _, _, _, O, SK,SK,SD,SD,SK,SK, O, _, _, _, _],
     [_, _, _, _, _, O, O, O, O, O, O, _, _, _, _, _],
   ],
   dragon: [
@@ -170,6 +170,154 @@ export const HEAD_TEMPLATES: Record<RaceType, PixelLayer> = {
     [_, _, _, O, SK,SD,SK,SK,SK,SK,SD,SK, O, _, _, _],
     [_, _, _, O, A, SK,SK,SK,SK,SK,SK, A, O, _, _, _],
     [_, _, _, _, _, O, O, O, O, O, O, _, _, _, _, _],
+  ],
+};
+
+// ── Monster body templates (16×9, same size as hero bodies) ──
+
+export const MONSTER_BODY_TEMPLATES: Record<MonsterType, PixelLayer> = {
+  beast: [
+    // Wide, forward-leaning, strong limbs
+    [_, O, O, O, O, O, O, O, O, O, O, O, O, O, _, _],
+    [O, S, F, F, F, F, F, F, F, F, F, F, F, F, O, _],
+    [O, F, F, F, F, F, F, F, F, F, F, F, F, F, O, _],
+    [O, S, F, F, F, F, F, F, F, F, F, F, F, S, O, _],
+    [O, S, F, F, F, F, F, F, F, F, F, F, F, S, O, _],
+    [_, O, S, F, F, F, F, F, F, F, F, F, S, O, _, _],
+    [_, O, F, F, _, _, F, F, F, F, _, _, F, F, O, _],
+    [_, O, F, F, _, _, _, _, _, _, _, _, F, F, O, _],
+    [_, O, O, O, _, _, _, _, _, _, _, _, O, O, _, _],
+  ],
+  undead: [
+    // Narrow with gaps (transparent holes in body), skeletal feel
+    [_, _, _, _, O, O, O, O, O, O, O, O, _, _, _, _],
+    [_, _, _, O, S, F, _, F, F, _, F, S, O, _, _, _],
+    [_, _, _, O, F, F, F, F, F, F, F, F, O, _, _, _],
+    [_, _, _, O, S, _, F, F, F, F, _, S, O, _, _, _],
+    [_, _, _, _, O, F, F, F, F, F, F, O, _, _, _, _],
+    [_, _, _, _, O, S, _, F, F, _, S, O, _, _, _, _],
+    [_, _, _, _, O, F, _, F, F, _, F, O, _, _, _, _],
+    [_, _, _, _, _, O, _, F, F, _, O, _, _, _, _, _],
+    [_, _, _, _, _, O, O, _, _, O, O, _, _, _, _, _],
+  ],
+  construct: [
+    // Full-width block, no taper, heavy metallic feel, many H pixels
+    [O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O],
+    [O, H, F, H, F, H, F, F, F, F, H, F, H, F, H, O],
+    [O, F, F, F, F, F, F, F, F, F, F, F, F, F, F, O],
+    [O, H, F, F, F, F, F, F, F, F, F, F, F, F, H, O],
+    [O, F, F, F, F, F, F, F, F, F, F, F, F, F, F, O],
+    [O, H, F, F, F, F, F, F, F, F, F, F, F, F, H, O],
+    [O, F, F, F, F, F, F, F, F, F, F, F, F, F, F, O],
+    [O, H, F, H, F, H, F, F, F, F, H, F, H, F, H, O],
+    [O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O],
+  ],
+  caster: [
+    // Narrow top, wide bottom but sparse/dissolving at edges
+    [_, _, _, _, _, O, O, O, O, O, O, _, _, _, _, _],
+    [_, _, _, _, O, S, F, F, F, F, S, O, _, _, _, _],
+    [_, _, _, O, S, F, F, F, F, F, F, S, O, _, _, _],
+    [_, _, _, O, F, F, F, F, F, F, F, F, O, _, _, _],
+    [_, _, O, S, F, F, F, F, F, F, F, F, S, O, _, _],
+    [_, O, S, F, F, F, F, F, F, F, F, F, F, S, O, _],
+    [_, O, _, F, _, F, F, F, F, F, F, _, F, _, O, _],
+    [O, _, F, _, _, _, F, F, F, F, _, _, _, F, _, O],
+    [_, _, _, _, _, _, O, O, O, O, _, _, _, _, _, _],
+  ],
+  humanoid: [
+    // Like melee_dps but wider and bulkier
+    [_, _, O, O, O, O, O, O, O, O, O, O, O, O, _, _],
+    [_, O, S, F, F, F, F, F, F, F, F, F, F, S, O, _],
+    [_, O, F, F, H, F, F, F, F, F, F, H, F, F, O, _],
+    [_, O, S, F, F, F, F, F, F, F, F, F, F, S, O, _],
+    [_, _, O, S, F, F, F, F, F, F, F, F, S, O, _, _],
+    [_, _, O, S, F, F, F, F, F, F, F, F, S, O, _, _],
+    [_, _, _, O, S, F, F, F, F, F, F, S, O, _, _, _],
+    [_, _, _, O, S, F, F, F, F, F, F, S, O, _, _, _],
+    [_, _, _, _, O, O, O, O, O, O, O, O, _, _, _, _],
+  ],
+  draconic: [
+    // Widest body (full 16 cols), tail hint (A pixels bottom-right)
+    [O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O],
+    [O, S, F, F, F, F, F, F, F, F, F, F, F, F, S, O],
+    [O, F, F, H, F, F, F, F, F, F, F, F, H, F, F, O],
+    [O, S, F, F, F, F, F, F, F, F, F, F, F, F, S, O],
+    [O, S, F, F, F, F, F, F, F, F, F, F, F, F, S, O],
+    [_, O, S, F, F, F, F, F, F, F, F, F, F, S, O, _],
+    [_, O, S, F, F, F, F, F, F, F, F, F, F, S, O, _],
+    [_, _, O, S, F, F, F, F, F, F, F, F, S, O, A, _],
+    [_, _, O, O, O, O, O, O, O, O, O, O, O, O, _, A],
+  ],
+};
+
+// ── Monster head templates (16×8, same size as hero heads) ──
+
+export const MONSTER_HEAD_TEMPLATES: Record<MonsterType, PixelLayer> = {
+  beast: [
+    // Forward-jutting snout, fangs (O pixels at bottom), wide ears
+    [_, O, A, _, _, O, O, O, O, O, O, _, _, A, O, _],
+    [_, _, O, _, O, SK,SK,SK,SK,SK,SK, O, _, O, _, _],
+    [_, _, _, O, SK,SK,SK,SK,SK,SK,SK,SK, O, _, _, _],
+    [_, _, _, O, SK,SK,SK,SK,SK,SK,SK,SK, O, _, _, _],
+    [_, _, _, O, SK,SK,SK,SK,SK,SK,SK,SK, O, _, _, _],
+    [_, _, O, SK,SK,SD,SK,SK,SK,SK,SD,SK,SK, O, _, _],
+    [_, _, O, SK,SK,SK,SK,SK,SK,SK,SK,SK,SK, O, _, _],
+    [_, _, _, O, O, O, _, O, O, _, O, O, O, _, _, _],
+  ],
+  undead: [
+    // Skull shape, deep eye sockets (O around E), cracked jaw
+    [_, _, _, _, _, O, O, O, O, O, O, _, _, _, _, _],
+    [_, _, _, _, O, SK,SK,SK,SK,SK,SK, O, _, _, _, _],
+    [_, _, _, O, SK,SK,SK,SK,SK,SK,SK,SK, O, _, _, _],
+    [_, _, _, O, SK, O, E, SK,SK, E, O,SK, O, _, _, _],
+    [_, _, _, O, SK, O,SK,SK,SK,SK, O,SK, O, _, _, _],
+    [_, _, _, O, SD,SK,SK,SK,SK,SK,SK,SD, O, _, _, _],
+    [_, _, _, _, O, SK, O,SD,SD, O,SK, O, _, _, _, _],
+    [_, _, _, _, _, O, _, O, O, _, O, _, _, _, _, _],
+  ],
+  construct: [
+    // Flat-top square, visor slit eyes (E in horizontal line), no organic features
+    [_, _, _, O, O, O, O, O, O, O, O, O, O, _, _, _],
+    [_, _, _, O, H, F, F, F, F, F, F, H, O, _, _, _],
+    [_, _, _, O, F, F, F, F, F, F, F, F, O, _, _, _],
+    [_, _, _, O, F, E, E, F, F, E, E, F, O, _, _, _],
+    [_, _, _, O, F, F, F, F, F, F, F, F, O, _, _, _],
+    [_, _, _, O, H, F, F, F, F, F, F, H, O, _, _, _],
+    [_, _, _, O, F, F, F, F, F, F, F, F, O, _, _, _],
+    [_, _, _, O, O, O, O, O, O, O, O, O, O, _, _, _],
+  ],
+  caster: [
+    // Hood/cowl shape, A pixels covering top, dissolving at bottom
+    [_, _, _, _, A, A, A, A, A, A, A, A, _, _, _, _],
+    [_, _, _, A, A, A, A, A, A, A, A, A, A, _, _, _],
+    [_, _, _, A, O, SK,SK,SK,SK,SK,SK, O, A, _, _, _],
+    [_, _, _, _, O, SK,SK,SK,SK,SK,SK, O, _, _, _, _],
+    [_, _, _, _, O, SK,SK,SK,SK,SK,SK, O, _, _, _, _],
+    [_, _, _, _, O, SK,SD,SK,SK,SD,SK, O, _, _, _, _],
+    [_, _, _, _, _, O, SK,SK,SK,SK, O, _, _, _, _, _],
+    [_, _, _, _, _, _, O, _, _, O, _, _, _, _, _, _],
+  ],
+  humanoid: [
+    // Thick brow, wide jaw, rougher than hero human
+    [_, _, _, _, O, O, O, O, O, O, O, O, _, _, _, _],
+    [_, _, _, O, SK,SK,SK,SK,SK,SK,SK,SK, O, _, _, _],
+    [_, _, O, SK,SK,SK,SK,SK,SK,SK,SK,SK,SK, O, _, _],
+    [_, _, O, SK,SD,SD,SK,SK,SK,SK,SD,SD,SK, O, _, _],
+    [_, _, O, SK,SK,SK,SK,SK,SK,SK,SK,SK,SK, O, _, _],
+    [_, _, O, SK,SK,SD,SK,SK,SK,SK,SD,SK,SK, O, _, _],
+    [_, _, _, O, SK,SK,SK,SK,SK,SK,SK,SK, O, _, _, _],
+    [_, _, _, _, O, O, O, O, O, O, O, O, _, _, _, _],
+  ],
+  draconic: [
+    // Large horns (A top), jaw ridge (A bottom), imposing
+    [_, _, A, A, _, _, _, _, _, _, _, _, A, A, _, _],
+    [_, _, _, O, A, O, O, O, O, O, O, A, O, _, _, _],
+    [_, _, _, O, SK,SK,SK,SK,SK,SK,SK,SK, O, _, _, _],
+    [_, _, _, O, SK,SK,SK,SK,SK,SK,SK,SK, O, _, _, _],
+    [_, _, _, O, SK,SK,SK,SK,SK,SK,SK,SK, O, _, _, _],
+    [_, _, _, O, SK,SD,SK,SK,SK,SK,SD,SK, O, _, _, _],
+    [_, _, _, O, A, SK,SK,SK,SK,SK,SK, A, O, _, _, _],
+    [_, _, _, A, _, O, O, O, O, O, O, _, A, _, _, _],
   ],
 };
 
@@ -262,15 +410,15 @@ export const WEAPON_TEMPLATES: Record<ClassType, PixelLayer> = {
     [_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _],
   ],
   assassin: [
-    // Small dagger line
+    // Dual daggers with glow highlights, diagonal layout
+    [_, _, _, _, _, _, _, _, _, _, _, _, _,WG, W, _],
+    [_, _, _, _, _, _, _, _, _, _, _, _, W,WG, _, _],
+    [_, _, _, _, _, _, _, _, _, _, _, W, W, _, _, _],
+    [_, _, _, _, _, _, _, _, _, _, W,WG, _, _, _, _],
     [_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _],
-    [_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _],
-    [_, _, _, _, _, _, _, _, _, _, _, _, _, W, _, _],
-    [_, _, _, _, _, _, _, _, _, _, _, _, W, _, _, _],
-    [_, _, _, _, _, _, _, _, _, _, _, W, _, _, _, _],
-    [_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _],
-    [_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _],
-    [_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _],
+    [_, _, W,WG, _, _, _, _, _, _, _, _, _, _, _, _],
+    [_, _, _, W, W, _, _, _, _, _, _, _, _, _, _, _],
+    [_, _, _, _,WG, W, _, _, _, _, _, _, _, _, _, _],
     [_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _],
   ],
   paladin: [
@@ -312,7 +460,7 @@ export const WEAPON_COLORS: Record<ClassType, { base: number; glow: number }> = 
   mage:     { base: 0x7744ff, glow: 0xaa88ff },   // saturated purple-blue
   ranger:   { base: 0x886644, glow: 0xaa8866 },
   cleric:   { base: 0xffdd44, glow: 0xffff99 },   // bright gold
-  assassin: { base: 0x888888, glow: 0xaaaaaa },
+  assassin: { base: 0xaabbcc, glow: 0xddeeff },  // bright silver-blue, high contrast
   paladin:  { base: 0x8899bb, glow: 0xbbccdd },
 };
 

@@ -21,6 +21,7 @@ export class Enemy extends Unit {
       enemyData.race ?? 'human', enemyData.class ?? 'warrior');
 
     this.enemyData = enemyData;
+    this.monsterType = enemyData.monsterType;
     this.level = level;
     this.goldReward = enemyData.goldReward;
     this.expReward = enemyData.expReward;

@@ -17,7 +17,7 @@ const items = itemsData as { id: string; name: string; rarity: string; slot: str
 const relics = relicsData as { id: string; name: string; rarity: string }[];
 const events = eventsData as { id: string; title: string; choices: { text: string; outcomes: { probability: number; effects: { type: string; heroId?: string; relicId?: string }[] }[] }[] }[];
 const acts = actsData as { id: string; eventPool: string[]; enemyPool: string[]; bossPool: string[] }[];
-const enemies = enemiesData as { id: string; name: string; isBoss?: boolean }[];
+const enemies = enemiesData as { id: string; name: string; isBoss?: boolean; monsterType?: string }[];
 const skillVisuals = skillVisualsData as Record<string, { type: string; color: string }>;
 const skillAdvancements = skillAdvancementsData as { skillId: string; level: number }[];
 
@@ -262,6 +262,21 @@ describe('Content Integrity', () => {
         if (cond?.type === 'element_wins' && cond.element) {
           expect(validElements, `${hero.id} uses invalid element ${cond.element}`).toContain(cond.element);
         }
+      }
+    });
+  });
+
+  describe('Enemy monsterType', () => {
+    it('all enemies have valid monsterType', () => {
+      const validTypes = ['beast', 'undead', 'construct', 'caster', 'humanoid', 'draconic'];
+      for (const enemy of enemies) {
+        expect(validTypes).toContain(enemy.monsterType);
+      }
+    });
+
+    it('all enemies have monsterType field', () => {
+      for (const enemy of enemies) {
+        expect(enemy.monsterType, `${enemy.id} should have monsterType`).toBeDefined();
       }
     });
   });
