@@ -67,7 +67,7 @@
 
 - **TypeScript** + **Phaser 3** — 游戏引擎
 - **Vite** — 构建工具，支持代码分割
-- **Vitest** — 测试框架 (993 测试用例, 80 套件)
+- **Vitest** — 测试框架 (1054 测试用例, 84 套件)
 - 纯 Phaser Canvas 渲染，无 DOM UI
 - 像素矩阵 Chibi 渲染系统 (分层模板 + 调色板映射)
 - TextFactory 文字预设系统 (6 种预设 + resolution:2 + LINEAR 滤镜)
@@ -108,6 +108,7 @@ src/
 
 | 版本 | 主要内容 |
 |------|---------|
+| v1.21.0 | 视觉差异化三阶段：12怪物模板+monsterType系统、4层血条(hero/normal/elite/boss)、11套动画参数、Boss阶段刻痕、elite激活 |
 | v1.20.0 | 人物UI改版：chibi精灵+像素图标选人界面、BattleHUD职业色条/元素点/濒死闪烁、属性折叠详情页、阵型推荐 |
 | v1.19.0 | 审计P0修复：羁绊注入战斗、临时元素闭环、友方技能正确选目标、hell_victory真实难度、数值平衡 |
 | v1.18.2 | 第三轮评估：rogue/berserker nerf、dragon_knight buff、UPGRADE_COSTS统一、解锁条件差异化 |
