@@ -34,12 +34,12 @@ export class BootScene extends Phaser.Scene {
       loadingText.setText('Loading complete!');
     });
 
-    // Load audio assets
+    // Load audio assets (OGG primary, MP3 fallback)
     for (const key of BGM_KEYS) {
-      this.load.audio(key, `audio/${key}.wav`);
+      this.load.audio(key, [`audio/${key}.ogg`, `audio/${key}.mp3`]);
     }
     for (const key of SFX_KEYS) {
-      this.load.audio(key, `audio/${key}.wav`);
+      this.load.audio(key, [`audio/${key}.ogg`, `audio/${key}.mp3`]);
     }
   }
 
