@@ -2,10 +2,8 @@ import { describe, it, expect } from 'vitest';
 import { TextFactory } from '../../src/ui/TextFactory';
 import Phaser from 'phaser';
 
-// Create a minimal scene for testing
 function createTestScene(): Phaser.Scene {
   const scene = new Phaser.Scene({ key: 'test' });
-  // The Phaser stub provides scene.add.text()
   return scene;
 }
 
@@ -17,14 +15,27 @@ describe('TextFactory', () => {
     expect(text.text).toBe('test');
   });
 
-  it('applies preset font sizes', () => {
+  it('applies updated preset font sizes', () => {
     const scene = createTestScene();
     const title = TextFactory.create(scene, 0, 0, 'T', 'title');
+    const subtitle = TextFactory.create(scene, 0, 0, 'T', 'subtitle');
     const body = TextFactory.create(scene, 0, 0, 'T', 'body');
+    const label = TextFactory.create(scene, 0, 0, 'T', 'label');
     const small = TextFactory.create(scene, 0, 0, 'T', 'small');
-    expect(title.style.fontSize).toBe('20px');
-    expect(body.style.fontSize).toBe('11px');
-    expect(small.style.fontSize).toBe('9px');
+    const tiny = TextFactory.create(scene, 0, 0, 'T', 'tiny');
+    expect(title.style.fontSize).toBe('22px');
+    expect(subtitle.style.fontSize).toBe('16px');
+    expect(body.style.fontSize).toBe('13px');
+    expect(label.style.fontSize).toBe('11px');
+    expect(small.style.fontSize).toBe('10px');
+    expect(tiny.style.fontSize).toBe('9px');
+  });
+
+  it('uses Chinese-friendly font family', () => {
+    const scene = createTestScene();
+    const text = TextFactory.create(scene, 0, 0, 'T', 'body');
+    expect(text.style.fontFamily).toContain('Microsoft YaHei');
+    expect(text.style.fontFamily).toContain('monospace');
   });
 
   it('allows style overrides', () => {
@@ -36,6 +47,6 @@ describe('TextFactory', () => {
   it('defaults to body preset', () => {
     const scene = createTestScene();
     const text = TextFactory.create(scene, 0, 0, 'T');
-    expect(text.style.fontSize).toBe('11px');
+    expect(text.style.fontSize).toBe('13px');
   });
 });

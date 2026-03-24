@@ -2,13 +2,15 @@ import Phaser from 'phaser';
 
 export type TextPreset = 'title' | 'subtitle' | 'body' | 'label' | 'small' | 'tiny';
 
+const FONT_FAMILY = '"Microsoft YaHei", "PingFang SC", "Noto Sans SC", monospace';
+
 const PRESETS: Record<TextPreset, Phaser.Types.GameObjects.Text.TextStyle> = {
-  title:    { fontSize: '20px', fontFamily: 'monospace', fontStyle: 'bold' },
-  subtitle: { fontSize: '14px', fontFamily: 'monospace', fontStyle: 'bold' },
-  body:     { fontSize: '11px', fontFamily: 'monospace' },
-  label:    { fontSize: '10px', fontFamily: 'monospace', fontStyle: 'bold' },
-  small:    { fontSize: '9px', fontFamily: 'monospace' },
-  tiny:     { fontSize: '8px', fontFamily: 'monospace' },
+  title:    { fontSize: '22px', fontFamily: FONT_FAMILY, fontStyle: 'bold' },
+  subtitle: { fontSize: '16px', fontFamily: FONT_FAMILY, fontStyle: 'bold' },
+  body:     { fontSize: '13px', fontFamily: FONT_FAMILY },
+  label:    { fontSize: '11px', fontFamily: FONT_FAMILY, fontStyle: 'bold' },
+  small:    { fontSize: '10px', fontFamily: FONT_FAMILY },
+  tiny:     { fontSize: '9px',  fontFamily: FONT_FAMILY },
 };
 
 export class TextFactory {
