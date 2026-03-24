@@ -392,7 +392,7 @@ export interface GameEventMap {
   'unit:heal': { sourceId: string; targetId: string; amount: number };
   'unit:kill': { killerId: string; targetId: string };
   'unit:death': { unitId: string; isHero: boolean };
-  'skill:use': { casterId: string; skillId: string; targets: string[] };
+  'skill:use': { casterId: string; skillId: string; targets: string[]; casterRole?: UnitRole; isAllySkill?: boolean };
   'skill:cooldown': { unitId: string; skillId: string; remaining: number };
   'status:apply': { targetId: string; effectId: string; effectType: StatusEffectType };
   'status:expire': { targetId: string; effectId: string; effectType: StatusEffectType };

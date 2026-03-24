@@ -150,11 +150,14 @@ export class SkillSystem {
         break;
     }
 
-    // Emit skill:use event
+    // Emit skill:use event (with role + ally info for audio dispatch)
+    const isAlly = skill.targetType === 'ally' || skill.targetType === 'all_allies' || skill.targetType === 'self';
     EventBus.getInstance().emit('skill:use', {
       casterId: unit.unitId,
       skillId: skill.id,
       targets: targets.map(t => t.unitId),
+      casterRole: unit.role,
+      isAllySkill: isAlly,
     });
 
     // Determine skill element (from skill data or unit element)
