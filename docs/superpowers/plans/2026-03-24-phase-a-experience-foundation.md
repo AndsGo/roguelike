@@ -223,6 +223,8 @@ npm test
 
 Expected: All pass — no test checks the exact shape of skill:use emissions.
 
+**Manual verification note:** Confirm that `all_allies` targetType produces `isAllySkill: true` by checking the explicit equality: `'all_allies' === 'all_allies'` is trivially true. The critical fix was avoiding `'all_allies'.includes('ally')` which returns false.
+
 - [ ] **Step 5: Commit**
 
 ```bash
@@ -480,7 +482,7 @@ Find:
 
 Replace with:
 ```typescript
-  private sfxListeners: Map<string, (...args: any[]) => void> = new Map();
+  private sfxListeners: Map<GameEventType, (...args: any[]) => void> = new Map();
 ```
 
 **3f. Replace `registerSfxListeners()` method (lines 207-217):**
@@ -688,7 +690,7 @@ Expected: Zero TS errors, all tests pass.
 
 Check that test count is ≥ previous (1054 tests, 84 suites). New tests added:
 - TextFactory: 5 tests (was 4, added font family test)
-- AudioManager: ~17 tests (was 5, added key + dispatch tests)
+- AudioManager: 18 tests (was 5, added 13 new key + dispatch tests)
 
 Expected: ~1068+ tests passing.
 
