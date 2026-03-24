@@ -33,15 +33,16 @@ const SFX_EVENT_ENTRIES: [GameEventType, string][] = [
   ['unit:damage', 'sfx_hit'],
   ['unit:kill', 'sfx_kill'],
   ['unit:heal', 'sfx_heal'],
-  ['skill:use', 'sfx_skill'],
-  ['element:reaction', 'sfx_reaction'],
+  // skill:use and element:reaction handled by custom listeners below
   ['item:equip', 'sfx_equip'],
   ['achievement:unlock', 'sfx_levelup'],
+  ['ultimate:ready', 'sfx_ult_ready'],
+  ['ultimate:used', 'sfx_ult_cast'],
 ];
 
 /** All BGM keys for preloading */
 export const BGM_KEYS = [
-  'bgm_menu', 'bgm_map', 'bgm_battle', 'bgm_shop',
+  'bgm_menu', 'bgm_map', 'bgm_battle', 'bgm_boss', 'bgm_shop',
   'bgm_ambient', 'bgm_event', 'bgm_victory', 'bgm_defeat',
 ];
 
@@ -51,7 +52,38 @@ export const SFX_KEYS = [
   'sfx_reaction', 'sfx_click', 'sfx_buy', 'sfx_equip', 'sfx_levelup',
   'sfx_select', 'sfx_coin', 'sfx_event_good', 'sfx_event_bad',
   'sfx_crit', 'sfx_error',
+  // Categorized skill SFX
+  'sfx_melee', 'sfx_ranged', 'sfx_magic', 'sfx_heal_cast',
+  // Element reaction SFX
+  'sfx_react_melt', 'sfx_react_overload', 'sfx_react_superconduct', 'sfx_react_annihilate',
+  // Ultimate SFX
+  'sfx_ult_ready', 'sfx_ult_cast',
 ];
+
+/** Chinese reaction name → SFX key mapping */
+const REACTION_SFX_MAP: Record<string, string> = {
+  '融化': 'sfx_react_melt',
+  '超载': 'sfx_react_overload',
+  '超导': 'sfx_react_superconduct',
+  '湮灭': 'sfx_react_annihilate',
+};
+
+/** Determine SFX key for a skill:use event based on caster role and ally flag */
+export function getSkillSfxKey(data: { casterRole?: string; isAllySkill?: boolean }): string {
+  if (data.isAllySkill) return 'sfx_heal_cast';
+  switch (data.casterRole) {
+    case 'tank': case 'melee_dps': return 'sfx_melee';
+    case 'ranged_dps': return 'sfx_ranged';
+    case 'healer': return 'sfx_heal_cast';
+    case 'support': return 'sfx_magic';
+    default: return 'sfx_skill';
+  }
+}
+
+/** Determine SFX key for an element:reaction event based on Chinese reactionType */
+export function getReactionSfxKey(reactionType: string): string {
+  return REACTION_SFX_MAP[reactionType] ?? 'sfx_reaction';
+}
 
 /**
  * Singleton audio manager handling BGM playback/crossfade and SFX.
@@ -67,7 +99,7 @@ export class AudioManager {
   private sfxListenersRegistered: boolean = false;
 
   // Named SFX listener references
-  private sfxListeners: Map<GameEventType, () => void> = new Map();
+  private sfxListeners: Map<GameEventType, (...args: any[]) => void> = new Map();
 
   private constructor() {
     this.settings = this.loadSettings();
@@ -209,11 +241,27 @@ export class AudioManager {
     this.sfxListenersRegistered = true;
 
     const bus = EventBus.getInstance();
+
+    // Simple 1:1 event→SFX mappings
     for (const [eventName, sfxKey] of SFX_EVENT_ENTRIES) {
       const listener = () => this.playSfx(sfxKey);
       this.sfxListeners.set(eventName, listener);
       bus.on(eventName, listener);
     }
+
+    // Custom skill:use dispatch by caster role
+    const skillListener = (data: { casterRole?: string; isAllySkill?: boolean }) => {
+      this.playSfx(getSkillSfxKey(data));
+    };
+    this.sfxListeners.set('skill:use', skillListener);
+    bus.on('skill:use', skillListener);
+
+    // Custom element:reaction dispatch by Chinese reaction name
+    const reactionListener = (data: { reactionType: string }) => {
+      this.playSfx(getReactionSfxKey(data.reactionType));
+    };
+    this.sfxListeners.set('element:reaction', reactionListener);
+    bus.on('element:reaction', reactionListener);
   }
 
   /** Unregister EventBus SFX listeners */
