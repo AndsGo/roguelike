@@ -310,6 +310,8 @@ export class BattleScene extends Phaser.Scene {
     // Boss entrance animation
     const bossUnit = enemies.find(e => e.isBoss);
     if (bossUnit) {
+      // Switch to boss BGM (crossfades from bgm_battle)
+      AudioManager.getInstance().playBgm('bgm_boss');
       const finalX = bossUnit.x;
       bossUnit.x = BOSS_ENTRANCE.START_X;
 
