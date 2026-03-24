@@ -18,12 +18,13 @@ All 23 audio files are uncompressed WAV (~11MB total). This causes slow initial 
 - Expected size reduction: 11MB → ~1.5MB (OGG)
 - Phaser natively supports multi-format: `this.load.audio(key, ['audio/key.ogg', 'audio/key.mp3'])`
 - Archive original WAVs to `assets-src/audio-wav/` (outside `public/`, not included in Vite build)
+- **Note on originals:** All audio files are AI-generated (BGM via Suno/Udio, SFX via jsfxr) and can be regenerated. `assets-src/` is gitignored as large binary source — no archival concern.
 
 ### Files
 - Modify: `src/scenes/BootScene.ts` — change audio load calls to multi-format arrays
 - Move: `public/audio/*.wav` → `assets-src/audio-wav/` (outside public, excluded from build)
 - Add: `public/audio/*.ogg` + `public/audio/*.mp3` (23 each)
-- Add: `assets-src/` to `.gitignore` (large binary source files, not needed in repo)
+- Add: `assets-src/` to `.gitignore` (large binary source files, regenerable via AI tools)
 
 ---
 
@@ -84,7 +85,7 @@ After font changes, verify no text overflow in:
 **Integration:**
 - Add `bgm_boss` to AudioManager's BGM_KEYS
 - Do NOT add to SCENE_BGM_MAP (boss BGM is conditional, not scene-level)
-- **Boss BGM override approach:** In `BattleScene.create()`, after enemy setup, check if any enemy is boss. If so, call `AudioManager.getInstance().playBgm('bgm_boss')`. This will crossfade from the already-playing `bgm_battle` (started by `SceneTransition` → `onSceneStart`) to `bgm_boss`. The 500ms crossfade makes this transition smooth — the brief bgm_battle play is acceptable as a "lead-in" before the boss theme takes over.
+- **Boss BGM trigger timing:** In `BattleScene.create()`, trigger `playBgm('bgm_boss')` at the **boss entrance animation** start point (~line 311, where boss slide-in begins), NOT after phase system setup. This synchronizes the BGM crossfade with the visual boss entrance, creating a cohesive dramatic moment. The 500ms crossfade from the briefly-playing `bgm_battle` to `bgm_boss` serves as a natural "lead-in".
 - When battle ends (scene transitions away), normal scene BGM resumes via `onSceneStart()`
 
 ### 3b. Categorized Skill SFX (4 new tracks)
@@ -120,7 +121,9 @@ The current `skill:use` event payload is `{ casterId: string; skillId: string; t
      skillId: skill.id,
      targets: actualTargets.map(t => t.unitId),
      casterRole: unit.role,
-     isAllySkill: ['ally', 'all_allies', 'lowest_hp_ally'].includes(skill.targetType),
+     isAllySkill: skill.targetType?.includes('ally') || skill.targetType === 'self',
+     // Covers: 'ally', 'all_allies', 'lowest_hp_ally', 'random_ally', 'self'
+     // Implementation must grep all targetType values in skills.json to verify completeness
    });
    ```
 
@@ -147,10 +150,10 @@ The current `skill:use` event payload is `{ casterId: string; skillId: string; t
 
 | Key | Chinese reactionType | Reaction | Sound Style |
 |-----|---------------------|----------|-------------|
-| `sfx_react_ignite` | `融化` | Melt (fire+ice) | Fire burst/crackle |
-| `sfx_react_freeze` | `超导` | Superconduct (ice+lightning) | Ice crack/shatter |
-| `sfx_react_shock` | `超载` | Overload (fire+lightning) | Electric zap/crackle |
-| `sfx_react_decay` | `湮灭` | Annihilation (dark+holy) | Low rumble/echo |
+| `sfx_react_melt` | `融化` | Melt (fire+ice) | Fire burst/crackle |
+| `sfx_react_superconduct` | `超导` | Superconduct (ice+lightning) | Ice crack/shatter |
+| `sfx_react_overload` | `超载` | Overload (fire+lightning) | Electric zap/crackle |
+| `sfx_react_annihilate` | `湮灭` | Annihilation (dark+holy) | Low rumble/echo |
 
 **Generation:** jsfxr (8-bit pixel style)
 
@@ -163,10 +166,10 @@ The `element:reaction` event's `reactionType` field contains Chinese strings fro
    - Add a Chinese-to-SFX mapping constant in AudioManager:
    ```typescript
    const REACTION_SFX_MAP: Record<string, string> = {
-     '融化': 'sfx_react_ignite',
-     '超载': 'sfx_react_shock',
-     '超导': 'sfx_react_freeze',
-     '湮灭': 'sfx_react_decay',
+     '融化': 'sfx_react_melt',
+     '超载': 'sfx_react_overload',
+     '超导': 'sfx_react_superconduct',
+     '湮灭': 'sfx_react_annihilate',
    };
    ```
    - In `registerSfxListeners()`, add a custom handler:
@@ -205,15 +208,17 @@ The `element:reaction` event's `reactionType` field contains Chinese strings fro
 | 3 | sfx_ranged | SFX | jsfxr |
 | 4 | sfx_magic | SFX | jsfxr |
 | 5 | sfx_heal_cast | SFX | jsfxr |
-| 6 | sfx_react_ignite | SFX | jsfxr |
-| 7 | sfx_react_freeze | SFX | jsfxr |
-| 8 | sfx_react_shock | SFX | jsfxr |
-| 9 | sfx_react_decay | SFX | jsfxr |
+| 6 | sfx_react_melt | SFX | jsfxr |
+| 7 | sfx_react_superconduct | SFX | jsfxr |
+| 8 | sfx_react_overload | SFX | jsfxr |
+| 9 | sfx_react_annihilate | SFX | jsfxr |
 | 10 | sfx_ult_ready | SFX | jsfxr |
 | 11 | sfx_ult_cast | SFX | jsfxr |
 
 ### Post-conversion totals
-- 34 audio assets (9 BGM + 25 SFX) in OGG + MP3 dual format
+- Existing: 8 BGM + 15 SFX = 23
+- New: 1 BGM (boss) + 10 SFX = 11
+- **Total: 9 BGM + 25 SFX = 34 audio assets** in OGG + MP3 dual format
 - Estimated total size: ~2MB (OGG) + ~3MB (MP3 fallback)
 
 ---
@@ -240,7 +245,7 @@ The `element:reaction` event's `reactionType` field contains Chinese strings fro
 
 1. **Format**: All audio loads as OGG (Chrome/Firefox) or MP3 (Safari fallback), no WAV in production build
 2. **Font**: All text renders in Microsoft YaHei (Windows) / PingFang SC (Mac) with correct sizes
-3. **No overflow**: Text in HeroCard, BattleHUD, HeroDraftScene cards fits without clipping
+3. **No overflow**: Visual inspection (Chrome MCP screenshots) confirms text in HeroCard, BattleHUD, HeroDraftScene cards does not overflow container, overlap adjacent elements, or wrap/truncate unexpectedly
 4. **Boss BGM**: Entering a boss battle crossfades from bgm_battle to bgm_boss smoothly
 5. **Skill SFX**: Tank/melee attacks sound different from ranged, magic, and heals
 6. **Reaction SFX**: Each of the 4 element reactions (融化/超载/超导/湮灭) has a distinct sound
@@ -248,3 +253,4 @@ The `element:reaction` event's `reactionType` field contains Chinese strings fro
 8. **Fallbacks**: Unknown role falls back to sfx_skill; unknown reaction falls back to sfx_reaction
 9. **Backward compat**: Existing skill:use/element:reaction listeners unaffected by payload expansion
 10. **Tests**: `npx tsc --noEmit && npm test` passes with zero errors
+11. **SFX concurrency**: Monitor during QA — if frequent SFX drops in dense battles, raise MAX_CONCURRENT_SFX from 4 to 6
