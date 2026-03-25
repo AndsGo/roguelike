@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { GAME_WIDTH, GAME_HEIGHT } from '../constants';
+import { GAME_WIDTH, GAME_HEIGHT, SHOP_REFRESH_BASE_COST } from '../constants';
 import { RunManager } from '../managers/RunManager';
 import { ShopGenerator } from '../systems/ShopGenerator';
 import { ItemData, HeroState } from '../types';
@@ -20,6 +20,8 @@ export class ShopScene extends Phaser.Scene {
   private selectedHero: HeroState | null = null;
   private itemCards: { container: Phaser.GameObjects.Container; item: ItemData; priceText: Phaser.GameObjects.Text; compareText: Phaser.GameObjects.Text; sold: boolean }[] = [];
   private heroButtons: Phaser.GameObjects.Container[] = [];
+  private refreshCount = 0;
+  private refreshBtn!: Button;
 
   constructor() {
     super({ key: 'ShopScene' });
@@ -30,6 +32,7 @@ export class ShopScene extends Phaser.Scene {
     this.selectedHero = null;
     this.itemCards = [];
     this.heroButtons = [];
+    this.refreshCount = 0;
   }
 
   create(): void {
@@ -94,12 +97,19 @@ export class ShopScene extends Phaser.Scene {
       this.createItemCard(item, x, y, rm);
     });
 
-    // Leave button
-    new Button(this, GAME_WIDTH / 2, GAME_HEIGHT - 30, UI.shop.leaveShop, 140, 35, () => {
+    // Leave button (shifted left for refresh button)
+    new Button(this, 310, GAME_HEIGHT - 30, UI.shop.leaveShop, 140, 35, () => {
       rm.markNodeCompleted(this.nodeIndex);
       SaveManager.autoSave();
       SceneTransition.fadeTransition(this, 'MapScene');
     });
+
+    // Refresh button
+    const refreshCost = this.getRefreshCost();
+    this.refreshBtn = new Button(this, 490, GAME_HEIGHT - 30, UI.shop.refresh(refreshCost), 140, 35, () => {
+      this.refreshShop();
+    }, Theme.colors.secondary);
+    this.updateRefreshButton();
 
     TutorialSystem.showTipIfNeeded(this, 'first_shop');
   }
@@ -304,6 +314,8 @@ export class ShopScene extends Phaser.Scene {
       ic.priceText.setColor(canAfford ? colorToString(Theme.colors.gold) : colorToString(Theme.colors.danger));
     }
 
+    this.updateRefreshButton();
+
     // Refresh comparison since equipment changed
     this.updateComparisonTexts();
 
@@ -328,6 +340,71 @@ export class ShopScene extends Phaser.Scene {
       delay: 1500,
       duration: 500,
       onComplete: () => msg.destroy(),
+    });
+  }
+
+  private getRefreshCost(): number {
+    return SHOP_REFRESH_BASE_COST * Math.pow(2, this.refreshCount);
+  }
+
+  private updateRefreshButton(): void {
+    const cost = this.getRefreshCost();
+    const canAfford = RunManager.getInstance().getGold() >= cost;
+    this.refreshBtn.setText(UI.shop.refresh(cost));
+    this.refreshBtn.setAlpha(canAfford ? 1 : 0.5);
+  }
+
+  private refreshShop(): void {
+    const rm = RunManager.getInstance();
+    const cost = this.getRefreshCost();
+
+    if (!rm.spendGold(cost)) {
+      AudioManager.getInstance().playSfx('sfx_error');
+      return;
+    }
+
+    this.refreshCount++;
+    AudioManager.getInstance().playSfx('sfx_coin');
+
+    // Fade out old cards, then destroy and rebuild
+    const oldContainers = this.itemCards.map(c => c.container);
+    this.tweens.add({
+      targets: oldContainers,
+      alpha: 0,
+      duration: 150,
+      onComplete: () => {
+        for (const card of this.itemCards) {
+          card.container.destroy();
+        }
+        this.itemCards = [];
+
+        // Regenerate inventory
+        const rng = rm.getRng();
+        this.shopItems = ShopGenerator.generate(rng, rm.getCurrentAct());
+
+        // Rebuild cards at alpha 0, then fade in
+        this.shopItems.forEach((item, i) => {
+          const x = 70 + (i % 3) * 230;
+          const y = 155 + Math.floor(i / 3) * 120;
+          this.createItemCard(item, x, y, rm);
+        });
+
+        // Fade in new cards
+        const newContainers = this.itemCards.map(c => c.container);
+        for (const c of newContainers) c.setAlpha(0);
+        this.tweens.add({
+          targets: newContainers,
+          alpha: 1,
+          duration: 200,
+        });
+
+        // Update UI
+        this.goldText.setText(`${rm.getGold()}G`);
+        this.updateRefreshButton();
+        if (this.selectedHero) {
+          this.updateComparisonTexts();
+        }
+      },
     });
   }
 

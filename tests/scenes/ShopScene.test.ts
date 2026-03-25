@@ -3,6 +3,7 @@ import { ShopScene } from '../../src/scenes/ShopScene';
 import { RunManager } from '../../src/managers/RunManager';
 import { EventBus } from '../../src/systems/EventBus';
 import { SceneTestHarness } from '../helpers/scene-harness';
+import { SHOP_REFRESH_BASE_COST } from '../../src/constants';
 
 describe('ShopScene', () => {
   let rm: RunManager;
@@ -182,6 +183,53 @@ describe('ShopScene', () => {
       ensureShopNode(0);
       const scene = SceneTestHarness.createScene(ShopScene, { nodeIndex: 0 });
       expect((scene as any).goldText).toBeDefined();
+    });
+  });
+
+  describe('shop refresh', () => {
+    it('refreshCount starts at 0', () => {
+      ensureShopNode(0);
+      const scene = SceneTestHarness.createScene(ShopScene, { nodeIndex: 0 });
+      expect((scene as any).refreshCount).toBe(0);
+    });
+
+    it('first refresh costs SHOP_REFRESH_BASE_COST', () => {
+      ensureShopNode(0);
+      const scene = SceneTestHarness.createScene(ShopScene, { nodeIndex: 0 });
+      rm.addGold(1000);
+      const goldBefore = rm.getGold();
+      (scene as any).refreshShop();
+      expect(rm.getGold()).toBe(goldBefore - SHOP_REFRESH_BASE_COST);
+      expect((scene as any).refreshCount).toBe(1);
+    });
+
+    it('second refresh costs double', () => {
+      ensureShopNode(0);
+      const scene = SceneTestHarness.createScene(ShopScene, { nodeIndex: 0 });
+      rm.addGold(1000);
+      (scene as any).refreshShop();
+      const goldBefore = rm.getGold();
+      (scene as any).refreshShop();
+      expect(rm.getGold()).toBe(goldBefore - SHOP_REFRESH_BASE_COST * 2);
+      expect((scene as any).refreshCount).toBe(2);
+    });
+
+    it('refresh fails with insufficient gold', () => {
+      ensureShopNode(0);
+      const scene = SceneTestHarness.createScene(ShopScene, { nodeIndex: 0 });
+      rm.spendGold(rm.getGold());
+      const countBefore = (scene as any).refreshCount;
+      (scene as any).refreshShop();
+      expect((scene as any).refreshCount).toBe(countBefore);
+    });
+
+    it('refresh generates new items', () => {
+      ensureShopNode(0);
+      const scene = SceneTestHarness.createScene(ShopScene, { nodeIndex: 0 });
+      rm.addGold(1000);
+      (scene as any).refreshShop();
+      expect((scene as any).itemCards.length).toBeGreaterThan(0);
+      expect((scene as any).refreshCount).toBe(1);
     });
   });
 });
