@@ -30,14 +30,14 @@
 ```typescript
 interface SkillEvolution {
   id: string;              // Evolution skill ID, e.g. "fireball_aoe"
-  heroId: string;          // Hero ID this evolution belongs to (for disambiguation)
+  heroId: string;          // Hero ID (denormalized for readability — also encoded in lookup key)
   sourceSkillId: string;   // Original skill ID, e.g. "fireball"
   branch: 'A' | 'B';      // Branch identifier
   name: string;            // Chinese name
   description: string;     // Chinese description
   // Fields to override on the base skill (MUST NOT include 'id' — evolved skill keeps base ID for cooldown tracking)
   overrides: Omit<Partial<SkillData>, 'id'>;
-  // Level 10 auto-enhancement (applied on top of overrides)
+  // Level 10 auto-enhancement (additive, same semantics as skill-advancements bonuses)
   level10Bonus?: Partial<{
     baseDamage: number;
     scalingRatio: number;
@@ -48,7 +48,7 @@ interface SkillEvolution {
 }
 ```
 
-**Merge semantics**: `{ ...baseSkill, ...overrides }` shallow spread. The evolved skill retains the original `id` (base skill ID) so that `unit.skillCooldowns` map keys are unaffected. The evolution's display `name` and `description` are used for UI only (stored in the SkillEvolution entry, not in overrides).
+**Merge semantics**: `{ ...baseSkill, ...overrides }` shallow spread. The evolved skill retains the original `id` (base skill ID) so that `unit.skillCooldowns` map keys are unaffected. The evolution's display `name` and `description` are used for UI only (stored in the SkillEvolution entry, not in overrides). **Note on nested fields**: `overrides.effects` (if present) completely replaces `baseSkill.effects` — no array merging. If an evolution needs base effects plus new effects, `overrides.effects` must contain the full array.
 
 **Data loading**: Import in SkillSystem.ts as `import evolutionsData from '../data/skill-evolutions.json'`. Build a lookup map `Map<string, SkillEvolution[]>` keyed by `heroId:sourceSkillId` on module load.
 
@@ -108,7 +108,8 @@ interface HeroState {
    YES → Return base skill as-is (no advancement, no evolution)
 
 4. Does evolutions["heroId:baseSkill.id"] exist (player has chosen)?
-   NO  → Return base skill as-is. (Pending evolution — frozen state.)
+   NO  → Fall back to LEGACY PATH (Step 2) — apply skill-advancements until player chooses.
+         This avoids a power cliff where the hero loses advancement bonuses while waiting to choose.
    YES → Step 5
 
 5. Load SkillEvolution by evolutionId. Merge: { ...baseSkill, ...overrides }.
@@ -119,7 +120,7 @@ interface HeroState {
    NO  → Return evolved skill as-is.
 ```
 
-**Key invariant**: For skills in the evolution config, the old `skill-advancements.json` entries are **never applied**. The two systems are mutually exclusive per heroId:skillId pair.
+**Key invariant**: For skills in the evolution config, once an evolution is **chosen**, old `skill-advancements.json` entries are **never applied** for that skill. Before a choice is made (pending state), legacy advancements still apply as a fallback to avoid power cliffs. Evolution data should be designed so that each branch at level 5 is at least as strong as the corresponding legacy advancement.
 
 **`initializeSkills()` update**: This method calls `getAdvancedSkill()` internally. It must be updated to accept and pass `heroId` and `evolutions` parameters. Call site in BattleScene passes `hero.id` and `hero.skillEvolutions ?? {}`.
 
@@ -129,7 +130,14 @@ interface HeroState {
 
 ### Producer: RunManager.addExp()
 
-When a hero levels up and crosses `EVOLUTION_LEVEL`:
+When a hero levels up and crosses `EVOLUTION_LEVEL`, detect using **level-crossing check** (not per-level callback):
+```
+const startLevel = hero.level;  // capture before addExp loop
+// ... after while loop completes ...
+if (startLevel < EVOLUTION_LEVEL && hero.level >= EVOLUTION_LEVEL) { ... }
+```
+
+Steps:
 1. Look up hero's skills[0] from hero data
 2. Check if `heroId:skills[0]` has evolution config entries
 3. Check if `skillEvolutions["heroId:skills[0]"]` is already set (guard)
@@ -151,7 +159,7 @@ When RewardScene.create() runs, exp has already been applied:
 On MapScene.create():
 1. Scan all heroes: for each hero, check if `heroLevel >= EVOLUTION_LEVEL && heroId:skills[0] in evolutionConfig && !skillEvolutions["heroId:skills[0]"]`
 2. If any found, show SkillEvolutionPanel before allowing node selection
-3. **Block battle entry**: If pending evolutions exist, clicking battle/elite/boss nodes shows warning `UI.evolution.pendingWarning` instead of starting
+3. **Block battle entry** (safety net): If pending evolutions still exist after the panel flow (e.g., app crash mid-selection restored with partial pending), clicking battle/elite/boss nodes shows warning `UI.evolution.pendingWarning` instead of starting. In normal flow the panel is mandatory (no close-on-click), so this guard only fires in edge cases.
 
 This makes pending state **derivable from data** (level + missing mapping), not a separate persisted flag.
 
@@ -226,7 +234,7 @@ evolution: {
 | `src/managers/RunManager.ts` | Modify | §5 — pendingEvolutions + setSkillEvolution() + addExp() trigger |
 | `src/scenes/RewardScene.ts` | Modify | §5 — Consume pending evolutions after rewards |
 | `src/scenes/MapScene.ts` | Modify | §5 — Interrupt recovery check + battle entry block |
-| `src/scenes/BattleScene.ts` | Modify | §4 — Pass heroId + skillEvolutions to initializeSkills() |
+| `src/systems/BattleSystem.ts` | Modify | §4 — Pass heroId + skillEvolutions to initializeSkills() (~line 103) |
 | `src/ui/SkillEvolutionPanel.ts` | **Create** | §6 — Evolution choice modal |
 | `tests/systems/SkillSystem.test.ts` | Modify | Evolution resolution tests |
 | `tests/managers/RunManager.test.ts` | Modify | Pending evolution + setSkillEvolution tests |
@@ -285,4 +293,5 @@ evolution: {
 8. **Cooldown tracking**: Evolved skill retains base skill ID for skillCooldowns map
 9. **10 heroes covered**: warrior, knight, rogue, berserker, mage, archer, priest, druid, elemental_weaver, frost_whisperer
 10. **Save compat**: Old saves work without errors
-11. **Tests**: `npx tsc --noEmit && npm test` passes with zero errors
+11. **shadow_assassin isolation**: shadow_assassin's backstab still uses legacy skill-advancements, unaffected by rogue's evolution
+12. **Tests**: `npx tsc --noEmit && npm test` passes with zero errors
