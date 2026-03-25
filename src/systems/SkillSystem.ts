@@ -1,5 +1,5 @@
 import { Unit } from '../entities/Unit';
-import { SkillData, SkillEffect, StatusEffect, StatusEffectType, SkillAdvancement } from '../types';
+import { SkillData, SkillEffect, StatusEffect, StatusEffectType, SkillAdvancement, SkillEvolution } from '../types';
 import { DamageSystem } from './DamageSystem';
 import { DamageNumber } from '../components/DamageNumber';
 import { DamageAccumulator } from './DamageAccumulator';
@@ -9,7 +9,28 @@ import { TargetingSystem } from './TargetingSystem';
 import { MetaManager } from '../managers/MetaManager';
 import skillsData from '../data/skills.json';
 import advancementsData from '../data/skill-advancements.json';
+import evolutionsData from '../data/skill-evolutions.json';
+import { EVOLUTION_LEVEL, EVOLUTION_ENHANCE_LEVEL } from '../constants';
 import { nextEffectId } from '../utils/id-generator';
+
+const evolutionMap = new Map<string, SkillEvolution[]>();
+for (const evo of evolutionsData as SkillEvolution[]) {
+  const key = `${evo.heroId}:${evo.sourceSkillId}`;
+  if (!evolutionMap.has(key)) evolutionMap.set(key, []);
+  evolutionMap.get(key)!.push(evo);
+}
+
+export function hasEvolutionConfig(heroId: string, skillId: string): boolean {
+  return evolutionMap.has(`${heroId}:${skillId}`);
+}
+
+export function getEvolutionBranches(heroId: string, skillId: string): SkillEvolution[] {
+  return evolutionMap.get(`${heroId}:${skillId}`) ?? [];
+}
+
+export function getEvolutionById(evolutionId: string): SkillEvolution | undefined {
+  return (evolutionsData as SkillEvolution[]).find(e => e.id === evolutionId);
+}
 
 export class SkillSystem {
   private rng: SeededRNG;
@@ -26,12 +47,12 @@ export class SkillSystem {
   }
 
   /** Initialize skills for a unit from skill IDs, applying advancements based on unit level */
-  initializeSkills(unit: Unit, skillIds: string[], heroLevel?: number): void {
+  initializeSkills(unit: Unit, skillIds: string[], heroLevel?: number, heroId?: string, evolutions?: Record<string, string>): void {
     unit.skills = skillIds
       .map(id => {
         const base = (skillsData as SkillData[]).find(s => s.id === id);
         if (!base) return null;
-        return heroLevel ? this.getAdvancedSkill(base, heroLevel) : { ...base };
+        return heroLevel ? this.getAdvancedSkill(base, heroLevel, heroId, evolutions) : { ...base };
       })
       .filter(Boolean) as SkillData[];
     for (const skill of unit.skills) {
@@ -39,8 +60,54 @@ export class SkillSystem {
     }
   }
 
-  /** Apply skill advancements based on hero level */
-  getAdvancedSkill(baseSkill: SkillData, heroLevel: number): SkillData {
+  /** Apply skill advancements based on hero level, with 6-step evolution resolution */
+  getAdvancedSkill(baseSkill: SkillData, heroLevel: number, heroId?: string, evolutions?: Record<string, string>): SkillData {
+    // Step 1: Check if this hero:skill has evolution config
+    const hasEvo = heroId ? hasEvolutionConfig(heroId, baseSkill.id) : false;
+
+    if (!hasEvo) {
+      // Step 2: LEGACY PATH
+      return this.applyLegacyAdvancements(baseSkill, heroLevel);
+    }
+
+    // Step 3: Below evolution level — return base skill as-is
+    if (heroLevel < EVOLUTION_LEVEL) {
+      return { ...baseSkill };
+    }
+
+    // Step 4: Check if player has chosen an evolution
+    const evoKey = `${heroId}:${baseSkill.id}`;
+    const chosenId = evolutions?.[evoKey];
+
+    if (!chosenId) {
+      // Pending — fall back to legacy advancements (no power cliff)
+      return this.applyLegacyAdvancements(baseSkill, heroLevel);
+    }
+
+    // Step 5: Apply evolution overrides
+    const evolution = getEvolutionById(chosenId);
+    if (!evolution) {
+      return this.applyLegacyAdvancements(baseSkill, heroLevel);
+    }
+
+    const evolved: SkillData = { ...baseSkill, ...evolution.overrides };
+    evolved.id = baseSkill.id; // Ensure base ID retained
+
+    // Step 6: Apply level10Bonus if hero >= EVOLUTION_ENHANCE_LEVEL
+    if (heroLevel >= EVOLUTION_ENHANCE_LEVEL && evolution.level10Bonus) {
+      const bonus = evolution.level10Bonus;
+      if (bonus.baseDamage) evolved.baseDamage += bonus.baseDamage;
+      if (bonus.scalingRatio) evolved.scalingRatio += bonus.scalingRatio;
+      if (bonus.cooldown) evolved.cooldown = Math.max(0.5, evolved.cooldown + bonus.cooldown);
+      if (bonus.aoeRadius) evolved.aoeRadius = (evolved.aoeRadius ?? 0) + bonus.aoeRadius;
+      if (bonus.effectDuration) evolved.effectDuration = (evolved.effectDuration ?? 0) + bonus.effectDuration;
+    }
+
+    return evolved;
+  }
+
+  /** Apply legacy skill advancements based on hero level */
+  private applyLegacyAdvancements(baseSkill: SkillData, heroLevel: number): SkillData {
     const advancements = (advancementsData as SkillAdvancement[])
       .filter(a => a.skillId === baseSkill.id && heroLevel >= a.requiredHeroLevel)
       .sort((a, b) => a.level - b.level);

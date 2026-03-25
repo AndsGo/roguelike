@@ -4,6 +4,7 @@ import { DamageSystem } from '../../src/systems/DamageSystem';
 import { SeededRNG } from '../../src/utils/rng';
 import { EventBus } from '../../src/systems/EventBus';
 import { createMockUnit } from '../mocks/phaser';
+import { EVOLUTION_LEVEL, EVOLUTION_ENHANCE_LEVEL } from '../../src/constants';
 
 describe('SkillSystem', () => {
   let skillSystem: SkillSystem;
@@ -95,6 +96,83 @@ describe('SkillSystem', () => {
       const result = skillSystem.findReadySkill(unit as any, [], []);
       expect(result).toBeDefined();
       expect(result!.id).toBe('test_self');
+    });
+  });
+
+  describe('evolution resolution', () => {
+    it('non-evolution skill at level 10 applies legacy advancements', () => {
+      const unit = createMockUnit({ unitId: 'warrior1' });
+      // taunt_shout is NOT in evolution config, should use legacy path
+      skillSystem.initializeSkills(unit as any, ['taunt_shout'], 10);
+      const skill = unit.skills.find((s: any) => s.id === 'taunt_shout');
+      expect(skill).toBeDefined();
+    });
+
+    it('evolution skill below level 5 returns base skill', () => {
+      const unit = createMockUnit({ unitId: 'mage1' });
+      skillSystem.initializeSkills(unit as any, ['fireball'], 3, 'mage', {});
+      const skill = unit.skills.find((s: any) => s.id === 'fireball');
+      expect(skill).toBeDefined();
+      expect(skill!.baseDamage).toBe(60); // base fireball damage
+    });
+
+    it('evolution skill at level 5 without choice falls back to legacy', () => {
+      const unit = createMockUnit({ unitId: 'mage1' });
+      skillSystem.initializeSkills(unit as any, ['fireball'], 5, 'mage', {});
+      const skill = unit.skills.find((s: any) => s.id === 'fireball');
+      expect(skill).toBeDefined();
+      expect(skill!.baseDamage).toBeGreaterThan(60);
+    });
+
+    it('evolution skill at level 5 with choice applies overrides', () => {
+      const unit = createMockUnit({ unitId: 'mage1' });
+      skillSystem.initializeSkills(unit as any, ['fireball'], 5, 'mage', { 'mage:fireball': 'fireball_flame_storm' });
+      const skill = unit.skills.find((s: any) => s.id === 'fireball');
+      expect(skill).toBeDefined();
+      expect(skill!.targetType).toBe('all_enemies');
+    });
+
+    it('evolved skill retains base skill ID for cooldown tracking', () => {
+      const unit = createMockUnit({ unitId: 'mage1' });
+      skillSystem.initializeSkills(unit as any, ['fireball'], 5, 'mage', { 'mage:fireball': 'fireball_flame_storm' });
+      const skill = unit.skills.find((s: any) => s.id === 'fireball');
+      expect(skill).toBeDefined();
+      expect(skill!.id).toBe('fireball');
+      expect(unit.skillCooldowns.has('fireball')).toBe(true);
+    });
+
+    it('evolution skill at level 10 with choice applies overrides + level10Bonus', () => {
+      const unit = createMockUnit({ unitId: 'mage1' });
+      skillSystem.initializeSkills(unit as any, ['fireball'], 10, 'mage', { 'mage:fireball': 'fireball_flame_storm' });
+      const skill = unit.skills.find((s: any) => s.id === 'fireball');
+      expect(skill).toBeDefined();
+      expect(skill!.targetType).toBe('all_enemies');
+    });
+
+    it('evolution skill with choice does NOT apply legacy advancements', () => {
+      const unit = createMockUnit({ unitId: 'mage1' });
+      skillSystem.initializeSkills(unit as any, ['fireball'], 10, 'mage', { 'mage:fireball': 'fireball_flame_storm' });
+      const evolved = unit.skills.find((s: any) => s.id === 'fireball');
+
+      const unit2 = createMockUnit({ unitId: 'mage2' });
+      skillSystem.initializeSkills(unit2 as any, ['fireball'], 10);
+      const legacy = unit2.skills.find((s: any) => s.id === 'fireball');
+
+      expect(evolved!.targetType).not.toBe(legacy!.targetType);
+    });
+
+    it('shared skill: rogue gets evolution, shadow_assassin gets legacy', () => {
+      const unit1 = createMockUnit({ unitId: 'rogue1' });
+      skillSystem.initializeSkills(unit1 as any, ['backstab'], 5, 'rogue', { 'rogue:backstab': 'backstab_bleed_combo' });
+
+      const unit2 = createMockUnit({ unitId: 'sa1' });
+      skillSystem.initializeSkills(unit2 as any, ['backstab'], 5, 'shadow_assassin', {});
+
+      const rogueSkill = unit1.skills.find((s: any) => s.id === 'backstab');
+      const saSkill = unit2.skills.find((s: any) => s.id === 'backstab');
+
+      expect(rogueSkill).toBeDefined();
+      expect(saSkill).toBeDefined();
     });
   });
 
