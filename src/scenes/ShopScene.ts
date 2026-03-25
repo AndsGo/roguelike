@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { GAME_WIDTH, GAME_HEIGHT, SHOP_REFRESH_BASE_COST } from '../constants';
+import { GAME_WIDTH, GAME_HEIGHT, SHOP_REFRESH_BASE_COST, SELL_PRICE_RATIO } from '../constants';
 import { RunManager } from '../managers/RunManager';
 import { ShopGenerator } from '../systems/ShopGenerator';
 import { ItemData, HeroState } from '../types';
@@ -217,18 +217,28 @@ export class ShopScene extends Phaser.Scene {
   }
 
   private updateComparisonTexts(): void {
+    const rm = RunManager.getInstance();
+
     for (const card of this.itemCards) {
       if (card.sold) continue;
 
+      const canAfford = rm.getGold() >= card.item.cost;
+      const baseColor = canAfford ? colorToString(Theme.colors.gold) : colorToString(Theme.colors.danger);
+
       if (!this.selectedHero) {
         card.compareText.setText('');
+        card.priceText.setText(`${card.item.cost}G`);
+        card.priceText.setColor(baseColor);
         continue;
       }
 
       const currentEquip = this.selectedHero.equipment[card.item.slot];
+
       if (!currentEquip) {
         card.compareText.setText(UI.shop.vsEmpty);
         card.compareText.setColor('#888888');
+        card.priceText.setText(`${card.item.cost}G`);
+        card.priceText.setColor(baseColor);
         continue;
       }
 
@@ -263,6 +273,17 @@ export class ShopScene extends Phaser.Scene {
         card.compareText.setText(UI.shop.vsSame(currentEquip.name));
         card.compareText.setColor('#888888');
       }
+
+      // Net cost display
+      if (currentEquip.cost > 0) {
+        const sellback = Math.floor(currentEquip.cost * SELL_PRICE_RATIO);
+        const netCost = card.item.cost - sellback;
+        card.priceText.setText(UI.shop.netCost(card.item.cost, netCost));
+        card.priceText.setColor(baseColor);
+      } else {
+        card.priceText.setText(`${card.item.cost}G`);
+        card.priceText.setColor(baseColor);
+      }
     }
   }
 
@@ -286,6 +307,14 @@ export class ShopScene extends Phaser.Scene {
     }
 
     const oldItem = rm.equipItem(this.selectedHero.id, item);
+
+    // Sell-back: credit 50% of replaced item's cost
+    if (oldItem && oldItem.cost > 0) {
+      const sellPrice = Math.floor(oldItem.cost * SELL_PRICE_RATIO);
+      rm.addGold(sellPrice);
+      this.showMessage(UI.shop.sellback(sellPrice));
+    }
+
     AudioManager.getInstance().playSfx('sfx_buy');
     this.goldText.setText(`${rm.getGold()}G`);
 

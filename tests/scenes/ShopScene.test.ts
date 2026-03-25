@@ -3,7 +3,7 @@ import { ShopScene } from '../../src/scenes/ShopScene';
 import { RunManager } from '../../src/managers/RunManager';
 import { EventBus } from '../../src/systems/EventBus';
 import { SceneTestHarness } from '../helpers/scene-harness';
-import { SHOP_REFRESH_BASE_COST } from '../../src/constants';
+import { SHOP_REFRESH_BASE_COST, SELL_PRICE_RATIO } from '../../src/constants';
 
 describe('ShopScene', () => {
   let rm: RunManager;
@@ -230,6 +230,91 @@ describe('ShopScene', () => {
       (scene as any).refreshShop();
       expect((scene as any).itemCards.length).toBeGreaterThan(0);
       expect((scene as any).refreshCount).toBe(1);
+    });
+  });
+
+  describe('sell-back', () => {
+    it('buy in empty slot: no sell-back, full price deducted', () => {
+      ensureShopNode(0);
+      const scene = SceneTestHarness.createScene(ShopScene, { nodeIndex: 0 });
+      rm.addGold(1000);
+      const hero = rm.getHeroes()[0];
+      (scene as any).selectedHero = hero;
+
+      const cards = (scene as any).itemCards;
+      if (cards.length === 0) return;
+      const card = cards[0];
+      const slot = card.item.slot;
+
+      // Ensure slot is empty
+      hero.equipment[slot] = null;
+
+      const goldBefore = rm.getGold();
+      (scene as any).buyItem(card.item, card.container, card.priceText);
+      expect(rm.getGold()).toBe(goldBefore - card.item.cost);
+    });
+
+    it('buy replacing existing: sell-back credits 50% of old item cost', () => {
+      ensureShopNode(0);
+      const scene = SceneTestHarness.createScene(ShopScene, { nodeIndex: 0 });
+      rm.addGold(1000);
+      const hero = rm.getHeroes()[0];
+      (scene as any).selectedHero = hero;
+
+      const cards = (scene as any).itemCards;
+      if (cards.length === 0) return;
+      const card = cards[0];
+      const slot = card.item.slot;
+
+      // Pre-equip an item in the same slot
+      const oldItem = { id: 'old_sword', name: 'Old Sword', slot, cost: 30, rarity: 'common', description: '', stats: { attack: 5 } };
+      hero.equipment[slot] = oldItem as any;
+
+      const goldBefore = rm.getGold();
+      (scene as any).buyItem(card.item, card.container, card.priceText);
+      const expectedSellback = Math.floor(oldItem.cost * SELL_PRICE_RATIO);
+      expect(rm.getGold()).toBe(goldBefore - card.item.cost + expectedSellback);
+    });
+
+    it('net cost display shows reduced price when hero has equipment', () => {
+      ensureShopNode(0);
+      const scene = SceneTestHarness.createScene(ShopScene, { nodeIndex: 0 });
+      rm.addGold(1000);
+      const hero = rm.getHeroes()[0];
+      (scene as any).selectedHero = hero;
+
+      const cards = (scene as any).itemCards;
+      if (cards.length === 0) return;
+      const card = cards[0];
+      const slot = card.item.slot;
+
+      // Pre-equip a 30G item
+      hero.equipment[slot] = { id: 'old_item', name: 'Old', slot, cost: 30, rarity: 'common', description: '', stats: {} } as any;
+
+      (scene as any).updateComparisonTexts();
+      // priceText should show net cost format
+      const expectedNet = card.item.cost - Math.floor(30 * SELL_PRICE_RATIO);
+      expect(card.priceText.text).toContain(`净 ${expectedNet}G`);
+    });
+
+    it('old item with cost 0: no sell-back', () => {
+      ensureShopNode(0);
+      const scene = SceneTestHarness.createScene(ShopScene, { nodeIndex: 0 });
+      rm.addGold(1000);
+      const hero = rm.getHeroes()[0];
+      (scene as any).selectedHero = hero;
+
+      const cards = (scene as any).itemCards;
+      if (cards.length === 0) return;
+      const card = cards[0];
+      const slot = card.item.slot;
+
+      // Pre-equip a zero-cost item
+      hero.equipment[slot] = { id: 'free_item', name: 'Free', slot, cost: 0, rarity: 'common', description: '', stats: {} } as any;
+
+      const goldBefore = rm.getGold();
+      (scene as any).buyItem(card.item, card.container, card.priceText);
+      expect(rm.getGold()).toBe(goldBefore - card.item.cost); // No sell-back
     });
   });
 });
