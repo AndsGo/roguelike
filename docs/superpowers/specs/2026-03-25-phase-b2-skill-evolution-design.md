@@ -261,7 +261,7 @@ evolution: {
 ### Skill resolution tests
 - Non-evolution skill at level 10 → applies skill-advancements (legacy)
 - Evolution skill at level 3 → returns base skill, no advancement
-- Evolution skill at level 5 without choice → returns base skill (frozen)
+- Evolution skill at level 5 without choice → falls back to legacy advancement (not base skill)
 - Evolution skill at level 5 with choice → applies overrides, retains base skill ID
 - Evolution skill at level 10 with choice → applies overrides + level10Bonus
 - Evolution skill with choice, verify old skill-advancements NOT applied
@@ -286,7 +286,7 @@ evolution: {
 1. **Evolution choice**: Level 5 heroes with evolution skills see 2-choose-1 panel in RewardScene
 2. **Level 10 enhance**: Chosen branch auto-strengthens at level 10
 3. **Mutual exclusion**: Evolution skills never use old skill-advancements
-4. **Frozen pending**: Pending evolution heroes use base skill (no advancement)
+4. **Pending fallback**: Pending evolution heroes use legacy skill-advancements (no power cliff)
 5. **One-time binding**: Chosen evolution cannot be overwritten
 6. **Interrupt recovery**: MapScene catches missed choices, blocks battle entry
 7. **Composite key**: Evolution keyed by heroId:skillId, shared skills disambiguated
