@@ -100,7 +100,8 @@ export class BattleSystem {
 
     // Initialize skills (with advancement for heroes based on level)
     for (const hero of heroes) {
-      this.skillSystem.initializeSkills(hero, hero.heroData.skills, hero.level);
+      const evolutions = hero.heroState?.skillEvolutions ?? {};
+      this.skillSystem.initializeSkills(hero, hero.heroData.skills, hero.level, hero.heroData.id, evolutions);
     }
     for (const enemy of enemies) {
       this.skillSystem.initializeSkills(enemy, enemy.enemyData.skills);
