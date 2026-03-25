@@ -1,22 +1,26 @@
 import Phaser from 'phaser';
-import { GAME_WIDTH, GAME_HEIGHT, MAP_HIDDEN_NODE_COST } from '../constants';
+import { GAME_WIDTH, GAME_HEIGHT, MAP_HIDDEN_NODE_COST, EVOLUTION_LEVEL } from '../constants';
 import { SaveManager } from '../managers/SaveManager';
 import { RunManager } from '../managers/RunManager';
 import { MapGenerator } from '../systems/MapGenerator';
-import { MapNode, ActConfig } from '../types';
+import { MapNode, ActConfig, SkillData } from '../types';
 import { Theme, colorToString, getNodeColor } from '../ui/Theme';
 import { SceneTransition } from '../systems/SceneTransition';
 import { Button } from '../ui/Button';
 import { MapRenderer, NODE_LABELS, LayerInfo } from '../ui/MapRenderer';
 import { HeroDetailPopup } from '../ui/HeroDetailPopup';
 import actsData from '../data/acts.json';
-import { UI } from '../i18n';
+import { UI, getHeroDisplayName } from '../i18n';
 import { NodeTooltip } from '../ui/NodeTooltip';
 import { RunOverviewPanel } from '../ui/RunOverviewPanel';
 import { FormationPanel } from '../ui/FormationPanel';
 import { TutorialSystem } from '../systems/TutorialSystem';
 import { TextFactory } from '../ui/TextFactory';
 import { DailyChallengeManager, DailyRule } from '../managers/DailyChallengeManager';
+import { SkillEvolutionPanel } from '../ui/SkillEvolutionPanel';
+import { hasEvolutionConfig, getEvolutionBranches } from '../systems/SkillSystem';
+import heroesData from '../data/heroes.json';
+import skillsData from '../data/skills.json';
 
 export class MapScene extends Phaser.Scene {
   private mapContainer!: Phaser.GameObjects.Container;
@@ -486,6 +490,8 @@ export class MapScene extends Phaser.Scene {
       this.pendingActTransition = null;
     }
 
+    this.checkPendingEvolutions(rm);
+
     TutorialSystem.showTipIfNeeded(this, 'first_map');
   }
 
@@ -642,6 +648,30 @@ export class MapScene extends Phaser.Scene {
     const accessible = rm.getAccessibleNodes();
     if (!accessible.includes(index)) return;
 
+    const node = rm.getMap()[index];
+
+    // Safety net: block combat nodes if pending evolutions exist
+    const combatNodes = ['battle', 'elite', 'boss', 'gauntlet'];
+    if (combatNodes.includes(node.type)) {
+      const hasPending = rm.getHeroes().some(hero => {
+        if (hero.level < EVOLUTION_LEVEL) return false;
+        const hd = (heroesData as any[]).find((h: any) => h.id === hero.id);
+        if (!hd) return false;
+        const skill0 = hd.skills[0];
+        if (!hasEvolutionConfig(hero.id, skill0)) return false;
+        return !(hero.skillEvolutions ?? {})[`${hero.id}:${skill0}`];
+      });
+      if (hasPending) {
+        const warn = TextFactory.create(this, GAME_WIDTH / 2, GAME_HEIGHT - 60,
+          UI.evolution.pendingWarning, 'body', {
+            color: colorToString(Theme.colors.danger),
+            stroke: '#000000', strokeThickness: 2,
+          }).setOrigin(0.5);
+        this.tweens.add({ targets: warn, alpha: 0, delay: 2000, duration: 500, onComplete: () => warn.destroy() });
+        return;
+      }
+    }
+
     // Check for act transition
     const nodeAct = rm.getNodeAct(index);
     const prevAct = rm.getCurrentAct();
@@ -651,7 +681,6 @@ export class MapScene extends Phaser.Scene {
     }
 
     rm.setCurrentNode(index);
-    const node = rm.getMap()[index];
 
     const sceneMap: Record<string, string> = {
       battle: 'BattleScene',
@@ -744,6 +773,40 @@ export class MapScene extends Phaser.Scene {
       this.pathOverlay.destroy();
       this.pathOverlay = null;
     }
+  }
+
+  private checkPendingEvolutions(rm: RunManager): void {
+    const pending: { heroId: string; skillId: string }[] = [];
+    for (const hero of rm.getHeroes()) {
+      if (hero.level < EVOLUTION_LEVEL) continue;
+      const heroData = (heroesData as any[]).find(h => h.id === hero.id);
+      if (!heroData) continue;
+      const skill0 = heroData.skills[0];
+      if (!hasEvolutionConfig(hero.id, skill0)) continue;
+      const evolutions = hero.skillEvolutions ?? {};
+      if (!evolutions[`${hero.id}:${skill0}`]) {
+        pending.push({ heroId: hero.id, skillId: skill0 });
+      }
+    }
+    if (pending.length > 0) {
+      this.showRecoveryEvolution(rm, pending, 0);
+    }
+  }
+
+  private showRecoveryEvolution(rm: RunManager, pending: { heroId: string; skillId: string }[], index: number): void {
+    if (index >= pending.length) return;
+    const { heroId, skillId } = pending[index];
+    const branches = getEvolutionBranches(heroId, skillId);
+    if (branches.length < 2) {
+      this.showRecoveryEvolution(rm, pending, index + 1);
+      return;
+    }
+    const heroName = getHeroDisplayName(heroId);
+    const baseSkill = (skillsData as SkillData[]).find((s: SkillData) => s.id === skillId)!;
+    new SkillEvolutionPanel(this, heroName, branches, baseSkill, (evolutionId) => {
+      rm.setSkillEvolution(heroId, skillId, evolutionId);
+      this.showRecoveryEvolution(rm, pending, index + 1);
+    });
   }
 
   shutdown(): void {

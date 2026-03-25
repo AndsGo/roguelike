@@ -1,13 +1,16 @@
 import Phaser from 'phaser';
 import { GAME_WIDTH, GAME_HEIGHT } from '../constants';
-import { BattleResult } from '../types';
+import { BattleResult, SkillData } from '../types';
 import { Button } from '../ui/Button';
 import { RunManager } from '../managers/RunManager';
 import { Theme, colorToString } from '../ui/Theme';
 import { SceneTransition } from '../systems/SceneTransition';
 import { StatsManager } from '../managers/StatsManager';
-import { UI } from '../i18n';
+import { UI, getHeroDisplayName } from '../i18n';
 import { TextFactory } from '../ui/TextFactory';
+import { SkillEvolutionPanel } from '../ui/SkillEvolutionPanel';
+import { getEvolutionBranches } from '../systems/SkillSystem';
+import skillsData from '../data/skills.json';
 
 export class RewardScene extends Phaser.Scene {
   private result!: BattleResult;
@@ -108,6 +111,39 @@ export class RewardScene extends Phaser.Scene {
       color: colorToString(Theme.colors.gold),
     }).setOrigin(0.5);
 
+    this.showEvolutionOrContinue(rm);
+  }
+
+  private showEvolutionOrContinue(rm: RunManager): void {
+    const pending = rm.getPendingEvolutions();
+    if (pending.length > 0) {
+      this.showNextEvolution(rm, pending, 0);
+    } else {
+      this.showContinueButton();
+    }
+  }
+
+  private showNextEvolution(rm: RunManager, pending: { heroId: string; skillId: string }[], index: number): void {
+    if (index >= pending.length) {
+      this.showContinueButton();
+      return;
+    }
+    const { heroId, skillId } = pending[index];
+    const branches = getEvolutionBranches(heroId, skillId);
+    if (branches.length < 2) {
+      this.showNextEvolution(rm, pending, index + 1);
+      return;
+    }
+    const heroName = getHeroDisplayName(heroId);
+    const baseSkill = (skillsData as SkillData[]).find(s => s.id === skillId)!;
+    new SkillEvolutionPanel(this, heroName, branches, baseSkill, (evolutionId) => {
+      rm.setSkillEvolution(heroId, skillId, evolutionId);
+      rm.clearPendingEvolution(heroId, skillId);
+      this.showNextEvolution(rm, pending, index + 1);
+    });
+  }
+
+  private showContinueButton(): void {
     new Button(this, GAME_WIDTH / 2, GAME_HEIGHT - 38, UI.reward.continueBtn, 160, 38, () => {
       SceneTransition.fadeTransition(this, 'MapScene');
     });
