@@ -1,0 +1,465 @@
+[
+  {
+    "id": "shield_bash_aoe_taunt",
+    "heroId": "warrior",
+    "sourceSkillId": "shield_bash",
+    "branch": "A",
+    "name": "震荡冲击",
+    "description": "盾击进化为范围震荡，对附近敌人造成物理伤害并嘲讽",
+    "overrides": {
+      "name": "震荡冲击",
+      "description": "盾击进化为范围震荡，对附近敌人造成物理伤害并嘲讽",
+      "targetType": "all_enemies",
+      "baseDamage": 55,
+      "scalingRatio": 0.9,
+      "cooldown": 8,
+      "range": 120,
+      "aoeRadius": 80,
+      "statusEffect": "taunt",
+      "effectDuration": 2.5
+    },
+    "level10Bonus": { "aoeRadius": 20, "effectDuration": 1 }
+  },
+  {
+    "id": "shield_bash_heavy_stun",
+    "heroId": "warrior",
+    "sourceSkillId": "shield_bash",
+    "branch": "B",
+    "name": "破甲重击",
+    "description": "全力一击，造成巨额物理伤害并长时间眩晕目标",
+    "overrides": {
+      "name": "破甲重击",
+      "description": "全力一击，造成巨额物理伤害并长时间眩晕目标",
+      "baseDamage": 90,
+      "scalingRatio": 1.2,
+      "cooldown": 8,
+      "statusEffect": "stun",
+      "effectDuration": 1.5
+    },
+    "level10Bonus": { "baseDamage": 20, "effectDuration": 0.5 }
+  },
+  {
+    "id": "holy_smite_burst_aoe",
+    "heroId": "knight",
+    "sourceSkillId": "holy_smite",
+    "branch": "A",
+    "name": "圣光爆裂",
+    "description": "圣光之力向四周爆发，对所有敌人造成圣属性范围伤害",
+    "overrides": {
+      "name": "圣光爆裂",
+      "description": "圣光之力向四周爆发，对所有敌人造成圣属性范围伤害",
+      "targetType": "all_enemies",
+      "baseDamage": 40,
+      "scalingRatio": 0.8,
+      "cooldown": 7,
+      "range": 250,
+      "aoeRadius": 100,
+      "element": "holy"
+    },
+    "level10Bonus": { "baseDamage": 10, "aoeRadius": 20 }
+  },
+  {
+    "id": "holy_smite_judgment",
+    "heroId": "knight",
+    "sourceSkillId": "holy_smite",
+    "branch": "B",
+    "name": "神罚审判",
+    "description": "召唤圣光裁决单体敌人，造成双倍伤害并回复自身生命",
+    "overrides": {
+      "name": "神罚审判",
+      "description": "召唤圣光裁决单体敌人，造成双倍伤害并回复自身生命",
+      "targetType": "enemy",
+      "baseDamage": 100,
+      "scalingRatio": 1.3,
+      "cooldown": 7,
+      "range": 200,
+      "element": "holy",
+      "effects": [
+        {
+          "type": "damage",
+          "damageType": "magical",
+          "element": "holy",
+          "baseDamage": 100,
+          "scalingStat": "magicPower",
+          "scalingRatio": 1.3
+        },
+        {
+          "type": "heal",
+          "baseDamage": 30,
+          "scalingStat": "magicPower",
+          "scalingRatio": 0.4
+        }
+      ]
+    },
+    "level10Bonus": { "baseDamage": 20, "scalingRatio": 0.15 }
+  },
+  {
+    "id": "backstab_bleed_combo",
+    "heroId": "rogue",
+    "sourceSkillId": "backstab",
+    "branch": "A",
+    "name": "血刃连击",
+    "description": "三连暗影刺击，每击附带流血效果，持续造成伤害",
+    "overrides": {
+      "name": "血刃连击",
+      "description": "三连暗影刺击，每击附带流血效果，持续造成伤害",
+      "baseDamage": 55,
+      "scalingRatio": 1.2,
+      "cooldown": 9,
+      "range": 60,
+      "element": "dark",
+      "statusEffect": "bleed",
+      "effectDuration": 4,
+      "effects": [
+        {
+          "type": "damage",
+          "damageType": "physical",
+          "element": "dark",
+          "baseDamage": 20,
+          "scalingStat": "attack",
+          "scalingRatio": 0.4
+        },
+        {
+          "type": "damage",
+          "damageType": "physical",
+          "element": "dark",
+          "baseDamage": 20,
+          "scalingStat": "attack",
+          "scalingRatio": 0.4
+        },
+        {
+          "type": "damage",
+          "damageType": "physical",
+          "element": "dark",
+          "baseDamage": 15,
+          "scalingStat": "attack",
+          "scalingRatio": 0.4
+        }
+      ]
+    },
+    "level10Bonus": { "baseDamage": 15, "effectDuration": 1 }
+  },
+  {
+    "id": "backstab_crit_burst",
+    "heroId": "rogue",
+    "sourceSkillId": "backstab",
+    "branch": "B",
+    "name": "暗影致命一击",
+    "description": "凝聚暗影之力发动致命一击，伤害极高且暴击率大幅提升",
+    "overrides": {
+      "name": "暗影致命一击",
+      "description": "凝聚暗影之力发动致命一击，伤害极高且暴击率大幅提升",
+      "baseDamage": 112,
+      "scalingRatio": 1.8,
+      "cooldown": 11,
+      "range": 60,
+      "element": "dark"
+    },
+    "level10Bonus": { "baseDamage": 25, "scalingRatio": 0.2 }
+  },
+  {
+    "id": "berserk_rage_lifesteal",
+    "heroId": "berserker",
+    "sourceSkillId": "berserk_rage",
+    "branch": "A",
+    "name": "嗜血狂暴",
+    "description": "进入嗜血狂暴状态，攻击力提升且每次攻击回复20%伤害的生命",
+    "overrides": {
+      "name": "嗜血狂暴",
+      "description": "进入嗜血狂暴状态，攻击力提升且每次攻击回复20%伤害的生命",
+      "cooldown": 20,
+      "statusEffect": "berserk",
+      "effectDuration": 7,
+      "element": "fire",
+      "effects": [
+        {
+          "type": "buff",
+          "statusEffectId": "berserk",
+          "statusDuration": 7
+        },
+        {
+          "type": "buff",
+          "statusEffectId": "lifesteal",
+          "statusDuration": 7
+        }
+      ]
+    },
+    "level10Bonus": { "effectDuration": 2 }
+  },
+  {
+    "id": "berserk_rage_frenzy_aoe",
+    "heroId": "berserker",
+    "sourceSkillId": "berserk_rage",
+    "branch": "B",
+    "name": "狂暴风暴",
+    "description": "爆发狂暴之力，对所有敌人造成火属性伤害并进入狂暴状态",
+    "overrides": {
+      "name": "狂暴风暴",
+      "description": "爆发狂暴之力，对所有敌人造成火属性伤害并进入狂暴状态",
+      "targetType": "all_enemies",
+      "baseDamage": 45,
+      "scalingRatio": 0.8,
+      "cooldown": 22,
+      "range": 150,
+      "aoeRadius": 120,
+      "statusEffect": "berserk",
+      "effectDuration": 5,
+      "element": "fire"
+    },
+    "level10Bonus": { "baseDamage": 10, "aoeRadius": 25 }
+  },
+  {
+    "id": "fireball_flame_storm",
+    "heroId": "mage",
+    "sourceSkillId": "fireball",
+    "branch": "A",
+    "name": "焚天烈焰",
+    "description": "召唤烈焰风暴，对所有敌人造成大范围火属性伤害",
+    "overrides": {
+      "name": "焚天烈焰",
+      "description": "召唤烈焰风暴，对所有敌人造成大范围火属性伤害",
+      "targetType": "all_enemies",
+      "baseDamage": 50,
+      "scalingRatio": 0.9,
+      "cooldown": 8,
+      "range": 250,
+      "aoeRadius": 100,
+      "element": "fire"
+    },
+    "level10Bonus": { "baseDamage": 12, "aoeRadius": 20 }
+  },
+  {
+    "id": "fireball_precision_rocket",
+    "heroId": "mage",
+    "sourceSkillId": "fireball",
+    "branch": "B",
+    "name": "精准灼热弹",
+    "description": "凝聚高压火焰射出精准弹体，对单体造成极高火属性伤害",
+    "overrides": {
+      "name": "精准灼热弹",
+      "description": "凝聚高压火焰射出精准弹体，对单体造成极高火属性伤害",
+      "targetType": "enemy",
+      "baseDamage": 120,
+      "scalingRatio": 1.5,
+      "cooldown": 6,
+      "range": 220,
+      "aoeRadius": 0,
+      "element": "fire"
+    },
+    "level10Bonus": { "baseDamage": 25, "cooldown": -1 }
+  },
+  {
+    "id": "multi_shot_barrage",
+    "heroId": "archer",
+    "sourceSkillId": "multi_shot",
+    "branch": "A",
+    "name": "箭雨齐射",
+    "description": "同时射出五支箭矢覆盖战场，每支箭伤害略低",
+    "overrides": {
+      "name": "箭雨齐射",
+      "description": "同时射出五支箭矢覆盖战场，每支箭伤害略低",
+      "targetType": "all_enemies",
+      "baseDamage": 24,
+      "scalingRatio": 0.6,
+      "cooldown": 7,
+      "range": 260,
+      "aoeRadius": 40
+    },
+    "level10Bonus": { "baseDamage": 5, "aoeRadius": 10 }
+  },
+  {
+    "id": "multi_shot_focused",
+    "heroId": "archer",
+    "sourceSkillId": "multi_shot",
+    "branch": "B",
+    "name": "贯穿神射",
+    "description": "将所有箭矢集中为一击，对单体造成毁灭性伤害",
+    "overrides": {
+      "name": "贯穿神射",
+      "description": "将所有箭矢集中为一击，对单体造成毁灭性伤害",
+      "targetType": "enemy",
+      "baseDamage": 75,
+      "scalingRatio": 1.5,
+      "cooldown": 7,
+      "range": 280,
+      "aoeRadius": 0
+    },
+    "level10Bonus": { "baseDamage": 18, "scalingRatio": 0.2 }
+  },
+  {
+    "id": "heal_group",
+    "heroId": "priest",
+    "sourceSkillId": "heal",
+    "branch": "A",
+    "name": "圣光普照",
+    "description": "将治疗之光扩展至全体队友，每人回复量降低40%",
+    "overrides": {
+      "name": "圣光普照",
+      "description": "将治疗之光扩展至全体队友，每人回复量降低40%",
+      "targetType": "all_allies",
+      "baseDamage": -48,
+      "scalingRatio": 0.6,
+      "cooldown": 6,
+      "range": 300,
+      "element": "holy"
+    },
+    "level10Bonus": { "baseDamage": -12 }
+  },
+  {
+    "id": "heal_shield",
+    "heroId": "priest",
+    "sourceSkillId": "heal",
+    "branch": "B",
+    "name": "圣盾治愈",
+    "description": "强化治疗单体队友，回复量提升50%并附加护盾效果",
+    "overrides": {
+      "name": "圣盾治愈",
+      "description": "强化治疗单体队友，回复量提升50%并附加护盾效果",
+      "targetType": "ally",
+      "baseDamage": -120,
+      "scalingRatio": 1.2,
+      "cooldown": 6,
+      "range": 200,
+      "element": "holy",
+      "statusEffect": "buff",
+      "effectDuration": 5
+    },
+    "level10Bonus": { "baseDamage": -25, "effectDuration": 1 }
+  },
+  {
+    "id": "nature_heal_hot_bloom",
+    "heroId": "druid",
+    "sourceSkillId": "nature_heal",
+    "branch": "A",
+    "name": "生命绽放",
+    "description": "对友方施加强力持续治疗效果，5秒内持续恢复生命",
+    "overrides": {
+      "name": "生命绽放",
+      "description": "对友方施加强力持续治疗效果，5秒内持续恢复生命",
+      "targetType": "ally",
+      "baseDamage": -35,
+      "scalingRatio": 0.6,
+      "cooldown": 6,
+      "range": 200,
+      "statusEffect": "regen",
+      "effectDuration": 5
+    },
+    "level10Bonus": { "baseDamage": -8, "effectDuration": 1 }
+  },
+  {
+    "id": "nature_heal_atk_buff",
+    "heroId": "druid",
+    "sourceSkillId": "nature_heal",
+    "branch": "B",
+    "name": "荆棘祝福",
+    "description": "治疗友方的同时赋予自然之力，提升15%攻击力持续8秒",
+    "overrides": {
+      "name": "荆棘祝福",
+      "description": "治疗友方的同时赋予自然之力，提升15%攻击力持续8秒",
+      "targetType": "ally",
+      "baseDamage": -55,
+      "scalingRatio": 0.8,
+      "cooldown": 7,
+      "range": 200,
+      "statusEffect": "buff",
+      "effectDuration": 8,
+      "effects": [
+        {
+          "type": "heal",
+          "baseDamage": 55,
+          "scalingStat": "magicPower",
+          "scalingRatio": 0.8
+        },
+        {
+          "type": "buff",
+          "statusEffectId": "attack_up",
+          "statusDuration": 8
+        }
+      ]
+    },
+    "level10Bonus": { "baseDamage": -12, "effectDuration": 2 }
+  },
+  {
+    "id": "elemental_infusion_amplify",
+    "heroId": "elemental_weaver",
+    "sourceSkillId": "elemental_infusion",
+    "branch": "A",
+    "name": "元素增幅",
+    "description": "灌注元素的同时施加元素易伤，目标受到的元素伤害提升",
+    "overrides": {
+      "name": "元素增幅",
+      "description": "灌注元素的同时施加元素易伤，目标受到的元素伤害提升",
+      "targetType": "ally",
+      "baseDamage": 0,
+      "scalingRatio": 0,
+      "cooldown": 5,
+      "range": 300,
+      "statusEffect": "buff",
+      "effectDuration": 6
+    },
+    "level10Bonus": { "effectDuration": 2, "cooldown": -1 }
+  },
+  {
+    "id": "elemental_infusion_shred",
+    "heroId": "elemental_weaver",
+    "sourceSkillId": "elemental_infusion",
+    "branch": "B",
+    "name": "元素侵蚀",
+    "description": "对敌方目标施加元素侵蚀，降低法术抗性20点持续5秒",
+    "overrides": {
+      "name": "元素侵蚀",
+      "description": "对敌方目标施加元素侵蚀，降低法术抗性20点持续5秒",
+      "targetType": "enemy",
+      "baseDamage": 15,
+      "scalingRatio": 0.3,
+      "cooldown": 5,
+      "range": 300,
+      "statusEffect": "magic_resist_down",
+      "effectDuration": 5
+    },
+    "level10Bonus": { "baseDamage": 5, "effectDuration": 1 }
+  },
+  {
+    "id": "frost_shield_fortress",
+    "heroId": "frost_whisperer",
+    "sourceSkillId": "frost_shield",
+    "branch": "A",
+    "name": "冰霜堡垒",
+    "description": "强化霜盾覆盖自身及相邻队友，护盾量大幅提升",
+    "overrides": {
+      "name": "冰霜堡垒",
+      "description": "强化霜盾覆盖自身及相邻队友，护盾量大幅提升",
+      "targetType": "all_allies",
+      "baseDamage": -55,
+      "scalingRatio": -0.8,
+      "cooldown": 10,
+      "range": 300,
+      "element": "ice",
+      "statusEffect": "buff",
+      "effectDuration": 6
+    },
+    "level10Bonus": { "baseDamage": -12, "effectDuration": 1 }
+  },
+  {
+    "id": "frost_shield_frostbite_aura",
+    "heroId": "frost_whisperer",
+    "sourceSkillId": "frost_shield",
+    "branch": "B",
+    "name": "霜噬领域",
+    "description": "释放冰霜领域，对范围内敌人持续造成冰属性伤害",
+    "overrides": {
+      "name": "霜噬领域",
+      "description": "释放冰霜领域，对范围内敌人持续造成冰属性伤害",
+      "targetType": "all_enemies",
+      "baseDamage": 20,
+      "scalingRatio": 0.5,
+      "cooldown": 9,
+      "range": 200,
+      "aoeRadius": 100,
+      "element": "ice",
+      "statusEffect": "burn",
+      "effectDuration": 4
+    },
+    "level10Bonus": { "baseDamage": 5, "aoeRadius": 20 }
+  }
+]
