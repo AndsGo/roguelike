@@ -135,7 +135,8 @@ Then **replace** the existing `'scavenge choice adds gold'` test (lines 109-117)
       const goldAfter = rm.getGold();
       expect(goldAfter).toBeGreaterThan(goldBefore);
       // Delta = scavenge (40-60) + interest (capped at 5)
-      expect(goldAfter - goldBefore).toBeGreaterThanOrEqual(REST_SCAVENGE_GOLD_MIN + 1);
+      // With 80G start, after scavenge (120-140G), interest is always capped at 5
+      expect(goldAfter - goldBefore).toBeGreaterThanOrEqual(REST_SCAVENGE_GOLD_MIN + INTEREST_CAP);
       expect(goldAfter - goldBefore).toBeLessThanOrEqual(REST_SCAVENGE_GOLD_MAX + INTEREST_CAP);
     });
 ```
@@ -257,8 +258,11 @@ Replace with:
         if (interest > 0) {
           rm.addGold(interest);
           // Append interest text to already-rendered result screen
+          // showResultScreen places heroes at GAME_HEIGHT/2 + i*22, so last hero Y = GAME_HEIGHT/2 + (n-1)*22
+          const heroCount = rm.getHeroes().length;
+          const interestY = GAME_HEIGHT / 2 + heroCount * 22 + 8;
           const interestText = TextFactory.create(
-            this, GAME_WIDTH / 2, GAME_HEIGHT / 2 + rm.getHeroes().length * 22 + 10,
+            this, GAME_WIDTH / 2, interestY,
             UI.rest.interest(interest), 'label', {
               color: colorToString(Theme.colors.gold),
             }
@@ -404,8 +408,8 @@ import { GAME_WIDTH, GAME_HEIGHT, SHOP_REFRESH_BASE_COST } from '../constants';
 **3d. Modify Leave button and add Refresh button** in `create()`. Replace lines 97-102 (the Leave button section):
 
 ```typescript
-    // Leave button (shifted left for refresh button)
-    new Button(this, 340, GAME_HEIGHT - 30, UI.shop.leaveShop, 140, 35, () => {
+    // Leave button (shifted left for refresh button, 40px gap between buttons)
+    new Button(this, 310, GAME_HEIGHT - 30, UI.shop.leaveShop, 140, 35, () => {
       rm.markNodeCompleted(this.nodeIndex);
       SaveManager.autoSave();
       SceneTransition.fadeTransition(this, 'MapScene');
@@ -413,7 +417,7 @@ import { GAME_WIDTH, GAME_HEIGHT, SHOP_REFRESH_BASE_COST } from '../constants';
 
     // Refresh button
     const refreshCost = this.getRefreshCost();
-    this.refreshBtn = new Button(this, 460, GAME_HEIGHT - 30, UI.shop.refresh(refreshCost), 140, 35, () => {
+    this.refreshBtn = new Button(this, 490, GAME_HEIGHT - 30, UI.shop.refresh(refreshCost), 140, 35, () => {
       this.refreshShop();
     }, Theme.colors.secondary);
     this.updateRefreshButton();
@@ -655,13 +659,11 @@ Add immediately after it:
 
 - [ ] **Step 4: Implement net cost display in updateComparisonTexts()**
 
-Extend `updateComparisonTexts()` to also update `priceText` with net cost. Add at the end of the method (after the comparison logic loop, before the closing `}`), after the `for (const card of this.itemCards)` loop ends:
+Merge net cost display into the **existing** `for (const card of this.itemCards)` loop in `updateComparisonTexts()`, avoiding a second loop. At the end of each card's processing (after the comparison text logic, just before the loop's closing `}`), add:
 
 ```typescript
-    // Update price texts with net cost
-    const rm = RunManager.getInstance();
-    for (const card of this.itemCards) {
-      if (card.sold) continue;
+      // Net cost display (merged into existing loop)
+      const rm = RunManager.getInstance();
       const canAfford = rm.getGold() >= card.item.cost;
       const baseColor = canAfford ? colorToString(Theme.colors.gold) : colorToString(Theme.colors.danger);
 
@@ -672,13 +674,17 @@ Extend `updateComparisonTexts()` to also update `priceText` with net cost. Add a
           const netCost = card.item.cost - sellback;
           card.priceText.setText(UI.shop.netCost(card.item.cost, netCost));
           card.priceText.setColor(baseColor);
-          continue;
+        } else {
+          card.priceText.setText(`${card.item.cost}G`);
+          card.priceText.setColor(baseColor);
         }
+      } else {
+        card.priceText.setText(`${card.item.cost}G`);
+        card.priceText.setColor(baseColor);
       }
-      card.priceText.setText(`${card.item.cost}G`);
-      card.priceText.setColor(baseColor);
-    }
 ```
+
+Note: `rm` can be hoisted outside the loop for efficiency. The key point is this logic goes inside the existing `for` loop, not in a separate loop.
 
 Also add `SELL_PRICE_RATIO` to the import if not already added in Step 3.
 
@@ -722,9 +728,9 @@ Expected: Zero TS errors, all tests pass.
 Previous: 1068 tests. New tests added:
 - RestScene interest: 6 tests
 - ShopScene refresh: 5 tests
-- ShopScene sell-back: 3 tests
+- ShopScene sell-back: 4 tests (empty slot, replace, net cost display, zero cost)
 
-Expected: ~1082+ tests.
+Expected: ~1083+ tests.
 
 - [ ] **Step 3: Verify acceptance criteria**
 

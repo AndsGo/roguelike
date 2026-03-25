@@ -77,7 +77,7 @@ SHOP_REFRESH_BASE_COST = 10  // First refresh cost
 
 **Integration:**
 - `refreshCount` is local to ShopScene (not persisted — resets when leaving shop)
-- **Button layout:** Leave button shifts left to x=340, Refresh button at x=460. Both y = GAME_HEIGHT - 30. This gives ~120px between centers on the 800px canvas.
+- **Button layout:** Leave button shifts left to x=310 (covers 240-380), Refresh button at x=490 (covers 420-560). Both y = GAME_HEIGHT - 30. This gives 40px gap between buttons on the 800px canvas.
 - Button text displays current refresh cost via i18n template: `UI.shop.refresh(cost)`
 - Button disabled (red text, 0.5 alpha) when gold insufficient
 - On click: `spendGold(refreshCost)` → `refreshCount++` → regenerate inventory → rebuild item cards
@@ -250,7 +250,7 @@ Old saves load and work identically. No migration guards needed.
 1. **Interest**: Rest node awards 0-5G interest based on `floor(gold/10)` after any option
 2. **Interest UI**: Feedback text shows interest earned in result screen (hidden when 0)
 3. **Refresh**: Shop refresh button generates new inventory for escalating cost (10/20/40/80G)
-4. **Refresh UI**: Button at x=460 shows current cost, disabled when unaffordable
+4. **Refresh UI**: Button at x=490 shows current cost, disabled when unaffordable
 5. **Refresh cleanup**: Old item cards destroyed, no dangling references or tweens
 6. **Sell-back**: Buying equipment with existing item in slot auto-sells old item at 50% price
 7. **Net cost**: Item cards show net cost when hero has equipment in the target slot, updates on hero switch
