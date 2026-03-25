@@ -4,7 +4,7 @@ import {
   SynergyConfig, SynergyThreshold, ActConfig,
 } from '../types';
 import { SeededRNG } from '../utils/rng';
-import { STARTING_GOLD, MAX_TEAM_SIZE } from '../constants';
+import { STARTING_GOLD, MAX_TEAM_SIZE, EVOLUTION_LEVEL } from '../constants';
 import { expForLevel } from '../utils/math';
 import { SYNERGY_DEFINITIONS } from '../config/synergies';
 import { EventBus } from '../systems/EventBus';
@@ -14,6 +14,7 @@ import heroesData from '../data/heroes.json';
 import actsData from '../data/acts.json';
 import relicsData from '../data/relics.json';
 import { MetaManager } from './MetaManager';
+import { hasEvolutionConfig } from '../systems/SkillSystem';
 
 /** Auto-assign formation row based on unit role */
 export function autoFormationByRole(role: string): 'front' | 'back' {
@@ -28,6 +29,7 @@ export class RunManager {
   private static instance: RunManager;
   private state!: RunState;
   private rng!: SeededRNG;
+  private pendingEvolutions: { heroId: string; skillId: string }[] = [];
 
   private constructor() {}
 
@@ -46,6 +48,7 @@ export class RunManager {
     // Unified teardown + re-init for new run
     GameLifecycle.teardownAll();
     GameLifecycle.prepareNewRun();
+    this.pendingEvolutions = [];
 
     // Use provided heroes or fall back to defaults
     const ids = heroIds && heroIds.length >= 2 ? heroIds : ['warrior', 'archer'];
@@ -296,6 +299,21 @@ export class RunManager {
     if (hero.level > startLevel) {
       AudioManager.getInstance().playSfx('sfx_levelup');
     }
+
+    // Check for evolution trigger (level-crossing detection)
+    if (startLevel < EVOLUTION_LEVEL && hero.level >= EVOLUTION_LEVEL) {
+      const heroData = (heroesData as any[]).find(h => h.id === hero.id);
+      if (heroData) {
+        const skill0 = heroData.skills[0];
+        if (hasEvolutionConfig(hero.id, skill0)) {
+          const evoKey = `${hero.id}:${skill0}`;
+          const evolutions = hero.skillEvolutions ?? {};
+          if (!evolutions[evoKey]) {
+            this.pendingEvolutions.push({ heroId: hero.id, skillId: skill0 });
+          }
+        }
+      }
+    }
   }
 
   markNodeCompleted(index: number): void {
@@ -447,6 +465,28 @@ export class RunManager {
     if (relic) {
       relic.triggerCount++;
     }
+  }
+
+  // ---- Skill Evolution ----
+
+  getPendingEvolutions(): { heroId: string; skillId: string }[] {
+    return [...this.pendingEvolutions];
+  }
+
+  clearPendingEvolution(heroId: string, skillId: string): void {
+    this.pendingEvolutions = this.pendingEvolutions.filter(
+      p => !(p.heroId === heroId && p.skillId === skillId)
+    );
+  }
+
+  setSkillEvolution(heroId: string, skillId: string, evolutionId: string): boolean {
+    const hero = this.getHeroState(heroId);
+    if (!hero) return false;
+    if (!hero.skillEvolutions) hero.skillEvolutions = {};
+    const key = `${heroId}:${skillId}`;
+    if (hero.skillEvolutions[key]) return false;
+    hero.skillEvolutions[key] = evolutionId;
+    return true;
   }
 
   // ---- Synergies ----

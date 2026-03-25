@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { RunManager } from '../../src/managers/RunManager';
 import { EventBus } from '../../src/systems/EventBus';
-import { STARTING_GOLD } from '../../src/constants';
+import { STARTING_GOLD, EVOLUTION_LEVEL } from '../../src/constants';
 
 describe('RunManager', () => {
   let rm: RunManager;
@@ -261,6 +261,48 @@ describe('RunManager', () => {
       hero.currentHp = maxHp - 1;
       rm.healAllHeroes(1.0);
       expect(hero.currentHp).toBe(maxHp);
+    });
+  });
+
+  describe('skill evolution', () => {
+    it('no pending evolutions at start', () => {
+      expect(rm.getPendingEvolutions().length).toBe(0);
+    });
+
+    it('addExp to level 5 with evolution skill populates pendingEvolutions', () => {
+      const warrior = rm.getHeroes().find(h => h.id === 'warrior')!;
+      while (warrior.level < EVOLUTION_LEVEL) {
+        rm.addExp(warrior, 500);
+      }
+      const pending = rm.getPendingEvolutions();
+      expect(pending.some(p => p.heroId === 'warrior')).toBe(true);
+    });
+
+    it('setSkillEvolution writes to heroState with composite key', () => {
+      const result = rm.setSkillEvolution('warrior', 'shield_bash', 'shield_bash_aoe_taunt');
+      expect(result).toBe(true);
+      const warrior = rm.getHeroes().find(h => h.id === 'warrior')!;
+      const evolutions = warrior.skillEvolutions ?? {};
+      expect(evolutions['warrior:shield_bash']).toBe('shield_bash_aoe_taunt');
+    });
+
+    it('setSkillEvolution rejects overwrite of existing choice', () => {
+      rm.setSkillEvolution('warrior', 'shield_bash', 'shield_bash_aoe_taunt');
+      const result = rm.setSkillEvolution('warrior', 'shield_bash', 'shield_bash_heavy_stun');
+      expect(result).toBe(false);
+      const warrior = rm.getHeroes().find(h => h.id === 'warrior')!;
+      expect(warrior.skillEvolutions!['warrior:shield_bash']).toBe('shield_bash_aoe_taunt');
+    });
+
+    it('clearPendingEvolution removes from list', () => {
+      const warrior = rm.getHeroes().find(h => h.id === 'warrior')!;
+      while (warrior.level < EVOLUTION_LEVEL) {
+        rm.addExp(warrior, 500);
+      }
+      expect(rm.getPendingEvolutions().length).toBeGreaterThan(0);
+      rm.setSkillEvolution('warrior', 'shield_bash', 'shield_bash_aoe_taunt');
+      rm.clearPendingEvolution('warrior', 'shield_bash');
+      expect(rm.getPendingEvolutions().some(p => p.heroId === 'warrior')).toBe(false);
     });
   });
 
