@@ -67,6 +67,7 @@ export interface HeroState {
   /** Permanent stat bonuses from events (accumulated across the run) */
   statBonuses?: Partial<Record<keyof UnitStats, number>>;
   formation?: 'front' | 'back';
+  skillEvolutions?: Record<string, string>;  // "heroId:baseSkillId" → evolutionId
 }
 
 // ============ Enemy ============
@@ -366,6 +367,23 @@ export interface SkillAdvancement {
   name: string;
   description: string;
   bonuses: Partial<{ baseDamage: number; scalingRatio: number; cooldown: number; range: number; aoeRadius: number; effectDuration: number }>;
+}
+
+export interface SkillEvolution {
+  id: string;
+  heroId: string;
+  sourceSkillId: string;
+  branch: 'A' | 'B';
+  name: string;
+  description: string;
+  overrides: Omit<Partial<SkillData>, 'id'>;
+  level10Bonus?: Partial<{
+    baseDamage: number;
+    scalingRatio: number;
+    cooldown: number;
+    aoeRadius: number;
+    effectDuration: number;
+  }>;
 }
 
 export type GameEventType =

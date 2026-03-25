@@ -67,4 +67,7 @@ export {
   GAUNTLET_REWARD_MULTIPLIER,
   // Reaction
   REACTION_DAMAGE_BONUS_CAP,
+  // Skill Evolution
+  EVOLUTION_LEVEL,
+  EVOLUTION_ENHANCE_LEVEL,
 } from './config/balance';

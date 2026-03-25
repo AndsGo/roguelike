@@ -444,6 +444,19 @@ export const UI = {
     inProgress: '进行中',
   },
 
+  // Skill Evolution
+  evolution: {
+    title: (heroName: string) => `${heroName} 技能进化！`,
+    choose: '选择',
+    branchA: 'A路线',
+    branchB: 'B路线',
+    damageChange: (before: number, after: number) => `伤害 ${before}→${after}`,
+    cooldownChange: (before: number, after: number) => `冷却 ${before}s→${after}s`,
+    targetChange: (before: string, after: string) => `目标 ${before}→${after}`,
+    pendingWarning: '有英雄尚未完成技能进化选择！',
+    enhanced: (skillName: string) => `${skillName} 已强化！`,
+  },
+
   // Tutorial
   tutorial: {
     clickToContinue: '[ 点击继续 ]',

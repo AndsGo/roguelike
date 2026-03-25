@@ -96,3 +96,8 @@ export const GAUNTLET_REWARD_MULTIPLIER = 0.8; // per-wave multiplier (3 waves Ã
 // ============ Reaction ============
 
 export const REACTION_DAMAGE_BONUS_CAP = 1.0; // max 100% reaction damage bonus from relics/synergies
+
+// ============ Skill Evolution ============
+
+export const EVOLUTION_LEVEL = 5;
+export const EVOLUTION_ENHANCE_LEVEL = 10;
