@@ -160,6 +160,10 @@ export const UI = {
     synergyLabel: '协同:',
     synergyProgress: (name: string, count: number, next: number) => `${name}(${count}/${next})`,
     synergyActive: (name: string, count: number, threshold: number) => `${name}(${count}/${threshold})✓`,
+    refresh: (cost: number) => `刷新 (${cost}G)`,
+    refreshDisabled: '金币不足',
+    netCost: (original: number, net: number) => `${original}G (净 ${net}G)`,
+    sellback: (amount: number) => `+${amount}G 卖出旧装备`,
   },
 
   // RestScene
@@ -177,6 +181,7 @@ export const UI = {
     trainResult: (exp: number) => `全队每人获得了 ${exp} 经验！`,
     scavengeResult: (gold: number) => `搜索到了 ${gold} 金币！`,
     continueBtn: '继续',
+    interest: (amount: number) => `利息 +${amount}`,
   },
 
   // EventScene

@@ -42,6 +42,16 @@ export const ELITE_BATTLE_GOLD_MIN = 40;
 export const ELITE_BATTLE_GOLD_MAX = 65;
 export const BOSS_BATTLE_GOLD = 120;
 
+// ============ Economy — Interest ============
+
+export const INTEREST_PER_10_GOLD = 1;
+export const INTEREST_CAP = 5;
+
+// ============ Economy — Shop ============
+
+export const SHOP_REFRESH_BASE_COST = 10;
+export const SELL_PRICE_RATIO = 0.5;
+
 // ============ Boss ============
 
 export const MAX_ENEMIES = 10; // 场上敌人安全上限（含 boss）
