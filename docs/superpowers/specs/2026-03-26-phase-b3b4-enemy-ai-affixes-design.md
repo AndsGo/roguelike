@@ -38,24 +38,36 @@ type AIType = 'default' | 'aggressive' | 'defensive' | 'disruptor' | 'berserker'
 | shadow_lord | `disruptor` | Assassin archetype, hunts back-row |
 | heart_of_the_forge | `defensive` | Construct guardian, shields allies |
 
+### Runtime Plumbing: EnemyData → Unit
+
+`aiType` flows from data to runtime:
+1. `EnemyData.aiType?: AIType` — declared in `src/types/index.ts`
+2. `Enemy` constructor copies it to `this.aiType = enemyData.aiType ?? 'default'`
+3. `Unit` base class gains `aiType: AIType = 'default'` (hero units keep default, only enemies override)
+4. `TargetingSystem.selectTarget()` reads `unit.aiType` directly — no cast needed
+
 ### Implementation in TargetingSystem
 
 Modify `TargetingSystem.selectTarget()`:
 
 ```
-selectTarget(unit, potentialTargets):
+selectTarget(unit, potentialTargets, allies):
   // Taunt ALWAYS takes precedence (unchanged)
   if taunted: return tauntSource
 
   // Check staleness cache (unchanged)
   if cachedTarget alive && in range && < 500ms: return cached
 
-  if unit.aiType exists AND unit is Enemy:
-    switch aiType:
+  if unit.aiType !== 'default':
+    switch unit.aiType:
       'aggressive':  → score all by lowest_hp (ignore unit.role)
-      'defensive':   → base role score + 0.5 bonus for attackers of lowest-HP ally
-      'disruptor':   → base role score + 0.5 bonus for backRow roles
-      'berserker':   → if currentHp < 50% maxHp: score by lowest_hp
+      'defensive':   → find lowest-HP ally via allies array
+                       → check ally.lastAttacker (Unit.lastAttacker, set on each damage event)
+                       → if lastAttacker alive and in potentialTargets: +0.5 score bonus
+                       → if lastAttacker dead/null: fall through to role-based (no bonus applied)
+      'disruptor':   → base role score + 0.5 bonus for targets with role in [ranged_dps, healer, support]
+      'berserker':   → if unit.currentHp < unit.getEffectiveStats().maxHp * 0.5:
+                         score by lowest_hp + trigger attackSpeed buff (see below)
                        else: fall through to role-based
       'default':     → fall through
 
@@ -63,19 +75,30 @@ selectTarget(unit, potentialTargets):
   ...
 ```
 
+### Berserker AttackSpeed Buff Details
+
+- **Magnitude:** +50% attackSpeed (buff StatusEffect, stat: 'attackSpeed', value: baseAttackSpeed * 0.5)
+- **Duration:** 9999 (effectively permanent until battle end, cleaned up by BattleScene shutdown)
+- **Trigger tracking:** `AffixSystem` (not TargetingSystem) holds a `berserkerTriggered: Set<string>` keyed by unit ID. Checked each tick. Once triggered, never re-injected even if healed above 50%.
+- **Why AffixSystem and not TargetingSystem:** TargetingSystem is stateless (static methods). Berserker buff is a battle-state mutation, so it belongs in AffixSystem.tick() alongside vengeful threshold checks.
+
+Note: Berserker AI is an `aiType` (targeting behavior), but the buff injection is handled by AffixSystem since it needs mutable state. AffixSystem checks all enemies with `aiType === 'berserker'` each tick, separate from the affix data.
+
 **Constraints:**
-- `aiType` is optional; absent = `default`. Zero-impact on existing enemies.
+- `aiType` is optional on `EnemyData`; absent = `default`. Zero-impact on existing enemies.
 - Scoring remains O(n) single-pass, only weights change.
-- Berserker's attackSpeed buff: inject once via `StatusEffect` when crossing 50% threshold. Use a `Set<string>` to track already-triggered units (prevent re-injection on heal-back-above-threshold scenarios).
 - Element advantage bonus (+0.3) and formation bonus still apply on top of AI scoring.
 
 ### Enemy Assignment Summary
 
-10 enemies get non-default AI out of 28 total:
-- 5 bosses: all assigned
-- 5 regular enemies: orc_warrior, fire_elemental, elemental_chimera (aggressive), dark_cultist, shadow_wraith, void_weaver (disruptor), frost_giant, holy_guardian, frost_sentinel (defensive), flame_knight, flame_construct (berserker)
+16 enemies get non-default AI out of 28 total:
+- 5 bosses: dragon_boss (aggressive), frost_queen (defensive), thunder_titan (berserker), shadow_lord (disruptor), heart_of_the_forge (defensive)
+- 3 aggressive: orc_warrior, fire_elemental, elemental_chimera
+- 3 defensive: frost_giant, holy_guardian, frost_sentinel
+- 3 disruptor: dark_cultist, shadow_wraith, void_weaver
+- 2 berserker: flame_knight, flame_construct
 
-Remaining 18 enemies keep `default` (field omitted from JSON).
+Remaining 12 enemies keep `default` (field omitted from JSON).
 
 ---
 
@@ -104,9 +127,9 @@ interface AffixData {
 |----|------|-----------|--------|----------|--------|---------------|
 | `berserk` | 狂暴 | 攻+20% | ★ | offensive | `{ attackBonus: 0.2 }` | battle:start → buff StatusEffect (+attack%) on all enemies |
 | `swift` | 迅捷 | 攻速+30% | ★ | offensive | `{ speedBonus: 0.3 }` | battle:start → buff StatusEffect (+attackSpeed%) on all enemies |
-| `splitting` | 分裂 | 溅射40% | ★ | offensive | `{ splashRatio: 0.4 }` | unit:damage listener → deal splash to nearest ally of target |
+| `splitting` | 分裂 | 溅射40% | ★ | offensive | `{ splashRatio: 0.4 }` | unit:damage listener → deal 40% splash to nearest hero of the damaged hero |
 | `regeneration` | 再生 | 回血2%/s | ▲ | defensive | `{ healPercent: 0.02, interval: 1.0 }` | tick timer → heal each enemy 2% maxHp per second |
-| `shielded` | 护盾 | +20%临时HP | ▲ | defensive | `{ shieldPercent: 0.2 }` | battle:start → add 20% maxHp to currentHp (capped at maxHp + shield) |
+| `shielded` | 护盾 | +20%临时HP | ▲ | defensive | `{ shieldPercent: 0.2 }` | battle:start → set `unit.shieldHp = maxHp * 0.2` with `shieldDuration = 9999` (uses existing shield system) |
 | `fortified` | 坚韧 | 防+25% | ▲ | defensive | `{ defenseBonus: 0.25 }` | battle:start → buff StatusEffect (+defense%) on all enemies |
 | `reflective` | 反射 | 反弹15% | ● | special | `{ reflectRatio: 0.15 }` | unit:damage listener → deal 15% of damage back to attacker |
 | `elemental` | 元素亲和 | 元素+25% | ● | special | `{ elementBonus: 0.25 }` | Formula modifier → DamageSystem queries getAffixElementBonus() |
@@ -122,15 +145,16 @@ class AffixSystem {
   private activeAffixes: AffixData[] = [];
   private enemies: Enemy[] = [];
   private listeners: Map<string, (...args: any[]) => void> = new Map();
-  private timers: { regenTimer: number; vengefulChecked: Set<string> } = ...;
-  private berserkerTriggered: Set<string> = new Set();  // for vengeful one-shot
+  private timers: { regenTimer: number } = ...;
+  private vengefulTriggered: Set<string> = new Set();   // track vengeful buff injection (one-shot per unit)
+  private berserkerTriggered: Set<string> = new Set();  // track berserker aiType buff injection
 
   activate(affixIds: string[], enemies: Enemy[]): void
     // Load AffixData from affixes.json
     // Buff type: inject StatusEffect on each enemy
     // Listener type: register EventBus handlers (unit:damage, unit:kill)
     // Timer type: initialize tick counters
-    // Shielded: directly modify currentHp
+    // Shielded: set unit.shieldHp via existing shield mechanism
 
   tick(delta: number): void
     // regeneration: heal interval check
@@ -153,11 +177,17 @@ class AffixSystem {
 - `DamageSystem`: Query `AffixSystem.getAffixElementBonus()` for elemental affix
 - `splitting` and `reflective`: Handled via unit:damage EventBus listener inside AffixSystem
 - `deathburst`: Handled via unit:kill EventBus listener inside AffixSystem
-- Damage dealt by affixes (splash, reflect, deathburst) emits proper `unit:damage` events for DamageNumber display
+- Damage dealt by affixes (splash, reflect, deathburst) emits `unit:damage` events for DamageNumber display
+
+### Chain Reaction Guard
+
+Affix-originated damage MUST NOT re-trigger affix listeners. Implementation: when AffixSystem deals damage (splash/reflect/deathburst), it sets a transient `isAffixDamage: true` flag on the event payload. All affix EventBus listeners check this flag and skip if true. This prevents:
+- `splitting` splash → `reflective` → `splitting` infinite loop
+- `deathburst` kill → another `deathburst` cascade
 
 ### Throttle Rule
 
-Same affix effect on the same unit throttled to once per 150ms, preventing visual flicker from reflective/deathburst chain reactions.
+Same affix visual feedback on the same unit throttled to once per 150ms, preventing visual flicker.
 
 ---
 
@@ -191,7 +221,7 @@ After generating all nodes, for each `elite` or `boss` node:
 for each node where type === 'elite' || type === 'boss':
   count = AFFIX_COUNT[difficulty][node.type]
   if count === 0: continue
-  node.affixes = seededRng.sample(ALL_AFFIX_IDS, count)  // No-replacement sampling
+  node.affixes = seededRng.pickN(ALL_AFFIX_IDS, count)   // No-replacement sampling
 ```
 
 **Constraints:**
@@ -237,11 +267,11 @@ During preparing phase (500ms), display affix names at screen center:
 
 Elite/boss enemies display affix symbols above their head:
 
-- Rendered as part of the **Unit overhead UI container** (same container that holds HealthBar and name)
-- Positioned at y offset -12 above HealthBar
+- Added as direct children of the `Unit` Container (which extends `Phaser.GameObjects.Container`), at y offset -12 above HealthBar position. NOT children of HealthBar component itself — this keeps HealthBar's boundary clean.
 - Symbols use `tiny` font size with category color
-- Moves with unit position (synced via container, not HealthBar child)
+- Move automatically with unit (since they're in the Unit container)
 - Only elite/boss display this; regular enemies never show affix icons
+- Created in BattleScene after AffixSystem.activate(), added to the relevant enemy Unit containers
 
 ### Visual Feedback on Affix Triggers
 
@@ -262,16 +292,16 @@ All feedback reuses existing mechanisms: `setTintFill()`/`clearTint()`, `DamageN
 
 ```
 BattleSystem.updateCombat(delta):
-  1. Update relic timers
-  2. Reset distance cache
-  3. Update combo timers
-  4. Process skill queue
+  1. RelicSystem.update(delta)
+  2. TargetingSystem.beginFrame() — reset distance cache
+  3. ComboSystem.update(delta)
+  4. SkillQueueSystem.update()
   5. For each unit: statusEffect tick, skill cooldowns, AI select target, attack/skill/move
-  6. Separate overlapping units
+  6. MovementSystem.separateUnits()
   7. ActModifierSystem.tick(delta)
-  8. AffixSystem.tick(delta)              ← NEW: after act modifier, before battle end check
-  9. Flush damage numbers
-  10. Check battle end
+  8. AffixSystem.tick(delta)              ← NEW: after act modifier
+  9. DamageAccumulator.update() — flush damage numbers
+  10. checkBattleEnd()
 ```
 
 AffixSystem ticks after all combat resolution so it reads post-frame effective HP state.
@@ -306,10 +336,10 @@ BattleScene.shutdown():
 |----------|---------|------------|
 | AI behavior | 5 aiTypes target selection correctness | ~8 |
 | Affix data integrity | affixes.json field validation, ID uniqueness | ~4 |
-| AffixSystem unit | activate/tick/deactivate lifecycle, each affix effect | ~12 |
+| AffixSystem unit | activate/tick/deactivate lifecycle, each affix effect, chain guard | ~13 |
 | Map generation | Affix count by difficulty, SeededRNG determinism, node type protection | ~5 |
 | Integration | BattleScene affix pass-through, save compat, difficulty config | ~4 |
-| **Total new tests** | | **~33** |
+| **Total new tests** | | **~34** |
 
 ### AI Behavior Tests
 
@@ -339,9 +369,10 @@ describe('AffixSystem')
     'fortified injects +25% defense buff on all enemies'
     'shielded adds 20% maxHp temporary HP at battle start'
   describe('reactive affixes')
-    'splitting deals 40% splash to adjacent target'
+    'splitting deals 40% splash to nearest hero of damaged hero'
     'reflective reflects 15% damage back to attacker'
     'deathburst deals 8% maxHp damage to all heroes on enemy death'
+    'affix damage with isAffixDamage flag does not re-trigger affix listeners'
   describe('periodic affixes')
     'regeneration heals 2% maxHp per second'
     'vengeful activates +35% attack below 40% HP'
@@ -371,7 +402,7 @@ describe('affix save compatibility')
 
 ### Acceptance Criteria
 
-1. 10+ enemies have non-default aiType, all 5 bosses assigned
+1. 16 enemies have non-default aiType, all 5 bosses assigned
 2. 10 affixes fully implemented with correct effects
 3. Elite/boss nodes receive correct affix count per difficulty
 4. NodeTooltip displays affix symbol + shortDesc within 180px width
