@@ -25,6 +25,7 @@ export class Enemy extends Unit {
     this.level = level;
     this.goldReward = enemyData.goldReward;
     this.expReward = enemyData.expReward;
+    this.aiType = enemyData.aiType ?? 'default';
 
     // Boss units get special visual treatment
     if (enemyData.isBoss) {

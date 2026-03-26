@@ -101,6 +101,51 @@ export class TargetingSystem {
       }
     }
 
+    // AI behavior: override strategy for non-default aiType
+    if (unit.aiType && unit.aiType !== 'default' && !unit.isHero) {
+      const livingEnemies = enemies.filter(e => e.isAlive);
+      if (livingEnemies.length === 0) return null;
+      const livingAllies = allies.filter(a => a.isAlive);
+
+      let aiResult: Unit | null = null;
+      switch (unit.aiType) {
+        case 'aggressive':
+          aiResult = this.selectWithElementWeight(unit, livingEnemies, 'lowest_hp');
+          break;
+        case 'defensive': {
+          const lowestAlly = livingAllies.reduce((min, a) =>
+            a.currentHp < min.currentHp ? a : min, livingAllies[0]);
+          const protectTarget = lowestAlly?.lastAttacker;
+          if (protectTarget && protectTarget.isAlive && livingEnemies.includes(protectTarget)) {
+            aiResult = this.selectWithAIBonus(unit, livingEnemies, 'nearest', protectTarget.unitId, 0.5);
+          } else {
+            aiResult = this.selectWithElementWeight(unit, livingEnemies, 'nearest');
+          }
+          break;
+        }
+        case 'disruptor': {
+          const backRowRoles = new Set(['ranged_dps', 'healer', 'support']);
+          aiResult = this.selectWithAIBonus(unit, livingEnemies, 'lowest_hp', null, 0, backRowRoles);
+          break;
+        }
+        case 'berserker': {
+          const maxHp = unit.getEffectiveStats().maxHp;
+          if (unit.currentHp < maxHp * 0.5) {
+            aiResult = this.selectWithElementWeight(unit, livingEnemies, 'lowest_hp');
+          }
+          break;
+        }
+      }
+
+      if (aiResult) {
+        targetCache.set(unit.unitId, {
+          targetId: aiResult.unitId,
+          expiry: TargetingSystem.frameTime + TARGET_STALE_MS,
+        });
+        return aiResult;
+      }
+    }
+
     const livingEnemies = enemies.filter(e => e.isAlive);
     const livingAllies = allies.filter(a => a.isAlive);
 
@@ -244,6 +289,68 @@ export class TargetingSystem {
         }
       }
 
+      if (score > bestScore) {
+        bestScore = score;
+        bestIdx = i;
+      }
+    }
+
+    return targets[bestIdx];
+  }
+
+  private static selectWithAIBonus(
+    unit: Unit,
+    targets: Unit[],
+    baseStrategy: 'nearest' | 'lowest_hp' | 'highest_threat',
+    bonusTargetId: string | null,
+    bonusAmount: number,
+    bonusRoles?: Set<string>,
+  ): Unit | null {
+    if (targets.length === 0) return null;
+    if (targets.length === 1) return targets[0];
+
+    const n = targets.length;
+    const rawBase = new Float64Array(n);
+    const hasAdv = new Uint8Array(n);
+    let maxBase = 0;
+
+    for (let i = 0; i < n; i++) {
+      const t = targets[i];
+      switch (baseStrategy) {
+        case 'nearest':
+          rawBase[i] = TargetingSystem.cachedDistance(unit, t);
+          break;
+        case 'lowest_hp':
+          rawBase[i] = t.currentHp;
+          break;
+        case 'highest_threat':
+          rawBase[i] = this.calculateThreat(t);
+          break;
+      }
+      if (rawBase[i] > maxBase) maxBase = rawBase[i];
+      if (unit.element && t.element && hasElementAdvantage(unit.element, t.element)) {
+        hasAdv[i] = 1;
+      }
+    }
+
+    const invMaxBase = maxBase > 0 ? 1 / maxBase : 0;
+    let bestIdx = 0;
+    let bestScore = -Infinity;
+
+    for (let i = 0; i < n; i++) {
+      let score: number;
+      if (baseStrategy === 'highest_threat') {
+        score = rawBase[i] * invMaxBase;
+      } else {
+        score = 1 - rawBase[i] * invMaxBase;
+      }
+      if (hasAdv[i]) score += 0.3;
+      if (bonusTargetId && targets[i].unitId === bonusTargetId) {
+        score += bonusAmount;
+      }
+      if (bonusRoles && bonusRoles.has(targets[i].role)) {
+        score += 0.5;
+      }
       if (score > bestScore) {
         bestScore = score;
         bestIdx = i;
