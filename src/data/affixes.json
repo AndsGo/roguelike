@@ -1,0 +1,102 @@
+[
+  {
+    "id": "berserk",
+    "name": "狂暴",
+    "shortDesc": "攻+20%",
+    "description": "所有敌人攻击力提升20%",
+    "category": "offensive",
+    "symbol": "★",
+    "symbolColor": "#ff4444",
+    "params": { "attackBonus": 0.2 }
+  },
+  {
+    "id": "swift",
+    "name": "迅捷",
+    "shortDesc": "攻速+30%",
+    "description": "所有敌人攻击速度提升30%",
+    "category": "offensive",
+    "symbol": "★",
+    "symbolColor": "#ff4444",
+    "params": { "speedBonus": 0.3 }
+  },
+  {
+    "id": "splitting",
+    "name": "分裂",
+    "shortDesc": "溅射40%",
+    "description": "敌人攻击时对目标附近英雄造成40%溅射伤害",
+    "category": "offensive",
+    "symbol": "★",
+    "symbolColor": "#ff4444",
+    "params": { "splashRatio": 0.4 }
+  },
+  {
+    "id": "regeneration",
+    "name": "再生",
+    "shortDesc": "回血2%/s",
+    "description": "所有敌人每秒回复2%最大生命值",
+    "category": "defensive",
+    "symbol": "▲",
+    "symbolColor": "#4488ff",
+    "params": { "healPercent": 0.02, "interval": 1.0 }
+  },
+  {
+    "id": "shielded",
+    "name": "护盾",
+    "shortDesc": "+20%护盾",
+    "description": "战斗开始时所有敌人获得20%最大生命值的护盾",
+    "category": "defensive",
+    "symbol": "▲",
+    "symbolColor": "#4488ff",
+    "params": { "shieldPercent": 0.2 }
+  },
+  {
+    "id": "fortified",
+    "name": "坚韧",
+    "shortDesc": "防+25%",
+    "description": "所有敌人防御力提升25%",
+    "category": "defensive",
+    "symbol": "▲",
+    "symbolColor": "#4488ff",
+    "params": { "defenseBonus": 0.25 }
+  },
+  {
+    "id": "reflective",
+    "name": "反射",
+    "shortDesc": "反弹15%",
+    "description": "敌人受到攻击时反弹15%伤害给攻击者",
+    "category": "special",
+    "symbol": "●",
+    "symbolColor": "#aa44ff",
+    "params": { "reflectRatio": 0.15 }
+  },
+  {
+    "id": "elemental",
+    "name": "元素亲和",
+    "shortDesc": "元素+25%",
+    "description": "所有敌人的元素伤害提升25%",
+    "category": "special",
+    "symbol": "●",
+    "symbolColor": "#aa44ff",
+    "params": { "elementBonus": 0.25 }
+  },
+  {
+    "id": "vengeful",
+    "name": "复仇",
+    "shortDesc": "低血+35%攻",
+    "description": "敌人血量低于40%时攻击力额外提升35%",
+    "category": "special",
+    "symbol": "●",
+    "symbolColor": "#aa44ff",
+    "params": { "hpThreshold": 0.4, "attackBonus": 0.35 }
+  },
+  {
+    "id": "deathburst",
+    "name": "亡语",
+    "shortDesc": "死亡爆炸",
+    "description": "敌人死亡时对全体英雄造成其最大生命值8%的伤害",
+    "category": "special",
+    "symbol": "●",
+    "symbolColor": "#aa44ff",
+    "params": { "damagePercent": 0.08 }
+  }
+]

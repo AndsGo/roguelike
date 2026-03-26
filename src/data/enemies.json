@@ -158,7 +158,8 @@
     "spriteKey": "enemy_orc_warrior",
     "goldReward": 18,
     "expReward": 40,
-    "isBoss": false
+    "isBoss": false,
+    "aiType": "aggressive"
   },
   {
     "id": "dragon_boss",
@@ -191,7 +192,8 @@
     "spriteKey": "enemy_dragon",
     "goldReward": 150,
     "expReward": 200,
-    "isBoss": true
+    "isBoss": true,
+    "aiType": "aggressive"
   },
   {
     "id": "fire_lizard",
@@ -255,7 +257,8 @@
     "skills": ["fireball"],
     "spriteKey": "enemy_fire_elemental",
     "goldReward": 16,
-    "expReward": 35
+    "expReward": 35,
+    "aiType": "aggressive"
   },
   {
     "id": "flame_knight",
@@ -287,7 +290,8 @@
     "skills": ["flame_strike"],
     "spriteKey": "enemy_flame_knight",
     "goldReward": 18,
-    "expReward": 38
+    "expReward": 38,
+    "aiType": "berserker"
   },
   {
     "id": "ice_wolf",
@@ -351,7 +355,8 @@
     "skills": ["frost_nova"],
     "spriteKey": "enemy_frost_giant",
     "goldReward": 20,
-    "expReward": 42
+    "expReward": 42,
+    "aiType": "defensive"
   },
   {
     "id": "enemy_ice_mage",
@@ -479,7 +484,8 @@
     "skills": ["shadow_bolt", "shadow_drain"],
     "spriteKey": "enemy_shadow_wraith",
     "goldReward": 16,
-    "expReward": 34
+    "expReward": 34,
+    "aiType": "disruptor"
   },
   {
     "id": "dark_cultist",
@@ -511,7 +517,8 @@
     "skills": ["shadow_bolt"],
     "spriteKey": "enemy_dark_cultist",
     "goldReward": 15,
-    "expReward": 32
+    "expReward": 32,
+    "aiType": "disruptor"
   },
   {
     "id": "holy_guardian",
@@ -543,7 +550,8 @@
     "skills": ["holy_smite"],
     "spriteKey": "enemy_holy_guardian",
     "goldReward": 18,
-    "expReward": 38
+    "expReward": 38,
+    "aiType": "defensive"
   },
   {
     "id": "light_sprite",
@@ -608,7 +616,8 @@
     "spriteKey": "enemy_frost_queen",
     "goldReward": 160,
     "expReward": 250,
-    "isBoss": true
+    "isBoss": true,
+    "aiType": "defensive"
   },
   {
     "id": "thunder_titan",
@@ -641,7 +650,8 @@
     "spriteKey": "enemy_thunder_titan",
     "goldReward": 180,
     "expReward": 300,
-    "isBoss": true
+    "isBoss": true,
+    "aiType": "berserker"
   },
   {
     "id": "shadow_lord",
@@ -674,7 +684,8 @@
     "spriteKey": "enemy_shadow_lord",
     "goldReward": 220,
     "expReward": 400,
-    "isBoss": true
+    "isBoss": true,
+    "aiType": "disruptor"
   },
   {
     "id": "flame_construct",
@@ -706,7 +717,8 @@
     "skills": ["forge_fire_strike"],
     "spriteKey": "enemy_flame_construct",
     "goldReward": 18,
-    "expReward": 30
+    "expReward": 30,
+    "aiType": "berserker"
   },
   {
     "id": "frost_sentinel",
@@ -738,7 +750,8 @@
     "skills": ["frost_guard"],
     "spriteKey": "enemy_frost_sentinel",
     "goldReward": 18,
-    "expReward": 30
+    "expReward": 30,
+    "aiType": "defensive"
   },
   {
     "id": "lightning_strider",
@@ -834,7 +847,8 @@
     "skills": ["void_debuff"],
     "spriteKey": "enemy_void_weaver",
     "goldReward": 18,
-    "expReward": 30
+    "expReward": 30,
+    "aiType": "disruptor"
   },
   {
     "id": "elemental_chimera",
@@ -866,7 +880,8 @@
     "skills": ["chimera_shift"],
     "spriteKey": "enemy_elemental_chimera",
     "goldReward": 65,
-    "expReward": 60
+    "expReward": 60,
+    "aiType": "aggressive"
   },
   {
     "id": "heart_of_the_forge",
@@ -899,6 +914,7 @@
     "spriteKey": "enemy_heart_of_the_forge",
     "goldReward": 200,
     "expReward": 120,
-    "isBoss": true
+    "isBoss": true,
+    "aiType": "defensive"
   }
 ]
