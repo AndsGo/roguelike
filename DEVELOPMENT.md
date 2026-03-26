@@ -6,11 +6,11 @@
 
 | 项目 | 数据 |
 |------|------|
-| 开发周期 | 2026-02-26 ~ 2026-03-22 |
-| Claude 会话数 | 32+ 次 |
-| Git 提交数 | 235+ |
-| 代码规模 | 200+ 文件, 45,000+ 行 |
-| 测试用例 | 1054 (84 个测试套件) |
+| 开发周期 | 2026-02-26 ~ 2026-03-26 |
+| Claude 会话数 | 36+ 次 |
+| Git 提交数 | 272+ |
+| 代码规模 | 105 文件, 22,500+ 行 TS + 5,100+ 行 JSON 数据 |
+| 测试用例 | 1137 (90 个测试套件) |
 | 技术栈 | TypeScript + Phaser 3 + Vite |
 
 ---
@@ -143,6 +143,37 @@ Day 20 (Mar 19) — 5人AI体验师团队评估 + 系统性修复
  │   └─ 战斗英雄名隐藏 + 敌人HUD元素指示器重排
  └─ 截图更新 + 文档更新
      → 978 测试通过, 78 套件, 零 TypeScript 错误
+
+Day 21-25 (Mar 22-25) — 深度自走棋迭代（评审团驱动）
+ ├─ 4人AI评审团 (内容/UI/音频/玩法) → 路线1: 深化自走棋
+ ├─ v1.22.0 Phase A: 音频优化
+ │   ├─ WAV→OGG+MP3 (11MB→2.8MB)
+ │   ├─ 字体升级 (Microsoft YaHei + 字号提升)
+ │   ├─ Boss BGM + 11种技能/元素/终极音效
+ │   └─ AudioManager 自定义监听器 (角色role→音效映射)
+ ├─ v1.23.0 Phase B1: 经济博弈系统
+ │   ├─ 休息利息 (floor(gold/10), 上限5)
+ │   ├─ 商店刷新 (10→20→40→80 指数递增)
+ │   └─ 装备卖回 (50%回收, 净花费显示)
+ ├─ v1.24.0 Phase B2: 技能进化分支
+ │   ├─ 10核心英雄 × 2条进化路线 = 20个进化条目
+ │   ├─ SkillSystem 6步解析优先级 (进化/传承/待定回退)
+ │   ├─ RunManager 级别穿越检测 + 一次性绑定
+ │   ├─ SkillEvolutionPanel 二选一模态 UI
+ │   └─ RewardScene 消费 + MapScene 中断恢复
+ └─ → 1100 测试通过, 85 套件, 零 TypeScript 错误
+
+Day 26 (Mar 26) — 敌人AI + 难度词缀系统
+ ├─ v1.25.0 Phase B3+B4: 敌人AI行为 + 词缀系统 (Subagent-Driven)
+ │   ├─ 5种AI策略 (aggressive/defensive/disruptor/berserker/default)
+ │   ├─ 16个敌人AI分配 (含5 Boss)
+ │   ├─ AffixSystem 单例 (10种词缀: 攻/防/特殊)
+ │   ├─ MapGenerator 词缀分配 (按难度递增, SeededRNG确定性)
+ │   ├─ NodeTooltip 词缀预览 + 战斗开场Banner
+ │   ├─ isAffixDamage 链式反应防护
+ │   └─ DamageSystem 元素词缀公式查询
+ ├─ 截图更新 + README/DEVELOPMENT 文档更新
+ └─ → 1137 测试通过, 90 套件, 零 TypeScript 错误
 ```
 
 ---
