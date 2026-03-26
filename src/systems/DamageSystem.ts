@@ -8,6 +8,7 @@ import { ComboSystem } from './ComboSystem';
 import { EventBus } from './EventBus';
 import { AudioManager } from './AudioManager';
 import { RelicSystem } from './RelicSystem';
+import { AffixSystem } from './AffixSystem';
 import { DamageAccumulator } from './DamageAccumulator';
 import { MetaManager } from '../managers/MetaManager';
 
@@ -79,6 +80,14 @@ export class DamageSystem {
       const elBonus = RelicSystem.getElementDamageBonus(attackerElement);
       if (elBonus > 0) {
         raw *= (1 + elBonus);
+      }
+    }
+
+    // Affix element bonus (enemy-only)
+    if (!attacker.isHero) {
+      const affixElementBonus = AffixSystem.getInstance().getAffixElementBonus();
+      if (affixElementBonus > 0 && attacker.element) {
+        raw *= (1 + affixElementBonus);
       }
     }
 

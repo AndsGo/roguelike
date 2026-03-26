@@ -35,6 +35,8 @@ import { UltimateBar } from '../ui/UltimateBar';
 import { BossPhaseSystem } from '../systems/BossPhaseSystem';
 import bossPhaseData from '../data/boss-phases.json';
 import { TextFactory } from '../ui/TextFactory';
+import { AffixSystem } from '../systems/AffixSystem';
+import { AffixData } from '../types';
 
 export class BattleScene extends Phaser.Scene {
   private battleSystem!: BattleSystem;
@@ -213,6 +215,24 @@ export class BattleScene extends Phaser.Scene {
     }
 
     RelicSystem.activateWithUnits(rm.getRelics(), heroes, enemies, rng);
+
+    // Activate affix system for this battle
+    const affixSystem = AffixSystem.getInstance();
+    affixSystem.activate(node.affixes ?? [], enemies, heroes);
+
+    // Show affix banner if any affixes active
+    const activeAffixes = affixSystem.getActiveAffixes();
+    if (activeAffixes.length > 0) {
+      this.showAffixBanner(activeAffixes);
+    }
+
+    // Add overhead affix icons to elite/boss enemies
+    if (activeAffixes.length > 0 && (node.type === 'elite' || node.type === 'boss')) {
+      for (const enemy of enemies) {
+        this.addAffixIcons(enemy, activeAffixes);
+      }
+    }
+
     this.ultimateSystem = new UltimateSystem();
 
     // Build heroDataMap for synergy injection
@@ -1117,6 +1137,35 @@ export class BattleScene extends Phaser.Scene {
     });
   }
 
+  private showAffixBanner(affixes: AffixData[]): void {
+    const cx = GAME_WIDTH / 2;
+    const cy = GAME_HEIGHT / 2 - 40;
+    const text = affixes.map(a => `${a.symbol} ${a.name}`).join('  ');
+    const banner = TextFactory.create(this, cx, cy, text, 'subtitle', {
+      color: '#ffdd44',
+      stroke: '#000000',
+      strokeThickness: 3,
+    }).setOrigin(0.5).setDepth(750).setAlpha(0);
+
+    this.tweens.add({
+      targets: banner,
+      alpha: { from: 0, to: 1 },
+      duration: 200,
+      hold: 600,
+      yoyo: true,
+      onComplete: () => banner.destroy(),
+    });
+  }
+
+  private addAffixIcons(enemy: Enemy, affixes: AffixData[]): void {
+    const iconText = affixes.map(a => a.symbol).join(' ');
+    const avgColor = affixes[0].symbolColor;
+    const icon = TextFactory.create(this, 0, -35, iconText, 'tiny', {
+      color: avgColor,
+    }).setOrigin(0.5);
+    enemy.add(icon);
+  }
+
   shutdown(): void {
     const eb = EventBus.getInstance();
     eb.off('unit:damage', this.onDamage);
@@ -1139,6 +1188,7 @@ export class BattleScene extends Phaser.Scene {
     this.ultimateSystem.deactivate();
     this.ultimateBar.destroy();
     RelicSystem.deactivate();
+    AffixSystem.getInstance().deactivate();
     this.cancelTargetingMode();
     this.threatGraphics?.destroy();
     this.healerGraphics?.destroy();

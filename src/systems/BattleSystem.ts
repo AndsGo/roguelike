@@ -12,6 +12,7 @@ import { SkillQueueSystem } from './SkillQueueSystem';
 import { ActModifierSystem } from './ActModifierSystem';
 import { EventBus } from './EventBus';
 import { RelicSystem } from './RelicSystem';
+import { AffixSystem } from './AffixSystem';
 import { DamageAccumulator } from './DamageAccumulator';
 import { SeededRNG } from '../utils/rng';
 import { GAUNTLET_REWARD_MULTIPLIER } from '../constants';
@@ -284,6 +285,9 @@ export class BattleSystem {
     if (this.actModifier) {
       this.actModifier.tick(adjustedDelta, this.heroes, this.enemies);
     }
+
+    // Tick affix effects
+    AffixSystem.getInstance().tick(adjustedDelta);
 
     // Flush accumulated damage numbers
     this.damageAccumulator.update(adjustedDelta);

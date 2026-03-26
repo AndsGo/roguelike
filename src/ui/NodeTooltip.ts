@@ -7,6 +7,8 @@ import enemiesData from '../data/enemies.json';
 import eventsData from '../data/events.json';
 import { ShopGenerator } from '../systems/ShopGenerator';
 import { getChoiceRiskLevel } from '../scenes/EventScene';
+import affixesData from '../data/affixes.json';
+import { AffixData } from '../types';
 
 const TOOLTIP_MAX_WIDTH = 180;
 const PADDING = 6;
@@ -84,6 +86,15 @@ export class NodeTooltip extends Phaser.GameObjects.Container {
         }
         if (node.type === 'gauntlet' && battleData?.waves) {
           lines.push(UI.wave.gauntletTooltip(1 + battleData.waves.length));
+        }
+        // Show affixes for elite/boss nodes
+        if (node.affixes && node.affixes.length > 0) {
+          for (const affixId of node.affixes) {
+            const affix = (affixesData as unknown as AffixData[]).find(a => a.id === affixId);
+            if (affix) {
+              lines.push(`  ${affix.symbol} ${affix.name} ${affix.shortDesc}`);
+            }
+          }
         }
         break;
       }
