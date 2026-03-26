@@ -50,7 +50,7 @@ export class MapScene extends Phaser.Scene {
     const rm = RunManager.getInstance();
 
     if (rm.getMap().length === 0) {
-      const map = MapGenerator.generate(rm.getRng(), rm.getFloor());
+      const map = MapGenerator.generate(rm.getRng(), rm.getFloor(), rm.getDifficulty());
       rm.setMap(map);
     }
 

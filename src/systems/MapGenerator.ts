@@ -4,7 +4,8 @@ import { MetaManager } from '../managers/MetaManager';
 import enemiesData from '../data/enemies.json';
 import actsData from '../data/acts.json';
 import { computeNodeLayers, buildLayerGroups } from '../utils/map-utils';
-import { MAP_SHORTCUT_CHANCE, MAP_HIDDEN_NODE_CHANCE, MAP_HIDDEN_NODE_COST } from '../constants';
+import { MAP_SHORTCUT_CHANCE, MAP_HIDDEN_NODE_CHANCE, MAP_HIDDEN_NODE_COST, AFFIX_COUNT } from '../constants';
+import affixesData from '../data/affixes.json';
 
 // Node type templates for each act (per-layer distribution)
 // Each act: [battle, battle, event/shop, battle, elite, battle, rest, boss]
@@ -20,7 +21,7 @@ export class MapGenerator {
    * Generate a full map for all acts, with branching paths per act.
    * Returns a flat array of MapNodes with connections supporting branching.
    */
-  static generate(rng: SeededRNG, floor: number): MapNode[] {
+  static generate(rng: SeededRNG, floor: number, difficulty: string = 'normal'): MapNode[] {
     const allNodes: MapNode[] = [];
     let nodeOffset = 0;
 
@@ -139,6 +140,17 @@ export class MapGenerator {
     // Map variants
     MapGenerator.addShortcuts(allNodes, rng);
     MapGenerator.addHiddenNodes(allNodes, rng, acts);
+
+    // Assign affixes to elite/boss nodes based on difficulty
+    const affixConfig = AFFIX_COUNT[difficulty] ?? AFFIX_COUNT['normal'];
+    const allAffixIds = (affixesData as { id: string }[]).map(a => a.id);
+    for (const node of allNodes) {
+      if (node.type === 'elite' && affixConfig.elite > 0) {
+        node.affixes = rng.pickN(allAffixIds, affixConfig.elite);
+      } else if (node.type === 'boss' && affixConfig.boss > 0) {
+        node.affixes = rng.pickN(allAffixIds, affixConfig.boss);
+      }
+    }
 
     return allNodes;
   }
