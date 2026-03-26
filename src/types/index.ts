@@ -70,6 +70,25 @@ export interface HeroState {
   skillEvolutions?: Record<string, string>;  // "heroId:baseSkillId" → evolutionId
 }
 
+// ============ AI Behaviors ============
+
+export type AIType = 'default' | 'aggressive' | 'defensive' | 'disruptor' | 'berserker';
+
+// ============ Affixes ============
+
+export type AffixId = string;
+
+export interface AffixData {
+  id: AffixId;
+  name: string;
+  shortDesc: string;
+  description: string;
+  category: 'offensive' | 'defensive' | 'special';
+  symbol: string;
+  symbolColor: string;
+  params: Record<string, number>;
+}
+
 // ============ Enemy ============
 
 export type MonsterType = 'beast' | 'undead' | 'construct' | 'caster' | 'humanoid' | 'draconic';
@@ -89,6 +108,7 @@ export interface EnemyData {
   goldReward: number;
   expReward: number;
   isBoss?: boolean;
+  aiType?: AIType;
 }
 
 // ============ Skills ============
@@ -222,6 +242,7 @@ export interface MapNode {
   hidden?: boolean;
   revealCost?: number;
   shortcutConnections?: number[];
+  affixes?: AffixId[];
 }
 
 export interface BattleNodeData {
@@ -406,7 +427,7 @@ export interface GameEventMap {
   'battle:start': { heroCount: number; enemyCount: number };
   'battle:end': { victory: boolean; result: BattleResult };
   'battle:turn': { turnNumber: number };
-  'unit:damage': { sourceId: string; targetId: string; amount: number; damageType: DamageType; element?: ElementType; isCrit: boolean };
+  'unit:damage': { sourceId: string; targetId: string; amount: number; damageType: DamageType; element?: ElementType; isCrit: boolean; isAffixDamage?: boolean };
   'unit:heal': { sourceId: string; targetId: string; amount: number };
   'unit:kill': { killerId: string; targetId: string };
   'unit:death': { unitId: string; isHero: boolean };

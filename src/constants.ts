@@ -70,4 +70,6 @@ export {
   // Skill Evolution
   EVOLUTION_LEVEL,
   EVOLUTION_ENHANCE_LEVEL,
+  // Affixes
+  AFFIX_COUNT,
 } from './config/balance';

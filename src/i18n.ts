@@ -457,6 +457,12 @@ export const UI = {
     enhanced: (skillName: string) => `${skillName} 已强化！`,
   },
 
+  // Affixes
+  affix: {
+    bannerTitle: '战斗词缀',
+    pendingWarning: '当前战斗带有词缀！',
+  },
+
   // Tutorial
   tutorial: {
     clickToContinue: '[ 点击继续 ]',

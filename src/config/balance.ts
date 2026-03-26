@@ -101,3 +101,12 @@ export const REACTION_DAMAGE_BONUS_CAP = 1.0; // max 100% reaction damage bonus 
 
 export const EVOLUTION_LEVEL = 5;
 export const EVOLUTION_ENHANCE_LEVEL = 10;
+
+// ============ Affixes ============
+
+export const AFFIX_COUNT: Record<string, { elite: number; boss: number }> = {
+  normal:    { elite: 0, boss: 1 },
+  hard:      { elite: 1, boss: 1 },
+  nightmare: { elite: 1, boss: 2 },
+  hell:      { elite: 2, boss: 2 },
+};
