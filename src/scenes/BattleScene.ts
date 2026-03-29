@@ -633,15 +633,20 @@ export class BattleScene extends Phaser.Scene {
         const spawnData = (enemiesData as EnemyData[]).find(e => e.id === data.spawns[i]);
         if (!spawnData) continue;
 
-        const yIndex = currentEnemyCount + i;
+        const yIndex = currentEnemyCount;
         const targetX = ENEMY_START_X + 40;
         const y = BATTLE_GROUND_Y - ((yIndex - 1) / 2) * UNIT_SPACING_Y;
 
         // 从屏幕右侧滑入，分批延迟入场
-        const enemy = new Enemy(this, WAVE_TRANSITION.SLIDE_START_X, y, spawnData, spawnLevel);
         const delay = i * 300;
 
         this.time.delayedCall(delay, () => {
+          if (!this.sys.settings.active) return;
+
+          const activeEnemies = this.battleSystem.enemies.filter(e => e.isAlive).length;
+          if (activeEnemies >= MAX_ENEMIES) return;
+
+          const enemy = new Enemy(this, WAVE_TRANSITION.SLIDE_START_X, y, spawnData, spawnLevel);
           this.allUnits.push(enemy);
           this.battleSystem.addUnit(enemy);
           this.tweens.add({

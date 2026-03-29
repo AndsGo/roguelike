@@ -114,6 +114,16 @@ describe('BattleSystem', () => {
       bs.speedMultiplier = 3;
       expect(bs.speedMultiplier).toBe(3);
     });
+
+    it('caps oversized simulation frames to avoid lockups at 3x speed', () => {
+      bs.setUnits([], []);
+      bs.speedMultiplier = 3;
+
+      bs.update(1000);
+
+      expect((bs as any).phaseTimer).toBe(250);
+      expect((bs as any).internalPhase).toBe('preparing');
+    });
   });
 
   describe('battle end conditions', () => {

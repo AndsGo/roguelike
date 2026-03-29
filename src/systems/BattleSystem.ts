@@ -30,6 +30,8 @@ type InternalPhase = 'preparing' | 'combat' | 'settling';
 
 const PREPARE_DURATION = 500; // ms
 const SETTLE_DURATION = 500;  // ms
+const MAX_SIMULATION_FRAME = 250; // ms, prevents runaway catch-up after a hitch
+const MAX_SIMULATION_STEP = 50;   // ms, keeps high-speed combat updates bounded
 
 export class BattleSystem {
   heroes: Hero[] = [];
@@ -172,31 +174,36 @@ export class BattleSystem {
   update(delta: number): void {
     if (this.battleState !== 'fighting' || this.isPaused) return;
 
-    const adjustedDelta = delta * this.speedMultiplier;
+    let remainingDelta = Math.min(delta * this.speedMultiplier, MAX_SIMULATION_FRAME);
 
-    switch (this.internalPhase) {
-      case 'preparing':
-        this.phaseTimer -= adjustedDelta;
-        if (this.phaseTimer <= 0) {
-          this.internalPhase = 'combat';
-        }
-        return;
+    while (remainingDelta > 0 && this.battleState === 'fighting' && !this.isPaused) {
+      const stepDelta = Math.min(remainingDelta, MAX_SIMULATION_STEP);
+      remainingDelta -= stepDelta;
 
-      case 'combat':
-        this.updateCombat(adjustedDelta);
-        return;
-
-      case 'settling':
-        this.phaseTimer -= adjustedDelta;
-        if (this.phaseTimer <= 0) {
-          // Transition to final public state
-          if (this.battleResult?.victory) {
-            this.battleState = 'victory';
-          } else {
-            this.battleState = 'defeat';
+      switch (this.internalPhase) {
+        case 'preparing':
+          this.phaseTimer -= stepDelta;
+          if (this.phaseTimer <= 0) {
+            this.internalPhase = 'combat';
           }
-        }
-        return;
+          break;
+
+        case 'combat':
+          this.updateCombat(stepDelta);
+          break;
+
+        case 'settling':
+          this.phaseTimer -= stepDelta;
+          if (this.phaseTimer <= 0) {
+            // Transition to final public state
+            if (this.battleResult?.victory) {
+              this.battleState = 'victory';
+            } else {
+              this.battleState = 'defeat';
+            }
+          }
+          break;
+      }
     }
   }
 

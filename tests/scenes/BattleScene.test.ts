@@ -25,6 +25,13 @@ describe('BattleScene', () => {
     return idx;
   }
 
+  function findBossNodeIndex(): number {
+    const map = rm.getMap();
+    const idx = map.findIndex(n => n.type === 'boss' && n.data && (n.data as any).enemies);
+    expect(idx).toBeGreaterThanOrEqual(0);
+    return idx;
+  }
+
   function createBattleScene(nodeIndex?: number): BattleScene {
     const idx = nodeIndex ?? findBattleNodeIndex();
     return SceneTestHarness.createScene(BattleScene, { nodeIndex: idx });
@@ -222,6 +229,23 @@ describe('BattleScene', () => {
       const actMod = (scene as any).battleSystem.actModifier;
       expect(actMod).toBeDefined();
       expect(actMod.getActDescription()).toBeTruthy();
+    });
+  });
+
+  describe('boss phase handling', () => {
+    it('caps reinforcements at MAX_ENEMIES even at 3x speed', () => {
+      const scene = createBattleScene(findBossNodeIndex());
+      const battleSystem = (scene as any).battleSystem;
+      battleSystem.speedMultiplier = 3;
+
+      (scene as any).onBossPhase({
+        bossId: 'test_boss',
+        phaseIndex: 0,
+        spawns: Array.from({ length: 12 }, () => 'slime'),
+      });
+
+      expect(battleSystem.enemies.length).toBeLessThanOrEqual(10);
+      expect((scene as any).allUnits.filter((u: any) => !u.isHero).length).toBeLessThanOrEqual(10);
     });
   });
 
