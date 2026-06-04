@@ -12,6 +12,21 @@ function mockScene(): Phaser.Scene {
   return new Phaser.Scene() as Phaser.Scene;
 }
 
+/**
+ * Drive the battle forward until it leaves the 'fighting' state.
+ * update() caps each call at MAX_SIMULATION_FRAME (250ms), so reaching the
+ * final state (prepare 500ms -> combat -> settle 500ms ~= 1050ms) requires
+ * several calls. Polling on the condition rather than guessing a fixed delta
+ * keeps the test robust to the internal phase/timer constants.
+ */
+function runUntilSettled(bs: BattleSystem, maxCalls = 100): void {
+  let calls = 0;
+  while (bs.battleState === 'fighting' && calls < maxCalls) {
+    bs.update(100);
+    calls++;
+  }
+}
+
 const heroData: HeroData = {
   id: 'warrior', name: 'W', role: 'tank',
   baseStats: {
@@ -134,10 +149,8 @@ describe('BattleSystem', () => {
 
       hero.isAlive = false;
 
-      // Skip prepare (500ms) + enter combat + settle (500ms)
-      bs.update(600);
-      bs.update(16);
-      bs.update(600);
+      // Advance through prepare -> combat (end detected) -> settle.
+      runUntilSettled(bs);
       expect(bs.battleState).toBe('defeat');
     });
 
@@ -148,9 +161,7 @@ describe('BattleSystem', () => {
 
       enemy.isAlive = false;
 
-      bs.update(600);
-      bs.update(16);
-      bs.update(600);
+      runUntilSettled(bs);
       expect(bs.battleState).toBe('victory');
     });
 
@@ -160,9 +171,7 @@ describe('BattleSystem', () => {
       bs.setUnits([hero], [enemy]);
 
       enemy.isAlive = false;
-      bs.update(600);
-      bs.update(16);
-      bs.update(600);
+      runUntilSettled(bs);
 
       const result = bs.getBattleResult();
       expect(result).toBeDefined();
@@ -215,9 +224,9 @@ describe('BattleSystem', () => {
       };
       eb.on('skill:interrupt', listener);
 
-      // Advance past prepare phase (500ms) then run combat tick
-      bs.update(600);
-      bs.update(100);
+      // Advance through prepare into combat; the stunned hero emits the
+      // interrupt on its first combat tick (before the battle settles).
+      runUntilSettled(bs);
 
       eb.off('skill:interrupt', listener);
 
@@ -235,7 +244,7 @@ describe('BattleSystem', () => {
 
       // Give the hero a skill on cooldown
       h1.skills = [{ id: 'test_skill', name: 'Test', description: '', cooldown: 5, damageType: 'physical', targetType: 'enemy', baseDamage: 50, scalingStat: 'attack', scalingRatio: 1.0, range: 200 }];
-      h1.skillCooldowns.set('test_skill', 3); // still on cooldown
+      h1.skillCooldowns.set('test_skill', 5000); // stays on cooldown through the combat tick
 
       // Stun the hero
       h1.statusEffects.push({
@@ -247,9 +256,8 @@ describe('BattleSystem', () => {
       const listener = (data: any) => events.push(data);
       eb.on('skill:interrupt', listener);
 
-      // Advance past prepare phase then run combat tick
-      bs.update(600);
-      bs.update(100);
+      // Drive real combat; the on-cooldown skill must not trigger an interrupt.
+      runUntilSettled(bs);
 
       eb.off('skill:interrupt', listener);
 
