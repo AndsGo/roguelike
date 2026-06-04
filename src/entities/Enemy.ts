@@ -14,8 +14,9 @@ export class Enemy extends Unit {
     y: number,
     enemyData: EnemyData,
     level: number,
+    statMultiplier: number = 1,
   ) {
-    const stats = Enemy.calculateStats(enemyData, level);
+    const stats = Enemy.calculateStats(enemyData, level, statMultiplier);
 
     super(scene, x, y, enemyData.id, enemyData.name, enemyData.role, stats, false, enemyData.element,
       enemyData.race ?? 'human', enemyData.class ?? 'warrior');
@@ -33,17 +34,21 @@ export class Enemy extends Unit {
     }
   }
 
-  static calculateStats(data: EnemyData, level: number): UnitStats {
+  static calculateStats(data: EnemyData, level: number, statMultiplier: number = 1): UnitStats {
     const scaling = data.scalingPerLevel;
     const base = data.baseStats;
+    const m = statMultiplier;
 
+    // statMultiplier (player-selected difficulty) scales offensive/defensive
+    // power linearly. Speed/range/crit are left unscaled, matching
+    // DifficultySystem.scaleEnemyStats so behaviour stays consistent.
     return {
-      maxHp: base.maxHp + scaling.maxHp * (level - 1),
-      hp: base.maxHp + scaling.maxHp * (level - 1),
-      attack: base.attack + scaling.attack * (level - 1),
-      defense: base.defense + scaling.defense * (level - 1),
-      magicPower: base.magicPower + scaling.magicPower * (level - 1),
-      magicResist: base.magicResist + scaling.magicResist * (level - 1),
+      maxHp: Math.round((base.maxHp + scaling.maxHp * (level - 1)) * m),
+      hp: Math.round((base.maxHp + scaling.maxHp * (level - 1)) * m),
+      attack: Math.round((base.attack + scaling.attack * (level - 1)) * m),
+      defense: Math.round((base.defense + scaling.defense * (level - 1)) * m),
+      magicPower: Math.round((base.magicPower + scaling.magicPower * (level - 1)) * m),
+      magicResist: Math.round((base.magicResist + scaling.magicResist * (level - 1)) * m),
       speed: base.speed,
       attackSpeed: base.attackSpeed,
       attackRange: base.attackRange,

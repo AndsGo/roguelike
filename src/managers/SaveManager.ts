@@ -131,7 +131,11 @@ export class SaveManager {
         return SaveManager.defaultMeta();
       }
 
-      return JSON.parse(payload.data) as MetaProgressionData;
+      // Shallow-merge over defaults so legacy/partial saves missing newer
+      // fields (unlockedRelics, mutations, etc.) never produce undefined
+      // arrays that crash consumers calling .includes()/.length.
+      const parsed = JSON.parse(payload.data) as Partial<MetaProgressionData>;
+      return { ...SaveManager.defaultMeta(), ...parsed } as MetaProgressionData;
     } catch {
       return SaveManager.defaultMeta();
     }

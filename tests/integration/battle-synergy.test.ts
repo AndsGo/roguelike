@@ -45,10 +45,10 @@ describe('Battle Synergy Integration', () => {
     const h1 = new Hero(scene, 100, 200, heroDataMap.get('h1')!, heroStates[0]);
     const h2 = new Hero(scene, 100, 270, heroDataMap.get('h2')!, heroStates[1]);
     battleSystem.setUnits([h1, h2], [], heroStates, heroDataMap);
-    // Human Alliance 2: attack+10, defense+10
-    expect(Object.keys(h1.synergyBonuses).length).toBeGreaterThan(0);
-    expect((h1.synergyBonuses as any).attack).toBe(10);
-    expect((h1.synergyBonuses as any).defense).toBe(10);
+    // Human Alliance 2: +10% attack, +10% defense (now a percentage bonus)
+    expect(Object.keys(h1.synergyPercentBonuses).length).toBeGreaterThan(0);
+    expect((h1.synergyPercentBonuses as any).attack).toBeCloseTo(0.10);
+    expect((h1.synergyPercentBonuses as any).defense).toBeCloseTo(0.10);
   });
 
   it('synergyBonuses remain empty when heroStates not passed', () => {

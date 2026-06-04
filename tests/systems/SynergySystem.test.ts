@@ -83,11 +83,11 @@ describe('SynergySystem', () => {
     expect(humanSynergy).toBeDefined();
     expect(humanSynergy!.activeThreshold).toBe(4);
 
-    // Each human should get +10 attack (from threshold 2) + +15 attack (from threshold 4) = +25
-    const bonusH1 = result.heroBonuses.get('h1');
-    expect(bonusH1).toBeDefined();
-    expect(bonusH1!.attack).toBe(25); // 10 + 15
-    expect(bonusH1!.defense).toBe(25); // 10 + 15
+    // Human "全属性+X%" is now a percentage bonus: +10% (threshold 2) + +15% (threshold 4) = +25%
+    const pctH1 = result.heroPercentBonuses.get('h1');
+    expect(pctH1).toBeDefined();
+    expect(pctH1!.attack).toBeCloseTo(0.25); // 0.10 + 0.15
+    expect(pctH1!.defense).toBeCloseTo(0.25); // 0.10 + 0.15
   });
 
   it('activates multiple synergies simultaneously', () => {
@@ -108,17 +108,17 @@ describe('SynergySystem', () => {
     expect(warriorSynergy).toBeDefined();
   });
 
-  it('getSynergyBonuses returns correct bonuses for a hero', () => {
+  it('getSynergyBonuses returns correct flat bonuses for a hero', () => {
+    // Warrior synergy grants flat +15 defense at count 2 (human is now a % bonus).
     const heroes: HeroState[] = [makeHeroState('h1'), makeHeroState('h2')];
     const dataMap = new Map<string, HeroData>([
-      ['h1', makeHeroData('h1', { race: 'human' })],
-      ['h2', makeHeroData('h2', { race: 'human' })],
+      ['h1', makeHeroData('h1', { class: 'warrior' })],
+      ['h2', makeHeroData('h2', { class: 'warrior' })],
     ]);
 
     synergy.calculateActiveSynergies(heroes, dataMap);
     const bonus = synergy.getSynergyBonuses('h1');
-    expect(bonus.attack).toBe(10);
-    expect(bonus.defense).toBe(10);
+    expect(bonus.defense).toBe(15);
   });
 
   it('getSynergyBonuses returns empty object before calculation', () => {

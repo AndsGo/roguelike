@@ -33,6 +33,8 @@ export class Unit extends Phaser.GameObjects.Container {
 
   // Stat modifiers from synergies/relics (added to getEffectiveStats pipeline)
   synergyBonuses: Partial<UnitStats> = {};
+  // Percentage stat modifiers from synergies (fraction, applied multiplicatively)
+  synergyPercentBonuses: Partial<UnitStats> = {};
 
   // Effective stats cache (dirty-flag optimization)
   private _effectiveStatsCache: UnitStats | null = null;
@@ -280,10 +282,18 @@ export class Unit extends Phaser.GameObjects.Container {
       }
     }
 
-    // Apply synergy bonuses
+    // Apply synergy bonuses (flat additive)
     for (const [key, value] of Object.entries(this.synergyBonuses)) {
       if (key in stats && typeof value === 'number') {
         (stats[key as keyof UnitStats] as number) += value;
+      }
+    }
+
+    // Apply synergy percentage bonuses (multiplicative, so "+X%" scales with
+    // the hero's level/gear-boosted stat instead of being a negligible flat add)
+    for (const [key, value] of Object.entries(this.synergyPercentBonuses)) {
+      if (key in stats && typeof value === 'number') {
+        (stats[key as keyof UnitStats] as number) *= 1 + value;
       }
     }
 

@@ -9,8 +9,10 @@ import skillsData from '../data/skills.json';
  * Cached results from synergy calculation for a battle.
  */
 export interface SynergyBonusCache {
-  /** Per-hero stat bonuses: heroId -> Partial<UnitStats> */
+  /** Per-hero flat stat bonuses: heroId -> Partial<UnitStats> */
   heroBonuses: Map<string, Partial<UnitStats>>;
+  /** Per-hero percentage stat bonuses (fraction, e.g. 0.15 = +15%): heroId -> Partial<UnitStats> */
+  heroPercentBonuses: Map<string, Partial<UnitStats>>;
   /** Global damage bonuses: element? -> multiplier additive */
   damageBonuses: Map<string | 'all', number>;
   /** Resistance bonuses applied to all heroes */
@@ -64,6 +66,7 @@ export class SynergySystem {
     }
 
     const heroBonuses = new Map<string, Partial<UnitStats>>();
+    const heroPercentBonuses = new Map<string, Partial<UnitStats>>();
     const damageBonuses = new Map<string | 'all', number>();
     const globalResistance: Partial<UnitStats> = {};
     const unlockedSkills: SkillData[] = [];
@@ -72,6 +75,7 @@ export class SynergySystem {
     // Initialize hero bonus maps
     for (const heroState of heroes) {
       heroBonuses.set(heroState.id, {});
+      heroPercentBonuses.set(heroState.id, {});
     }
 
     for (const synergy of SYNERGY_DEFINITIONS) {
@@ -113,12 +117,14 @@ export class SynergySystem {
         switch (effect.type) {
           case 'stat_boost': {
             if (!effect.stat || effect.value === undefined) break;
-            // Apply stat boost to all members of this synergy
+            // Percentage boosts accumulate separately and apply multiplicatively
+            // in Unit.getEffectiveStats so "+X%" scales with level/gear.
+            const target = effect.percent ? heroPercentBonuses : heroBonuses;
             for (const heroId of memberIds) {
-              const bonus = heroBonuses.get(heroId) ?? {};
+              const bonus = target.get(heroId) ?? {};
               const current = (bonus[effect.stat] as number) ?? 0;
               (bonus[effect.stat] as number) = current + effect.value;
-              heroBonuses.set(heroId, bonus);
+              target.set(heroId, bonus);
             }
             break;
           }
@@ -167,6 +173,7 @@ export class SynergySystem {
 
     this.cache = {
       heroBonuses,
+      heroPercentBonuses,
       damageBonuses,
       globalResistance,
       unlockedSkills,

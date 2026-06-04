@@ -12,8 +12,8 @@ export const SYNERGY_DEFINITIONS: SynergyConfig[] = [
     type: 'race',
     key: 'human',
     thresholds: [
-      { count: 2, description: '全属性+10%', effects: [{ type: 'stat_boost', stat: 'attack', value: 10 }, { type: 'stat_boost', stat: 'defense', value: 10 }] },
-      { count: 4, description: '全属性+15%', effects: [{ type: 'stat_boost', stat: 'attack', value: 15 }, { type: 'stat_boost', stat: 'defense', value: 15 }] },
+      { count: 2, description: '全属性+10%', effects: [{ type: 'stat_boost', stat: 'attack', value: 0.10, percent: true }, { type: 'stat_boost', stat: 'defense', value: 0.10, percent: true }] },
+      { count: 4, description: '全属性+15%', effects: [{ type: 'stat_boost', stat: 'attack', value: 0.15, percent: true }, { type: 'stat_boost', stat: 'defense', value: 0.15, percent: true }] },
     ],
   },
   {
@@ -56,7 +56,7 @@ export const SYNERGY_DEFINITIONS: SynergyConfig[] = [
     type: 'race',
     key: 'beast',
     thresholds: [
-      { count: 2, description: '速度+15%', effects: [{ type: 'stat_boost', stat: 'speed', value: 15 }] },
+      { count: 2, description: '速度+15%', effects: [{ type: 'stat_boost', stat: 'speed', value: 0.15, percent: true }] },
       { count: 3, description: '最大生命+100', effects: [{ type: 'stat_boost', stat: 'maxHp', value: 100 }] },
     ],
   },
