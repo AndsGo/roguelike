@@ -150,6 +150,54 @@ const AI_UNIT_SPRITES: Record<string, UnitSpriteSheetConfig> = {
     62,
     62,
   ),
+  hero_necromancer: createUnitSpriteSheetConfig(
+    'hero_necromancer',
+    'assets/units/third-batch/hero_necromancer_spritesheet.png',
+    64,
+    64,
+  ),
+  hero_berserker: createUnitSpriteSheetConfig(
+    'hero_berserker',
+    'assets/units/third-batch/hero_berserker_spritesheet.png',
+    66,
+    66,
+  ),
+  hero_frost_ranger: createUnitSpriteSheetConfig(
+    'hero_frost_ranger',
+    'assets/units/third-batch/hero_frost_ranger_spritesheet.png',
+    64,
+    64,
+  ),
+  hero_beast_warden: createUnitSpriteSheetConfig(
+    'hero_beast_warden',
+    'assets/units/third-batch/hero_beast_warden_spritesheet.png',
+    70,
+    70,
+  ),
+  enemy_ice_wolf: createUnitSpriteSheetConfig(
+    'enemy_ice_wolf',
+    'assets/units/third-batch/enemy_ice_wolf_spritesheet.png',
+    58,
+    58,
+  ),
+  enemy_frost_giant: createUnitSpriteSheetConfig(
+    'enemy_frost_giant',
+    'assets/units/third-batch/enemy_frost_giant_spritesheet.png',
+    72,
+    72,
+  ),
+  enemy_ice_mage: createUnitSpriteSheetConfig(
+    'enemy_ice_mage',
+    'assets/units/third-batch/enemy_ice_mage_spritesheet.png',
+    58,
+    58,
+  ),
+  enemy_storm_hawk: createUnitSpriteSheetConfig(
+    'enemy_storm_hawk',
+    'assets/units/third-batch/enemy_storm_hawk_spritesheet.png',
+    58,
+    58,
+  ),
 };
 
 export function getUnitSpriteSheet(spriteKey?: string): UnitSpriteSheetConfig | undefined {
