@@ -102,6 +102,54 @@ const AI_UNIT_SPRITES: Record<string, UnitSpriteSheetConfig> = {
     92,
     7,
   ),
+  hero_knight: createUnitSpriteSheetConfig(
+    'hero_knight',
+    'assets/units/second-batch/hero_knight_spritesheet.png',
+    66,
+    66,
+  ),
+  hero_shadow_assassin: createUnitSpriteSheetConfig(
+    'hero_shadow_assassin',
+    'assets/units/second-batch/hero_shadow_assassin_spritesheet.png',
+    64,
+    64,
+  ),
+  hero_elementalist: createUnitSpriteSheetConfig(
+    'hero_elementalist',
+    'assets/units/second-batch/hero_elementalist_spritesheet.png',
+    64,
+    64,
+  ),
+  hero_druid: createUnitSpriteSheetConfig(
+    'hero_druid',
+    'assets/units/second-batch/hero_druid_spritesheet.png',
+    64,
+    64,
+  ),
+  enemy_orc_warrior: createUnitSpriteSheetConfig(
+    'enemy_orc_warrior',
+    'assets/units/second-batch/enemy_orc_warrior_spritesheet.png',
+    62,
+    62,
+  ),
+  enemy_fire_lizard: createUnitSpriteSheetConfig(
+    'enemy_fire_lizard',
+    'assets/units/second-batch/enemy_fire_lizard_spritesheet.png',
+    58,
+    58,
+  ),
+  enemy_fire_elemental: createUnitSpriteSheetConfig(
+    'enemy_fire_elemental',
+    'assets/units/second-batch/enemy_fire_elemental_spritesheet.png',
+    60,
+    60,
+  ),
+  enemy_flame_knight: createUnitSpriteSheetConfig(
+    'enemy_flame_knight',
+    'assets/units/second-batch/enemy_flame_knight_spritesheet.png',
+    62,
+    62,
+  ),
 };
 
 export function getUnitSpriteSheet(spriteKey?: string): UnitSpriteSheetConfig | undefined {

@@ -12,9 +12,26 @@ const EXPECTED_FIRST_BATCH = [
   'enemy_dragon',
 ] as const;
 
+const EXPECTED_SECOND_BATCH = [
+  'hero_knight',
+  'hero_shadow_assassin',
+  'hero_elementalist',
+  'hero_druid',
+  'enemy_orc_warrior',
+  'enemy_fire_lizard',
+  'enemy_fire_elemental',
+  'enemy_flame_knight',
+] as const;
+
 describe('UnitSpriteAssets registry', () => {
   it('registers the first batch sprite keys', () => {
     for (const key of EXPECTED_FIRST_BATCH) {
+      expect(getUnitSpriteSheet(key), `${key} should be registered`).toBeDefined();
+    }
+  });
+
+  it('registers the second batch sprite keys', () => {
+    for (const key of EXPECTED_SECOND_BATCH) {
       expect(getUnitSpriteSheet(key), `${key} should be registered`).toBeDefined();
     }
   });
