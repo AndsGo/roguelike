@@ -345,6 +345,32 @@ const AI_UNIT_SPRITES: Record<string, UnitSpriteSheetConfig> = {
     62,
     62,
   ),
+  hero_ice_dragon_hunter: createUnitSpriteSheetConfig(
+    'hero_ice_dragon_hunter',
+    'assets/units/final-batch/hero_ice_dragon_hunter_spritesheet.png',
+    64,
+    64,
+  ),
+  enemy_void_weaver: createUnitSpriteSheetConfig(
+    'enemy_void_weaver',
+    'assets/units/final-batch/enemy_void_weaver_spritesheet.png',
+    60,
+    60,
+  ),
+  enemy_elemental_chimera: createUnitSpriteSheetConfig(
+    'enemy_elemental_chimera',
+    'assets/units/final-batch/enemy_elemental_chimera_spritesheet.png',
+    82,
+    82,
+    7,
+  ),
+  enemy_heart_of_the_forge: createUnitSpriteSheetConfig(
+    'enemy_heart_of_the_forge',
+    'assets/units/final-batch/enemy_heart_of_the_forge_spritesheet.png',
+    96,
+    96,
+    7,
+  ),
 };
 
 export function getUnitSpriteSheet(spriteKey?: string): UnitSpriteSheetConfig | undefined {
