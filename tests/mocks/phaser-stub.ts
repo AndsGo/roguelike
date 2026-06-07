@@ -14,15 +14,11 @@ class MockGameObject {
   scaleX = 1;
   scaleY = 1;
   depth = 0;
-  flipX = false;
-  flipY = false;
   private _data: Record<string, any> = {};
 
   setVisible(v: boolean) { this.visible = v; return this; }
   setAlpha(a: number) { this.alpha = a; return this; }
   setOrigin() { return this; }
-  setFlipX(v: boolean) { this.flipX = v; return this; }
-  setFlipY(v: boolean) { this.flipY = v; return this; }
   setPosition(x: number, y: number) { this.x = x; this.y = y; return this; }
   setScale(sx?: number, _sy?: number) { this.scaleX = sx ?? 1; this.scaleY = _sy ?? sx ?? 1; return this; }
   setDepth(d: number) { this.depth = d; return this; }

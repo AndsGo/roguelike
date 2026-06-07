@@ -247,13 +247,5 @@ describe('Hero', () => {
       const hero = new Hero(scene, 100, 200, heroData, heroState);
       expect(hero.element).toBe('ice');
     });
-
-    // Heroes stand on the left and must face right toward the enemies. Sprite
-    // art is drawn facing left, so the hero sprite is flipped horizontally.
-    it('flips the sprite to face right (flipX = true)', () => {
-      const scene = new Phaser.Scene();
-      const hero = new Hero(scene, 100, 200, makeHeroData(), makeHeroState());
-      expect(hero.sprite.flipX).toBe(true);
-    });
   });
 });

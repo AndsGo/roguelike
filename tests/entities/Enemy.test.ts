@@ -152,14 +152,5 @@ describe('Enemy', () => {
 
       expect(enemy.isBoss).toBe(false);
     });
-
-    // Enemies stand on the right and already face left (toward the heroes) in
-    // the source art, so they are NOT flipped.
-    it('leaves the sprite unflipped to face left (flipX = false)', () => {
-      const scene = new Phaser.Scene();
-      const enemy = new Enemy(scene, 500, 300, makeEnemyData(), 1);
-
-      expect(enemy.sprite.flipX).toBe(false);
-    });
   });
 });

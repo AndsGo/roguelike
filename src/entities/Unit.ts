@@ -123,14 +123,6 @@ export class Unit extends Phaser.GameObjects.Container {
     this.sprite.setOrigin(0.5);
     this.add(this.sprite);
 
-    // Authored spritesheets and generated chibi textures are all drawn facing
-    // LEFT. Heroes stand on the left of the battlefield and must face right
-    // toward the enemies; enemies stand on the right and already face left
-    // toward the heroes. So flip heroes only. `flipX` is a GameObject flag (not
-    // a negative scaleX), so it persists across animation frame/texture swaps
-    // and is independent of the idle-scale, attack-lunge, and hurt-shake tweens.
-    this.sprite.setFlipX(this.isHero);
-
     // Name label (hidden by default for heroes — HUD already shows hero info)
     const displayName = name.length > 8 ? name.substring(0, 8) : name;
     this.nameLabel = TextFactory.create(scene, 0, -this.spriteHeight / 2 - 14, displayName, 'small', {
