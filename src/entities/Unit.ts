@@ -7,6 +7,7 @@ import { EventBus } from '../systems/EventBus';
 import { RelicSystem } from '../systems/RelicSystem';
 import { Theme, darkenColor, getElementColor, getRoleColor } from '../ui/Theme';
 import { getOrCreateTexture, getDisplaySize, ChibiConfig } from '../systems/UnitRenderer';
+import { ensureUnitSpriteAnimations, getUnitSpriteSheet, UnitSpriteAnim, UnitSpriteSheetConfig } from '../systems/UnitSpriteAssets';
 import { UI } from '../i18n';
 import { TextFactory } from '../ui/TextFactory';
 
@@ -54,12 +55,14 @@ export class Unit extends Phaser.GameObjects.Container {
   private static isCounterDamage = false;
 
   // Visual
-  sprite: Phaser.GameObjects.Image;
+  sprite: Phaser.GameObjects.Image | Phaser.GameObjects.Sprite;
   healthBar: HealthBar;
   protected fillColor: number;
   protected borderColor: number;
   protected spriteWidth: number;
   protected spriteHeight: number;
+  protected spriteKey?: string;
+  private aiSpriteConfig?: UnitSpriteSheetConfig;
   private nameLabel: Phaser.GameObjects.Text;
   private statusIcons: Phaser.GameObjects.Text;
   private statusOverlay: Phaser.GameObjects.Graphics;
@@ -80,6 +83,7 @@ export class Unit extends Phaser.GameObjects.Container {
     element?: ElementType,
     race: RaceType = 'human',
     classType: ClassType = 'warrior',
+    spriteKey?: string,
   ) {
     super(scene, x, y);
     this.unitId = id;
@@ -87,6 +91,7 @@ export class Unit extends Phaser.GameObjects.Container {
     this.role = role;
     this.race = race;
     this.classType = classType;
+    this.spriteKey = spriteKey;
     this.isHero = isHero;
     this.element = element;
     this.aiType = 'default';
@@ -103,11 +108,28 @@ export class Unit extends Phaser.GameObjects.Container {
     this.spriteWidth = sizeInfo.w;
     this.spriteHeight = sizeInfo.h;
 
-    // Create pixel-art texture and Image sprite
-    const textureKey = getOrCreateTexture(scene, this.buildChibiConfig());
-    this.sprite = scene.add.image(0, 0, textureKey);
+    // Prefer authored spritesheets when present; fall back to generated chibi textures.
+    this.aiSpriteConfig = getUnitSpriteSheet(this.spriteKey);
+    if (this.aiSpriteConfig && scene.textures.exists(this.aiSpriteConfig.textureKey)) {
+      ensureUnitSpriteAnimations(scene, this.aiSpriteConfig);
+      const sprite = scene.add.sprite(0, 0, this.aiSpriteConfig.textureKey, 0);
+      sprite.setDisplaySize(this.aiSpriteConfig.displayWidth, this.aiSpriteConfig.displayHeight);
+      sprite.play(`${this.aiSpriteConfig.textureKey}_idle`);
+      this.sprite = sprite;
+    } else {
+      const textureKey = getOrCreateTexture(scene, this.buildChibiConfig());
+      this.sprite = scene.add.image(0, 0, textureKey);
+    }
     this.sprite.setOrigin(0.5);
     this.add(this.sprite);
+
+    // Authored spritesheets and generated chibi textures are all drawn facing
+    // LEFT. Heroes stand on the left of the battlefield and must face right
+    // toward the enemies; enemies stand on the right and already face left
+    // toward the heroes. So flip heroes only. `flipX` is a GameObject flag (not
+    // a negative scaleX), so it persists across animation frame/texture swaps
+    // and is independent of the idle-scale, attack-lunge, and hurt-shake tweens.
+    this.sprite.setFlipX(this.isHero);
 
     // Name label (hidden by default for heroes — HUD already shows hero info)
     const displayName = name.length > 8 ? name.substring(0, 8) : name;
@@ -209,8 +231,36 @@ export class Unit extends Phaser.GameObjects.Container {
 
   /** Regenerate the pixel-art texture (e.g. after boss upgrade) */
   protected regenerateTexture(): void {
+    if (this.aiSpriteConfig && this.scene.textures.exists(this.aiSpriteConfig.textureKey)) {
+      return;
+    }
     const key = getOrCreateTexture(this.scene, this.buildChibiConfig());
     this.sprite.setTexture(key);
+  }
+
+  playUnitSpriteAnimation(anim: UnitSpriteAnim): void {
+    // `this.scene` is undefined once the GameObject has been destroyed. Guard it
+    // like every other visual method here — a stale UnitAnimationSystem listener
+    // can resolve a destroyed unit and call this, which would otherwise throw and
+    // crash the battle update loop.
+    if (!this.scene || !this.aiSpriteConfig || !('play' in this.sprite)) return;
+    const key = `${this.aiSpriteConfig.textureKey}_${anim}`;
+    if (!this.scene.anims.exists(key)) return;
+
+    const sprite = this.sprite as Phaser.GameObjects.Sprite;
+    sprite.play(key);
+    if (anim !== 'idle') {
+      sprite.once(Phaser.Animations.Events.ANIMATION_COMPLETE, () => {
+        // The unit may be destroyed before the animation completes.
+        if (this.isAlive && this.scene && this.scene.anims.exists(`${this.aiSpriteConfig?.textureKey}_idle`)) {
+          sprite.play(`${this.aiSpriteConfig?.textureKey}_idle`);
+        }
+      });
+    }
+  }
+
+  hasAuthoredSprite(): boolean {
+    return !!this.aiSpriteConfig && 'play' in this.sprite;
   }
 
   /** Configure for boss display */
@@ -433,15 +483,33 @@ export class Unit extends Phaser.GameObjects.Container {
       unitId: this.unitId,
       isHero: this.isHero,
     });
+    this.playUnitSpriteAnimation('death');
 
-    // Staged death animation: hit-stop → flash white 3x → shrink+fade
-    // Stage 1: Hit-stop (freeze briefly)
     const scene = this.scene;
     if (!scene) {
       this.setVisible(false);
       return;
     }
 
+    if (this.hasAuthoredSprite()) {
+      scene.time.delayedCall(520, () => {
+        if (!scene) return;
+        this.sprite.clearTint();
+        scene.tweens.add({
+          targets: this,
+          alpha: 0,
+          duration: 300,
+          ease: 'Sine.easeOut',
+          onComplete: () => {
+            this.setVisible(false);
+          },
+        });
+      });
+      return;
+    }
+
+    // Staged death animation: hit-stop → flash white 3x → shrink+fade
+    // Stage 1: Hit-stop (freeze briefly)
     // Stage 2: Flash white 3 times
     let flashCount = 0;
     const flashInterval = scene.time.addEvent({
@@ -481,12 +549,28 @@ export class Unit extends Phaser.GameObjects.Container {
 
   flashHurt(): void {
     if (!this.scene) return;
+    this.playUnitSpriteAnimation('hurt');
     this.sprite.setTintFill(0xffffff);
-    this.scene.time.delayedCall(100, () => {
+    const isAuthoredSprite = this.hasAuthoredSprite();
+    this.scene.time.delayedCall(isAuthoredSprite ? 70 : 100, () => {
       if (this.isAlive && this.scene) {
         this.sprite.clearTint();
       }
     });
+    if (isAuthoredSprite) {
+      const originalX = this.sprite.x;
+      this.scene.tweens.add({
+        targets: this.sprite,
+        x: originalX - 3,
+        duration: 45,
+        yoyo: true,
+        repeat: 1,
+        ease: 'Sine.easeInOut',
+        onComplete: () => {
+          this.sprite.x = originalX;
+        },
+      });
+    }
   }
 
   /** Flash a specific color (used by external systems like BattleEffects, SkillSystem) */

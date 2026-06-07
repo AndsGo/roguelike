@@ -19,7 +19,7 @@ export class Enemy extends Unit {
     const stats = Enemy.calculateStats(enemyData, level, statMultiplier);
 
     super(scene, x, y, enemyData.id, enemyData.name, enemyData.role, stats, false, enemyData.element,
-      enemyData.race ?? 'human', enemyData.class ?? 'warrior');
+      enemyData.race ?? 'human', enemyData.class ?? 'warrior', enemyData.spriteKey);
 
     this.enemyData = enemyData;
     this.monsterType = enemyData.monsterType;

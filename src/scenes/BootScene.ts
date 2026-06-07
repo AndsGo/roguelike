@@ -3,6 +3,7 @@ import { GAME_WIDTH, GAME_HEIGHT } from '../constants';
 import { AudioManager, BGM_KEYS, SFX_KEYS } from '../systems/AudioManager';
 import { SaveManager } from '../managers/SaveManager';
 import { TextFactory } from '../ui/TextFactory';
+import { preloadUnitSpriteSheets } from '../systems/UnitSpriteAssets';
 
 export class BootScene extends Phaser.Scene {
   constructor() {
@@ -41,6 +42,8 @@ export class BootScene extends Phaser.Scene {
     for (const key of SFX_KEYS) {
       this.load.audio(key, [`audio/${key}.ogg`, `audio/${key}.mp3`]);
     }
+
+    preloadUnitSpriteSheets(this);
   }
 
   create(): void {
