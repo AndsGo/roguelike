@@ -198,6 +198,54 @@ const AI_UNIT_SPRITES: Record<string, UnitSpriteSheetConfig> = {
     58,
     58,
   ),
+  hero_dragon_knight: createUnitSpriteSheetConfig(
+    'hero_dragon_knight',
+    'assets/units/fourth-batch/hero_dragon_knight_spritesheet.png',
+    70,
+    70,
+  ),
+  hero_shadow_weaver: createUnitSpriteSheetConfig(
+    'hero_shadow_weaver',
+    'assets/units/fourth-batch/hero_shadow_weaver_spritesheet.png',
+    64,
+    64,
+  ),
+  hero_storm_caller: createUnitSpriteSheetConfig(
+    'hero_storm_caller',
+    'assets/units/fourth-batch/hero_storm_caller_spritesheet.png',
+    64,
+    64,
+  ),
+  hero_holy_sentinel: createUnitSpriteSheetConfig(
+    'hero_holy_sentinel',
+    'assets/units/fourth-batch/hero_holy_sentinel_spritesheet.png',
+    66,
+    66,
+  ),
+  enemy_thunder_golem: createUnitSpriteSheetConfig(
+    'enemy_thunder_golem',
+    'assets/units/fourth-batch/enemy_thunder_golem_spritesheet.png',
+    72,
+    72,
+  ),
+  enemy_shadow_wraith: createUnitSpriteSheetConfig(
+    'enemy_shadow_wraith',
+    'assets/units/fourth-batch/enemy_shadow_wraith_spritesheet.png',
+    58,
+    58,
+  ),
+  enemy_dark_cultist: createUnitSpriteSheetConfig(
+    'enemy_dark_cultist',
+    'assets/units/fourth-batch/enemy_dark_cultist_spritesheet.png',
+    58,
+    58,
+  ),
+  enemy_holy_guardian: createUnitSpriteSheetConfig(
+    'enemy_holy_guardian',
+    'assets/units/fourth-batch/enemy_holy_guardian_spritesheet.png',
+    64,
+    64,
+  ),
 };
 
 export function getUnitSpriteSheet(spriteKey?: string): UnitSpriteSheetConfig | undefined {
