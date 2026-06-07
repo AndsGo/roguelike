@@ -156,6 +156,7 @@ export class BattleSystem {
       const bonuses = cache.heroBonuses.get(hero.unitId);
       if (bonuses) {
         hero.synergyBonuses = bonuses;
+        hero.synergyPercentBonuses = cache.heroPercentBonuses.get(hero.unitId) ?? {};
         hero.invalidateStats();
       }
     }

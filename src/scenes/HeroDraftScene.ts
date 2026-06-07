@@ -16,7 +16,10 @@ import { getOrCreateTexture, ChibiConfig } from '../systems/UnitRenderer';
 import { drawRoleIcon, drawElementIcon } from '../ui/PixelIcons';
 import { getElementColor } from '../ui/Theme';
 
-const BASE_MAX_SELECTION = 3;
+// Opening draft size. Set to 4 so players can reach a count=4 race/class
+// synergy or two count=2 synergies on turn one — count=3/4 thresholds were
+// previously unreachable with a 3-hero cap (recruit the 5th via events).
+const BASE_MAX_SELECTION = 4;
 const MIN_SELECTION = 2;
 const CARD_W = 74;
 const CARD_H = 100;

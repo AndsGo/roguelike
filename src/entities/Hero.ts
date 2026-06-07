@@ -18,7 +18,7 @@ export class Hero extends Unit {
 
     const effectiveElement = heroState.temporaryElement ?? heroData.element;
     super(scene, x, y, heroData.id, heroData.name, heroData.role, stats, true, effectiveElement,
-      heroData.race ?? 'human', heroData.class ?? 'warrior');
+      heroData.race ?? 'human', heroData.class ?? 'warrior', heroData.spriteKey);
 
     this.heroData = heroData;
     this.heroState = heroState;

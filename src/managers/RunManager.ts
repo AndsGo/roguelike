@@ -453,6 +453,10 @@ export class RunManager {
   addRelic(relicId: string): void {
     if (this.state.relics.some(r => r.id === relicId)) return;
     this.state.relics.push({ id: relicId, triggerCount: 0 });
+    // Permanently record the relic in meta progression. Without this,
+    // meta.unlockedRelics stays empty forever and the relics_count
+    // achievements (relic_5 / relic_collector) are impossible to unlock.
+    MetaManager.unlockRelic(relicId);
     EventBus.getInstance().emit('relic:acquire', { relicId });
   }
 

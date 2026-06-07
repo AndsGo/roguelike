@@ -6,13 +6,15 @@ import { CLERIC_ENERGY_MULTIPLIER } from '../../src/constants';
 const skills = skillsData as { id: string; baseDamage: number; scalingRatio: number }[];
 
 describe('Phase 4 Balance Changes', () => {
-  it('human synergy 2-person threshold is +10 attack and defense', () => {
+  it('human synergy 2-person threshold is +10% attack and defense (percentage)', () => {
     const human = SYNERGY_DEFINITIONS.find(s => s.id === 'synergy_human')!;
     const t2 = human.thresholds.find(t => t.count === 2)!;
-    const atkEffect = t2.effects.find((e: any) => e.stat === 'attack');
-    const defEffect = t2.effects.find((e: any) => e.stat === 'defense');
-    expect(atkEffect!.value).toBe(10);
-    expect(defEffect!.value).toBe(10);
+    const atkEffect = t2.effects.find((e: any) => e.stat === 'attack') as any;
+    const defEffect = t2.effects.find((e: any) => e.stat === 'defense') as any;
+    expect(atkEffect!.value).toBeCloseTo(0.10);
+    expect(atkEffect!.percent).toBe(true);
+    expect(defEffect!.value).toBeCloseTo(0.10);
+    expect(defEffect!.percent).toBe(true);
   });
 
   it('shadow_strike has buffed damage', () => {

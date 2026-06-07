@@ -200,6 +200,12 @@ export interface SynergyEffect {
   value?: number;
   skillId?: string;
   element?: ElementType;
+  /**
+   * When true on a stat_boost, `value` is a fraction (e.g. 0.15 = +15%)
+   * applied multiplicatively to the hero's effective stat, instead of a
+   * flat additive amount. Lets "全属性+X%" synergies scale with level/gear.
+   */
+  percent?: boolean;
 }
 
 // ============ Events (Narrative) ============

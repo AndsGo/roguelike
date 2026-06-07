@@ -104,3 +104,44 @@ NodeType:    'battle' | 'elite' | 'boss' | 'shop' | 'event' | 'rest'
 - **Legacy save migration:** New fields on `MetaProgressionData` must use `?? defaultValue` guards since old saves won't have them. See `encounteredEnemies ?? []` pattern in MetaManager.
 - **Phaser Container hit areas:** See "Container origin gotcha" above. This has caused bugs in Panel.ts and Button.ts.
 - **Constants re-export:** `src/constants.ts` re-exports from `src/config/balance.ts` for backward compatibility. New constants go in `src/config/balance.ts`.
+
+---
+
+# Claude Code Game Studios (CCGS)
+
+This project has the [Claude Code Game Studios](https://github.com/Donchitos/Claude-Code-Game-Studios)
+studio agent system installed under `.claude/`: **49 specialized subagents**, **73 slash commands**,
+**11 path-scoped rules**, and document templates in `.claude/docs/templates/`. Run `/start` for guided
+onboarding or `/help` for "what should I do next". Type `/` to browse commands — e.g. `/brainstorm`,
+`/design-system`, `/create-stories`, `/dev-story`, `/code-review`, `/balance-check`, `/team-combat`.
+
+> **Intentionally NOT installed:** the CCGS `settings.json`, `hooks/`, and `statusline.sh`. This
+> project's permissions, hooks, and statusline are unchanged.
+
+## Stack adaptation (important)
+
+CCGS ships configured for native engines (Godot / Unity / Unreal). **This project is the exception:
+TypeScript + Phaser 3 + Vite (web).** Therefore:
+
+- The **Architecture / Commands / Testing sections above take precedence** over any CCGS doc. Where
+  CCGS docs assume a different layout (`src/gameplay/**`, `design/gdd/`, `tests/unit/`,
+  `docs/architecture/` ADRs, engine CI commands), map them onto this repo's real structure: `src/`
+  (scenes / systems / entities / data), Vitest in `tests/`, balance config in `src/config/balance.ts`.
+- **Ignore the engine-specialist agents** (`godot-*`, `unity-*`, `unreal-*`) — they don't apply to
+  Phaser. The engine-agnostic agents (directors, leads, design / QA / production / release
+  specialists) and the process skills are the usable part.
+- `.claude/docs/coding-standards.md` and `.claude/docs/directory-structure.md` are **reference-only**
+  here — they describe the generic engine template, not this codebase.
+
+## Collaboration Protocol
+
+CCGS agents are collaborative, not autonomous. Every task follows:
+**Question → Options → Decision → Draft → Approval.**
+
+- Ask before writing files; present 2–4 options with trade-offs; the user decides.
+- Show drafts / summaries before finalizing; multi-file changes need explicit approval.
+- No commits without user instruction.
+
+## Coordination Rules
+
+@.claude/docs/coordination-rules.md

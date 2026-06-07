@@ -37,6 +37,7 @@ import bossPhaseData from '../data/boss-phases.json';
 import { TextFactory } from '../ui/TextFactory';
 import { AffixSystem } from '../systems/AffixSystem';
 import { AffixData } from '../types';
+import { DifficultySystem } from '../systems/DifficultySystem';
 
 export class BattleScene extends Phaser.Scene {
   private battleSystem!: BattleSystem;
@@ -203,7 +204,7 @@ export class BattleScene extends Phaser.Scene {
         const data = enemiesData.find(ed => ed.id === e.id) as EnemyData | undefined;
         if (!data) return null;
         const y = BATTLE_GROUND_Y - ((battleData.enemies.length - 1) / 2 - i) * UNIT_SPACING_Y;
-        return new Enemy(this, ENEMY_START_X, y, data, e.level);
+        return new Enemy(this, ENEMY_START_X, y, data, e.level, DifficultySystem.getCurrentDifficulty().enemyStatMultiplier);
       })
       .filter((e): e is Enemy => e !== null);
 
@@ -646,7 +647,7 @@ export class BattleScene extends Phaser.Scene {
           const activeEnemies = this.battleSystem.enemies.filter(e => e.isAlive).length;
           if (activeEnemies >= MAX_ENEMIES) return;
 
-          const enemy = new Enemy(this, WAVE_TRANSITION.SLIDE_START_X, y, spawnData, spawnLevel);
+          const enemy = new Enemy(this, WAVE_TRANSITION.SLIDE_START_X, y, spawnData, spawnLevel, DifficultySystem.getCurrentDifficulty().enemyStatMultiplier);
           this.allUnits.push(enemy);
           this.battleSystem.addUnit(enemy);
           this.tweens.add({
@@ -1018,7 +1019,7 @@ export class BattleScene extends Phaser.Scene {
         const data = enemiesData.find(ed => ed.id === e.id) as EnemyData | undefined;
         if (!data) return null;
         const y = BATTLE_GROUND_Y - ((waveData.length - 1) / 2 - i) * UNIT_SPACING_Y;
-        const enemy = new Enemy(this, WAVE_TRANSITION.SLIDE_START_X, y, data, e.level);
+        const enemy = new Enemy(this, WAVE_TRANSITION.SLIDE_START_X, y, data, e.level, DifficultySystem.getCurrentDifficulty().enemyStatMultiplier);
         // Slide in from right
         this.tweens.add({
           targets: enemy,
@@ -1081,6 +1082,12 @@ export class BattleScene extends Phaser.Scene {
       if (expBonus > 0) {
         expEarned = Math.round(expEarned * (1 + expBonus));
       }
+
+      // Apply difficulty reward multipliers (harder difficulties pay out more).
+      // Normal difficulty multipliers are 1.0, so this is a no-op there.
+      const diff = DifficultySystem.getCurrentDifficulty();
+      goldEarned = Math.round(goldEarned * diff.goldMultiplier);
+      expEarned = Math.round(expEarned * diff.expMultiplier);
 
       const survivors = this.battleSystem.heroes
         .filter(h => h.isAlive)
