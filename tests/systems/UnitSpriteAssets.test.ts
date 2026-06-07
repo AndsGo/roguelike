@@ -56,6 +56,17 @@ const EXPECTED_FIFTH_BATCH = [
   'enemy_shadow_lord',
 ] as const;
 
+const EXPECTED_SIXTH_BATCH = [
+  'hero_magma_warden',
+  'hero_storm_falcon',
+  'hero_frost_whisperer',
+  'hero_holy_emissary',
+  'enemy_flame_construct',
+  'enemy_frost_sentinel',
+  'enemy_lightning_strider',
+  'enemy_holy_smith',
+] as const;
+
 describe('UnitSpriteAssets registry', () => {
   it('registers the first batch sprite keys', () => {
     for (const key of EXPECTED_FIRST_BATCH) {
@@ -83,6 +94,12 @@ describe('UnitSpriteAssets registry', () => {
 
   it('registers the fifth batch sprite keys', () => {
     for (const key of EXPECTED_FIFTH_BATCH) {
+      expect(getUnitSpriteSheet(key), `${key} should be registered`).toBeDefined();
+    }
+  });
+
+  it('registers the sixth batch sprite keys', () => {
+    for (const key of EXPECTED_SIXTH_BATCH) {
       expect(getUnitSpriteSheet(key), `${key} should be registered`).toBeDefined();
     }
   });

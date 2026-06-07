@@ -297,6 +297,54 @@ const AI_UNIT_SPRITES: Record<string, UnitSpriteSheetConfig> = {
     86,
     7,
   ),
+  hero_magma_warden: createUnitSpriteSheetConfig(
+    'hero_magma_warden',
+    'assets/units/sixth-batch/hero_magma_warden_spritesheet.png',
+    74,
+    74,
+  ),
+  hero_storm_falcon: createUnitSpriteSheetConfig(
+    'hero_storm_falcon',
+    'assets/units/sixth-batch/hero_storm_falcon_spritesheet.png',
+    64,
+    64,
+  ),
+  hero_frost_whisperer: createUnitSpriteSheetConfig(
+    'hero_frost_whisperer',
+    'assets/units/sixth-batch/hero_frost_whisperer_spritesheet.png',
+    64,
+    64,
+  ),
+  hero_holy_emissary: createUnitSpriteSheetConfig(
+    'hero_holy_emissary',
+    'assets/units/sixth-batch/hero_holy_emissary_spritesheet.png',
+    66,
+    66,
+  ),
+  enemy_flame_construct: createUnitSpriteSheetConfig(
+    'enemy_flame_construct',
+    'assets/units/sixth-batch/enemy_flame_construct_spritesheet.png',
+    66,
+    66,
+  ),
+  enemy_frost_sentinel: createUnitSpriteSheetConfig(
+    'enemy_frost_sentinel',
+    'assets/units/sixth-batch/enemy_frost_sentinel_spritesheet.png',
+    72,
+    72,
+  ),
+  enemy_lightning_strider: createUnitSpriteSheetConfig(
+    'enemy_lightning_strider',
+    'assets/units/sixth-batch/enemy_lightning_strider_spritesheet.png',
+    60,
+    60,
+  ),
+  enemy_holy_smith: createUnitSpriteSheetConfig(
+    'enemy_holy_smith',
+    'assets/units/sixth-batch/enemy_holy_smith_spritesheet.png',
+    62,
+    62,
+  ),
 };
 
 export function getUnitSpriteSheet(spriteKey?: string): UnitSpriteSheetConfig | undefined {
