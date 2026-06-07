@@ -246,6 +246,57 @@ const AI_UNIT_SPRITES: Record<string, UnitSpriteSheetConfig> = {
     64,
     64,
   ),
+  hero_ice_mage: createUnitSpriteSheetConfig(
+    'hero_ice_mage',
+    'assets/units/fifth-batch/hero_ice_mage_spritesheet.png',
+    64,
+    64,
+  ),
+  hero_thunder_monk: createUnitSpriteSheetConfig(
+    'hero_thunder_monk',
+    'assets/units/fifth-batch/hero_thunder_monk_spritesheet.png',
+    66,
+    66,
+  ),
+  hero_elemental_weaver: createUnitSpriteSheetConfig(
+    'hero_elemental_weaver',
+    'assets/units/fifth-batch/hero_elemental_weaver_spritesheet.png',
+    64,
+    64,
+  ),
+  hero_forest_stalker: createUnitSpriteSheetConfig(
+    'hero_forest_stalker',
+    'assets/units/fifth-batch/hero_forest_stalker_spritesheet.png',
+    64,
+    64,
+  ),
+  enemy_light_sprite: createUnitSpriteSheetConfig(
+    'enemy_light_sprite',
+    'assets/units/fifth-batch/enemy_light_sprite_spritesheet.png',
+    54,
+    54,
+  ),
+  enemy_frost_queen: createUnitSpriteSheetConfig(
+    'enemy_frost_queen',
+    'assets/units/fifth-batch/enemy_frost_queen_spritesheet.png',
+    82,
+    82,
+    7,
+  ),
+  enemy_thunder_titan: createUnitSpriteSheetConfig(
+    'enemy_thunder_titan',
+    'assets/units/fifth-batch/enemy_thunder_titan_spritesheet.png',
+    92,
+    92,
+    7,
+  ),
+  enemy_shadow_lord: createUnitSpriteSheetConfig(
+    'enemy_shadow_lord',
+    'assets/units/fifth-batch/enemy_shadow_lord_spritesheet.png',
+    86,
+    86,
+    7,
+  ),
 };
 
 export function getUnitSpriteSheet(spriteKey?: string): UnitSpriteSheetConfig | undefined {
