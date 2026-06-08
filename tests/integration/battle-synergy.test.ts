@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import Phaser from 'phaser';
 import { BattleSystem } from '../../src/systems/BattleSystem';
+import { DamageSystem } from '../../src/systems/DamageSystem';
 import { Hero } from '../../src/entities/Hero';
 import { SeededRNG } from '../../src/utils/rng';
 import { EventBus } from '../../src/systems/EventBus';
@@ -49,6 +50,36 @@ describe('Battle Synergy Integration', () => {
     expect(Object.keys(h1.synergyPercentBonuses).length).toBeGreaterThan(0);
     expect((h1.synergyPercentBonuses as any).attack).toBeCloseTo(0.10);
     expect((h1.synergyPercentBonuses as any).defense).toBeCloseTo(0.10);
+  });
+
+  it('wires synergy damage into DamageSystem and applies the bonus (regression: P0-1)', () => {
+    const scene = new Phaser.Scene();
+    // Three dragons => synergy_dragon damage capstone active (+18% all damage; needs 3)
+    const heroStates = [makeHeroState('d1'), makeHeroState('d2'), makeHeroState('d3')];
+    const heroDataMap = new Map<string, HeroData>([
+      ['d1', makeHeroData('d1', { race: 'dragon' })],
+      ['d2', makeHeroData('d2', { race: 'dragon' })],
+      ['d3', makeHeroData('d3', { race: 'dragon' })],
+    ]);
+    const d1 = new Hero(scene, 100, 200, heroDataMap.get('d1')!, heroStates[0]);
+    const d2 = new Hero(scene, 100, 270, heroDataMap.get('d2')!, heroStates[1]);
+    const d3 = new Hero(scene, 100, 340, heroDataMap.get('d3')!, heroStates[2]);
+    battleSystem.setUnits([d1, d2, d3], [], heroStates, heroDataMap);
+
+    // Synergy must be active and the DamageSystem must be wired to it.
+    const mult = battleSystem.synergySystem.getSynergyDamageMultiplier();
+    expect(mult).toBeGreaterThan(1.0);
+    expect(battleSystem.damageSystem.synergySystem).toBe(battleSystem.synergySystem);
+
+    // calculateDamage must actually multiply by the synergy bonus. Compare to an
+    // identical DamageSystem without a synergy system, using the same seed so
+    // variance/crit cancel out in the ratio.
+    const withSyn = new DamageSystem(new SeededRNG(7));
+    withSyn.synergySystem = battleSystem.synergySystem;
+    const without = new DamageSystem(new SeededRNG(7));
+    const a = withSyn.calculateDamage(d1, d2, 100, 'physical');
+    const b = without.calculateDamage(d1, d2, 100, 'physical');
+    expect(a.finalDamage / b.finalDamage).toBeCloseTo(mult, 1);
   });
 
   it('synergyBonuses remain empty when heroStates not passed', () => {

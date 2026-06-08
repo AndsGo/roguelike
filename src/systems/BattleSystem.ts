@@ -61,6 +61,10 @@ export class BattleSystem {
   private accumulatedGold: number = 0;
   private accumulatedExp: number = 0;
 
+  // Reusable buffer for the combined hero+enemy list, refilled in place each
+  // combat substep to avoid allocating a new array (GC pressure) every tick.
+  private allUnitsBuf: Unit[] = [];
+
   constructor(rng: SeededRNG) {
     this.rng = rng;
     this.damageAccumulator = new DamageAccumulator();
@@ -68,6 +72,7 @@ export class BattleSystem {
     this.synergySystem = new SynergySystem();
     this.damageSystem = new DamageSystem(rng);
     this.damageSystem.comboSystem = this.comboSystem;
+    this.damageSystem.synergySystem = this.synergySystem;
     this.damageSystem.setAccumulator(this.damageAccumulator);
     this.skillSystem = new SkillSystem(rng, this.damageSystem);
     this.skillSystem.setAccumulator(this.damageAccumulator);
@@ -227,7 +232,12 @@ export class BattleSystem {
       this.executeQueuedSkill(entry.unitId, entry.skillId);
     }
 
-    const allUnits: Unit[] = [...this.heroes, ...this.enemies];
+    // Reuse a persistent buffer instead of allocating a new array each substep.
+    // Refilled every substep, so it always reflects the current units (incl. summons).
+    const allUnits = this.allUnitsBuf;
+    allUnits.length = 0;
+    for (const h of this.heroes) allUnits.push(h);
+    for (const e of this.enemies) allUnits.push(e);
 
     for (const unit of allUnits) {
       if (!unit.isAlive) continue;
@@ -337,15 +347,17 @@ export class BattleSystem {
   private tickAttack(unit: Unit, delta: number, enemies: Unit[]): void {
     unit.attackCooldownTimer -= delta;
     if (unit.attackCooldownTimer <= 0) {
-      unit.attackCooldownTimer = 1000 / unit.getEffectiveStats().attackSpeed;
+      // Cache effective stats once — they don't change within a single attack tick,
+      // and this avoids 3-4 redundant getEffectiveStats() calls per attack.
+      const stats = unit.getEffectiveStats();
+      unit.attackCooldownTimer = 1000 / stats.attackSpeed;
 
       if (unit.target && unit.target.isAlive) {
         // Healer auto-attacks heal allies
         if (unit.role === 'healer' && unit.target.isHero === unit.isHero) {
-          const stats = unit.getEffectiveStats();
           this.damageSystem.applyHeal(unit, unit.target, stats.magicPower * 0.3);
         } else {
-          const damageType = unit.getEffectiveStats().magicPower > unit.getEffectiveStats().attack
+          const damageType = stats.magicPower > stats.attack
             ? 'magical' as const
             : 'physical' as const;
           const result = this.damageSystem.applyDamage(unit, unit.target, damageType);
@@ -361,7 +373,7 @@ export class BattleSystem {
           TargetingSystem.registerThreat(
             unit.target.unitId,
             unit.unitId,
-            unit.getEffectiveStats().attack,
+            stats.attack,
           );
         }
       }

@@ -8,6 +8,7 @@ interface ComboState {
 
 const COMBO_WINDOW = 2.0; // seconds
 const COMBO_BONUS_PER_5 = 0.10; // +10% damage per 5 hits
+const COMBO_BONUS_MAX = 0.50; // cap combo bonus at +50% (reached at 25 hits)
 const COMBO_MILESTONE = 10; // trigger event at this count
 
 /**
@@ -55,14 +56,15 @@ export class ComboSystem {
 
   /**
    * Get the current combo damage multiplier for an attacker.
-   * Every 5 hits grants +10% bonus damage (additive).
+   * Every 5 hits grants +10% bonus damage (additive), capped at +50% so it
+   * can't scale without bound against single targets (e.g. bosses).
    */
   getComboMultiplier(attackerId: string): number {
     const state = this.combos.get(attackerId);
     if (!state) return 1.0;
 
     const bonusTiers = Math.floor(state.count / 5);
-    return 1.0 + bonusTiers * COMBO_BONUS_PER_5;
+    return 1.0 + Math.min(bonusTiers * COMBO_BONUS_PER_5, COMBO_BONUS_MAX);
   }
 
   /**

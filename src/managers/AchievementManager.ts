@@ -79,6 +79,8 @@ export class AchievementManager {
         return (s) => s.maxCombo >= t;
       case 'stat_damage':
         return (s) => s.totalDamage >= t;
+      case 'stat_single_hit':
+        return (s) => s.maxSingleHit >= t;
       case 'stat_kills':
         return (s) => s.totalKills >= t;
       case 'stat_healing':

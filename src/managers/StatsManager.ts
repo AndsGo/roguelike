@@ -9,6 +9,7 @@ export interface RunStats {
   totalHealing: number;
   totalKills: number;
   maxCombo: number;
+  maxSingleHit: number;
   skillsUsed: number;
   goldEarned: number;
   goldSpent: number;
@@ -126,6 +127,9 @@ export class StatsManager {
 
     this.onDamage = (data) => {
       this.currentRunStats.totalDamage += data.amount;
+      if (data.amount > this.currentRunStats.maxSingleHit) {
+        this.currentRunStats.maxSingleHit = data.amount;
+      }
       this.ensureHeroStats(data.sourceId);
       this.currentRunStats.heroStats[data.sourceId].damage += data.amount;
       if (data.isCrit) {
@@ -283,6 +287,7 @@ export class StatsManager {
       totalHealing: 0,
       totalKills: 0,
       maxCombo: 0,
+      maxSingleHit: 0,
       skillsUsed: 0,
       goldEarned: 0,
       goldSpent: 0,

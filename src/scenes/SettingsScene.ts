@@ -55,7 +55,7 @@ export class SettingsScene extends Phaser.Scene {
     // ---- Save Slots Section ----
     for (let slot = 0; slot < 3; slot++) {
       this.createSaveSlotRow(leftCol, y, slot);
-      y += 30;
+      y += 22;
     }
 
     y += 5;
@@ -92,6 +92,37 @@ export class SettingsScene extends Phaser.Scene {
       setAccessibility(toggled);
       cbBtn.setText(toggled.colorblindMode ? UI.settings.on : UI.settings.off);
     }, cbSettings.colorblindMode ? Theme.colors.success : Theme.colors.panelBorder);
+
+    y += 30;
+
+    // ---- Reduce Motion ----
+    TextFactory.create(this, leftCol, y, '减少动效', 'body', {
+      color: '#ffffff',
+    }).setOrigin(0, 0.5);
+
+    const rmBtn = new Button(this, rightCol, y,
+      cbSettings.reduceMotion ? UI.settings.on : UI.settings.off, 80, 28, () => {
+        const current = getAccessibility();
+        const toggled = { ...current, reduceMotion: !current.reduceMotion };
+        setAccessibility(toggled);
+        rmBtn.setText(toggled.reduceMotion ? UI.settings.on : UI.settings.off);
+      }, cbSettings.reduceMotion ? Theme.colors.success : Theme.colors.panelBorder);
+
+    y += 24;
+
+    // ---- Text Size (accessibility) ----
+    TextFactory.create(this, leftCol, y, '文字大小', 'body', {
+      color: '#ffffff',
+    }).setOrigin(0, 0.5);
+
+    const textScaleOptions = [1, 1.25, 1.5];
+    const tsPct = (v: number) => `${Math.round(v * 100)}%`;
+    const tsBtn = new Button(this, rightCol, y, tsPct(getAccessibility().textScale), 80, 28, () => {
+      const cur = getAccessibility();
+      const next = textScaleOptions[(textScaleOptions.indexOf(cur.textScale) + 1) % textScaleOptions.length] ?? 1;
+      setAccessibility({ ...cur, textScale: next });
+      tsBtn.setText(tsPct(next));
+    }, Theme.colors.panelBorder);
 
     y += 32;
 

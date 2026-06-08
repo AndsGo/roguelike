@@ -386,6 +386,15 @@ export class RelicSystem {
     return total;
   }
 
+  /**
+   * combo_gloves: amplifies the combo damage BONUS by +50%.
+   * Returns the factor applied to the combo bonus portion (the amount above 1.0),
+   * so a +50% combo bonus becomes +75% when this relic is held.
+   */
+  static getComboBonusMultiplier(): number {
+    return RelicSystem.hasRelic('combo_gloves') ? 1.5 : 1.0;
+  }
+
   /** Get total gold bonus fraction (lucky_coin = +20%) */
   static getGoldBonus(): number {
     const inst = RelicSystem.getInstance();

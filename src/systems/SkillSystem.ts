@@ -485,6 +485,7 @@ export class SkillSystem {
       case 'stun': return 'stun';
       case 'taunt': return 'taunt';
       case 'burn': return 'dot';
+      case 'frostbite': return 'dot';
       case 'attack_buff': return 'buff';
       default: return 'debuff';
     }

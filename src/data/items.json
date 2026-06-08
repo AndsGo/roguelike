@@ -293,7 +293,7 @@
     "description": "用龙鳞碎片打造的戒指，全面提升防护",
     "slot": "accessory",
     "rarity": "epic",
-    "cost": 175,
+    "cost": 125,
     "stats": { "defense": 15, "magicResist": 15, "maxHp": 80 }
   },
   {
@@ -446,7 +446,7 @@
     "description": "融合五种元素的护甲",
     "slot": "armor",
     "rarity": "rare",
-    "cost": 170,
+    "cost": 125,
     "stats": { "defense": 25, "magicResist": 20 }
   },
   {
@@ -455,7 +455,7 @@
     "description": "蕴含熔炉力量的核心",
     "slot": "accessory",
     "rarity": "epic",
-    "cost": 200,
+    "cost": 140,
     "stats": { "magicPower": 30, "critChance": 0.10 }
   },
   {

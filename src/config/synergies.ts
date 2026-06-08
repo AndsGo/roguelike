@@ -41,7 +41,7 @@ export const SYNERGY_DEFINITIONS: SynergyConfig[] = [
   {
     id: 'synergy_demon',
     name: '恶魔契约',
-    description: '恶魔获得强大力量，但需付出代价',
+    description: '恶魔契约赋予强大的攻击与法术力量',
     type: 'race',
     key: 'demon',
     thresholds: [
@@ -67,7 +67,8 @@ export const SYNERGY_DEFINITIONS: SynergyConfig[] = [
     type: 'race',
     key: 'dragon',
     thresholds: [
-      { count: 2, description: '全伤害+18%', effects: [{ type: 'damage_bonus', value: 0.18 }] },
+      { count: 2, description: '最大生命+60', effects: [{ type: 'stat_boost', stat: 'maxHp', value: 60 }] },
+      { count: 3, description: '全伤害+18%', effects: [{ type: 'damage_bonus', value: 0.18 }] },
     ],
   },
 

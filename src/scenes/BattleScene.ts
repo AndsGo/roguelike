@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { GAME_WIDTH, GAME_HEIGHT, BATTLE_GROUND_Y, HERO_START_X, ENEMY_START_X, UNIT_SPACING_Y, FRONT_ROW_X, BACK_ROW_X, MAX_ENEMIES } from '../constants';
+import { computeInterest } from '../config/balance';
 import { RunManager } from '../managers/RunManager';
 import { BattleSystem } from '../systems/BattleSystem';
 import { Hero } from '../entities/Hero';
@@ -1088,6 +1089,10 @@ export class BattleScene extends Phaser.Scene {
       const diff = DifficultySystem.getCurrentDifficulty();
       goldEarned = Math.round(goldEarned * diff.goldMultiplier);
       expEarned = Math.round(expEarned * diff.expMultiplier);
+
+      // Bank interest: reward held gold reserves, settled on each battle victory
+      // (computed on the pre-reward reserve, flat — not scaled by difficulty).
+      goldEarned += computeInterest(rm.getGold());
 
       const survivors = this.battleSystem.heroes
         .filter(h => h.isAlive)

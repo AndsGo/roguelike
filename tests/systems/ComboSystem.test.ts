@@ -74,6 +74,20 @@ describe('ComboSystem', () => {
       }
       expect(combo.getComboMultiplier('a')).toBeCloseTo(1.3);
     });
+
+    it('caps the bonus at +50%, reached at 25 hits (P1-3)', () => {
+      for (let i = 0; i < 25; i++) {
+        combo.registerHit('a', 't');
+      }
+      expect(combo.getComboMultiplier('a')).toBeCloseTo(1.5);
+    });
+
+    it('does not exceed +50% no matter how high the combo climbs (P1-3)', () => {
+      for (let i = 0; i < 100; i++) {
+        combo.registerHit('a', 't');
+      }
+      expect(combo.getComboMultiplier('a')).toBeCloseTo(1.5);
+    });
   });
 
   describe('update (timeout)', () => {

@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { createMockLocalStorage } from '../mocks/phaser';
-import { REST_HEAL_PERCENT, REST_TRAIN_EXP, REST_SCAVENGE_GOLD_MIN, REST_SCAVENGE_GOLD_MAX, INTEREST_CAP } from '../../src/constants';
+import { REST_HEAL_PERCENT, REST_TRAIN_EXP, REST_SCAVENGE_GOLD_MIN, REST_SCAVENGE_GOLD_MAX } from '../../src/constants';
 
 const mockStorage = createMockLocalStorage();
 Object.defineProperty(globalThis, 'localStorage', { value: mockStorage, writable: true });
@@ -106,15 +106,15 @@ describe('RestScene', () => {
       }
     });
 
-    it('scavenge choice adds gold plus interest', () => {
+    it('scavenge choice adds scavenge gold (interest no longer settled at rest)', () => {
       const goldBefore = rm.getGold();
       const scene = createRestScene();
       (scene as any).executeChoice('scavenge', rm);
       const goldAfter = rm.getGold();
       expect(goldAfter).toBeGreaterThan(goldBefore);
-      // With 80G start, after scavenge (120-140G), interest is always capped at 5
-      expect(goldAfter - goldBefore).toBeGreaterThanOrEqual(REST_SCAVENGE_GOLD_MIN + INTEREST_CAP);
-      expect(goldAfter - goldBefore).toBeLessThanOrEqual(REST_SCAVENGE_GOLD_MAX + INTEREST_CAP);
+      // Interest moved to per-battle settlement; rest scavenge grants only scavenge gold.
+      expect(goldAfter - goldBefore).toBeGreaterThanOrEqual(REST_SCAVENGE_GOLD_MIN);
+      expect(goldAfter - goldBefore).toBeLessThanOrEqual(REST_SCAVENGE_GOLD_MAX);
     });
 
     it('rest choice heals heroes', () => {
@@ -137,56 +137,4 @@ describe('RestScene', () => {
     });
   });
 
-  describe('interest mechanism', () => {
-    it('awards 0 interest when gold is 0', () => {
-      rm.spendGold(rm.getGold());
-      const goldBefore = rm.getGold();
-      expect(goldBefore).toBe(0);
-      const scene = createRestScene();
-      (scene as any).executeChoice('rest', rm);
-      expect(rm.getGold()).toBe(0);
-    });
-
-    it('awards 1 interest for 10G', () => {
-      rm.spendGold(rm.getGold());
-      rm.addGold(10);
-      const scene = createRestScene();
-      (scene as any).executeChoice('rest', rm);
-      expect(rm.getGold()).toBe(11);
-    });
-
-    it('awards 4 interest for 49G', () => {
-      rm.spendGold(rm.getGold());
-      rm.addGold(49);
-      const scene = createRestScene();
-      (scene as any).executeChoice('rest', rm);
-      expect(rm.getGold()).toBe(53);
-    });
-
-    it('caps interest at INTEREST_CAP for 50G+', () => {
-      rm.spendGold(rm.getGold());
-      rm.addGold(50);
-      const scene = createRestScene();
-      (scene as any).executeChoice('rest', rm);
-      expect(rm.getGold()).toBe(55);
-    });
-
-    it('caps interest at INTEREST_CAP for 100G', () => {
-      rm.spendGold(rm.getGold());
-      rm.addGold(100);
-      const scene = createRestScene();
-      (scene as any).executeChoice('rest', rm);
-      expect(rm.getGold()).toBe(105);
-    });
-
-    it('interest calculated after scavenge gold is added', () => {
-      rm.spendGold(rm.getGold());
-      rm.addGold(45);
-      const scene = createRestScene();
-      (scene as any).executeChoice('scavenge', rm);
-      // After scavenge: 45 + (40-60) = 85-105G → interest = 5 (cap)
-      expect(rm.getGold()).toBeGreaterThanOrEqual(90);
-      expect(rm.getGold()).toBeLessThanOrEqual(110);
-    });
-  });
 });

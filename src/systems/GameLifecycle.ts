@@ -3,6 +3,7 @@ import { AudioManager } from './AudioManager';
 import { ErrorHandler } from './ErrorHandler';
 import { StatsManager } from '../managers/StatsManager';
 import { AchievementManager } from '../managers/AchievementManager';
+import { TutorialSystem } from './TutorialSystem';
 
 /**
  * Centralized teardown for all singleton managers and systems.
@@ -49,5 +50,8 @@ export class GameLifecycle {
     // EventBus is already reset by teardownAll()
     StatsManager.reinitForNewRun();
     AchievementManager.registerListeners();
+    // teardownAll() wiped the tutorial tip listeners — re-register them so the
+    // element-reaction / relic-acquire tips can fire during this run.
+    TutorialSystem.registerEventListeners();
   }
 }
