@@ -144,5 +144,12 @@
 - 治疗技能负 `scalingRatio`（4 个）— 实为**正确**实现，翻正号会反向破坏治疗。
 - `phoenix_ash` effect.type、`overload_engine` 缺 value — 走独立代码路径，照常生效。
 
-### 🚧 Phase 3-5 阻塞（无法在本会话执行）
-本会话**未连接浏览器/Chrome MCP**（仅有 claude.ai 系列集成 MCP）。`game-evaluation` 技能的 Phase 3（E2E 视觉测试）、Phase 4（视觉问题修复）、Phase 5（重拍 README 截图）均依赖 Chrome MCP，无法运行。需在已连接 Chrome MCP 的会话补做，并顺带可视验证 P1-7 的设置页文字缩放 UI。
+### ✅ Phase 3-4 已补做（用户安装 Playwright MCP 后）
+安装 Playwright 插件后，通过 `browser_evaluate` 驱动 `window.__PHASER_GAME__` 完成 E2E 视觉走查（详见 `docs/ux-ui-e2e-report-2026-06-08.md`，截图见 `docs/screenshots/e2e-2026-06-08-*.png`）：
+- **10 个核心场景 + 设置页全部通过，无 P0/P1 视觉缺陷。**
+- **Phase 4 视觉修复:** 主菜单版本号 `v1.11.0 → v1.16.0`（`src/i18n.ts:23`，对齐 package.json），浏览器复验通过。
+- **P1-7 文字缩放设置页 UI 补完:** 之前因无法验证布局而推迟；现压缩存档行间距(30→22)换得空间，新增"文字大小"开关，实地截图确认不溢出。
+- **实地验证 P1-4:** 事件场景随机抽中并正常渲染 `dragon_egg`（修复前永不可达的孤儿事件之一）。
+- 残留观察：HeroDraft 锁定格小字密排(P2)、弹窗 backdrop 透明度不统一(P2)、基础战斗金币偏高(并入 P1-2 经济联调)。
+
+> Phase 5（重拍 README 全套截图 + 改 README/DEVELOPMENT 版本/计数）未做——属文档维护，非测试/质量项，按需另行处理。
