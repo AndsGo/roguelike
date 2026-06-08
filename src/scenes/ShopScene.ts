@@ -77,7 +77,14 @@ export class ShopScene extends Phaser.Scene {
       btnContainer.add(text);
 
       btnContainer.setSize(85, 22);
-      btnContainer.setInteractive({ useHandCursor: true });
+      // Hit area must match the bg's top-left draw rect (0,-10,85,22); otherwise
+      // setSize+setInteractive auto-centers the hit zone ~42px left of the visual
+      // (the documented container-origin gotcha). See Button.ts / Panel.ts.
+      btnContainer.setInteractive({
+        hitArea: new Phaser.Geom.Rectangle(0, -10, 85, 22),
+        hitAreaCallback: Phaser.Geom.Rectangle.Contains,
+        useHandCursor: true,
+      });
       btnContainer.on('pointerup', () => {
         this.selectedHero = hero;
         this.highlightHeroButton(i);

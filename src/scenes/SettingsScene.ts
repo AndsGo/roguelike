@@ -93,6 +93,21 @@ export class SettingsScene extends Phaser.Scene {
       cbBtn.setText(toggled.colorblindMode ? UI.settings.on : UI.settings.off);
     }, cbSettings.colorblindMode ? Theme.colors.success : Theme.colors.panelBorder);
 
+    y += 30;
+
+    // ---- Reduce Motion ----
+    TextFactory.create(this, leftCol, y, '减少动效', 'body', {
+      color: '#ffffff',
+    }).setOrigin(0, 0.5);
+
+    const rmBtn = new Button(this, rightCol, y,
+      cbSettings.reduceMotion ? UI.settings.on : UI.settings.off, 80, 28, () => {
+        const current = getAccessibility();
+        const toggled = { ...current, reduceMotion: !current.reduceMotion };
+        setAccessibility(toggled);
+        rmBtn.setText(toggled.reduceMotion ? UI.settings.on : UI.settings.off);
+      }, cbSettings.reduceMotion ? Theme.colors.success : Theme.colors.panelBorder);
+
     y += 32;
 
     // ---- Keybindings Section ----

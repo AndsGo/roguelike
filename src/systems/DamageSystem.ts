@@ -10,6 +10,7 @@ import { AudioManager } from './AudioManager';
 import { RelicSystem } from './RelicSystem';
 import { AffixSystem } from './AffixSystem';
 import { DamageAccumulator } from './DamageAccumulator';
+import { SynergySystem } from './SynergySystem';
 import { MetaManager } from '../managers/MetaManager';
 
 export interface DamageResult {
@@ -24,6 +25,7 @@ export class DamageSystem {
   private rng: SeededRNG;
   private accumulator?: DamageAccumulator;
   comboSystem: ComboSystem | null = null;
+  synergySystem: SynergySystem | null = null;
 
   constructor(rng: SeededRNG) {
     this.rng = rng;
@@ -102,6 +104,17 @@ export class DamageSystem {
       const relicDmgBonus = RelicSystem.getDamageBonus();
       if (relicDmgBonus > 0) {
         raw *= (1 + relicDmgBonus);
+      }
+    }
+
+    // Synergy damage bonus (dragon/mage capstones + per-element synergies).
+    // The SynergySystem computes these but nothing applied them before — wire
+    // them in for hero attackers, using the attacker's element for element
+    // synergies plus any 'all' bonus.
+    if (attacker.isHero && this.synergySystem) {
+      const synergyMult = this.synergySystem.getSynergyDamageMultiplier(attackerElement);
+      if (synergyMult !== 1.0) {
+        raw *= synergyMult;
       }
     }
 

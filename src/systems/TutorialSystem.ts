@@ -105,25 +105,30 @@ export class TutorialSystem {
       TutorialSystem.seenTips = new Set(saved);
     }
 
-    // Register EventBus listeners for event-triggered tips
+    TutorialSystem.registerEventListeners();
+  }
+
+  /**
+   * Register the EventBus listeners for event-triggered tips
+   * (`first_element`, `first_relic`).
+   *
+   * MUST be re-called after every `EventBus.reset()` (see
+   * `GameLifecycle.prepareNewRun`). `newRun()` resets the bus before the player
+   * ever triggers a reaction or picks up a relic, so without re-registration
+   * these two tips would never fire for the entire session.
+   */
+  static registerEventListeners(): void {
     const bus = EventBus.getInstance();
-    const eventTips = TutorialSystem.TIPS.filter(t => t.trigger.includes(':'));
-    for (const tip of eventTips) {
-      if (tip.trigger === 'element:reaction') {
-        bus.on('element:reaction', () => {
-          if (TutorialSystem.activeScene) {
-            TutorialSystem.showTipIfNeeded(TutorialSystem.activeScene, 'first_element');
-          }
-        });
+    bus.on('element:reaction', () => {
+      if (TutorialSystem.activeScene) {
+        TutorialSystem.showTipIfNeeded(TutorialSystem.activeScene, 'first_element');
       }
-      if (tip.trigger === 'relic:acquire') {
-        bus.on('relic:acquire', () => {
-          if (TutorialSystem.activeScene) {
-            TutorialSystem.showTipIfNeeded(TutorialSystem.activeScene, 'first_relic');
-          }
-        });
+    });
+    bus.on('relic:acquire', () => {
+      if (TutorialSystem.activeScene) {
+        TutorialSystem.showTipIfNeeded(TutorialSystem.activeScene, 'first_relic');
       }
-    }
+    });
   }
 
   /** Set the currently active scene for event-triggered tips */

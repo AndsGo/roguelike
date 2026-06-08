@@ -4,10 +4,13 @@ const ACCESSIBILITY_KEY = 'roguelike_accessibility';
 
 export interface AccessibilitySettings {
   colorblindMode: boolean;
+  /** When true, suppress screen shake, crit slow-motion, and full-screen flashes. */
+  reduceMotion: boolean;
 }
 
 const defaultAccessibility: AccessibilitySettings = {
   colorblindMode: false,
+  reduceMotion: false,
 };
 
 let accessibilityCache: AccessibilitySettings | null = null;

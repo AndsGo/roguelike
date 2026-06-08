@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import { GAME_WIDTH, GAME_HEIGHT } from '../config/balance';
 import { Unit } from '../entities/Unit';
-import { Theme } from '../ui/Theme';
+import { Theme, getAccessibility } from '../ui/Theme';
 import { TextFactory } from '../ui/TextFactory';
 
 /**
@@ -17,6 +17,7 @@ export class BattleEffects {
 
   /** Camera shake effect */
   screenShake(intensity: number = 0.005, duration: number = 100): void {
+    if (getAccessibility().reduceMotion) return;
     this.scene.cameras.main.shake(duration, intensity);
   }
 
@@ -28,6 +29,7 @@ export class BattleEffects {
 
   /** Screen edge flash on crit — brief golden vignette */
   critEdgeFlash(): void {
+    if (getAccessibility().reduceMotion) return;
     const g = this.scene.add.graphics();
     g.setDepth(500);
 
@@ -52,6 +54,7 @@ export class BattleEffects {
 
   /** Brief slow motion on crit */
   critSlowMotion(): void {
+    if (getAccessibility().reduceMotion) return;
     this.scene.time.timeScale = 0.5;
     this.scene.time.delayedCall(150, () => {
       this.scene.time.timeScale = 1;
@@ -99,6 +102,7 @@ export class BattleEffects {
 
   /** Full-screen color flash (e.g., for element reactions) */
   screenFlash(color: number, duration: number = 150): void {
+    if (getAccessibility().reduceMotion) return;
     const flash = this.scene.add.rectangle(
       GAME_WIDTH / 2, GAME_HEIGHT / 2,
       GAME_WIDTH, GAME_HEIGHT,

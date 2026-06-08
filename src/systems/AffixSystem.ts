@@ -110,6 +110,7 @@ export class AffixSystem {
             value: bonusValue,
             stat: 'attack',
           } as StatusEffect);
+          enemy.invalidateStats();
         }
       }
     }
@@ -131,6 +132,7 @@ export class AffixSystem {
           value: bonusValue,
           stat: 'attackSpeed',
         } as StatusEffect);
+        enemy.invalidateStats();
       }
     }
   }
@@ -201,6 +203,7 @@ export class AffixSystem {
         value: bonusValue,
         stat,
       } as StatusEffect);
+      enemy.invalidateStats();
     }
   }
 

@@ -86,7 +86,7 @@
     "description": "单次攻击造成500+伤害",
     "icon": "sword",
     "reward": { "type": "meta_currency", "value": 50 },
-    "conditionType": "stat_damage",
+    "conditionType": "stat_single_hit",
     "conditionParams": { "threshold": 500 }
   },
   {
@@ -155,7 +155,7 @@
   {
     "id": "relic_5",
     "name": "遗物猎人",
-    "description": "单次冒险中收集5个遗物",
+    "description": "解锁5种遗物",
     "icon": "gem",
     "reward": { "type": "meta_currency", "value": 100 },
     "conditionType": "relics_count",

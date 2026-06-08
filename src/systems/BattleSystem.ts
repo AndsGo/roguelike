@@ -68,6 +68,7 @@ export class BattleSystem {
     this.synergySystem = new SynergySystem();
     this.damageSystem = new DamageSystem(rng);
     this.damageSystem.comboSystem = this.comboSystem;
+    this.damageSystem.synergySystem = this.synergySystem;
     this.damageSystem.setAccumulator(this.damageAccumulator);
     this.skillSystem = new SkillSystem(rng, this.damageSystem);
     this.skillSystem.setAccumulator(this.damageAccumulator);
