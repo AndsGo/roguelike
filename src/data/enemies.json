@@ -879,7 +879,7 @@
     },
     "skills": ["chimera_shift"],
     "spriteKey": "enemy_elemental_chimera",
-    "goldReward": 65,
+    "goldReward": 40,
     "expReward": 60,
     "aiType": "aggressive"
   },

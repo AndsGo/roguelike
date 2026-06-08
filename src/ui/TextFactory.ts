@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { getAccessibility } from './Theme';
 
 export type TextPreset = 'title' | 'subtitle' | 'body' | 'label' | 'small' | 'tiny';
 
@@ -23,6 +24,12 @@ export class TextFactory {
     overrides?: Partial<Phaser.Types.GameObjects.Text.TextStyle>,
   ): Phaser.GameObjects.Text {
     const style = { ...PRESETS[preset], ...overrides };
+    // Apply accessibility text scaling (default 1 = unchanged).
+    const scale = getAccessibility().textScale;
+    if (scale && scale !== 1 && typeof style.fontSize === 'string') {
+      const px = parseInt(style.fontSize, 10);
+      if (!Number.isNaN(px)) style.fontSize = `${Math.round(px * scale)}px`;
+    }
     const textObj = scene.add.text(x, y, text, style);
     textObj.setResolution(2);
     // Override pixelArt nearest-neighbor filtering for crisp text

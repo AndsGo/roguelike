@@ -457,7 +457,7 @@
       "range": 200,
       "aoeRadius": 100,
       "element": "ice",
-      "statusEffect": "burn",
+      "statusEffect": "frostbite",
       "effectDuration": 4
     },
     "level10Bonus": { "baseDamage": 5, "aoeRadius": 20 }

@@ -6,18 +6,24 @@ export interface AccessibilitySettings {
   colorblindMode: boolean;
   /** When true, suppress screen shake, crit slow-motion, and full-screen flashes. */
   reduceMotion: boolean;
+  /** Global multiplier applied to all TextFactory font sizes (1 = default). */
+  textScale: number;
 }
 
 const defaultAccessibility: AccessibilitySettings = {
   colorblindMode: false,
   reduceMotion: false,
+  textScale: 1,
 };
 
 let accessibilityCache: AccessibilitySettings | null = null;
 
 export function getAccessibility(): AccessibilitySettings {
   if (!accessibilityCache) {
-    accessibilityCache = SaveManager.loadData<AccessibilitySettings>(ACCESSIBILITY_KEY) ?? { ...defaultAccessibility };
+    // Merge over defaults so legacy saves missing newer fields (e.g. textScale)
+    // fall back to sane values instead of undefined.
+    const loaded = SaveManager.loadData<AccessibilitySettings>(ACCESSIBILITY_KEY);
+    accessibilityCache = { ...defaultAccessibility, ...(loaded ?? {}) };
   }
   return accessibilityCache;
 }

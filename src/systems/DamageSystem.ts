@@ -93,9 +93,12 @@ export class DamageSystem {
       }
     }
 
-    // Combo multiplier
+    // Combo multiplier (combo_gloves relic amplifies the bonus portion by +50%)
     if (this.comboSystem) {
-      const comboMod = this.comboSystem.getComboMultiplier(attacker.unitId);
+      let comboMod = this.comboSystem.getComboMultiplier(attacker.unitId);
+      if (attacker.isHero && comboMod > 1.0) {
+        comboMod = 1.0 + (comboMod - 1.0) * RelicSystem.getComboBonusMultiplier();
+      }
       raw *= comboMod;
     }
 

@@ -1089,14 +1089,14 @@
   },
   {
     "id": "static_charge",
-    "name": "静电标记",
-    "description": "标记敌人，友方接下来3次攻击附加雷电伤害",
+    "name": "静电冲击",
+    "description": "释放强力静电冲击，对单体敌人造成雷电伤害",
     "cooldown": 8,
     "damageType": "magical",
     "targetType": "enemy",
-    "baseDamage": 0,
+    "baseDamage": 30,
     "scalingStat": "attack",
-    "scalingRatio": 0,
+    "scalingRatio": 1.0,
     "range": 350,
     "element": "lightning"
   },

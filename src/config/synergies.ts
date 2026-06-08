@@ -41,7 +41,7 @@ export const SYNERGY_DEFINITIONS: SynergyConfig[] = [
   {
     id: 'synergy_demon',
     name: '恶魔契约',
-    description: '恶魔获得强大力量，但需付出代价',
+    description: '恶魔契约赋予强大的攻击与法术力量',
     type: 'race',
     key: 'demon',
     thresholds: [

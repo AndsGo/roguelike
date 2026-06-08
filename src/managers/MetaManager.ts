@@ -90,7 +90,7 @@ export class MetaManager {
     ice_mage: { type: 'boss_kill', bossId: 'shadow_lord', description: 'Defeat Shadow Lord' },
     thunder_monk: { type: 'full_element_team', element: 'lightning', description: 'Win with mono-lightning team' },
     elemental_weaver: { type: 'victory', threshold: 3, description: 'Win 3 runs' },
-    forest_stalker: { type: 'hero_used', heroId: 'beast_warden', threshold: 3, description: 'Use beast_warden in 3 runs' },
+    forest_stalker: { type: 'hero_used', heroId: 'beast_warden', description: 'Win using beast_warden' },
     magma_warden: { type: 'relic_count', threshold: 10, description: 'Finish with 10+ relics' },
     storm_falcon: { type: 'element_wins', element: 'lightning', threshold: 5, description: 'Win 5 runs with lightning heroes' },
     frost_whisperer: { type: 'element_wins', element: 'ice', threshold: 3, description: '使用冰属性英雄获胜3次' },
@@ -441,6 +441,7 @@ export class MetaManager {
     inst.meta.encounteredEnemies = [];
     inst.meta.defeatedBosses = [];
     inst.meta.mutations = [];
+    inst.meta.hellVictories = 0;
     inst.ensureUpgradeState();
     inst.persist();
   }
