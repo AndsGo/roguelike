@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { GAME_WIDTH, GAME_HEIGHT, REST_HEAL_PERCENT, REST_TRAIN_EXP, REST_SCAVENGE_GOLD_MIN, REST_SCAVENGE_GOLD_MAX, INTEREST_PER_10_GOLD, INTEREST_CAP } from '../constants';
+import { GAME_WIDTH, GAME_HEIGHT, REST_HEAL_PERCENT, REST_TRAIN_EXP, REST_SCAVENGE_GOLD_MIN, REST_SCAVENGE_GOLD_MAX } from '../constants';
 import { RunManager } from '../managers/RunManager';
 import { Button } from '../ui/Button';
 import { Theme, colorToString, getNodeColor } from '../ui/Theme';
@@ -121,26 +121,7 @@ export class RestScene extends Phaser.Scene {
             this.executeScavenge(rm);
             break;
         }
-        // Interest: award gold based on current reserves
-        const interest = Math.min(Math.floor(rm.getGold() / 10) * INTEREST_PER_10_GOLD, INTEREST_CAP);
-        if (interest > 0) {
-          rm.addGold(interest);
-          // Append interest text to already-rendered result screen
-          const heroCount = rm.getHeroes().length;
-          const interestY = GAME_HEIGHT / 2 + heroCount * 22 + 8;
-          const interestText = TextFactory.create(
-            this, GAME_WIDTH / 2, interestY,
-            UI.rest.interest(interest), 'label', {
-              color: colorToString(Theme.colors.gold),
-            }
-          ).setOrigin(0.5).setAlpha(0);
-          this.tweens.add({
-            targets: interestText,
-            alpha: 1,
-            duration: 300,
-            ease: 'Sine.easeOut',
-          });
-        }
+        // Interest is now settled per battle victory (see BattleScene), not at rest.
         SaveManager.autoSave();
       },
     });

@@ -67,7 +67,8 @@ export const SYNERGY_DEFINITIONS: SynergyConfig[] = [
     type: 'race',
     key: 'dragon',
     thresholds: [
-      { count: 2, description: '全伤害+18%', effects: [{ type: 'damage_bonus', value: 0.18 }] },
+      { count: 2, description: '最大生命+60', effects: [{ type: 'stat_boost', stat: 'maxHp', value: 60 }] },
+      { count: 3, description: '全伤害+18%', effects: [{ type: 'damage_bonus', value: 0.18 }] },
     ],
   },
 

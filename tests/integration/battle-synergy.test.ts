@@ -54,15 +54,17 @@ describe('Battle Synergy Integration', () => {
 
   it('wires synergy damage into DamageSystem and applies the bonus (regression: P0-1)', () => {
     const scene = new Phaser.Scene();
-    // Two dragons => synergy_dragon active (+all-damage bonus)
-    const heroStates = [makeHeroState('d1'), makeHeroState('d2')];
+    // Three dragons => synergy_dragon damage capstone active (+18% all damage; needs 3)
+    const heroStates = [makeHeroState('d1'), makeHeroState('d2'), makeHeroState('d3')];
     const heroDataMap = new Map<string, HeroData>([
       ['d1', makeHeroData('d1', { race: 'dragon' })],
       ['d2', makeHeroData('d2', { race: 'dragon' })],
+      ['d3', makeHeroData('d3', { race: 'dragon' })],
     ]);
     const d1 = new Hero(scene, 100, 200, heroDataMap.get('d1')!, heroStates[0]);
     const d2 = new Hero(scene, 100, 270, heroDataMap.get('d2')!, heroStates[1]);
-    battleSystem.setUnits([d1, d2], [], heroStates, heroDataMap);
+    const d3 = new Hero(scene, 100, 340, heroDataMap.get('d3')!, heroStates[2]);
+    battleSystem.setUnits([d1, d2, d3], [], heroStates, heroDataMap);
 
     // Synergy must be active and the DamageSystem must be wired to it.
     const mult = battleSystem.synergySystem.getSynergyDamageMultiplier();

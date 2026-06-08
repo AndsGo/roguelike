@@ -153,3 +153,18 @@
 - 残留观察：HeroDraft 锁定格小字密排(P2)、弹窗 backdrop 透明度不统一(P2)、基础战斗金币偏高(并入 P1-2 经济联调)。
 
 > Phase 5（重拍 README 全套截图 + 改 README/DEVELOPMENT 版本/计数）未做——属文档维护，非测试/质量项，按需另行处理。
+
+### ✅ 推迟的经济/羁绊项已按具体方案落地（用户要求后续完成）
+
+**P1-2 经济利息 — 已落地:**
+- `balance.ts`: `INTEREST_CAP 5 → 10`，并抽出纯函数 `computeInterest(gold) = min(floor(gold/10)×INTEREST_PER_10_GOLD, CAP)`。
+- 结算时机从"仅休息节点"改为**每场战斗胜利后**（`BattleScene.ts` 在难度乘子之后、按战前储备计算并平加到 `goldEarned`）——让"囤金 vs 即时消费"每战都成为决策。
+- 移除 `RestScene` 的利息块（避免双重结算）。
+- 测试：新增 `tests/config/economy-interest.test.ts`（4 例，纯函数回归）；删除 `RestScene.test.ts` 中 6 个与 cap=5 紧耦合的旧利息断言、修正 scavenge 断言。
+
+**P1-6 龙族羁绊 — 已落地（双阈值，去除"2 龙即 +18% 全伤"的统治力）:**
+- `synergies.ts`: `count≥2: 最大生命+60`（防御性入门档）、`count≥3: 全伤害+18%`（招牌档，原 +18% 由 2 提到 3 触发）。
+- 阈值在系统内**累加生效**，故把 +18% 单独门控在 count3；2 龙仅得 +60 HP，必须投入 3/5 个槽位（共 5 名龙族英雄）才解锁全伤加成。
+- 测试：`SynergySystem.test.ts` 两处龙族断言改为 3 龙 + 新增 count2 maxHp 入门档断言；`battle-synergy.test.ts` P0-1 回归改为 3 龙。
+
+**验证门:** `npx tsc --noEmit` 0 错误；`npm test` 93 文件 / 1162 用例全过（净 -1：移除 6 旧利息断言 + 新增 5 例）。

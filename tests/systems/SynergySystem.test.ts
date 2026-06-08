@@ -162,17 +162,31 @@ describe('SynergySystem', () => {
 
   it('damage_bonus synergy is tracked', () => {
     const heroes: HeroState[] = [
-      makeHeroState('h1'), makeHeroState('h2'),
+      makeHeroState('h1'), makeHeroState('h2'), makeHeroState('h3'),
     ];
+    const dataMap = new Map<string, HeroData>([
+      ['h1', makeHeroData('h1', { race: 'dragon' })],
+      ['h2', makeHeroData('h2', { race: 'dragon' })],
+      ['h3', makeHeroData('h3', { race: 'dragon' })],
+    ]);
+
+    const result = synergy.calculateActiveSynergies(heroes, dataMap);
+    // Dragon (3): +18% all damage — capstone now requires 3, not 2
+    const dmgBonus = result.damageBonuses.get('all');
+    expect(dmgBonus).toBe(0.18);
+  });
+
+  it('dragon count-2 grants the maxHp entry tier, not the damage capstone', () => {
+    const heroes: HeroState[] = [makeHeroState('h1'), makeHeroState('h2')];
     const dataMap = new Map<string, HeroData>([
       ['h1', makeHeroData('h1', { race: 'dragon' })],
       ['h2', makeHeroData('h2', { race: 'dragon' })],
     ]);
 
     const result = synergy.calculateActiveSynergies(heroes, dataMap);
-    // Dragon (2): +18% all damage
-    const dmgBonus = result.damageBonuses.get('all');
-    expect(dmgBonus).toBe(0.18);
+    // 2 dragons: +60 maxHp entry tier only; the +18% all-damage capstone needs 3.
+    expect(result.heroBonuses.get('h1')!.maxHp).toBe(60);
+    expect(result.damageBonuses.get('all')).toBeUndefined();
   });
 
   it('reset clears the cache', () => {
@@ -258,14 +272,14 @@ describe('SynergySystem', () => {
       makeHeroState('h3'), makeHeroState('h4'),
     ];
     const dataMap = new Map<string, HeroData>([
-      ['h1', makeHeroData('h1', { race: 'dragon' })], // dragon (2): +18% all damage
+      ['h1', makeHeroData('h1', { race: 'dragon' })], // dragon (3): +18% all damage
       ['h2', makeHeroData('h2', { race: 'dragon' })],
-      ['h3', makeHeroData('h3', { race: 'undead' })], // undead needs 4 for dark damage bonus
-      ['h4', makeHeroData('h4', { race: 'undead' })],
+      ['h3', makeHeroData('h3', { race: 'dragon' })],
+      ['h4', makeHeroData('h4', { race: 'undead' })], // undead needs more for dark damage bonus
     ]);
 
     synergy.calculateActiveSynergies(heroes, dataMap);
-    // Dragon gives 0.18 to 'all'
+    // Dragon (3) gives 0.18 to 'all'
     const mult = synergy.getSynergyDamageMultiplier('fire');
     expect(mult).toBeCloseTo(1.18); // 1.0 + 0.18 (all)
   });

@@ -45,7 +45,17 @@ export const BOSS_BATTLE_GOLD = 120;
 // ============ Economy — Interest ============
 
 export const INTEREST_PER_10_GOLD = 1;
-export const INTEREST_CAP = 5;
+export const INTEREST_CAP = 10;
+
+/**
+ * Bank interest, rewarding the player for holding gold reserves.
+ * = floor(gold / 10) * INTEREST_PER_10_GOLD, capped at INTEREST_CAP.
+ * Settled after each battle victory (see BattleScene) so saving has a
+ * meaningful "hoard vs. spend" tension every fight — not just at rare rest nodes.
+ */
+export function computeInterest(gold: number): number {
+  return Math.min(Math.floor(gold / 10) * INTEREST_PER_10_GOLD, INTEREST_CAP);
+}
 
 // ============ Economy — Shop ============
 
