@@ -139,54 +139,65 @@ export const SYNERGY_DEFINITIONS: SynergyConfig[] = [
   },
 
   // ---- Element Synergies ----
+  // Two tiers: an accessible entry bonus (count>=2, +20% element damage) and a
+  // mono-element capstone (count>=4) that ALSO grants the element a distinct team
+  // identity — so committing 4 slots to one element (often via temporaryElement
+  // conversion of element-less heroes, see RunManager.setTemporaryElement) is a
+  // real archetype, competitive with race/class capstones rather than a flat
+  // single-stat bump. Capstone numbers are conservative and pending playtest tuning.
   {
     id: 'synergy_fire',
     name: '烈焰之心',
-    description: '火属性英雄增幅火焰伤害',
+    description: '火属性英雄增幅火焰伤害；四人成阵时引发熔火爆发',
     type: 'element',
     key: 'fire',
     thresholds: [
       { count: 2, description: '火属性伤害+20%', effects: [{ type: 'damage_bonus', element: 'fire', value: 0.20 }] },
+      { count: 4, description: '熔火爆发：火属性伤害再+25%，全体攻击+10%', effects: [{ type: 'damage_bonus', element: 'fire', value: 0.25 }, { type: 'stat_boost', stat: 'attack', value: 0.10, percent: true }] },
     ],
   },
   {
     id: 'synergy_dark',
     name: '暗影亲和',
-    description: '暗属性英雄增幅暗影伤害',
+    description: '暗属性英雄增幅暗影伤害；四人成阵时唤起深渊之力',
     type: 'element',
     key: 'dark',
     thresholds: [
       { count: 2, description: '暗属性伤害+20%', effects: [{ type: 'damage_bonus', element: 'dark', value: 0.20 }] },
+      { count: 4, description: '深渊侵蚀：暗属性伤害再+25%，全体法力+20', effects: [{ type: 'damage_bonus', element: 'dark', value: 0.25 }, { type: 'stat_boost', stat: 'magicPower', value: 20 }] },
     ],
   },
   {
     id: 'synergy_holy',
     name: '圣光共鸣',
-    description: '圣属性英雄增幅圣光伤害',
+    description: '圣属性英雄增幅圣光伤害；四人成阵时降下神圣领域',
     type: 'element',
     key: 'holy',
     thresholds: [
       { count: 2, description: '圣属性伤害+20%', effects: [{ type: 'damage_bonus', element: 'holy', value: 0.20 }] },
+      { count: 4, description: '神圣领域：圣属性伤害再+25%，全体法抗+15', effects: [{ type: 'damage_bonus', element: 'holy', value: 0.25 }, { type: 'resistance', value: 15 }] },
     ],
   },
   {
     id: 'synergy_ice',
     name: '永冬之力',
-    description: '冰属性英雄增幅冰霜伤害',
+    description: '冰属性英雄增幅冰霜伤害；四人成阵时降临绝对零度',
     type: 'element',
     key: 'ice',
     thresholds: [
       { count: 2, description: '冰属性伤害+20%', effects: [{ type: 'damage_bonus', element: 'ice', value: 0.20 }] },
+      { count: 4, description: '绝对零度：冰属性伤害再+25%，全体防御+15%', effects: [{ type: 'damage_bonus', element: 'ice', value: 0.25 }, { type: 'stat_boost', stat: 'defense', value: 0.15, percent: true }] },
     ],
   },
   {
     id: 'synergy_lightning',
     name: '雷霆之怒',
-    description: '雷属性英雄增幅雷电伤害',
+    description: '雷属性英雄增幅雷电伤害；四人成阵时引动雷暴',
     type: 'element',
     key: 'lightning',
     thresholds: [
       { count: 2, description: '雷属性伤害+20%', effects: [{ type: 'damage_bonus', element: 'lightning', value: 0.20 }] },
+      { count: 4, description: '雷暴降临：雷属性伤害再+25%，全体攻速+0.12', effects: [{ type: 'damage_bonus', element: 'lightning', value: 0.25 }, { type: 'stat_boost', stat: 'attackSpeed', value: 0.12 }] },
     ],
   },
 ];
