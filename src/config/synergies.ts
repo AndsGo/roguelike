@@ -164,7 +164,7 @@ export const SYNERGY_DEFINITIONS: SynergyConfig[] = [
     key: 'dark',
     thresholds: [
       { count: 2, description: '暗属性伤害+20%', effects: [{ type: 'damage_bonus', element: 'dark', value: 0.20 }] },
-      { count: 4, description: '深渊侵蚀：暗属性伤害再+25%，全体法力+20', effects: [{ type: 'damage_bonus', element: 'dark', value: 0.25 }, { type: 'stat_boost', stat: 'magicPower', value: 20 }] },
+      { count: 4, description: '深渊侵蚀：暗属性伤害再+25%，全体暴击率+15%', effects: [{ type: 'damage_bonus', element: 'dark', value: 0.25 }, { type: 'stat_boost', stat: 'critChance', value: 0.15 }] },
     ],
   },
   {

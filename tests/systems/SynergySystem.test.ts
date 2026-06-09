@@ -330,4 +330,29 @@ describe('SynergySystem', () => {
     expect(result.damageBonuses.get('fire')).toBeCloseTo(0.20);
     expect(result.heroPercentBonuses.get('f1')!.attack).toBeUndefined();
   });
+
+  it('dark element capstone grants crit (not magicPower), fitting its assassin/caster roster', () => {
+    // Arrange: mono-dark party of 4. Dark heroes split phys-assassin / magic-caster,
+    // so the capstone identity must be useful to both — crit, not magicPower.
+    const heroes: HeroState[] = [
+      makeHeroState('d1'), makeHeroState('d2'),
+      makeHeroState('d3'), makeHeroState('d4'),
+    ];
+    const dataMap = new Map<string, HeroData>([
+      ['d1', makeHeroData('d1', { element: 'dark' })],
+      ['d2', makeHeroData('d2', { element: 'dark' })],
+      ['d3', makeHeroData('d3', { element: 'dark' })],
+      ['d4', makeHeroData('d4', { element: 'dark' })],
+    ]);
+
+    // Act
+    const result = synergy.calculateActiveSynergies(heroes, dataMap);
+
+    // Assert: dark damage stacks to +0.45; identity bonus is +0.15 critChance (flat),
+    // and NO magicPower is granted (the old dead-stat bonus is gone).
+    expect(result.damageBonuses.get('dark')).toBeCloseTo(0.45);
+    const bonus = result.heroBonuses.get('d1')!;
+    expect(bonus.critChance).toBeCloseTo(0.15);
+    expect(bonus.magicPower).toBeUndefined();
+  });
 });
