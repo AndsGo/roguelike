@@ -125,6 +125,10 @@ class Graphics extends MockGameObject {
 
 class Image extends MockGameObject {
   private _textureKey = '';
+  // Record tint state so tests can assert silhouette-tint behaviour (e.g. status overlays).
+  tintFillColor: number | null = null;
+  displayWidth = 0;
+  displayHeight = 0;
 
   constructor(scene?: any, x?: number, y?: number, key?: string) {
     super();
@@ -134,10 +138,12 @@ class Image extends MockGameObject {
     this._textureKey = key ?? '';
   }
 
+  get textureKey() { return this._textureKey; }
   setTexture(key: string) { this._textureKey = key; return this; }
-  setTintFill(_color: number) { return this; }
-  clearTint() { return this; }
-  setTint(_color: number) { return this; }
+  setDisplaySize(w: number, h: number) { this.displayWidth = w; this.displayHeight = h; return this; }
+  setTintFill(color: number) { this.tintFillColor = color; return this; }
+  clearTint() { this.tintFillColor = null; return this; }
+  setTint(color: number) { this.tintFillColor = color; return this; }
 }
 
 class Particles extends MockGameObject {
