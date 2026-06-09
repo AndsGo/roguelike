@@ -138,10 +138,13 @@ export class MapScene extends Phaser.Scene {
           connGraphics.lineStyle(2, 0x99bbff, 0.7);
           MapRenderer.drawCurvedLine(connGraphics, fromPos.x, fromPos.y, toPos.x, toPos.y);
         } else if (isCompleted) {
-          connGraphics.lineStyle(2, 0x556677, 0.5);
+          connGraphics.lineStyle(2.5, 0x8294b3, 0.65);
           MapRenderer.drawCurvedLine(connGraphics, fromPos.x, fromPos.y, toPos.x, toPos.y);
         } else {
-          connGraphics.lineStyle(2, 0x3a4466, 0.4);
+          // Upcoming/unreachable links. Brightened from 0x3a4466@0.4 — at run start the
+          // whole map is this tier, and the old colour sat too close to the 0x1a1a2e
+          // background to read. Still muted vs the bright accessible path (0x99bbff).
+          connGraphics.lineStyle(2.5, 0x6677aa, 0.55);
           MapRenderer.drawCurvedLine(connGraphics, fromPos.x, fromPos.y, toPos.x, toPos.y);
         }
       }

@@ -298,7 +298,7 @@ export const UI = {
   // HeroDraftScene
   heroDraft: {
     title: '选择初始英雄',
-    subtitle: '选择2-3名英雄开始冒险',
+    subtitle: '选择2-4名英雄开始冒险',
     locked: '未解锁',
     selected: (n: number, max: number) => `已选: ${n}/${max}`,
     startBtn: '开始冒险',
