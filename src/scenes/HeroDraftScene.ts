@@ -157,7 +157,10 @@ export class HeroDraftScene extends Phaser.Scene {
       const condStr = unlockCond ? formatUnlockCondition(unlockCond) : UI.heroDraft.locked;
       const condText = TextFactory.create(this, 0, 16, condStr, 'tiny', {
         color: '#aa8833',
-        wordWrap: { width: CARD_W - 8 },
+        // useAdvancedWrap lets spaceless CJK break at character boundaries; without
+        // it, Phaser's whitespace-only wrap leaves the unlock string on one line that
+        // overflows the narrow (74px) card into neighbouring cells.
+        wordWrap: { width: CARD_W - 8, useAdvancedWrap: true },
         align: 'center',
       }).setOrigin(0.5);
       container.add(condText);
