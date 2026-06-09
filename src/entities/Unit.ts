@@ -65,7 +65,9 @@ export class Unit extends Phaser.GameObjects.Container {
   private aiSpriteConfig?: UnitSpriteSheetConfig;
   private nameLabel: Phaser.GameObjects.Text;
   private statusIcons: Phaser.GameObjects.Text;
-  private statusOverlay: Phaser.GameObjects.Graphics;
+  private statusOverlay: Phaser.GameObjects.Image;
+  /** Texture key currently shown by the sprite — mirrored onto the status overlay. */
+  private spriteTextureKey: string = '';
   private stunTween: Phaser.Tweens.Tween | null = null;
   private statusTooltip: Phaser.GameObjects.Container | null = null;
   isBoss: boolean = false;
@@ -116,9 +118,11 @@ export class Unit extends Phaser.GameObjects.Container {
       sprite.setDisplaySize(this.aiSpriteConfig.displayWidth, this.aiSpriteConfig.displayHeight);
       sprite.play(`${this.aiSpriteConfig.textureKey}_idle`);
       this.sprite = sprite;
+      this.spriteTextureKey = this.aiSpriteConfig.textureKey;
     } else {
       const textureKey = getOrCreateTexture(scene, this.buildChibiConfig());
       this.sprite = scene.add.image(0, 0, textureKey);
+      this.spriteTextureKey = textureKey;
     }
     this.sprite.setOrigin(0.5);
     this.add(this.sprite);
@@ -155,8 +159,18 @@ export class Unit extends Phaser.GameObjects.Container {
       this.add(elementLabel);
     }
 
-    // Status effect visuals (pre-created to avoid per-frame allocation)
-    this.statusOverlay = scene.add.graphics();
+    // Status effect tint: a silhouette-following copy of the sprite texture, tinted
+    // and washed at low alpha while a status is active. setTintFill respects the
+    // texture's alpha (exactly like the hit-flash), so it colours ONLY the character
+    // — never the full bounding box (the old fillRect "square mask" bug). Hidden
+    // until a status applies.
+    const statusOverlay = scene.add.image(0, 0, this.spriteTextureKey, 0);
+    statusOverlay.setOrigin(0.5);
+    if (this.aiSpriteConfig) {
+      statusOverlay.setDisplaySize(this.aiSpriteConfig.displayWidth, this.aiSpriteConfig.displayHeight);
+    }
+    statusOverlay.setAlpha(0.4).setVisible(false);
+    this.statusOverlay = statusOverlay;
     this.add(this.statusOverlay);
     this.statusIcons = TextFactory.create(scene, 0, -this.spriteHeight / 2 - 24, '', 'small', {
       color: '#ffcc00',
@@ -228,6 +242,8 @@ export class Unit extends Phaser.GameObjects.Container {
     }
     const key = getOrCreateTexture(this.scene, this.buildChibiConfig());
     this.sprite.setTexture(key);
+    this.spriteTextureKey = key;
+    this.statusOverlay.setTexture(key);
   }
 
   playUnitSpriteAnimation(anim: UnitSpriteAnim): void {
@@ -599,8 +615,6 @@ export class Unit extends Phaser.GameObjects.Container {
     const hasHot = this.statusEffects.some(e => e.type === 'hot');
 
     // Color overlay based on active effects (priority: freeze > burn > poison > debuff)
-    this.statusOverlay.clear();
-
     let overlayColor: number | null = null;
     if (hasFreeze) {
       overlayColor = 0x88ccff;
@@ -612,11 +626,12 @@ export class Unit extends Phaser.GameObjects.Container {
       overlayColor = 0xaa6666;
     }
 
+    // Tint the silhouette copy (see constructor) — follows the character shape, no box.
     if (overlayColor !== null) {
-      const w = this.spriteWidth;
-      const h = this.spriteHeight;
-      this.statusOverlay.fillStyle(overlayColor, 0.3);
-      this.statusOverlay.fillRect(-w / 2, -h / 2, w, h);
+      this.statusOverlay.setTintFill(overlayColor);
+      this.statusOverlay.setVisible(true);
+    } else {
+      this.statusOverlay.setVisible(false);
     }
 
     // Status icon text above unit — show type symbol + remaining duration
