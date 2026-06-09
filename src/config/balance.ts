@@ -25,6 +25,32 @@ export const CRIT_MULTIPLIER = 1.5;
 export const DEFENSE_FORMULA_BASE = 100; // damage * (100 / (100 + def))
 export const DEFENSE_SOFT_CAP = 80;         // defense value where diminishing returns begin
 export const DEFENSE_SOFT_CAP_FACTOR = 20;  // sqrt scaling factor above soft cap
+
+// Single-hit damage soft cap (backlog issue #6). The damage pipeline is fully
+// multiplicative (crit × element × combo × relic × synergy × lowHp …) and can stack
+// to ~19-26× a unit's offensive stat against a low-mitigation target, enabling
+// degenerate one-shots that delete a boss health bar and remove combat tension.
+// Above DAMAGE_SOFT_CAP_MULT × (attack | magicPower) a single hit's EXCESS is
+// compressed by a sqrt curve (same idiom as the defense soft cap above), so big
+// build spikes are still rewarded but the degenerate tail is trimmed. Because the
+// cap is pegged to the offensive stat and applied AFTER defense reduction, it does
+// not bite in normal high-defense fights — only the burst ceiling.
+// NOTE: conservative starting values — tune via playtest before finalizing.
+export const DAMAGE_SOFT_CAP_MULT = 15;     // hits up to 15× the offensive stat are unscaled
+export const DAMAGE_SOFT_CAP_FACTOR = 0.05; // sqrt compression strength for the excess above the cap
+
+/**
+ * Apply the single-hit soft cap. Below `offensiveStat × DAMAGE_SOFT_CAP_MULT` the
+ * value is unchanged; above it the excess is compressed by a sqrt curve. Monotonic
+ * increasing (more investment always yields more damage), but with sharp diminishing
+ * returns at the extreme. A non-positive offensiveStat disables the cap (returns raw).
+ */
+export function softCapDamage(raw: number, offensiveStat: number): number {
+  const cap = offensiveStat * DAMAGE_SOFT_CAP_MULT;
+  if (cap <= 0 || raw <= cap) return raw;
+  return cap + Math.sqrt((raw - cap) * cap * DAMAGE_SOFT_CAP_FACTOR);
+}
+
 export const Y_MOVEMENT_DAMPING = 0.3;
 
 // ============ Leveling ============

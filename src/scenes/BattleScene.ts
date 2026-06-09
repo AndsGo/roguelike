@@ -696,6 +696,21 @@ export class BattleScene extends Phaser.Scene {
               boss.invalidateStats();
               this.effects.showSkillName(boss.x, boss.y - 40, UI.battle.bossDamageReduction, 0xffaa44);
               break;
+            case 'heal':
+              // Sustain wall: restore value% of maxHp — punishes burst-then-coast,
+              // rewards sustained pressure. (Issue #5 boss differentiation.)
+              boss.heal(Math.round(boss.baseStats.maxHp * (data.effect.value / 100)));
+              this.effects.showSkillName(boss.x, boss.y - 40, UI.battle.bossHeal, 0x44dd66);
+              break;
+            case 'cleanse':
+              // Purge player-inflicted DoT/debuff/stun on the boss — punishes
+              // DoT-stacking builds, demands direct burst. (Issue #5.)
+              boss.statusEffects = boss.statusEffects.filter(
+                e => e.type !== 'dot' && e.type !== 'debuff' && e.type !== 'stun',
+              );
+              boss.invalidateStats();
+              this.effects.showSkillName(boss.x, boss.y - 40, UI.battle.bossCleanse, 0xcc66ff);
+              break;
           }
         }
       }
@@ -905,7 +920,7 @@ export class BattleScene extends Phaser.Scene {
     // Overlay
     const overlay = this.add.rectangle(
       GAME_WIDTH / 2, GAME_HEIGHT / 2,
-      GAME_WIDTH, GAME_HEIGHT, 0x000000, 0.6,
+      GAME_WIDTH, GAME_HEIGHT, 0x000000, Theme.modalBackdropAlpha,
     ).setInteractive().setDepth(100);
 
     // Panel background

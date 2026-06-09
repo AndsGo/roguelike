@@ -82,6 +82,16 @@ describe('Content Integrity', () => {
         }
       }
     });
+
+    it('featuredEvents are a subset of the act eventPool and exist (issue #5)', () => {
+      const actsWithFeatured = actsData as { id: string; eventPool: string[]; featuredEvents?: string[] }[];
+      for (const act of actsWithFeatured) {
+        for (const eventId of act.featuredEvents ?? []) {
+          expect(eventIds.has(eventId), `Act ${act.id} featuredEvent missing from events.json: ${eventId}`).toBe(true);
+          expect(act.eventPool.includes(eventId), `Act ${act.id} featuredEvent not in its eventPool: ${eventId}`).toBe(true);
+        }
+      }
+    });
   });
 
   describe('Event recruit/relic references', () => {

@@ -316,4 +316,31 @@ describe('RunManager', () => {
       expect(humanSynergy).toBeDefined();
     });
   });
+
+  describe('setTemporaryElement', () => {
+    it('prefers an element-less hero so the conversion adds an element-synergy member', () => {
+      // Arrange: mage has an innate element (fire); warrior has none.
+      rm.newRun(1, 'normal', ['mage', 'warrior']);
+
+      // Act: grant an ice element.
+      const affectedId = rm.setTemporaryElement('ice');
+
+      // Assert: the element-less warrior is converted, not the fire mage.
+      expect(affectedId).toBe('warrior');
+      const warrior = rm.getHeroes().find(h => h.id === 'warrior');
+      const mage = rm.getHeroes().find(h => h.id === 'mage');
+      expect(warrior!.temporaryElement).toBe('ice');
+      expect(mage!.temporaryElement).toBeUndefined();
+    });
+
+    it('returns null when every hero already has a temporary element', () => {
+      // Arrange: a 2-hero run, both already converted.
+      rm.newRun(1, 'normal', ['mage', 'warrior']);
+      rm.setTemporaryElement('ice');
+      rm.setTemporaryElement('fire');
+
+      // Act / Assert: no eligible hero remains.
+      expect(rm.setTemporaryElement('dark')).toBeNull();
+    });
+  });
 });

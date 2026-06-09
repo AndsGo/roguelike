@@ -66,6 +66,35 @@ describe('DamageSystem', () => {
       expect(result.finalDamage).toBeLessThanOrEqual(115);
     });
 
+    it('soft-caps a degenerate single hit relative to the attacker offensive stat (issue #6)', () => {
+      const attacker = createMockUnit({
+        stats: { attack: 100, critChance: 0, critDamage: 1.5, defense: 0, magicResist: 0 },
+      });
+      const target = createMockUnit({
+        stats: { defense: 0, maxHp: 100000, hp: 100000, magicResist: 0 },
+      });
+
+      // baseDamage 5000 = 50× the attacker's attack against a 0-defense target.
+      // Uncapped this would land ~5000 (±10%); the soft cap (15× attack = 1500)
+      // compresses it to ~1787 before variance.
+      const result = ds.calculateDamage(attacker as any, target as any, 5000, 'physical', false);
+      expect(result.finalDamage).toBeLessThan(2100);    // far below the uncapped 4500+
+      expect(result.finalDamage).toBeGreaterThan(1500);  // still above the cap — a big spike
+    });
+
+    it('does not soft-cap pure damage (issue #6 — pure bypasses mitigation logic)', () => {
+      const attacker = createMockUnit({
+        stats: { attack: 100, critChance: 0, critDamage: 1.5 },
+      });
+      const target = createMockUnit({
+        stats: { defense: 0, maxHp: 100000, hp: 100000 },
+      });
+
+      // 5000 pure = 50× attack, but pure damage is exempt from the cap.
+      const result = ds.calculateDamage(attacker as any, target as any, 5000, 'pure', false);
+      expect(result.finalDamage).toBeGreaterThan(4000); // ~5000 ±10%, uncapped
+    });
+
     it('applies crit multiplier when forceCrit is true', () => {
       const attacker = createMockUnit({
         stats: { attack: 50, critChance: 0, critDamage: 2.0 },
@@ -85,7 +114,9 @@ describe('DamageSystem', () => {
 
     it('variance stays within +-10% range over many iterations', () => {
       const attacker = createMockUnit({
-        stats: { attack: 50, critChance: 0, critDamage: 1.5 },
+        // attack 100 keeps base 1000 (= 10× attack) below the issue-#6 soft cap
+        // (15× attack), so this test isolates variance without the cap clipping it.
+        stats: { attack: 100, critChance: 0, critDamage: 1.5 },
       });
       const target = createMockUnit({
         stats: { defense: 0, maxHp: 10000, hp: 10000 },

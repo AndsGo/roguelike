@@ -1,6 +1,7 @@
 import { Unit } from '../entities/Unit';
 import { DamageType, ElementType } from '../types';
 import { DAMAGE_VARIANCE, DEFENSE_FORMULA_BASE, DEFENSE_SOFT_CAP, DEFENSE_SOFT_CAP_FACTOR } from '../constants';
+import { softCapDamage } from '../config/balance';
 import { DamageNumber } from '../components/DamageNumber';
 import { SeededRNG } from '../utils/rng';
 import { ElementSystem } from './ElementSystem';
@@ -128,6 +129,15 @@ export class DamageSystem {
       if (lowHpBonus > 0) {
         raw *= (1 + lowHpBonus);
       }
+    }
+
+    // Single-hit soft cap (issue #6): compress the extreme tail of the multiplicative
+    // stack so a degenerate build cannot one-shot a boss, while still rewarding spikes.
+    // Pegged to the attacker's offensive stat; skips 'pure' damage (intentional fixed/
+    // percent damage that should bypass mitigation logic).
+    if (damageType !== 'pure') {
+      const offensiveStat = damageType === 'magical' ? stats.magicPower : stats.attack;
+      raw = softCapDamage(raw, offensiveStat);
     }
 
     // Random variance +/-10%

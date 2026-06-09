@@ -283,4 +283,51 @@ describe('SynergySystem', () => {
     const mult = synergy.getSynergyDamageMultiplier('fire');
     expect(mult).toBeCloseTo(1.18); // 1.0 + 0.18 (all)
   });
+
+  it('fire element capstone (count>=4) stacks damage and grants the team-identity bonus', () => {
+    // Arrange: a committed mono-fire party of 4.
+    const heroes: HeroState[] = [
+      makeHeroState('f1'), makeHeroState('f2'),
+      makeHeroState('f3'), makeHeroState('f4'),
+    ];
+    const dataMap = new Map<string, HeroData>([
+      ['f1', makeHeroData('f1', { element: 'fire' })],
+      ['f2', makeHeroData('f2', { element: 'fire' })],
+      ['f3', makeHeroData('f3', { element: 'fire' })],
+      ['f4', makeHeroData('f4', { element: 'fire' })],
+    ]);
+
+    // Act
+    const result = synergy.calculateActiveSynergies(heroes, dataMap);
+
+    // Assert: capstone threshold reached; entry (+0.20) and capstone (+0.25)
+    // element-damage bonuses stack cumulatively to +0.45.
+    const fireSynergy = result.activeSynergies.find(s => s.synergyId === 'synergy_fire');
+    expect(fireSynergy!.activeThreshold).toBe(4);
+    expect(result.damageBonuses.get('fire')).toBeCloseTo(0.45);
+    expect(synergy.getSynergyDamageMultiplier('fire')).toBeCloseTo(1.45);
+    // Distinct team identity: fire capstone grants +10% attack to members.
+    expect(result.heroPercentBonuses.get('f1')!.attack).toBeCloseTo(0.10);
+  });
+
+  it('fire element with 3 heroes gets only the entry tier, not the capstone', () => {
+    // Arrange: 3 fire heroes — between the two thresholds.
+    const heroes: HeroState[] = [
+      makeHeroState('f1'), makeHeroState('f2'), makeHeroState('f3'),
+    ];
+    const dataMap = new Map<string, HeroData>([
+      ['f1', makeHeroData('f1', { element: 'fire' })],
+      ['f2', makeHeroData('f2', { element: 'fire' })],
+      ['f3', makeHeroData('f3', { element: 'fire' })],
+    ]);
+
+    // Act
+    const result = synergy.calculateActiveSynergies(heroes, dataMap);
+
+    // Assert: entry tier only — no capstone damage stack, no identity bonus.
+    const fireSynergy = result.activeSynergies.find(s => s.synergyId === 'synergy_fire');
+    expect(fireSynergy!.activeThreshold).toBe(2);
+    expect(result.damageBonuses.get('fire')).toBeCloseTo(0.20);
+    expect(result.heroPercentBonuses.get('f1')!.attack).toBeUndefined();
+  });
 });

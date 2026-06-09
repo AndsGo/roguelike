@@ -182,17 +182,33 @@ export class RunManager {
     return true;
   }
 
-  /** Set a temporary element on a random hero */
+  /**
+   * Grant a temporary (run-persistent) element to a hero, enabling element
+   * synergies for builds. Prefers heroes with NO innate element so the conversion
+   * actually adds a new element-synergy member instead of overwriting a hero who
+   * already contributes one. Falls back to any not-yet-converted hero only when
+   * every hero already has an element. Returns the affected heroId, or null if
+   * all heroes have already been converted.
+   */
   setTemporaryElement(element: ElementType): string | null {
-    const eligible = this.state.heroes.filter(h => !h.temporaryElement);
-    if (eligible.length === 0) return null;
-    const hero = this.rng.pick(eligible);
+    const unconverted = this.state.heroes.filter(h => !h.temporaryElement);
+    if (unconverted.length === 0) return null;
+    const elementless = unconverted.filter(h => {
+      const data = this.getHeroData(h.id) as HeroData | undefined;
+      return data != null && !data.element;
+    });
+    const pool = elementless.length > 0 ? elementless : unconverted;
+    const hero = this.rng.pick(pool);
     hero.temporaryElement = element;
     this.calculateSynergies();
     return hero.id;
   }
 
-  /** Clear all temporary elements (called at end of act) */
+  /**
+   * Clear all temporary elements. Available for callers that want conversions to
+   * expire (e.g. a future act-reset rule); NOT auto-invoked today, so a granted
+   * element persists for the rest of the run.
+   */
   clearTemporaryElements(): void {
     for (const hero of this.state.heroes) {
       delete hero.temporaryElement;

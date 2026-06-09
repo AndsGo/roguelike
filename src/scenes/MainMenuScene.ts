@@ -210,7 +210,7 @@ export class MainMenuScene extends Phaser.Scene {
     const cx = GAME_WIDTH / 2;
     const cy = GAME_HEIGHT / 2;
 
-    const backdrop = this.add.rectangle(cx, cy, GAME_WIDTH, GAME_HEIGHT, 0x000000, 0.6)
+    const backdrop = this.add.rectangle(cx, cy, GAME_WIDTH, GAME_HEIGHT, 0x000000, Theme.modalBackdropAlpha)
       .setInteractive().setDepth(799);
 
     const panelBg = this.add.graphics().setDepth(800);
@@ -294,7 +294,7 @@ export class MainMenuScene extends Phaser.Scene {
     const panelH = 280;
 
     // Overlay — click outside panel to close
-    const overlay = this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, 0x000000, 0.6)
+    const overlay = this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, 0x000000, Theme.modalBackdropAlpha)
       .setInteractive().setDepth(799);
 
     const panelBg = this.add.graphics().setDepth(800);
@@ -383,7 +383,7 @@ export class MainMenuScene extends Phaser.Scene {
 
   private showNewGameConfirmation(): void {
     // Overlay background
-    const overlay = this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, 0x000000, 0.6)
+    const overlay = this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, 0x000000, Theme.modalBackdropAlpha)
       .setInteractive().setDepth(799);
 
     const panelBg = this.add.graphics().setDepth(800);
@@ -477,7 +477,7 @@ export class MainMenuScene extends Phaser.Scene {
 
     // Full-screen overlay (click to close)
     this.upgradeOverlay = this.add.rectangle(
-      GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, 0x000000, 0.95,
+      GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, 0x000000, Theme.modalBackdropAlpha,
     ).setInteractive({ useHandCursor: true }).setDepth(799);
     this.upgradeOverlay.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
       // Only close when clicking outside the panel area

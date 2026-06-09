@@ -47,11 +47,18 @@ describe('Phase 2b: Boss Phases', () => {
   });
 
   it('boss effects use valid types', () => {
-    const validTypes = ['enrage', 'shield', 'damage_reduction'];
+    // Issue #5 added heal (sustain wall) and cleanse (debuff purge) to diversify
+    // the response each boss demands beyond "burst > sustain".
+    const validTypes = ['enrage', 'shield', 'damage_reduction', 'heal', 'cleanse'];
     for (const id of NEW_BOSSES) {
       for (const phase of phases[id].phases) {
         expect(validTypes).toContain(phase.bossEffect.type);
-        expect(phase.bossEffect.value).toBeGreaterThan(0);
+        // cleanse purges all (no magnitude); every other effect needs value > 0.
+        if (phase.bossEffect.type === 'cleanse') {
+          expect(phase.bossEffect.value).toBeGreaterThanOrEqual(0);
+        } else {
+          expect(phase.bossEffect.value).toBeGreaterThan(0);
+        }
       }
     }
   });
@@ -60,5 +67,24 @@ describe('Phase 2b: Boss Phases', () => {
     for (const phase of phases.frost_queen.phases) {
       expect(phase.spawns).toHaveLength(0);
     }
+  });
+
+  it('each boss has a distinct mechanical signature (issue #5)', () => {
+    const ALL_BOSSES = ['dragon_boss', 'heart_of_the_forge', 'frost_queen', 'thunder_titan', 'shadow_lord'];
+    const signatures = ALL_BOSSES.map(id =>
+      phases[id].phases.map(p => p.bossEffect.type).sort().join('+'),
+    );
+    // No two bosses share the same effect-type profile — each demands a distinct response.
+    expect(new Set(signatures).size).toBe(ALL_BOSSES.length);
+  });
+
+  it('boss roster uses more than the original 3 effect types (issue #5)', () => {
+    const ALL_BOSSES = ['dragon_boss', 'heart_of_the_forge', 'frost_queen', 'thunder_titan', 'shadow_lord'];
+    const allTypes = new Set<string>();
+    for (const id of ALL_BOSSES) {
+      for (const p of phases[id].phases) allTypes.add(p.bossEffect.type);
+    }
+    expect(allTypes.has('heal') || allTypes.has('cleanse')).toBe(true);
+    expect(allTypes.size).toBeGreaterThan(3);
   });
 });
