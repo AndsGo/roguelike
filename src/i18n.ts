@@ -119,6 +119,8 @@ export const UI = {
     bossShield: '护盾激活！',
     bossEnrage: '狂暴化！',
     bossDamageReduction: '防御强化！',
+    bossHeal: '生命汲取！',
+    bossCleanse: '净化奥能！',
     statusDot: '灼烧',
     statusHot: '回复',
     statusStun: '眩晕',

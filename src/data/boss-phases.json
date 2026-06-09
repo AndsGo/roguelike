@@ -18,12 +18,12 @@
       {
         "hpPercent": 0.50,
         "spawns": ["lightning_strider", "holy_smith"],
-        "bossEffect": { "type": "enrage", "value": 30 }
+        "bossEffect": { "type": "heal", "value": 10 }
       },
       {
         "hpPercent": 0.25,
         "spawns": ["void_weaver", "flame_construct"],
-        "bossEffect": { "type": "damage_reduction", "value": 20 }
+        "bossEffect": { "type": "cleanse", "value": 0 }
       }
     ]
   },
@@ -32,7 +32,7 @@
       {
         "hpPercent": 0.50,
         "spawns": [],
-        "bossEffect": { "type": "enrage", "value": 30 }
+        "bossEffect": { "type": "cleanse", "value": 0 }
       },
       {
         "hpPercent": 0.25,
@@ -51,7 +51,7 @@
       {
         "hpPercent": 0.50,
         "spawns": ["storm_hawk", "storm_hawk"],
-        "bossEffect": { "type": "damage_reduction", "value": 15 }
+        "bossEffect": { "type": "heal", "value": 15 }
       },
       {
         "hpPercent": 0.25,
@@ -75,7 +75,7 @@
       {
         "hpPercent": 0.25,
         "spawns": ["dark_mage"],
-        "bossEffect": { "type": "enrage", "value": 35 }
+        "bossEffect": { "type": "heal", "value": 12 }
       }
     ]
   }

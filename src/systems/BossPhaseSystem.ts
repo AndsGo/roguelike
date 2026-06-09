@@ -5,7 +5,11 @@ export interface BossPhase {
   hpPercent: number;
   spawns: string[];
   bossEffect?: {
-    type: 'shield' | 'enrage' | 'damage_reduction';
+    // shield/enrage/damage_reduction: stat buffs on the boss.
+    // heal: restore `value`% of the boss's maxHp (punishes burst-then-coast).
+    // cleanse: purge all player-inflicted DoT/debuff/stun on the boss (punishes
+    //   DoT-stacking; `value` is unused, kept 0 for schema consistency).
+    type: 'shield' | 'enrage' | 'damage_reduction' | 'heal' | 'cleanse';
     value: number;
   };
 }

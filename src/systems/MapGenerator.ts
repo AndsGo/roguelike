@@ -266,6 +266,13 @@ export class MapGenerator {
     if (act.eventPool.length === 0) {
       return { eventId: 'healing_spring' }; // fallback
     }
+    // Per-act structural identity (issue #5): ~50% of the time draw from this act's
+    // signature events so each act surfaces its theme (abyss → curses/pacts, forge →
+    // elemental rituals) without fully crowding out the rest of the pool's variety.
+    const featured = (act.featuredEvents ?? []).filter(id => act.eventPool.includes(id));
+    if (featured.length > 0 && rng.chance(0.5)) {
+      return { eventId: rng.pick(featured) };
+    }
     return {
       eventId: rng.pick(act.eventPool),
     };

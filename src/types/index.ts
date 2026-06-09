@@ -274,6 +274,13 @@ export interface ActConfig {
   enemyPool: string[];   // enemy IDs available in this act
   bossPool: string[];    // boss IDs
   eventPool: string[];   // event IDs
+  /**
+   * Thematic "signature" events for this act (must be a subset of eventPool).
+   * MapGenerator biases event-node selection toward these, giving each act a
+   * structural identity beyond stat scaling — e.g. the abyss surfaces curses/pacts,
+   * the element forge surfaces elemental rituals. (Issue #5 per-act structure.)
+   */
+  featuredEvents?: string[];
   elementAffinity?: ElementType; // dominant element in this act
   difficultyMultiplier: number;  // scales enemy stats
 }
