@@ -191,6 +191,19 @@ export const Theme = {
   },
 
   spacing: { xs: 4, sm: 8, md: 16, lg: 24, xl: 32 },
+
+  /**
+   * Modal backdrop opacity — single source of truth, 2-tier convention:
+   *  - `modalBackdropAlpha` (0.7): a modal that is the TOPMOST overlay and darkens
+   *    the live scene behind it. Used by every full-screen panel and by standalone
+   *    detail popups (Achievement / Codex / Help / Formation / RunOverview /
+   *    BuildReview / SkillEvolution / HeroDetail).
+   *  - `modalBackdropAlphaNested` (0.4): a detail popup stacked ON TOP of an
+   *    already-darkened modal (e.g. CodexDetailPopup over CodexPanel). Kept lighter
+   *    so the two backdrops don't compound into a near-black screen.
+   */
+  modalBackdropAlpha: 0.7,
+  modalBackdropAlphaNested: 0.4,
 };
 
 /** Convert a 0x hex number to a '#rrggbb' CSS string */

@@ -33,7 +33,7 @@ export class CodexDetailPopup extends Phaser.GameObjects.Container {
     this.backdrop = scene.add.rectangle(
       GAME_WIDTH / 2, GAME_HEIGHT / 2,
       GAME_WIDTH, GAME_HEIGHT,
-      0x000000, 0.4,
+      0x000000, Theme.modalBackdropAlphaNested,
     ).setInteractive({ useHandCursor: true });
     this.add(this.backdrop);
 

@@ -35,7 +35,7 @@ export class SkillEvolutionPanel {
     const panelH = 320;
 
     // Backdrop (no close-on-click — player must choose a branch)
-    const backdrop = this.scene.add.rectangle(cx, cy, GAME_WIDTH, GAME_HEIGHT, 0x000000, 0.7)
+    const backdrop = this.scene.add.rectangle(cx, cy, GAME_WIDTH, GAME_HEIGHT, 0x000000, Theme.modalBackdropAlpha)
       .setInteractive().setDepth(799);
     this.elements.push(backdrop);
 

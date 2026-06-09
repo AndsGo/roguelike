@@ -280,7 +280,7 @@ export class SettingsScene extends Phaser.Scene {
   ): void {
     const overlay = this.add.rectangle(
       GAME_WIDTH / 2, GAME_HEIGHT / 2,
-      GAME_WIDTH, GAME_HEIGHT, 0x000000, 0.5,
+      GAME_WIDTH, GAME_HEIGHT, 0x000000, Theme.modalBackdropAlpha,
     ).setInteractive();
 
     const panelBg = this.add.graphics();

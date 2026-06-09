@@ -29,7 +29,7 @@ export class FormationPanel {
     const panelY = (GAME_HEIGHT - PANEL_H) / 2;
 
     // Backdrop
-    const backdrop = scene.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, 0x000000, 0.5)
+    const backdrop = scene.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, 0x000000, Theme.modalBackdropAlpha)
       .setDepth(799).setInteractive();
     backdrop.on('pointerup', (p: Phaser.Input.Pointer) => {
       const px = p.x, py = p.y;
