@@ -6,6 +6,7 @@ import { Button } from './Button';
 import { UI } from '../i18n';
 import { TextFactory } from './TextFactory';
 import { AudioManager } from '../systems/AudioManager';
+import { TutorialSystem } from '../systems/TutorialSystem';
 
 export class SkillEvolutionPanel {
   private scene: Phaser.Scene;
@@ -64,6 +65,9 @@ export class SkillEvolutionPanel {
 
     this.buildBranchCard(leftX, cardY, cardW, cardH, this.branches[0], 'A');
     this.buildBranchCard(rightX, cardY, cardW, cardH, this.branches[1], 'B');
+
+    // Show first-evolution tutorial tip (one-time, above the panel)
+    TutorialSystem.showTipIfNeeded(this.scene, 'first_evolution');
   }
 
   private buildBranchCard(

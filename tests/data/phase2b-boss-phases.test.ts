@@ -15,8 +15,8 @@ describe('Phase 2b: Boss Phases', () => {
     }
   });
 
-  it('frost_queen has 2 phases', () => {
-    expect(phases.frost_queen.phases).toHaveLength(2);
+  it('frost_queen has 3 phases (expanded in evaluation follow-up)', () => {
+    expect(phases.frost_queen.phases).toHaveLength(3);
   });
 
   it('thunder_titan has 3 phases', () => {
@@ -63,9 +63,14 @@ describe('Phase 2b: Boss Phases', () => {
     }
   });
 
-  it('frost_queen has no spawns (Act 1 simplicity)', () => {
+  it('frost_queen spawns only existing ice-themed adds', () => {
+    // Evaluation follow-up gave frost_queen add waves (ice_wolf / enemy_ice_mage)
+    // so her fight asks for target-priority decisions, not just burst.
+    const allowed = new Set(['ice_wolf', 'enemy_ice_mage']);
     for (const phase of phases.frost_queen.phases) {
-      expect(phase.spawns).toHaveLength(0);
+      for (const spawnId of phase.spawns) {
+        expect(allowed.has(spawnId), `Unexpected frost_queen spawn: ${spawnId}`).toBe(true);
+      }
     }
   });
 

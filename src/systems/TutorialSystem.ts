@@ -92,6 +92,19 @@ export class TutorialSystem {
       title: '首领战斗',
       message: '首领战是每章的终极挑战，做好准备！',
     },
+    {
+      id: 'first_evolution',
+      trigger: 'SkillEvolutionPanel',
+      title: '技能进化',
+      message: '进化将永久改变该技能：左侧偏强化单体，右侧偏范围/功能。请结合队伍缺口选择。',
+      position: { x: 400, y: 110 },
+    },
+    {
+      id: 'manual_skills',
+      trigger: 'skill_ready',
+      title: '手动释放技能',
+      message: '技能就绪后可点击底部技能槽手动释放，抢占关键时机！',
+    },
   ];
 
   /** Load seen tips from localStorage and register EventBus listeners */

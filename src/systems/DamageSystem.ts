@@ -47,6 +47,7 @@ export class DamageSystem {
     damageType: DamageType,
     forceCrit: boolean = false,
     element?: ElementType,
+    critBonus: number = 0,
   ): DamageResult {
     const stats = attacker.getEffectiveStats();
     const targetStats = target.getEffectiveStats();
@@ -67,8 +68,8 @@ export class DamageSystem {
       raw = raw * (DEFENSE_FORMULA_BASE / (DEFENSE_FORMULA_BASE + cappedDef));
     }
 
-    // Crit check
-    const isCrit = forceCrit || this.rng.chance(stats.critChance);
+    // Crit check (critBonus: per-skill flat crit-chance bonus, e.g. 捕食者之击)
+    const isCrit = forceCrit || this.rng.chance(Math.min(1, stats.critChance + critBonus));
     if (isCrit) {
       raw *= stats.critDamage;
     }
@@ -260,7 +261,7 @@ export class DamageSystem {
       });
 
       // Mutation: overkill_splash — 30% excess damage to random enemy
-      if (MetaManager.hasMutation('overkill_splash') && attacker.isHero) {
+      if (MetaManager.isMutationEffective('overkill_splash') && attacker.isHero) {
         const excess = finalDmg - preDamageHp;
         if (excess > 0) {
           const splashDmg = Math.round(excess * 0.3);
@@ -307,7 +308,7 @@ export class DamageSystem {
     }
 
     // Mutation: heal_shield — remaining overflow → shield at 50% efficiency (cap 30% maxHp)
-    if (MetaManager.hasMutation('heal_shield') && target.isHero) {
+    if (MetaManager.isMutationEffective('heal_shield') && target.isHero) {
       const remainingOverflow = totalOverflow - overflowConsumed;
       if (remainingOverflow > 0) {
         const maxMutShield = Math.round(target.currentStats.maxHp * 0.3);

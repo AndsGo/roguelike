@@ -19,7 +19,7 @@ export class ShopScene extends Phaser.Scene {
   private shopItems: ItemData[] = [];
   private goldText!: Phaser.GameObjects.Text;
   private selectedHero: HeroState | null = null;
-  private itemCards: { container: Phaser.GameObjects.Container; item: ItemData; priceText: Phaser.GameObjects.Text; compareText: Phaser.GameObjects.Text; sold: boolean }[] = [];
+  private itemCards: { container: Phaser.GameObjects.Container; item: ItemData; priceText: Phaser.GameObjects.Text; compareText: Phaser.GameObjects.Text; sold: boolean; buyBg: Phaser.GameObjects.Graphics; buyLabel: Phaser.GameObjects.Text; buyHit: Phaser.GameObjects.Rectangle }[] = [];
   private heroButtons: Phaser.GameObjects.Container[] = [];
   private itemsContainer!: Phaser.GameObjects.Container;
   private refreshCount = 0;
@@ -180,6 +180,71 @@ export class ShopScene extends Phaser.Scene {
       const text = btn.getAt(1) as Phaser.GameObjects.Text;
       text.setColor(i === selectedIndex ? colorToString(Theme.colors.secondary) : '#ffffff');
     });
+    this.refreshBuyButtonStyles();
+    this.refreshEquipBadge();
+  }
+
+  /** Refresh buy button enabled/disabled visuals based on selectedHero. */
+  private refreshBuyButtonStyles(): void {
+    const hasHero = this.selectedHero !== null;
+    for (const card of this.itemCards) {
+      if (card.sold) continue;
+      const rm = RunManager.getInstance();
+      const canAfford = rm.getGold() >= card.item.cost;
+      if (!hasHero) {
+        card.buyBg.clear();
+        card.buyBg.fillStyle(0x555555, 0.6);
+        card.buyBg.fillRoundedRect(100, 22, 48, 22, 4);
+        card.buyLabel.setColor('#888888');
+        card.buyHit.disableInteractive();
+      } else {
+        card.buyBg.clear();
+        card.buyBg.fillStyle(canAfford ? Theme.colors.primary : 0x444444, canAfford ? 0.8 : 0.6);
+        card.buyBg.fillRoundedRect(100, 22, 48, 22, 4);
+        card.buyLabel.setColor(canAfford ? '#ffffff' : '#666666');
+        card.buyHit.setInteractive({ useHandCursor: canAfford });
+      }
+    }
+  }
+
+  /** Show/update equipment summary badge below hero buttons. */
+  private refreshEquipBadge(): void {
+    // Destroy previous badge container if any
+    const prev = (this as any)._equipBadgeContainer as Phaser.GameObjects.Container | null;
+    if (prev) {
+      prev.destroy();
+      (this as any)._equipBadgeContainer = null;
+    }
+    if (!this.selectedHero) return;
+
+    const slots = ['weapon', 'armor', 'accessory'] as const;
+    const labels = ['武', '护', '饰'] as const;
+    const badgeY = 92;
+
+    const container = this.add.container(0, 0).setDepth(30);
+    let curX = 20;
+
+    for (let i = 0; i < slots.length; i++) {
+      const slot = slots[i];
+      const label = labels[i];
+      const eq = this.selectedHero.equipment[slot];
+
+      const labelObj = TextFactory.create(this, curX, badgeY, `${label}:`, 'tiny', {
+        color: '#778899',
+      });
+      container.add(labelObj);
+      curX += labelObj.width + 2;
+
+      const nameStr = eq ? eq.name : '空';
+      const nameColor = eq ? colorToString(getRarityColor(eq.rarity)) : '#555566';
+      const nameObj = TextFactory.create(this, curX, badgeY, nameStr, 'tiny', {
+        color: nameColor,
+      });
+      container.add(nameObj);
+      curX += nameObj.width + 10;
+    }
+
+    (this as any)._equipBadgeContainer = container;
   }
 
   private createItemCard(item: ItemData, x: number, y: number, rm: RunManager): void {
@@ -244,27 +309,30 @@ export class ShopScene extends Phaser.Scene {
     });
     container.add(priceText);
 
-    // Buy button
+    // Buy button — disabled style when no hero selected
+    const hasHero = this.selectedHero !== null;
     const buyBg = this.add.graphics();
-    buyBg.fillStyle(Theme.colors.primary, 0.8);
+    buyBg.fillStyle(hasHero ? Theme.colors.primary : 0x555555, hasHero ? 0.8 : 0.6);
     buyBg.fillRoundedRect(100, 22, 48, 22, 4);
     container.add(buyBg);
 
     const buyLabel = TextFactory.create(this, 124, 33, UI.shop.buy, 'label', {
-      color: '#ffffff',
+      color: hasHero ? '#ffffff' : '#888888',
     }).setOrigin(0.5);
     container.add(buyLabel);
 
     // Transparent hit area covering the full buy button region (padded for easier clicking)
-    const buyHit = this.add.rectangle(124, 33, 64, 34, 0x000000, 0)
-      .setInteractive({ useHandCursor: true });
+    const buyHit = this.add.rectangle(124, 33, 64, 34, 0x000000, 0);
+    if (hasHero) {
+      buyHit.setInteractive({ useHandCursor: true });
+    }
     container.add(buyHit);
 
     buyHit.on('pointerup', () => {
       this.buyItem(item, container, priceText);
     });
 
-    this.itemCards.push({ container, item, priceText, compareText, sold: false });
+    this.itemCards.push({ container, item, priceText, compareText, sold: false, buyBg, buyLabel, buyHit });
   }
 
   private updateComparisonTexts(): void {
@@ -393,6 +461,8 @@ export class ShopScene extends Phaser.Scene {
       const canAfford = rm.getGold() >= ic.item.cost;
       ic.priceText.setColor(canAfford ? colorToString(Theme.colors.gold) : colorToString(Theme.colors.danger));
     }
+    this.refreshBuyButtonStyles();
+    this.refreshEquipBadge();
 
     this.updateRefreshButton();
 
@@ -482,8 +552,10 @@ export class ShopScene extends Phaser.Scene {
         // Update UI
         this.goldText.setText(`${rm.getGold()}G`);
         this.updateRefreshButton();
+        this.refreshBuyButtonStyles();
         if (this.selectedHero) {
           this.updateComparisonTexts();
+          this.refreshEquipBadge();
         }
       },
     });

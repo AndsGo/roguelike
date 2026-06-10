@@ -225,6 +225,7 @@ class Scene {
       return {};
     },
     killAll: () => {},
+    killTweensOf: (_target: any) => {},
   };
 
   cameras = {

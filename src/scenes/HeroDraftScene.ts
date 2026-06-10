@@ -15,7 +15,8 @@ import { getOrCreateTexture, ChibiConfig } from '../systems/UnitRenderer';
 import { drawRoleIcon, drawElementIcon } from '../ui/PixelIcons';
 import { attachPressInteraction } from '../ui/PressInteraction';
 import { applyUiCamera, fillBackground, onViewResize, pointerView, restartOnResize, view } from '../ui/Viewport';
-import { getElementColor } from '../ui/Theme';
+import { queueUnitSpriteSheets, getUnitSpriteSheet } from '../systems/UnitSpriteAssets';
+import { MutationPickPanel } from '../ui/MutationPickPanel';
 
 // Opening draft size. Set to 4 so players can reach a count=4 race/class
 // synergy or two count=2 synergies on turn one — count=3/4 thresholds were
@@ -27,24 +28,21 @@ const CARD_H = 100;
 const CARD_GAP = 4;
 const COLS = 10;
 
-const ELEMENT_LABELS: Record<string, string> = {
-  fire: '火', ice: '冰', lightning: '雷', dark: '暗', holy: '圣',
-};
-
-const ROLE_SHORT: Record<string, string> = {
-  tank: '坦', melee_dps: '战', ranged_dps: '射', healer: '治', support: '辅',
-};
 
 export class HeroDraftScene extends Phaser.Scene {
   private selectedIds: string[] = [];
   private cardContainers: Map<string, Phaser.GameObjects.Container> = new Map();
   private gridContainer!: Phaser.GameObjects.Container;
   private cardBorders: Map<string, Phaser.GameObjects.Graphics> = new Map();
+  private cardAvatars: Map<string, Phaser.GameObjects.Image> = new Map();
+  private cardBadges: Map<string, { circle: Phaser.GameObjects.Graphics; label: Phaser.GameObjects.Text; cancelText: Phaser.GameObjects.Text }> = new Map();
   private startBtn: Button | null = null;
   private selectionText: Phaser.GameObjects.Text | null = null;
   private synergyText!: Phaser.GameObjects.Text;
   private difficulty: string = 'normal';
   private heroPopup: HeroDetailPopup | null = null;
+  /** Mutation chosen for this run via MutationPickPanel (3+ unlocked). */
+  private pickedMutationId: string | null = null;
 
   constructor() {
     super({ key: 'HeroDraftScene' });
@@ -53,6 +51,7 @@ export class HeroDraftScene extends Phaser.Scene {
   init(data?: { difficulty?: string }): void {
     this.difficulty = data?.difficulty ?? 'normal';
     this.selectedIds = [];
+    this.pickedMutationId = null;
   }
 
   create(): void {
@@ -78,6 +77,29 @@ export class HeroDraftScene extends Phaser.Scene {
     // All heroes from data
     const allHeroes = heroesData as HeroData[];
     const unlockedHeroes = MetaManager.getUnlockedHeroes();
+
+    // Queue spritesheets for unlocked heroes so avatars can be swapped in after load
+    const unlockedSpriteKeys = allHeroes
+      .filter(h => unlockedHeroes.includes(h.id) && h.spriteKey)
+      .map(h => h.spriteKey);
+    queueUnitSpriteSheets(this, unlockedSpriteKeys);
+    if ((this.load as Phaser.Loader.LoaderPlugin & { list?: { size?: number } })?.list?.size) {
+      this.load.start();
+    }
+
+    // After spritesheets finish loading, swap chibi placeholders with real art
+    // (load is absent under the test harness's Phaser stub, same as the guard above)
+    this.load?.once?.('complete', () => {
+      for (const [heroId, img] of this.cardAvatars) {
+        const hero = allHeroes.find(h => h.id === heroId);
+        if (!hero) continue;
+        const config = getUnitSpriteSheet(hero.spriteKey);
+        if (config && this.textures.exists(config.textureKey)) {
+          img.setTexture(config.textureKey, 0);
+          img.setDisplaySize(44, 44);
+        }
+      }
+    });
 
     // Responsive grid: column count derives from the viewport width
     const cols = Math.max(4, Math.min(COLS, Math.floor((v.vw - 24) / (CARD_W + CARD_GAP))));
@@ -163,6 +185,15 @@ export class HeroDraftScene extends Phaser.Scene {
     }
 
     this.updateSelectionUI();
+
+    // Per-run mutation pick: with 3+ mutations unlocked, choose ONE to be
+    // active this run before drafting (panel overlays the draft at depth 899+).
+    const offers = MutationPickPanel.rollOffers();
+    if (offers) {
+      new MutationPickPanel(this, offers, (id) => {
+        this.pickedMutationId = id;
+      });
+    }
   }
 
   private createHeroCard(hero: HeroData, cx: number, cy: number, unlocked: boolean): void {
@@ -213,19 +244,19 @@ export class HeroDraftScene extends Phaser.Scene {
     roleBar.fillRoundedRect(-CARD_W / 2, -CARD_H / 2, CARD_W, 3, 1);
     container.add(roleBar);
 
-    // Role pixel icon (top-left, 8×8 scale=1)
+    // Role pixel icon (top-left, 8×8 scale=1) — positioned at y≈-43 from card center
     const roleIconG = this.add.graphics();
     drawRoleIcon(roleIconG, -CARD_W / 2 + 3, -CARD_H / 2 + 5, hero.role, 1);
     container.add(roleIconG);
 
-    // Element pixel icon (top-right, 8×8 scale=1)
+    // Element pixel icon (top-right, 8×8 scale=1) — positioned at y≈-43 from card center
     if (hero.element) {
       const elIconG = this.add.graphics();
       drawElementIcon(elIconG, CARD_W / 2 - 11, -CARD_H / 2 + 5, hero.element, 1);
       container.add(elIconG);
     }
 
-    // Chibi sprite (centered, compact)
+    // Chibi sprite placeholder at y=-18; stored so the load.once callback can swap it
     const chibiConfig: ChibiConfig = {
       role: hero.role as ChibiConfig['role'],
       race: (hero.race ?? 'human') as ChibiConfig['race'],
@@ -236,35 +267,23 @@ export class HeroDraftScene extends Phaser.Scene {
       isBoss: false,
     };
     const textureKey = getOrCreateTexture(this, chibiConfig);
-    const sprite = this.add.image(0, -16, textureKey).setScale(1.2);
+    const sprite = this.add.image(0, -18, textureKey).setScale(1.2);
     container.add(sprite);
+    this.cardAvatars.set(hero.id, sprite);
 
-    // Hero name
-    const nameText = TextFactory.create(this, 0, 12, hero.name, 'small', {
+    // Hero name — moved to y=+16
+    const nameText = TextFactory.create(this, 0, 16, hero.name, 'small', {
       color: '#ffffff',
     }).setOrigin(0.5);
     container.add(nameText);
 
-    // Role tag (role-colored)
-    const roleStr = ROLE_SHORT[hero.role] ?? '';
-    const elemStr = hero.element ? ELEMENT_LABELS[hero.element] ?? '' : '';
-    const tagLine = [roleStr, elemStr].filter(Boolean).join(' ');
-    const tagText = TextFactory.create(this, 0, 24, tagLine, 'tiny', {
-      color: colorToString(roleColor),
+    // Race · Class line — y=+28, tiny, muted blue-grey
+    const raceName = hero.race ? (RACE_NAMES[hero.race] ?? hero.race) : '';
+    const className = hero.class ? (CLASS_NAMES[hero.class] ?? hero.class) : '';
+    const raceClassText = TextFactory.create(this, 0, 28, `${raceName}·${className}`, 'tiny', {
+      color: '#aabbcc',
     }).setOrigin(0.5);
-    container.add(tagText);
-
-    // Key stats summary (compact)
-    const stats = hero.baseStats;
-    const atkDefText = TextFactory.create(this, 0, 36, `攻:${stats.attack}  防:${stats.defense}`, 'tiny', {
-      color: '#aaaaaa',
-    }).setOrigin(0.5);
-    container.add(atkDefText);
-
-    const spdText = TextFactory.create(this, 0, 46, `速:${stats.speed}  攻速:${stats.attackSpeed.toFixed(1)}`, 'tiny', {
-      color: '#888888',
-    }).setOrigin(0.5);
-    container.add(spdText);
+    container.add(raceClassText);
 
     // Hit zone for interaction
     const hitZone = this.add.rectangle(0, 0, CARD_W, CARD_H, 0x000000, 0)
@@ -334,6 +353,48 @@ export class HeroDraftScene extends Phaser.Scene {
       }
     }
 
+    // Sync selection-order badges on each card
+    for (const [heroId, container] of this.cardContainers) {
+      const selIdx = this.selectedIds.indexOf(heroId);
+      const isSelected = selIdx >= 0;
+      const existing = this.cardBadges.get(heroId);
+
+      if (isSelected) {
+        if (!existing) {
+          // Gold filled circle in top-right corner of card
+          const circle = this.add.graphics();
+          circle.fillStyle(0xffd700, 1);
+          circle.fillCircle(CARD_W / 2 - 9, -CARD_H / 2 + 9, 8);
+          container.add(circle);
+
+          // Bare number label centred on the circle, black bold
+          const label = TextFactory.create(this, CARD_W / 2 - 9, -CARD_H / 2 + 9,
+            String(selIdx + 1), 'tiny', { color: '#000000' })
+            .setOrigin(0.5)
+            .setStyle({ fontStyle: 'bold' });
+          container.add(label);
+
+          // Cancel hint at bottom of card
+          const cancelText = TextFactory.create(this, 0, 42, '点击取消', 'tiny', {
+            color: '#9999aa',
+          }).setOrigin(0.5);
+          container.add(cancelText);
+
+          this.cardBadges.set(heroId, { circle, label, cancelText });
+        } else {
+          // Badge already exists — refresh the number in case order changed
+          existing.label.setText(String(selIdx + 1));
+        }
+      } else {
+        if (existing) {
+          existing.circle.destroy();
+          existing.label.destroy();
+          existing.cancelText.destroy();
+          this.cardBadges.delete(heroId);
+        }
+      }
+    }
+
     this.updateSynergyPreview();
   }
 
@@ -368,6 +429,10 @@ export class HeroDraftScene extends Phaser.Scene {
     if (this.selectedIds.length < MIN_SELECTION) return;
     const rm = RunManager.getInstance();
     rm.newRun(undefined, this.difficulty, this.selectedIds);
+    // Per-run mutation pick (chosen before drafting) binds to the new run
+    if (this.pickedMutationId) {
+      rm.setActiveMutation(this.pickedMutationId);
+    }
     SceneTransition.fadeTransition(this, 'MapScene');
   }
 

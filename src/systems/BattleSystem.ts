@@ -13,6 +13,7 @@ import { ActModifierSystem } from './ActModifierSystem';
 import { EventBus } from './EventBus';
 import { RelicSystem } from './RelicSystem';
 import { AffixSystem } from './AffixSystem';
+import { ItemEffectSystem } from './ItemEffectSystem';
 import { DamageAccumulator } from './DamageAccumulator';
 import { SeededRNG } from '../utils/rng';
 import { GAUNTLET_REWARD_MULTIPLIER } from '../constants';
@@ -361,6 +362,12 @@ export class BattleSystem {
             ? 'magical' as const
             : 'physical' as const;
           const result = this.damageSystem.applyDamage(unit, unit.target, damageType);
+
+          // Rare-weapon procs (on-hit, then on-kill if the attack was lethal)
+          ItemEffectSystem.tryProc(unit, unit.target, 'hit', this.rng);
+          if (!unit.target.isAlive) {
+            ItemEffectSystem.tryProc(unit, unit.target, 'kill', this.rng);
+          }
 
           // Emit unit:attack for animation system
           EventBus.getInstance().emit('unit:attack', {

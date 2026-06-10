@@ -92,7 +92,10 @@ export class MetaManager {
     elemental_weaver: { type: 'victory', threshold: 3, description: 'Win 3 runs' },
     forest_stalker: { type: 'hero_used', heroId: 'beast_warden', description: 'Win using beast_warden' },
     magma_warden: { type: 'relic_count', threshold: 10, description: 'Finish with 10+ relics' },
-    storm_falcon: { type: 'element_wins', element: 'lightning', threshold: 5, description: 'Win 5 runs with lightning heroes' },
+    // Threshold 3 (not 5): only 4 lightning heroes exist game-wide, so a
+    // 5-lightning party is mathematically impossible (team size 5, falcon
+    // itself locked). 3 is reachable via the other unlocks + element events.
+    storm_falcon: { type: 'element_wins', element: 'lightning', threshold: 3, description: '队伍含3名雷电英雄获胜' },
     frost_whisperer: { type: 'element_wins', element: 'ice', threshold: 3, description: '使用冰属性英雄获胜3次' },
     holy_emissary: { type: 'victory', threshold: 5, description: 'Win 5 runs' },
     ice_dragon_hunter: { type: 'boss_kill', threshold: 1, bossId: 'frost_queen', description: '击败冰霜女王' },
@@ -233,6 +236,32 @@ export class MetaManager {
     return (MetaManager.getInstance().meta.mutations ?? []).includes(id);
   }
 
+  /**
+   * The run's chosen mutation. Pushed in by RunManager / MutationPickPanel
+   * (an inverted dependency — RunManager imports MetaManager, so MetaManager
+   * cannot import RunManager back). undefined = no per-run pick → legacy
+   * "all unlocked mutations active" behaviour (old saves, <3 unlocked).
+   */
+  private static activeRunMutationId: string | undefined;
+
+  static setActiveRunMutation(id: string | undefined): void {
+    MetaManager.activeRunMutationId = id;
+  }
+
+  /**
+   * Whether a mutation is effectively active for the current run.
+   * When the player has ≥3 mutations unlocked, they pick one per run;
+   * only that chosen mutation is active. Otherwise all unlocked are active.
+   */
+  static isMutationEffective(id: string): boolean {
+    if (!MetaManager.hasMutation(id)) return false;
+    const unlocked = MetaManager.getMutations();
+    if (unlocked.length < 3 || MetaManager.activeRunMutationId === undefined) {
+      return true;
+    }
+    return MetaManager.activeRunMutationId === id;
+  }
+
   /** Get all unlocked mutation IDs */
   static getMutations(): string[] {
     return MetaManager.getInstance().meta.mutations ?? [];
@@ -285,6 +314,18 @@ export class MetaManager {
     } catch {
       ErrorHandler.report('warn', 'MetaManager', 'failed to migrate legacy currency');
     }
+  }
+
+  // ---- Daily Challenge ----
+
+  /**
+   * Record a daily challenge completion. Call once per victorious daily run.
+   * Uses the encounteredEnemies ?? [] pattern for old-save compatibility.
+   */
+  static recordDailyCompletion(): void {
+    const inst = MetaManager.getInstance();
+    inst.meta.dailyChallengesCompleted = (inst.meta.dailyChallengesCompleted ?? 0) + 1;
+    inst.persist();
   }
 
   // ---- Run Statistics ----
@@ -442,6 +483,7 @@ export class MetaManager {
     inst.meta.defeatedBosses = [];
     inst.meta.mutations = [];
     inst.meta.hellVictories = 0;
+    inst.meta.dailyChallengesCompleted = 0;
     inst.ensureUpgradeState();
     inst.persist();
   }

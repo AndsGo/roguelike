@@ -2,9 +2,31 @@
   "dragon_boss": {
     "phases": [
       {
-        "hpPercent": 0.50,
+        "hpPercent": 0.75,
         "spawns": [],
-        "bossEffect": { "type": "enrage", "value": 25 }
+        "bossEffect": {
+          "type": "enrage",
+          "value": 15
+        }
+      },
+      {
+        "hpPercent": 0.5,
+        "spawns": [
+          "fire_lizard",
+          "fire_elemental"
+        ],
+        "bossEffect": {
+          "type": "shield",
+          "value": 400
+        }
+      },
+      {
+        "hpPercent": 0.25,
+        "spawns": [],
+        "bossEffect": {
+          "type": "enrage",
+          "value": 40
+        }
       }
     ]
   },
@@ -12,32 +34,68 @@
     "phases": [
       {
         "hpPercent": 0.75,
-        "spawns": ["flame_construct", "frost_sentinel"],
-        "bossEffect": { "type": "shield", "value": 2000 }
+        "spawns": [
+          "flame_construct",
+          "frost_sentinel"
+        ],
+        "bossEffect": {
+          "type": "shield",
+          "value": 2000
+        }
       },
       {
-        "hpPercent": 0.50,
-        "spawns": ["lightning_strider", "holy_smith"],
-        "bossEffect": { "type": "heal", "value": 10 }
+        "hpPercent": 0.5,
+        "spawns": [
+          "lightning_strider",
+          "holy_smith"
+        ],
+        "bossEffect": {
+          "type": "heal",
+          "value": 10
+        }
       },
       {
         "hpPercent": 0.25,
-        "spawns": ["void_weaver", "flame_construct"],
-        "bossEffect": { "type": "cleanse", "value": 0 }
+        "spawns": [
+          "void_weaver",
+          "flame_construct"
+        ],
+        "bossEffect": {
+          "type": "cleanse",
+          "value": 0
+        }
       }
     ]
   },
   "frost_queen": {
     "phases": [
       {
-        "hpPercent": 0.50,
-        "spawns": [],
-        "bossEffect": { "type": "cleanse", "value": 0 }
+        "hpPercent": 0.66,
+        "spawns": [
+          "ice_wolf"
+        ],
+        "bossEffect": {
+          "type": "cleanse",
+          "value": 0
+        }
       },
       {
-        "hpPercent": 0.25,
+        "hpPercent": 0.4,
+        "spawns": [
+          "enemy_ice_mage"
+        ],
+        "bossEffect": {
+          "type": "shield",
+          "value": 500
+        }
+      },
+      {
+        "hpPercent": 0.2,
         "spawns": [],
-        "bossEffect": { "type": "shield", "value": 500 }
+        "bossEffect": {
+          "type": "enrage",
+          "value": 30
+        }
       }
     ]
   },
@@ -46,17 +104,29 @@
       {
         "hpPercent": 0.75,
         "spawns": [],
-        "bossEffect": { "type": "enrage", "value": 20 }
+        "bossEffect": {
+          "type": "enrage",
+          "value": 20
+        }
       },
       {
-        "hpPercent": 0.50,
-        "spawns": ["storm_hawk", "storm_hawk"],
-        "bossEffect": { "type": "heal", "value": 15 }
+        "hpPercent": 0.5,
+        "spawns": [
+          "storm_hawk",
+          "storm_hawk"
+        ],
+        "bossEffect": {
+          "type": "heal",
+          "value": 15
+        }
       },
       {
         "hpPercent": 0.25,
         "spawns": [],
-        "bossEffect": { "type": "enrage", "value": 40 }
+        "bossEffect": {
+          "type": "enrage",
+          "value": 40
+        }
       }
     ]
   },
@@ -65,17 +135,31 @@
       {
         "hpPercent": 0.75,
         "spawns": [],
-        "bossEffect": { "type": "damage_reduction", "value": 20 }
+        "bossEffect": {
+          "type": "damage_reduction",
+          "value": 20
+        }
       },
       {
-        "hpPercent": 0.50,
-        "spawns": ["skeleton_archer", "skeleton_archer"],
-        "bossEffect": { "type": "enrage", "value": 25 }
+        "hpPercent": 0.5,
+        "spawns": [
+          "skeleton_archer",
+          "skeleton_archer"
+        ],
+        "bossEffect": {
+          "type": "enrage",
+          "value": 25
+        }
       },
       {
         "hpPercent": 0.25,
-        "spawns": ["dark_mage"],
-        "bossEffect": { "type": "heal", "value": 12 }
+        "spawns": [
+          "dark_mage"
+        ],
+        "bossEffect": {
+          "type": "heal",
+          "value": 12
+        }
       }
     ]
   }

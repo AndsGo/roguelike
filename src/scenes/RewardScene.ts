@@ -115,7 +115,7 @@ export class RewardScene extends Phaser.Scene {
       TextFactory.create(this, colX.kills, rowY, `${hs?.kills ?? 0}`, 'tiny', { color: '#cccc88' }).setOrigin(0.5);
     });
 
-    TextFactory.create(this, v.cx, v.vh - 80, UI.reward.totalGold(rm.getGold()), 'body', {
+    TextFactory.create(this, v.cx, v.vh - 80, UI.reward.totalGold(rm.getGold()), 'subtitle', {
       color: colorToString(Theme.colors.gold),
     }).setOrigin(0.5);
 

@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import { view } from './Viewport';
 import { MapNode, NodeType, ActConfig, HeroState, HeroData } from '../types';
-import { Theme, colorToString, getRoleColor, getNodeColor } from './Theme';
+import { Theme, colorToString, getRoleColor, getNodeColor, getHealthColor } from './Theme';
 import { UI, SLOT_LABELS } from '../i18n';
 import { computeNodeLayers } from '../utils/map-utils';
 import { TextFactory } from './TextFactory';
@@ -186,7 +186,7 @@ export class MapRenderer {
       const hpG = scene.add.graphics().setDepth(101);
       hpG.fillStyle(0x333333, 1);
       hpG.fillRoundedRect(x - hpBarWidth / 2, y + 32, hpBarWidth, 4, 2);
-      const hpColor = hpRatio > 0.6 ? 0x44ff44 : hpRatio > 0.3 ? 0xffaa00 : 0xff4444;
+      const hpColor = getHealthColor(hpRatio);
       hpG.fillStyle(hpColor, 1);
       hpG.fillRoundedRect(x - hpBarWidth / 2, y + 32, hpBarWidth * hpRatio, 4, 2);
 
@@ -203,6 +203,7 @@ export class MapRenderer {
     getHeroData: (id: string) => HeroData,
     getMaxHp: (hero: HeroState, data: HeroData) => number,
     onHeroClick: (heroState: HeroState, heroData: HeroData) => void,
+    hasPendingEvolution?: (hero: HeroState) => boolean,
   ): Phaser.GameObjects.GameObject[] {
     const interactiveObjects: Phaser.GameObjects.GameObject[] = [];
     const v = view(scene);
@@ -246,7 +247,7 @@ export class MapRenderer {
       const hpG = scene.add.graphics().setDepth(101);
       hpG.fillStyle(0x333333, 1);
       hpG.fillRoundedRect(x - hpBarWidth / 2, y + 32, hpBarWidth, 4, 2);
-      const hpColor = hpRatio > 0.6 ? 0x44ff44 : hpRatio > 0.3 ? 0xffaa00 : 0xff4444;
+      const hpColor = getHealthColor(hpRatio);
       hpG.fillStyle(hpColor, 1);
       hpG.fillRoundedRect(x - hpBarWidth / 2, y + 32, hpBarWidth * hpRatio, 4, 2);
 
@@ -264,6 +265,26 @@ export class MapRenderer {
           color: hasEquip ? '#ffffff' : '#666666',
         }).setOrigin(0.5).setDepth(102);
         interactiveObjects.push(eqG, eqLabel);
+      }
+
+      // Pending skill-evolution badge (gold "!" at the card's top-right)
+      if (hasPendingEvolution?.(hero)) {
+        const badgeG = scene.add.graphics().setDepth(102);
+        badgeG.fillStyle(Theme.colors.gold, 0.95);
+        badgeG.fillCircle(x + 30, y + 2, 7);
+        const badgeText = TextFactory.create(scene, x + 30, y + 2, '!', 'small', {
+          color: '#1a1a2e',
+          fontStyle: 'bold',
+        }).setOrigin(0.5).setDepth(103);
+        interactiveObjects.push(badgeG, badgeText);
+        scene.tweens.add({
+          targets: [badgeG, badgeText],
+          alpha: { from: 1, to: 0.55 },
+          duration: 700,
+          yoyo: true,
+          repeat: -1,
+          ease: 'Sine.easeInOut',
+        });
       }
 
       // Clickable hit zone

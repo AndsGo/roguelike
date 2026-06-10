@@ -20,6 +20,9 @@ export interface RunStats {
   criticalHits: number;
   elementReactions: Record<string, number>;
   runDurationMs: number;
+  /** Set by finalizeRun — lets achievement checks distinguish "won THIS run"
+   *  from lifetime victories (the speedrun/no_death misfire fix). */
+  victory: boolean;
 }
 
 /** Lifetime history stats persisted across runs */
@@ -248,6 +251,7 @@ export class StatsManager {
     const inst = StatsManager.getInstance();
     const elapsed = Date.now() - inst.runStartTime;
     inst.currentRunStats.runDurationMs = elapsed;
+    inst.currentRunStats.victory = victory;
 
     inst.historyStats.totalRuns++;
     if (victory) {
@@ -298,6 +302,7 @@ export class StatsManager {
       criticalHits: 0,
       elementReactions: {},
       runDurationMs: 0,
+      victory: false,
     };
   }
 }

@@ -38,7 +38,7 @@ export class ShopGenerator {
    */
   static generate(rng: SeededRNG, actIndex: number, itemCount?: number): ItemData[] {
     let count = itemCount ?? rng.nextInt(4, 6);
-    if (MetaManager.hasMutation('shop_extra_item')) {
+    if (MetaManager.isMutationEffective('shop_extra_item')) {
       count += 1;
     }
     const stage = actIndex <= 0 ? 'early' : actIndex === 1 ? 'mid' : 'late';

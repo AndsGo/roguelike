@@ -3,7 +3,7 @@ import { Button } from '../ui/Button';
 import { Theme, colorToString } from '../ui/Theme';
 import { SceneTransition, TRANSITION } from '../systems/SceneTransition';
 import { RunEndPanel, RunEndResult } from '../ui/RunEndPanel';
-import { RunEndContext } from '../managers/MetaManager';
+import { MetaManager, RunEndContext } from '../managers/MetaManager';
 import { DailyChallengeManager } from '../managers/DailyChallengeManager';
 import { RunManager } from '../managers/RunManager';
 import { BuildReviewPanel } from '../ui/BuildReviewPanel';
@@ -114,6 +114,13 @@ export abstract class BaseEndScene extends Phaser.Scene {
     if (!state.isDaily) return 0;
 
     DailyChallengeManager.markCompleted();
+
+    // Meta integration: count victorious dailies (daily_warrior achievement)
+    // and grant a +50% meta-currency bonus on top of the victory reward (100).
+    if (victory) {
+      MetaManager.recordDailyCompletion();
+      MetaManager.addMetaCurrency(50);
+    }
 
     // Calculate score: floor progress * 10 + gold + (victory ? 500 : 0)
     const floorScore = rm.getFloor() * 10;

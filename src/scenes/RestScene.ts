@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 import { REST_HEAL_PERCENT, REST_TRAIN_EXP, REST_SCAVENGE_GOLD_MIN, REST_SCAVENGE_GOLD_MAX } from '../constants';
 import { RunManager } from '../managers/RunManager';
 import { Button } from '../ui/Button';
-import { Theme, colorToString, getNodeColor } from '../ui/Theme';
+import { Theme, colorToString, getNodeColor, getHealthColor } from '../ui/Theme';
 import { SceneTransition } from '../systems/SceneTransition';
 import { SaveManager } from '../managers/SaveManager';
 import { ParticleManager } from '../systems/ParticleManager';
@@ -55,7 +55,7 @@ export class RestScene extends Phaser.Scene {
       const data = rm.getHeroData(hero.id);
       const maxHp = rm.getMaxHp(hero, data);
       const ratio = hero.currentHp / maxHp;
-      const hpColor = ratio > 0.6 ? '#44ff44' : ratio > 0.3 ? '#ffaa00' : '#ff4444';
+      const hpColor = '#' + getHealthColor(ratio).toString(16).padStart(6, '0');
 
       TextFactory.create(this, v.cx, Math.round(v.vh * 0.31) + 25 + i * (v.compact ? 18 : 22), `${data.name}: ${hero.currentHp}/${maxHp} HP`, 'label', {
         color: hpColor,

@@ -51,7 +51,7 @@ const COLORBLIND_ELEMENT: Record<string, number> = {
   ice: 0x3399ff,       // bright blue (same family, higher contrast)
   lightning: 0xffff00,  // pure yellow (unchanged)
   dark: 0x8833cc,      // violet-purple (shifted from magenta)
-  holy: 0xffd700,      // gold (visible on light backgrounds)
+  holy: 0xfff0b0,      // pale gold (distinct from gold currency)
 };
 
 /** Colorblind-safe rarity palette — uses luminance + saturation variation */
@@ -115,6 +115,18 @@ export function getNodeColor(nodeType: string): number {
   return Theme.colors.node[nodeType] ?? 0xaaaaaa;
 }
 
+/**
+ * Get HP bar fill color for a given ratio, respecting colorblind mode.
+ * Normal:     green (high) / orange-yellow (mid) / red (low)
+ * Colorblind: blue  (high) / yellow       (mid) / orange-red (low)
+ */
+export function getHealthColor(ratio: number): number {
+  if (getAccessibility().colorblindMode) {
+    return ratio > 0.6 ? 0x4488ff : ratio > 0.3 ? 0xffdd00 : 0xff6600;
+  }
+  return ratio > 0.6 ? 0x44ff44 : ratio > 0.3 ? 0xffaa00 : 0xff4444;
+}
+
 export const Theme = {
   colors: {
     primary: 0x4a90d9,
@@ -133,7 +145,7 @@ export const Theme = {
       ice: 0x35c9ff,
       lightning: 0xffeb3b,
       dark: 0x9c27b0,
-      holy: 0xffd700,
+      holy: 0xfffacd,
     } as Record<string, number>,
 
     /** Unicode symbols for elements (colorblind-friendly indicators) */

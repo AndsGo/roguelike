@@ -19,6 +19,7 @@ import { TextFactory } from '../ui/TextFactory';
 import { DailyChallengeManager, DailyRule } from '../managers/DailyChallengeManager';
 import { SkillEvolutionPanel } from '../ui/SkillEvolutionPanel';
 import { hasEvolutionConfig, getEvolutionBranches } from '../systems/SkillSystem';
+import { HelpPanel } from '../ui/HelpPanel';
 import heroesData from '../data/heroes.json';
 import skillsData from '../data/skills.json';
 import enemiesData from '../data/enemies.json';
@@ -41,6 +42,7 @@ export class MapScene extends Phaser.Scene {
   private heroPanelObjects: Phaser.GameObjects.GameObject[] = [];
   private overviewPanel: RunOverviewPanel | null = null;
   private formationPanel: FormationPanel | null = null;
+  private helpPanel: HelpPanel | null = null;
 
   constructor() {
     super({ key: 'MapScene' });
@@ -246,7 +248,7 @@ export class MapScene extends Phaser.Scene {
         }).setOrigin(0.5);
         this.mapContainer.add(labelText);
 
-        const costText = TextFactory.create(this, pos.x, pos.y + radius + 8, UI.map.hiddenCost(node.revealCost ?? MAP_HIDDEN_NODE_COST), 'tiny', {
+        const costText = TextFactory.create(this, pos.x, pos.y + radius + 8, UI.map.hiddenCost(node.revealCost ?? MAP_HIDDEN_NODE_COST), 'small', {
           color: '#ccaa44',
         }).setOrigin(0.5);
         this.mapContainer.add(costText);
@@ -314,6 +316,31 @@ export class MapScene extends Phaser.Scene {
         g.fillCircle(pos.x, pos.y, radius);
         g.lineStyle(1, color, 0.15);
         g.strokeCircle(pos.x, pos.y, radius);
+      }
+
+      // Boss: 8 gold radial rays extending from the circle edge
+      if (node.type === 'boss') {
+        const rayCount = 8;
+        const rayInner = radius + 3;
+        const rayOuter = rayInner + 6;
+        g.lineStyle(1.5, 0xffd700, 0.9);
+        for (let r = 0; r < rayCount; r++) {
+          const angle = (r / rayCount) * Math.PI * 2;
+          g.lineBetween(
+            pos.x + Math.cos(angle) * rayInner,
+            pos.y + Math.sin(angle) * rayInner,
+            pos.x + Math.cos(angle) * rayOuter,
+            pos.y + Math.sin(angle) * rayOuter,
+          );
+        }
+      }
+
+      // Elite: two concentric orange rings outside the node
+      if (node.type === 'elite') {
+        g.lineStyle(1.5, 0xffa500, 0.6);
+        g.strokeCircle(pos.x, pos.y, radius + 2);
+        g.lineStyle(1, 0xffa500, 0.3);
+        g.strokeCircle(pos.x, pos.y, radius + 4);
       }
 
       this.mapContainer.add(g);
@@ -432,6 +459,19 @@ export class MapScene extends Phaser.Scene {
       }).setOrigin(0.5).setDepth(102);
     }
 
+    // Help button (mid-run reference: synergies, element chart, unlocks)
+    const helpBtn = TextFactory.create(this, v.vw - 70, 26, '[帮助]', 'small', {
+      color: '#8899aa',
+    }).setOrigin(1, 0).setDepth(101);
+    const helpHit = this.add.rectangle(helpBtn.x - helpBtn.width / 2, helpBtn.y + 6, helpBtn.width + 12, 20, 0x000000, 0)
+      .setInteractive({ useHandCursor: true })
+      .setDepth(101);
+    helpHit.on('pointerup', () => {
+      if (!this.helpPanel) {
+        this.helpPanel = new HelpPanel(this, () => { this.helpPanel = null; });
+      }
+    });
+
     // Overview button
     const overviewBtn = TextFactory.create(this, v.vw - 15, 26, '[概览]', 'small', {
       color: colorToString(Theme.colors.ui.accent),
@@ -463,6 +503,14 @@ export class MapScene extends Phaser.Scene {
           // Clean up reference when popup closes
           this.heroPopup.on('destroy', () => { this.heroPopup = null; });
         }
+      },
+      (hero) => {
+        if (hero.level < EVOLUTION_LEVEL) return false;
+        const hd = (heroesData as any[]).find((h: any) => h.id === hero.id);
+        if (!hd) return false;
+        const skill0 = hd.skills[0];
+        if (!hasEvolutionConfig(hero.id, skill0)) return false;
+        return !(hero.skillEvolutions ?? {})[`${hero.id}:${skill0}`];
       },
     );
 

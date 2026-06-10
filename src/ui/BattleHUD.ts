@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { Theme, colorToString, getRoleColor, getElementColor } from './Theme';
+import { Theme, colorToString, getRoleColor, getElementColor, getHealthColor, getAccessibility } from './Theme';
 import { TextFactory } from './TextFactory';
 import { Unit } from '../entities/Unit';
 import { Hero } from '../entities/Hero';
@@ -137,15 +137,19 @@ export class BattleHUD extends Phaser.GameObjects.Container {
       container.add(name);
       container.setData('nameText', name);
 
-      // Flash tween for low HP warning (starts paused)
-      const flashTween = this.scene.tweens.add({
-        targets: name,
-        alpha: { from: 1, to: 0.3 },
-        duration: 400,
-        yoyo: true,
-        repeat: -1,
-        paused: true,
-      });
+      // Flash tween for low HP warning (starts paused).
+      // When reduceMotion is on the tween is never started; updatePortraits
+      // switches to a static red colour instead.
+      const flashTween = getAccessibility().reduceMotion
+        ? null
+        : this.scene.tweens.add({
+            targets: name,
+            alpha: { from: 1, to: 0.3 },
+            duration: 400,
+            yoyo: true,
+            repeat: -1,
+            paused: true,
+          });
       container.setData('flashTween', flashTween);
 
       // Mini HP bar
@@ -398,7 +402,7 @@ export class BattleHUD extends Phaser.GameObjects.Container {
       // Only redraw if values changed
       if (ratio !== lastRatio) {
         hpFill.clear();
-        const color = ratio > 0.6 ? 0x44ff44 : ratio > 0.3 ? 0xffaa00 : 0xff4444;
+        const color = getHealthColor(ratio);
         const isHero = container.getData('isHero') as boolean;
         const barX = isHero ? 60 : 58;
         hpFill.fillStyle(color, 1);
@@ -416,14 +420,22 @@ export class BattleHUD extends Phaser.GameObjects.Container {
       if (isHero) {
         const flashTween = container.getData('flashTween') as Phaser.Tweens.Tween | null;
         const nameText = container.getData('nameText') as Phaser.GameObjects.Text | null;
-        if (flashTween && nameText) {
-          if (ratio < 0.2 && alive) {
-            nameText.setColor('#ff4444');
-            if (!flashTween.isPlaying()) flashTween.resume();
+        if (nameText) {
+          const lowHp = ratio < 0.2 && alive;
+          if (flashTween) {
+            // Normal mode: animated flash
+            if (lowHp) {
+              nameText.setColor('#ff4444');
+              if (!flashTween.isPlaying()) flashTween.resume();
+            } else {
+              nameText.setColor('#ffffff');
+              nameText.setAlpha(1);
+              if (flashTween.isPlaying()) flashTween.pause();
+            }
           } else {
-            nameText.setColor('#ffffff');
+            // reduceMotion: static red, no animation
+            nameText.setColor(lowHp ? '#ff4444' : '#ffffff');
             nameText.setAlpha(1);
-            if (flashTween.isPlaying()) flashTween.pause();
           }
         }
       }

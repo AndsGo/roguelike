@@ -6,7 +6,9 @@
     "slot": "weapon",
     "rarity": "common",
     "cost": 30,
-    "stats": { "attack": 10 }
+    "stats": {
+      "attack": 10
+    }
   },
   {
     "id": "steel_sword",
@@ -15,25 +17,35 @@
     "slot": "weapon",
     "rarity": "uncommon",
     "cost": 60,
-    "stats": { "attack": 20, "critChance": 0.05 }
+    "stats": {
+      "attack": 20,
+      "critChance": 0.05
+    }
   },
   {
     "id": "flame_blade",
     "name": "烈焰之刃",
-    "description": "附带火焰魔力的武器",
+    "description": "附带火焰魔力的武器，攻击有20%几率灼烧敌人(3秒)",
     "slot": "weapon",
     "rarity": "rare",
     "cost": 120,
-    "stats": { "attack": 25, "magicPower": 15 }
+    "stats": {
+      "attack": 25,
+      "magicPower": 15
+    }
   },
   {
     "id": "shadow_dagger",
     "name": "暗影匕首",
-    "description": "极快的刺杀武器",
+    "description": "极快的刺杀武器，击杀后攻速提升25%(4秒)",
     "slot": "weapon",
     "rarity": "rare",
     "cost": 100,
-    "stats": { "attack": 15, "critChance": 0.15, "critDamage": 0.3 }
+    "stats": {
+      "attack": 15,
+      "critChance": 0.15,
+      "critDamage": 0.3
+    }
   },
   {
     "id": "holy_staff",
@@ -42,7 +54,9 @@
     "slot": "weapon",
     "rarity": "rare",
     "cost": 110,
-    "stats": { "magicPower": 30 }
+    "stats": {
+      "magicPower": 30
+    }
   },
   {
     "id": "arcane_wand",
@@ -51,7 +65,9 @@
     "slot": "weapon",
     "rarity": "uncommon",
     "cost": 65,
-    "stats": { "magicPower": 20 }
+    "stats": {
+      "magicPower": 20
+    }
   },
   {
     "id": "hunting_bow",
@@ -60,7 +76,10 @@
     "slot": "weapon",
     "rarity": "common",
     "cost": 35,
-    "stats": { "attack": 12, "attackSpeed": 0.1 }
+    "stats": {
+      "attack": 12,
+      "attackSpeed": 0.1
+    }
   },
   {
     "id": "leather_armor",
@@ -69,7 +88,10 @@
     "slot": "armor",
     "rarity": "common",
     "cost": 25,
-    "stats": { "defense": 8, "maxHp": 30 }
+    "stats": {
+      "defense": 8,
+      "maxHp": 30
+    }
   },
   {
     "id": "chain_mail",
@@ -78,7 +100,10 @@
     "slot": "armor",
     "rarity": "uncommon",
     "cost": 55,
-    "stats": { "defense": 15, "maxHp": 50 }
+    "stats": {
+      "defense": 15,
+      "maxHp": 50
+    }
   },
   {
     "id": "plate_armor",
@@ -87,7 +112,11 @@
     "slot": "armor",
     "rarity": "rare",
     "cost": 100,
-    "stats": { "defense": 30, "maxHp": 80, "speed": -10 }
+    "stats": {
+      "defense": 30,
+      "maxHp": 80,
+      "speed": -10
+    }
   },
   {
     "id": "mage_robe",
@@ -96,7 +125,11 @@
     "slot": "armor",
     "rarity": "uncommon",
     "cost": 50,
-    "stats": { "magicResist": 15, "magicPower": 10, "maxHp": 30 }
+    "stats": {
+      "magicResist": 15,
+      "magicPower": 10,
+      "maxHp": 30
+    }
   },
   {
     "id": "hp_ring",
@@ -105,7 +138,9 @@
     "slot": "accessory",
     "rarity": "common",
     "cost": 20,
-    "stats": { "maxHp": 50 }
+    "stats": {
+      "maxHp": 50
+    }
   },
   {
     "id": "crit_amulet",
@@ -114,7 +149,10 @@
     "slot": "accessory",
     "rarity": "uncommon",
     "cost": 45,
-    "stats": { "critChance": 0.1, "critDamage": 0.2 }
+    "stats": {
+      "critChance": 0.1,
+      "critDamage": 0.2
+    }
   },
   {
     "id": "speed_boots",
@@ -123,7 +161,10 @@
     "slot": "accessory",
     "rarity": "uncommon",
     "cost": 50,
-    "stats": { "speed": 20, "attackSpeed": 0.15 }
+    "stats": {
+      "speed": 20,
+      "attackSpeed": 0.15
+    }
   },
   {
     "id": "shield_talisman",
@@ -132,7 +173,10 @@
     "slot": "accessory",
     "rarity": "rare",
     "cost": 80,
-    "stats": { "defense": 12, "magicResist": 12 }
+    "stats": {
+      "defense": 12,
+      "magicResist": 12
+    }
   },
   {
     "id": "dragon_scale",
@@ -141,7 +185,11 @@
     "slot": "armor",
     "rarity": "epic",
     "cost": 200,
-    "stats": { "defense": 40, "magicResist": 30, "maxHp": 120 }
+    "stats": {
+      "defense": 40,
+      "magicResist": 30,
+      "maxHp": 120
+    }
   },
   {
     "id": "excalibur",
@@ -150,7 +198,11 @@
     "slot": "weapon",
     "rarity": "epic",
     "cost": 250,
-    "stats": { "attack": 45, "critChance": 0.1, "critDamage": 0.5 }
+    "stats": {
+      "attack": 45,
+      "critChance": 0.1,
+      "critDamage": 0.5
+    }
   },
   {
     "id": "phoenix_feather",
@@ -159,16 +211,23 @@
     "slot": "accessory",
     "rarity": "epic",
     "cost": 180,
-    "stats": { "maxHp": 100, "magicPower": 20, "magicResist": 15 }
+    "stats": {
+      "maxHp": 100,
+      "magicPower": 20,
+      "magicResist": 15
+    }
   },
   {
     "id": "frost_blade",
     "name": "冰霜之刃",
-    "description": "寒冰铸就的利剑，攻击附带冰冻效果",
+    "description": "寒冰铸就的利剑，攻击有15%几率冰冻敌人(0.6秒)",
     "slot": "weapon",
     "rarity": "rare",
     "cost": 115,
-    "stats": { "attack": 22, "magicPower": 12 }
+    "stats": {
+      "attack": 22,
+      "magicPower": 12
+    }
   },
   {
     "id": "thunder_hammer",
@@ -177,7 +236,10 @@
     "slot": "weapon",
     "rarity": "rare",
     "cost": 125,
-    "stats": { "attack": 20, "magicPower": 18 }
+    "stats": {
+      "attack": 20,
+      "magicPower": 18
+    }
   },
   {
     "id": "shadow_dagger_epic",
@@ -186,7 +248,11 @@
     "slot": "weapon",
     "rarity": "epic",
     "cost": 190,
-    "stats": { "attack": 30, "critChance": 0.2, "critDamage": 0.5 }
+    "stats": {
+      "attack": 30,
+      "critChance": 0.2,
+      "critDamage": 0.5
+    }
   },
   {
     "id": "holy_sword",
@@ -195,7 +261,11 @@
     "slot": "weapon",
     "rarity": "epic",
     "cost": 210,
-    "stats": { "attack": 35, "defense": 15, "magicPower": 10 }
+    "stats": {
+      "attack": 35,
+      "defense": 15,
+      "magicPower": 10
+    }
   },
   {
     "id": "nature_staff",
@@ -204,7 +274,9 @@
     "slot": "weapon",
     "rarity": "uncommon",
     "cost": 55,
-    "stats": { "magicPower": 22 }
+    "stats": {
+      "magicPower": 22
+    }
   },
   {
     "id": "demon_axe",
@@ -213,7 +285,10 @@
     "slot": "weapon",
     "rarity": "rare",
     "cost": 135,
-    "stats": { "attack": 38, "defense": -8 }
+    "stats": {
+      "attack": 38,
+      "defense": -8
+    }
   },
   {
     "id": "crystal_bow",
@@ -222,7 +297,10 @@
     "slot": "weapon",
     "rarity": "rare",
     "cost": 105,
-    "stats": { "attack": 20, "attackRange": 40 }
+    "stats": {
+      "attack": 20,
+      "attackRange": 40
+    }
   },
   {
     "id": "ice_armor_item",
@@ -231,7 +309,11 @@
     "slot": "armor",
     "rarity": "rare",
     "cost": 120,
-    "stats": { "defense": 25, "magicResist": 18, "maxHp": 60 }
+    "stats": {
+      "defense": 25,
+      "magicResist": 18,
+      "maxHp": 60
+    }
   },
   {
     "id": "fire_cloak",
@@ -240,7 +322,10 @@
     "slot": "armor",
     "rarity": "uncommon",
     "cost": 60,
-    "stats": { "magicPower": 15, "speed": 12 }
+    "stats": {
+      "magicPower": 15,
+      "speed": 12
+    }
   },
   {
     "id": "shadow_vest",
@@ -249,7 +334,11 @@
     "slot": "armor",
     "rarity": "rare",
     "cost": 95,
-    "stats": { "critChance": 0.1, "speed": 15, "defense": 10 }
+    "stats": {
+      "critChance": 0.1,
+      "speed": 15,
+      "defense": 10
+    }
   },
   {
     "id": "holy_plate",
@@ -258,7 +347,11 @@
     "slot": "armor",
     "rarity": "epic",
     "cost": 220,
-    "stats": { "defense": 45, "maxHp": 150, "magicResist": 20 }
+    "stats": {
+      "defense": 45,
+      "maxHp": 150,
+      "magicResist": 20
+    }
   },
   {
     "id": "elemental_ring",
@@ -267,7 +360,10 @@
     "slot": "accessory",
     "rarity": "rare",
     "cost": 90,
-    "stats": { "magicPower": 18, "critChance": 0.08 }
+    "stats": {
+      "magicPower": 18,
+      "critChance": 0.08
+    }
   },
   {
     "id": "berserker_charm",
@@ -276,7 +372,11 @@
     "slot": "accessory",
     "rarity": "rare",
     "cost": 85,
-    "stats": { "attack": 20, "attackSpeed": 0.2, "defense": -5 }
+    "stats": {
+      "attack": 20,
+      "attackSpeed": 0.2,
+      "defense": -5
+    }
   },
   {
     "id": "healers_pendant",
@@ -285,7 +385,10 @@
     "slot": "accessory",
     "rarity": "uncommon",
     "cost": 48,
-    "stats": { "magicPower": 15, "maxHp": 40 }
+    "stats": {
+      "magicPower": 15,
+      "maxHp": 40
+    }
   },
   {
     "id": "dragon_scale_ring",
@@ -294,7 +397,11 @@
     "slot": "accessory",
     "rarity": "epic",
     "cost": 125,
-    "stats": { "defense": 15, "magicResist": 15, "maxHp": 80 }
+    "stats": {
+      "defense": 15,
+      "magicResist": 15,
+      "maxHp": 80
+    }
   },
   {
     "id": "boots_of_haste",
@@ -303,7 +410,10 @@
     "slot": "accessory",
     "rarity": "uncommon",
     "cost": 52,
-    "stats": { "speed": 25, "attackSpeed": 0.12 }
+    "stats": {
+      "speed": 25,
+      "attackSpeed": 0.12
+    }
   },
   {
     "id": "mjolnir",
@@ -312,7 +422,11 @@
     "slot": "weapon",
     "rarity": "legendary",
     "cost": 240,
-    "stats": { "attack": 55, "magicPower": 30, "attackSpeed": 0.1 }
+    "stats": {
+      "attack": 55,
+      "magicPower": 30,
+      "attackSpeed": 0.1
+    }
   },
   {
     "id": "aegis_shield",
@@ -321,7 +435,11 @@
     "slot": "armor",
     "rarity": "legendary",
     "cost": 245,
-    "stats": { "defense": 60, "magicResist": 45, "maxHp": 200 }
+    "stats": {
+      "defense": 60,
+      "magicResist": 45,
+      "maxHp": 200
+    }
   },
   {
     "id": "philosophers_stone",
@@ -330,7 +448,15 @@
     "slot": "accessory",
     "rarity": "legendary",
     "cost": 265,
-    "stats": { "attack": 15, "defense": 15, "magicPower": 20, "magicResist": 15, "maxHp": 100, "speed": 10, "critChance": 0.05 }
+    "stats": {
+      "attack": 15,
+      "defense": 15,
+      "magicPower": 20,
+      "magicResist": 15,
+      "maxHp": 100,
+      "speed": 10,
+      "critChance": 0.05
+    }
   },
   {
     "id": "iron_buckler",
@@ -339,7 +465,10 @@
     "slot": "armor",
     "rarity": "common",
     "cost": 28,
-    "stats": { "defense": 10, "maxHp": 20 }
+    "stats": {
+      "defense": 10,
+      "maxHp": 20
+    }
   },
   {
     "id": "silk_gloves",
@@ -348,7 +477,9 @@
     "slot": "accessory",
     "rarity": "common",
     "cost": 22,
-    "stats": { "attackSpeed": 0.15 }
+    "stats": {
+      "attackSpeed": 0.15
+    }
   },
   {
     "id": "bone_staff",
@@ -357,7 +488,10 @@
     "slot": "weapon",
     "rarity": "uncommon",
     "cost": 58,
-    "stats": { "magicPower": 22, "magicResist": 5 }
+    "stats": {
+      "magicPower": 22,
+      "magicResist": 5
+    }
   },
   {
     "id": "warriors_shield",
@@ -366,7 +500,11 @@
     "slot": "armor",
     "rarity": "rare",
     "cost": 105,
-    "stats": { "defense": 28, "maxHp": 70, "magicResist": 10 }
+    "stats": {
+      "defense": 28,
+      "maxHp": 70,
+      "magicResist": 10
+    }
   },
   {
     "id": "assassins_cloak",
@@ -375,7 +513,11 @@
     "slot": "armor",
     "rarity": "rare",
     "cost": 98,
-    "stats": { "critChance": 0.12, "speed": 18, "critDamage": 0.2 }
+    "stats": {
+      "critChance": 0.12,
+      "speed": 18,
+      "critDamage": 0.2
+    }
   },
   {
     "id": "ruby_pendant",
@@ -384,7 +526,10 @@
     "slot": "accessory",
     "rarity": "rare",
     "cost": 88,
-    "stats": { "magicPower": 20, "maxHp": 50 }
+    "stats": {
+      "magicPower": 20,
+      "maxHp": 50
+    }
   },
   {
     "id": "frozen_heart",
@@ -393,7 +538,11 @@
     "slot": "accessory",
     "rarity": "epic",
     "cost": 185,
-    "stats": { "magicPower": 25, "defense": 12, "magicResist": 18 }
+    "stats": {
+      "magicPower": 25,
+      "defense": 12,
+      "magicResist": 18
+    }
   },
   {
     "id": "frostbound_heart",
@@ -402,7 +551,11 @@
     "slot": "weapon",
     "rarity": "legendary",
     "cost": 250,
-    "stats": { "magicPower": 50, "magicResist": 20, "attackSpeed": 0.1 }
+    "stats": {
+      "magicPower": 50,
+      "magicResist": 20,
+      "attackSpeed": 0.1
+    }
   },
   {
     "id": "shadow_edge",
@@ -411,7 +564,12 @@
     "slot": "weapon",
     "rarity": "legendary",
     "cost": 240,
-    "stats": { "attack": 50, "critChance": 0.18, "critDamage": 0.6, "speed": 15 }
+    "stats": {
+      "attack": 50,
+      "critChance": 0.18,
+      "critDamage": 0.6,
+      "speed": 15
+    }
   },
   {
     "id": "angel_wings",
@@ -420,7 +578,12 @@
     "slot": "armor",
     "rarity": "legendary",
     "cost": 260,
-    "stats": { "defense": 35, "magicResist": 40, "maxHp": 180, "magicPower": 25 }
+    "stats": {
+      "defense": 35,
+      "magicResist": 40,
+      "maxHp": 180,
+      "magicPower": 25
+    }
   },
   {
     "id": "ring_of_fate",
@@ -429,7 +592,14 @@
     "slot": "accessory",
     "rarity": "legendary",
     "cost": 280,
-    "stats": { "attack": 20, "defense": 20, "magicPower": 25, "maxHp": 120, "critChance": 0.08, "attackSpeed": 0.1 }
+    "stats": {
+      "attack": 20,
+      "defense": 20,
+      "magicPower": 25,
+      "maxHp": 120,
+      "critChance": 0.08,
+      "attackSpeed": 0.1
+    }
   },
   {
     "id": "forge_hammer_weapon",
@@ -438,7 +608,10 @@
     "slot": "weapon",
     "rarity": "rare",
     "cost": 180,
-    "stats": { "attack": 35, "magicPower": 15 }
+    "stats": {
+      "attack": 35,
+      "magicPower": 15
+    }
   },
   {
     "id": "elemental_plate",
@@ -447,7 +620,10 @@
     "slot": "armor",
     "rarity": "rare",
     "cost": 125,
-    "stats": { "defense": 25, "magicResist": 20 }
+    "stats": {
+      "defense": 25,
+      "magicResist": 20
+    }
   },
   {
     "id": "forge_core",
@@ -456,7 +632,10 @@
     "slot": "accessory",
     "rarity": "epic",
     "cost": 140,
-    "stats": { "magicPower": 30, "critChance": 0.10 }
+    "stats": {
+      "magicPower": 30,
+      "critChance": 0.1
+    }
   },
   {
     "id": "elemental_fusion_blade",
@@ -465,6 +644,10 @@
     "slot": "weapon",
     "rarity": "legendary",
     "cost": 280,
-    "stats": { "attack": 50, "magicPower": 30, "critDamage": 0.15 }
+    "stats": {
+      "attack": 50,
+      "magicPower": 30,
+      "critDamage": 0.15
+    }
   }
 ]

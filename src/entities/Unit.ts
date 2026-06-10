@@ -373,6 +373,16 @@ export class Unit extends Phaser.GameObjects.Container {
       }
     }
 
+    // Floor movement/attack tempo so stacked slows can't go negative
+    stats.speed = Math.max(5, stats.speed);
+    stats.attackSpeed = Math.max(0.1, stats.attackSpeed);
+
+    // Crit caps: elf+ranger+assassin synergies plus crit gear could stack to
+    // 67%+ crit / 2.9x multiplier — the dominant "crit answer" build the
+    // balance review flagged. Caps keep crit builds strong but not solitary.
+    stats.critChance = Math.min(0.75, stats.critChance);
+    stats.critDamage = Math.min(2.5, stats.critDamage);
+
     this._effectiveStatsCache = stats;
     this._statsDirty = false;
     return stats;

@@ -83,7 +83,7 @@ export class EventScene extends Phaser.Scene {
     }
 
     // Mutation: first_event_safe — ensure at least one safe option for the first event
-    if (MetaManager.hasMutation('first_event_safe') && event) {
+    if (MetaManager.isMutationEffective('first_event_safe') && event) {
       const map = rm.getMap();
       const firstEventIdx = map.findIndex(n => n.type === 'event');
       if (this.nodeIndex === firstEventIdx) {

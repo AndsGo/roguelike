@@ -1,4 +1,5 @@
 import { RunManager } from '../managers/RunManager';
+import { StatsManager } from '../managers/StatsManager';
 import { RunEndContext } from '../managers/MetaManager';
 import { Theme, colorToString } from '../ui/Theme';
 import { RunEndPanel } from '../ui/RunEndPanel';
@@ -39,7 +40,8 @@ export class GameOverScene extends BaseEndScene {
       partyHeroIds: heroStates.map(h => h.id),
       partyElements: heroStates.map(h => {
         const data = (heroesData as { id: string; element: string | null }[]).find(d => d.id === h.id);
-        return data?.element ?? undefined;
+        // Event-granted temporaryElement counts toward unlock checks
+        return h.temporaryElement ?? data?.element ?? undefined;
       }),
       partyRoles: heroStates.map(h => {
         const data = (heroesData as { id: string; role: string }[]).find(d => d.id === h.id);
@@ -58,6 +60,35 @@ export class GameOverScene extends BaseEndScene {
 
     // Daily challenge completion
     this.settleDailyChallenge(false, 270);
+
+    // Run recap — skipped on daily runs (leaderboard occupies this space)
+    if (!rm.getState().isDaily) {
+      const s = StatsManager.getRunStats();
+      let bestHero = '';
+      let bestDmg = 0;
+      for (const [id, hs] of Object.entries(s.heroStats)) {
+        if (hs.damage > bestDmg) {
+          bestDmg = hs.damage;
+          const data = (heroesData as { id: string; name: string }[]).find(d => d.id === id);
+          bestHero = data?.name ?? id;
+        }
+      }
+      const reactionTotal = Object.values(s.elementReactions).reduce((a, b) => a + b, 0);
+
+      TextFactory.create(this, v.cx, 262, UI.gameOver.recapTitle, 'label', {
+        color: '#667788',
+      }).setOrigin(0.5);
+      const line1 = bestHero
+        ? `${UI.gameOver.recapBestHero(bestHero, Math.round(bestDmg))} · ${UI.gameOver.recapNodes(s.nodesCompleted)}`
+        : UI.gameOver.recapNodes(s.nodesCompleted);
+      TextFactory.create(this, v.cx, 278, line1, 'label', {
+        color: '#8899aa',
+      }).setOrigin(0.5);
+      const line2 = `${UI.gameOver.recapCombo(s.maxCombo)} · ${UI.gameOver.recapCrits(s.criticalHits)} · ${UI.gameOver.recapReactions(reactionTotal)}`;
+      TextFactory.create(this, v.cx, 293, line2, 'label', {
+        color: '#8899aa',
+      }).setOrigin(0.5);
+    }
 
     // Build review + retry + main menu buttons — anchor from bottom
     this.createBuildReviewButton(v.vh - 130);

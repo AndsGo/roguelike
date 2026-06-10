@@ -108,16 +108,19 @@ export class AchievementManager {
     }
   }
 
-  /** Handle the 4 complex custom conditions by achievement ID */
+  /** Handle the complex custom conditions by achievement ID */
   private static resolveCustomCondition(
     id: string,
   ): (stats: RunStats, meta: MetaProgressionData) => boolean {
+    // These all require winning THIS run (stats.victory, set by finalizeRun) —
+    // checking lifetime m.totalVictories here let veterans pop "speedrun" on
+    // node 1 of any new run.
     switch (id) {
       case 'speedrun':
-        return (s, m) => m.totalVictories >= 1 && s.nodesCompleted <= 15 && s.nodesCompleted > 0;
+        return (s) => s.victory && s.nodesCompleted <= 15 && s.nodesCompleted > 0;
       case 'no_death':
-        return (s, m) => {
-          if (m.totalVictories < 1) return false;
+        return (s) => {
+          if (!s.victory) return false;
           const heroStats = s.heroStats;
           for (const key of Object.keys(heroStats)) {
             if (heroStats[key].deaths > 0) return false;
@@ -127,10 +130,12 @@ export class AchievementManager {
       case 'solo_victory':
         return (s) => {
           const heroIds = Object.keys(s.heroStats);
-          return heroIds.length === 1 && s.nodesCompleted >= 15;
+          return s.victory && heroIds.length === 1;
         };
       case 'hell_victory':
         return (_s, m) => (m.hellVictories ?? 0) >= 1;
+      case 'daily_warrior':
+        return (_s, m) => (m.dailyChallengesCompleted ?? 0) >= 7;
       default:
         return () => false;
     }

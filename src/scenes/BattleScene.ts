@@ -32,6 +32,7 @@ import { UI } from '../i18n';
 import { KeybindingConfig } from '../config/keybindings';
 import { BOSS_ENTRANCE, WAVE_TRANSITION } from '../config/visual';
 import { RunOverviewPanel } from '../ui/RunOverviewPanel';
+import { HelpPanel } from '../ui/HelpPanel';
 import { TutorialSystem } from '../systems/TutorialSystem';
 import { DailyChallengeManager, DailyRule } from '../managers/DailyChallengeManager';
 import { UltimateSystem } from '../systems/UltimateSystem';
@@ -54,6 +55,7 @@ export class BattleScene extends Phaser.Scene {
   private unitAnimations!: UnitAnimationSystem;
   private pauseElements: Phaser.GameObjects.GameObject[] = [];
   private overviewPanel: RunOverviewPanel | null = null;
+  private pauseHelpPanel: HelpPanel | null = null;
   private ultimateSystem!: UltimateSystem;
   private ultimateBar!: UltimateBar;
 
@@ -79,6 +81,7 @@ export class BattleScene extends Phaser.Scene {
   private onDamage!: (data: { sourceId: string; targetId: string; amount: number; isCrit: boolean; element?: ElementType }) => void;
   private onHeal!: (data: { sourceId: string; targetId: string; amount: number }) => void;
   private onDeath!: (data: { unitId: string; isHero: boolean }) => void;
+  private onStatusApply!: (data: { targetId: string; effectId: string; effectType: string }) => void;
   private onReaction!: (data: { element1: ElementType; element2: ElementType; targetId: string; reactionType: string }) => void;
   private onSkillVisual!: (data: { casterId: string; skillId: string; targets: string[] }) => void;
   private onComboBreak!: (data: { unitId: string }) => void;
@@ -162,6 +165,9 @@ export class BattleScene extends Phaser.Scene {
     }
     const actIndex = rm.getCurrentAct();
 
+    // Per-act battle BGM variation (boss battles switch to bgm_boss below, unaffected)
+    AudioManager.getInstance().setBattleAct(actIndex);
+
     // Responsive world camera: 800×450 battlefield fit-scaled and centered;
     // the visible design rect (vb) can be wider/taller — edge-anchored UI
     // and full-bleed backgrounds use it.
@@ -202,6 +208,43 @@ export class BattleScene extends Phaser.Scene {
           bgDecor.fillRect(vb.x, vb.y + vb.h - i * 20, vb.w, 20);
         }
         break;
+      case 3: // Elemental Forge
+        bgDecor.fillStyle(0x2a1a0a, 0.5);
+        bgDecor.fillRect(vb.x, BATTLE_GROUND_Y + 40, vb.w, vb.y + vb.h - BATTLE_GROUND_Y - 40);
+        for (let i = 0; i < 8; i++) {
+          bgDecor.fillStyle(0xff6600, 0.12);
+          const cx = vb.x + rng.next() * vb.w;
+          const cy = vb.y + rng.next() * (BATTLE_GROUND_Y - 40);
+          bgDecor.fillCircle(cx, cy, 2 + rng.next() * 2);
+        }
+        break;
+    }
+
+    // Distant background gradient bands (depth -1)
+    const actGradColors: number[] = [0x0d2818, 0x2a1208, 0x140a24, 0x241a08];
+    const gradColor = actGradColors[actIndex] ?? actGradColors[0];
+    const bgGrad = this.add.graphics();
+    bgGrad.setDepth(-1);
+    const bandH = Math.floor((vb.h * 0.3) / 4);
+    const gradAlphas = [0.25, 0.18, 0.10, 0.05];
+    for (let b = 0; b < 4; b++) {
+      bgGrad.fillStyle(gradColor, gradAlphas[b]);
+      bgGrad.fillRect(vb.x, vb.y + b * bandH, vb.w, bandH);
+    }
+
+    // Ground enhancement (depth 0): bright top edge + perspective lines
+    const actGroundBrightColors: number[] = [0x1a4a22, 0x3d1e0e, 0x1e1040, 0x3d2610];
+    const groundBrightColor = actGroundBrightColors[actIndex] ?? actGroundBrightColors[0];
+    const bgGround = this.add.graphics();
+    bgGround.setDepth(0);
+    bgGround.lineStyle(2, groundBrightColor, 0.8);
+    bgGround.lineBetween(vb.x, BATTLE_GROUND_Y + 50, vb.x + vb.w, BATTLE_GROUND_Y + 50);
+    const perspLineCount = 4;
+    const perspBottom = vb.y + vb.h;
+    for (let p = 0; p < perspLineCount; p++) {
+      const tx = vb.x + (vb.w / (perspLineCount + 1)) * (p + 1);
+      bgGround.lineStyle(1, groundBrightColor, 0.06);
+      bgGround.lineBetween(tx, BATTLE_GROUND_Y + 50, vb.cx, perspBottom);
     }
 
     // Ground line
@@ -562,6 +605,13 @@ export class BattleScene extends Phaser.Scene {
         // Screen flash with the primary reaction element color
         const elColor = getElementColor(data.element1);
         this.effects.screenFlash(elColor);
+        // Per-reaction specialist visual
+        switch (data.reactionType) {
+          case '融化': this.effects.showIgniteEffect(target.x, target.y); break;
+          case '超导': this.effects.showFreezeEffect(target.x, target.y); break;
+          case '超载': this.effects.showShockEffect(target.x, target.y); break;
+          case '湮灭': this.effects.showAnnihilateEffect(target.x, target.y); break;
+        }
       }
     };
 
@@ -644,10 +694,24 @@ export class BattleScene extends Phaser.Scene {
       }
     };
 
+    // Support value visibility: float a label when a buff/regen lands so
+    // support heroes' contribution is perceivable (balance review P1-2)
+    this.onStatusApply = (data) => {
+      if (data.effectType !== 'buff' && data.effectType !== 'hot') return;
+      const unit = this.allUnits.find(u => u.unitId === data.targetId);
+      if (!unit || !unit.isAlive) return;
+      if (data.effectType === 'buff') {
+        this.effects.showSkillName(unit.x, unit.y - 8, '增益↑', 0x44ff88);
+      } else {
+        this.effects.showSkillName(unit.x, unit.y - 8, '再生+', 0x44ddff);
+      }
+    };
+
     const eb = EventBus.getInstance();
     eb.on('unit:damage', this.onDamage);
     eb.on('unit:heal', this.onHeal);
     eb.on('unit:death', this.onDeath);
+    eb.on('status:apply', this.onStatusApply);
     eb.on('element:reaction', this.onReaction);
     eb.on('skill:use', this.onSkillVisual);
     eb.on('combo:break', this.onComboBreak);
@@ -994,39 +1058,48 @@ export class BattleScene extends Phaser.Scene {
     // Panel background
     const panelBg = this.add.graphics().setDepth(101);
     const pw = 240;
-    const ph = 180;
+    const ph = 220;
     panelBg.fillStyle(Theme.colors.panel, 0.95);
     panelBg.fillRoundedRect(GAME_WIDTH / 2 - pw / 2, GAME_HEIGHT / 2 - ph / 2, pw, ph, 8);
     panelBg.lineStyle(2, Theme.colors.panelBorder, 0.8);
     panelBg.strokeRoundedRect(GAME_WIDTH / 2 - pw / 2, GAME_HEIGHT / 2 - ph / 2, pw, ph, 8);
 
     // Title
-    const title = TextFactory.create(this, GAME_WIDTH / 2, GAME_HEIGHT / 2 - 60, UI.battle.pause, 'subtitle', {
+    const title = TextFactory.create(this, GAME_WIDTH / 2, GAME_HEIGHT / 2 - 80, UI.battle.pause, 'subtitle', {
       color: colorToString(Theme.colors.secondary),
     }).setOrigin(0.5).setDepth(102);
 
     // Continue button
-    const continueBtn = new Button(this, GAME_WIDTH / 2, GAME_HEIGHT / 2 - 20,
+    const continueBtn = new Button(this, GAME_WIDTH / 2, GAME_HEIGHT / 2 - 42,
       UI.battle.resume, 160, 32, () => this.resumeBattle(), Theme.colors.success);
     continueBtn.setDepth(102);
 
     // Settings button
-    const settingsBtn = new Button(this, GAME_WIDTH / 2, GAME_HEIGHT / 2 + 20,
+    const settingsBtn = new Button(this, GAME_WIDTH / 2, GAME_HEIGHT / 2 - 4,
       UI.battle.settings, 160, 32, () => {
         this.resumeBattle();
         SceneTransition.fadeTransition(this, 'SettingsScene', { returnScene: 'BattleScene' });
       }, Theme.colors.panelBorder);
     settingsBtn.setDepth(102);
 
+    // Help button (mid-battle reference; battle stays paused underneath)
+    const helpBtn = new Button(this, GAME_WIDTH / 2, GAME_HEIGHT / 2 + 34,
+      '帮助', 160, 32, () => {
+        if (!this.pauseHelpPanel) {
+          this.pauseHelpPanel = new HelpPanel(this, () => { this.pauseHelpPanel = null; });
+        }
+      }, Theme.colors.panelBorder);
+    helpBtn.setDepth(102);
+
     // Exit button (abandon battle → map)
-    const exitBtn = new Button(this, GAME_WIDTH / 2, GAME_HEIGHT / 2 + 60,
+    const exitBtn = new Button(this, GAME_WIDTH / 2, GAME_HEIGHT / 2 + 72,
       UI.battle.abandonBattle, 160, 32, () => {
         this.resumeBattle();
         SceneTransition.fadeTransition(this, 'MapScene');
       }, Theme.colors.danger);
     exitBtn.setDepth(102);
 
-    this.pauseElements = [overlay, panelBg, title, continueBtn, settingsBtn, exitBtn];
+    this.pauseElements = [overlay, panelBg, title, continueBtn, settingsBtn, helpBtn, exitBtn];
   }
 
   private resumeBattle(): void {
@@ -1215,7 +1288,11 @@ export class BattleScene extends Phaser.Scene {
 
     // Play victory/defeat SFX stinger
     const audio = AudioManager.getInstance();
-    audio.playSfx(isVictory ? 'sfx_levelup' : 'sfx_event_bad');
+    if (isVictory) {
+      audio.playVictoryStinger();
+    } else {
+      audio.playDefeatStinger();
+    }
 
     // Victory/defeat text with animation
     const text = isVictory ? UI.battle.victory : UI.battle.defeat;
@@ -1271,6 +1348,7 @@ export class BattleScene extends Phaser.Scene {
     eb.off('unit:damage', this.onDamage);
     eb.off('unit:heal', this.onHeal);
     eb.off('unit:death', this.onDeath);
+    eb.off('status:apply', this.onStatusApply);
     eb.off('element:reaction', this.onReaction);
     eb.off('skill:use', this.onSkillVisual);
     eb.off('combo:break', this.onComboBreak);

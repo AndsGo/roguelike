@@ -1,11 +1,13 @@
 import Phaser from 'phaser';
-import { Theme, colorToString } from './Theme';
+import { Theme, colorToString, getAccessibility } from './Theme';
 import { TextFactory } from './TextFactory';
 import { SkillQueueSystem } from '../systems/SkillQueueSystem';
 import { Hero } from '../entities/Hero';
 import { SkillData } from '../types';
 import { UI } from '../i18n';
 import { EventBus } from '../systems/EventBus';
+import { TutorialSystem } from '../systems/TutorialSystem';
+import { AudioManager } from '../systems/AudioManager';
 import { attachPressInteraction } from './PressInteraction';
 import { isTouchDevice } from '../utils/device';
 import { viewBounds, uiBoost } from './Viewport';
@@ -31,6 +33,7 @@ export class SkillBar extends Phaser.GameObjects.Container {
   private slots: SkillSlot[] = [];
   private skillQueue: SkillQueueSystem;
   private heroes: Hero[];
+  private manualSkillTipShown: boolean = false;
 
   constructor(
     scene: Phaser.Scene,
@@ -88,6 +91,11 @@ export class SkillBar extends Phaser.GameObjects.Container {
     const readyEntries = this.skillQueue.getReadySkills();
     for (const slot of this.slots) {
       slot.updateState(readyEntries);
+    }
+    // Show manual-skills tip the first time any skill becomes ready this session
+    if (!this.manualSkillTipShown && readyEntries.length > 0) {
+      this.manualSkillTipShown = true;
+      TutorialSystem.showTipIfNeeded(this.scene, 'manual_skills');
     }
   }
 
@@ -251,16 +259,24 @@ class SkillSlot extends Phaser.GameObjects.Container {
 
     if (queued && !this.isReady) {
       this.isReady = true;
-      this.readyGlow.setAlpha(1);
-      // Pulse animation
-      this.scene.tweens.add({
-        targets: this.readyGlow,
-        alpha: { from: 1, to: 0.3 },
-        duration: 600,
-        yoyo: true,
-        repeat: -1,
-        ease: 'Sine.easeInOut',
-      });
+      // Breathing glow: skip if tween already running (re-entry guard)
+      if (!this.scene.tweens.isTweening(this.readyGlow)) {
+        if (!getAccessibility().reduceMotion) {
+          // Breathing pulse 0.5 ↔ 1 alpha, 800 ms
+          this.readyGlow.setAlpha(1);
+          this.scene.tweens.add({
+            targets: this.readyGlow,
+            alpha: { from: 1, to: 0.5 },
+            duration: 800,
+            yoyo: true,
+            repeat: -1,
+            ease: 'Sine.easeInOut',
+          });
+        } else {
+          // Static full alpha when reduceMotion is on
+          this.readyGlow.setAlpha(1);
+        }
+      }
     } else if (!queued && this.isReady) {
       this.isReady = false;
       this.scene.tweens.killTweensOf(this.readyGlow);
@@ -270,7 +286,23 @@ class SkillSlot extends Phaser.GameObjects.Container {
 
   /** Attempt to fire this skill. Returns true if successful. */
   tryFire(): boolean {
-    if (!this.isReady) return false;
+    if (!this.isReady) {
+      // Not-ready feedback: brief horizontal shake + error sound
+      if (!this.scene.tweens.isTweening(this)) {
+        AudioManager.getInstance().playSfx('sfx_error');
+        const origX = this.x;
+        this.scene.tweens.add({
+          targets: this,
+          x: { from: origX - 2, to: origX + 2 },
+          duration: 50,
+          yoyo: true,
+          repeat: 1,
+          ease: 'Linear',
+          onComplete: () => { this.x = origX; },
+        });
+      }
+      return false;
+    }
 
     // For targeted skills (enemy/ally single target), enter targeting mode
     const targetType = this.skill.targetType;

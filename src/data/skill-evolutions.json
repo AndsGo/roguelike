@@ -18,7 +18,10 @@
       "statusEffect": "taunt",
       "effectDuration": 2.5
     },
-    "level10Bonus": { "aoeRadius": 20, "effectDuration": 1 }
+    "level10Bonus": {
+      "aoeRadius": 20,
+      "effectDuration": 1
+    }
   },
   {
     "id": "shield_bash_heavy_stun",
@@ -36,7 +39,10 @@
       "statusEffect": "stun",
       "effectDuration": 1.5
     },
-    "level10Bonus": { "baseDamage": 20, "effectDuration": 0.5 }
+    "level10Bonus": {
+      "baseDamage": 20,
+      "effectDuration": 0.5
+    }
   },
   {
     "id": "holy_smite_burst_aoe",
@@ -56,7 +62,10 @@
       "aoeRadius": 100,
       "element": "holy"
     },
-    "level10Bonus": { "baseDamage": 10, "aoeRadius": 20 }
+    "level10Bonus": {
+      "baseDamage": 10,
+      "aoeRadius": 20
+    }
   },
   {
     "id": "holy_smite_judgment",
@@ -91,7 +100,10 @@
         }
       ]
     },
-    "level10Bonus": { "baseDamage": 20, "scalingRatio": 0.15 }
+    "level10Bonus": {
+      "baseDamage": 20,
+      "scalingRatio": 0.15
+    }
   },
   {
     "id": "backstab_bleed_combo",
@@ -137,7 +149,10 @@
         }
       ]
     },
-    "level10Bonus": { "baseDamage": 15, "effectDuration": 1 }
+    "level10Bonus": {
+      "baseDamage": 15,
+      "effectDuration": 1
+    }
   },
   {
     "id": "backstab_crit_burst",
@@ -155,7 +170,10 @@
       "range": 60,
       "element": "dark"
     },
-    "level10Bonus": { "baseDamage": 25, "scalingRatio": 0.2 }
+    "level10Bonus": {
+      "baseDamage": 25,
+      "scalingRatio": 0.2
+    }
   },
   {
     "id": "berserk_rage_lifesteal",
@@ -184,7 +202,9 @@
         }
       ]
     },
-    "level10Bonus": { "effectDuration": 2 }
+    "level10Bonus": {
+      "effectDuration": 2
+    }
   },
   {
     "id": "berserk_rage_frenzy_aoe",
@@ -206,7 +226,10 @@
       "effectDuration": 5,
       "element": "fire"
     },
-    "level10Bonus": { "baseDamage": 10, "aoeRadius": 25 }
+    "level10Bonus": {
+      "baseDamage": 10,
+      "aoeRadius": 25
+    }
   },
   {
     "id": "fireball_flame_storm",
@@ -226,7 +249,10 @@
       "aoeRadius": 100,
       "element": "fire"
     },
-    "level10Bonus": { "baseDamage": 12, "aoeRadius": 20 }
+    "level10Bonus": {
+      "baseDamage": 12,
+      "aoeRadius": 20
+    }
   },
   {
     "id": "fireball_precision_rocket",
@@ -246,7 +272,10 @@
       "aoeRadius": 0,
       "element": "fire"
     },
-    "level10Bonus": { "baseDamage": 25, "cooldown": -1 }
+    "level10Bonus": {
+      "baseDamage": 25,
+      "cooldown": -1
+    }
   },
   {
     "id": "multi_shot_barrage",
@@ -265,7 +294,10 @@
       "range": 260,
       "aoeRadius": 40
     },
-    "level10Bonus": { "baseDamage": 5, "aoeRadius": 10 }
+    "level10Bonus": {
+      "baseDamage": 5,
+      "aoeRadius": 10
+    }
   },
   {
     "id": "multi_shot_focused",
@@ -284,7 +316,10 @@
       "range": 280,
       "aoeRadius": 0
     },
-    "level10Bonus": { "baseDamage": 18, "scalingRatio": 0.2 }
+    "level10Bonus": {
+      "baseDamage": 18,
+      "scalingRatio": 0.2
+    }
   },
   {
     "id": "heal_group",
@@ -303,7 +338,9 @@
       "range": 300,
       "element": "holy"
     },
-    "level10Bonus": { "baseDamage": -12 }
+    "level10Bonus": {
+      "baseDamage": -12
+    }
   },
   {
     "id": "heal_shield",
@@ -324,7 +361,10 @@
       "statusEffect": "buff",
       "effectDuration": 5
     },
-    "level10Bonus": { "baseDamage": -25, "effectDuration": 1 }
+    "level10Bonus": {
+      "baseDamage": -25,
+      "effectDuration": 1
+    }
   },
   {
     "id": "nature_heal_hot_bloom",
@@ -344,7 +384,10 @@
       "statusEffect": "regen",
       "effectDuration": 5
     },
-    "level10Bonus": { "baseDamage": -8, "effectDuration": 1 }
+    "level10Bonus": {
+      "baseDamage": -8,
+      "effectDuration": 1
+    }
   },
   {
     "id": "nature_heal_atk_buff",
@@ -377,7 +420,10 @@
         }
       ]
     },
-    "level10Bonus": { "baseDamage": -12, "effectDuration": 2 }
+    "level10Bonus": {
+      "baseDamage": -12,
+      "effectDuration": 2
+    }
   },
   {
     "id": "elemental_infusion_amplify",
@@ -397,7 +443,10 @@
       "statusEffect": "buff",
       "effectDuration": 6
     },
-    "level10Bonus": { "effectDuration": 2, "cooldown": -1 }
+    "level10Bonus": {
+      "effectDuration": 2,
+      "cooldown": -1
+    }
   },
   {
     "id": "elemental_infusion_shred",
@@ -417,7 +466,10 @@
       "statusEffect": "magic_resist_down",
       "effectDuration": 5
     },
-    "level10Bonus": { "baseDamage": 5, "effectDuration": 1 }
+    "level10Bonus": {
+      "baseDamage": 5,
+      "effectDuration": 1
+    }
   },
   {
     "id": "frost_shield_fortress",
@@ -438,7 +490,10 @@
       "statusEffect": "buff",
       "effectDuration": 6
     },
-    "level10Bonus": { "baseDamage": -12, "effectDuration": 1 }
+    "level10Bonus": {
+      "baseDamage": -12,
+      "effectDuration": 1
+    }
   },
   {
     "id": "frost_shield_frostbite_aura",
@@ -460,6 +515,180 @@
       "statusEffect": "frostbite",
       "effectDuration": 4
     },
-    "level10Bonus": { "baseDamage": 5, "aoeRadius": 20 }
+    "level10Bonus": {
+      "baseDamage": 5,
+      "aoeRadius": 20
+    }
+  },
+  {
+    "id": "shadow_bolt_void_pierce",
+    "heroId": "necromancer",
+    "sourceSkillId": "shadow_bolt",
+    "branch": "A",
+    "name": "虚空贯穿",
+    "description": "暗影箭凝聚为虚空之矛,单体伤害大幅提升并延长侵蚀",
+    "overrides": {
+      "name": "虚空贯穿",
+      "description": "暗影箭凝聚为虚空之矛,单体伤害大幅提升并延长侵蚀",
+      "baseDamage": 75,
+      "scalingRatio": 1.3,
+      "cooldown": 7,
+      "statusEffect": "dark_dot",
+      "effectDuration": 5
+    },
+    "level10Bonus": {
+      "baseDamage": 20,
+      "effectDuration": 1
+    }
+  },
+  {
+    "id": "shadow_bolt_plague_nova",
+    "heroId": "necromancer",
+    "sourceSkillId": "shadow_bolt",
+    "branch": "B",
+    "name": "瘟疫新星",
+    "description": "暗影箭爆裂为瘟疫新星,侵蚀所有敌人",
+    "overrides": {
+      "name": "瘟疫新星",
+      "description": "暗影箭爆裂为瘟疫新星,侵蚀所有敌人",
+      "targetType": "all_enemies",
+      "baseDamage": 38,
+      "scalingRatio": 0.8,
+      "cooldown": 9,
+      "aoeRadius": 90,
+      "statusEffect": "dark_dot",
+      "effectDuration": 3
+    },
+    "level10Bonus": {
+      "aoeRadius": 25,
+      "baseDamage": 12
+    }
+  },
+  {
+    "id": "chain_lightning_overcharge",
+    "heroId": "elementalist",
+    "sourceSkillId": "chain_lightning",
+    "branch": "A",
+    "name": "超载电弧",
+    "description": "雷电链聚为单道超载电弧,伤害极大提升",
+    "overrides": {
+      "name": "超载电弧",
+      "description": "雷电链聚为单道超载电弧,伤害极大提升",
+      "baseDamage": 90,
+      "scalingRatio": 1.4,
+      "cooldown": 8
+    },
+    "level10Bonus": {
+      "baseDamage": 25
+    }
+  },
+  {
+    "id": "chain_lightning_storm_field",
+    "heroId": "elementalist",
+    "sourceSkillId": "chain_lightning",
+    "branch": "B",
+    "name": "风暴力场",
+    "description": "雷电链化作席卷全场的风暴力场,并使敌人感电减速",
+    "overrides": {
+      "name": "风暴力场",
+      "description": "雷电链化作席卷全场的风暴力场,并使敌人感电减速",
+      "targetType": "all_enemies",
+      "baseDamage": 42,
+      "scalingRatio": 0.85,
+      "cooldown": 10,
+      "aoeRadius": 100,
+      "statusEffect": "slow",
+      "effectDuration": 2.5
+    },
+    "level10Bonus": {
+      "effectDuration": 1,
+      "baseDamage": 12
+    }
+  },
+  {
+    "id": "dragon_breath_inferno",
+    "heroId": "dragon_knight",
+    "sourceSkillId": "dragon_breath",
+    "branch": "A",
+    "name": "炼狱吐息",
+    "description": "龙息更加炽烈,灼烧伤害与持续时间大幅提升",
+    "overrides": {
+      "name": "炼狱吐息",
+      "description": "龙息更加炽烈,灼烧伤害与持续时间大幅提升",
+      "baseDamage": 80,
+      "scalingRatio": 1.1,
+      "cooldown": 9,
+      "statusEffect": "burn",
+      "effectDuration": 5
+    },
+    "level10Bonus": {
+      "baseDamage": 20,
+      "effectDuration": 1
+    }
+  },
+  {
+    "id": "dragon_breath_wide_sweep",
+    "heroId": "dragon_knight",
+    "sourceSkillId": "dragon_breath",
+    "branch": "B",
+    "name": "横扫之炎",
+    "description": "龙息扫掠范围翻倍,覆盖整个战场前沿",
+    "overrides": {
+      "name": "横扫之炎",
+      "description": "龙息扫掠范围翻倍,覆盖整个战场前沿",
+      "baseDamage": 50,
+      "scalingRatio": 0.85,
+      "cooldown": 10,
+      "aoeRadius": 160,
+      "statusEffect": "burn",
+      "effectDuration": 2.5
+    },
+    "level10Bonus": {
+      "aoeRadius": 30
+    }
+  },
+  {
+    "id": "beast_charge_savage_pounce",
+    "heroId": "beast_warden",
+    "sourceSkillId": "beast_charge",
+    "branch": "A",
+    "name": "猛兽扑杀",
+    "description": "野兽冲锋化作致命扑杀,伤害提升且眩晕更久",
+    "overrides": {
+      "name": "猛兽扑杀",
+      "description": "野兽冲锋化作致命扑杀,伤害提升且眩晕更久",
+      "baseDamage": 85,
+      "scalingRatio": 1.35,
+      "cooldown": 8,
+      "statusEffect": "stun",
+      "effectDuration": 1.8
+    },
+    "level10Bonus": {
+      "baseDamage": 20,
+      "effectDuration": 0.4
+    }
+  },
+  {
+    "id": "beast_charge_stampede",
+    "heroId": "beast_warden",
+    "sourceSkillId": "beast_charge",
+    "branch": "B",
+    "name": "兽群践踏",
+    "description": "召唤兽群践踏所有敌人并短暂眩晕",
+    "overrides": {
+      "name": "兽群践踏",
+      "description": "召唤兽群践踏所有敌人并短暂眩晕",
+      "targetType": "all_enemies",
+      "baseDamage": 45,
+      "scalingRatio": 0.9,
+      "cooldown": 11,
+      "aoeRadius": 110,
+      "statusEffect": "stun",
+      "effectDuration": 0.8
+    },
+    "level10Bonus": {
+      "baseDamage": 15,
+      "effectDuration": 0.3
+    }
   }
 ]

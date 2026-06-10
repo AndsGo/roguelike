@@ -235,12 +235,38 @@ export class SkillSystem {
         // Healing skill
         this.damageSystem.applyHeal(unit, target, Math.abs(totalDamage));
       } else if (totalDamage > 0) {
-        // Damage skill - pass element through
-        const forceCrit = skill.id === 'backstab';
-        const result = this.damageSystem.calculateDamage(
-          unit, target, totalDamage, skill.damageType, forceCrit, skillElement,
-        );
-        target.takeDamage(result.finalDamage);
+        // Damage skill - pass element through.
+        // Multi-hit skills (hits > 1, e.g. 箭雨×5) split the total into
+        // independently-critting strikes; the accumulator merges the floaters.
+        const hitCount = Math.max(1, skill.hits ?? 1);
+        const forceCrit = (skill.forceCrit ?? false) || skill.id === 'backstab';
+        let perHitBase = totalDamage / hitCount;
+        // Execute mechanic (处决): below the HP threshold the skill deals
+        // multiplied damage (致命幻影 "低于30%生命伤害翻倍")
+        if (
+          skill.executeThreshold &&
+          target.currentHp / target.getEffectiveStats().maxHp < skill.executeThreshold
+        ) {
+          perHitBase *= skill.executeMultiplier ?? 2;
+        }
+        let lastCrit = false;
+        let dealtTotal = 0;
+        let reactionTotal = 0;
+        for (let hit = 0; hit < hitCount && target.isAlive; hit++) {
+          const hitResult = this.damageSystem.calculateDamage(
+            unit, target, perHitBase, skill.damageType, forceCrit, skillElement,
+            skill.bonusCritChance ?? 0,
+          );
+          target.takeDamage(hitResult.finalDamage);
+          dealtTotal += hitResult.finalDamage;
+          reactionTotal += hitResult.elementReactionDamage;
+          lastCrit = lastCrit || hitResult.isCrit;
+        }
+        const result = {
+          finalDamage: dealtTotal,
+          elementReactionDamage: reactionTotal,
+          isCrit: lastCrit,
+        };
 
         // Register combo hit
         if (this.damageSystem.comboSystem) {
@@ -290,7 +316,7 @@ export class SkillSystem {
         });
 
         // Mutation: crit_cooldown — reduce all cooldowns by 1s on crit
-        if (result.isCrit && MetaManager.hasMutation('crit_cooldown') && unit.isHero) {
+        if (result.isCrit && MetaManager.isMutationEffective('crit_cooldown') && unit.isHero) {
           for (const [skillId, cd] of unit.skillCooldowns) {
             if (cd > 0) {
               unit.skillCooldowns.set(skillId, Math.max(0, cd - 1));
@@ -422,16 +448,17 @@ export class SkillSystem {
   }
 
   private applyStatusEffect(source: Unit, target: Unit, skill: SkillData): void {
-    const effectType = this.mapEffectType(skill.statusEffect!);
+    const spec = STATUS_EFFECT_SPECS[skill.statusEffect!] ?? { type: 'debuff' as StatusEffectType };
+    const effectType = spec.type;
     const skillElement = skill.element ?? source.element;
     const effect: StatusEffect = {
       id: nextEffectId(skill.statusEffect!),
       type: effectType,
       name: skill.statusEffect!,
       duration: skill.effectDuration!,
-      value: effectType === 'buff' || effectType === 'debuff' ? skill.baseDamage * 0.5 : skill.baseDamage * 0.2,
+      value: resolveStatusValue(spec, skill.baseDamage),
       tickInterval: effectType === 'dot' || effectType === 'hot' ? 1 : undefined,
-      stat: effectType === 'buff' ? 'attack' : undefined,
+      stat: spec.stat,
       sourceId: source.unitId,
       element: skillElement,
     };
@@ -481,13 +508,63 @@ export class SkillSystem {
   }
 
   private mapEffectType(effectName: string): StatusEffectType {
-    switch (effectName) {
-      case 'stun': return 'stun';
-      case 'taunt': return 'taunt';
-      case 'burn': return 'dot';
-      case 'frostbite': return 'dot';
-      case 'attack_buff': return 'buff';
-      default: return 'debuff';
-    }
+    return (STATUS_EFFECT_SPECS[effectName] ?? { type: 'debuff' as StatusEffectType }).type;
   }
+}
+
+/**
+ * Declarative status-effect semantics: every `statusEffect` name used in
+ * skills.json maps to a concrete runtime behavior. Buff/debuff entries MUST
+ * carry `stat` — Unit.getEffectiveStats only applies effects with a stat.
+ * (Historically only 5 names were mapped; the other 13 silently fell through
+ * to a stat-less 'debuff' and did nothing — the "ice bolt doesn't slow" bug.)
+ */
+interface StatusEffectSpec {
+  type: StatusEffectType;
+  stat?: StatusEffect['stat'];
+  /** Fixed magnitude. When omitted, derives from |baseDamage| (see resolveStatusValue). */
+  value?: number;
+  /** Stat delta is applied as a negative number (debuffs). */
+  negate?: boolean;
+}
+
+const STATUS_EFFECT_SPECS: Record<string, StatusEffectSpec> = {
+  // Control
+  stun:   { type: 'stun' },
+  freeze: { type: 'stun' },                       // frozen = cannot act
+  taunt:  { type: 'taunt' },
+  // Damage / heal over time (tick value derives from baseDamage)
+  burn:      { type: 'dot' },
+  frostbite: { type: 'dot' },
+  dark_dot:  { type: 'dot' },
+  regen:     { type: 'hot' },
+  // Stat buffs
+  attack_buff:     { type: 'buff', stat: 'attack' },
+  berserk:         { type: 'buff', stat: 'attack', value: 25 },
+  defense_buff:    { type: 'buff', stat: 'defense' },
+  divine_shield:   { type: 'buff', stat: 'defense', value: 40 },
+  ice_armor:       { type: 'buff', stat: 'defense', value: 25 },
+  buff:            { type: 'buff', stat: 'defense' },   // generic shield-style blessing
+  speed_buff:      { type: 'buff', stat: 'speed', value: 30 },
+  attack_speed_up: { type: 'buff', stat: 'attackSpeed', value: 0.25 },
+  // Stat debuffs
+  slow:              { type: 'debuff', stat: 'speed', value: 25, negate: true },
+  attack_debuff:     { type: 'debuff', stat: 'attack', negate: true },
+  magic_resist_down: { type: 'debuff', stat: 'magicResist', negate: true },
+};
+
+/** Fallback magnitude when a stat effect's skill has baseDamage 0 (e.g. war_cry). */
+const STATUS_VALUE_FALLBACK = 15;
+
+function resolveStatusValue(spec: StatusEffectSpec, baseDamage: number): number {
+  // DoT/HoT tick at 20% of |baseDamage| (heals store negative baseDamage)
+  if (spec.type === 'dot' || spec.type === 'hot') {
+    return Math.abs(baseDamage) * 0.2;
+  }
+  if (spec.stat) {
+    const magnitude = spec.value ?? (Math.abs(baseDamage) * 0.5 || STATUS_VALUE_FALLBACK);
+    return spec.negate ? -magnitude : magnitude;
+  }
+  // Control effects (stun/taunt) carry no stat delta
+  return 0;
 }

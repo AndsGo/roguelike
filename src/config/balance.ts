@@ -24,7 +24,10 @@ export const DAMAGE_VARIANCE = 0.1; // +/-10%
 export const CRIT_MULTIPLIER = 1.5;
 export const DEFENSE_FORMULA_BASE = 100; // damage * (100 / (100 + def))
 export const DEFENSE_SOFT_CAP = 80;         // defense value where diminishing returns begin
-export const DEFENSE_SOFT_CAP_FACTOR = 20;  // sqrt scaling factor above soft cap
+// 30 (was 20): the steeper curve made tank defense growth feel dead past
+// Lv10 (warrior def 103 vs cap 80). A gentler falloff keeps late defense
+// meaningful without removing the cap.
+export const DEFENSE_SOFT_CAP_FACTOR = 30;  // sqrt scaling factor above soft cap
 
 // Single-hit damage soft cap (backlog issue #6). The damage pipeline is fully
 // multiplicative (crit × element × combo × relic × synergy × lowHp …) and can stack

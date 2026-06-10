@@ -49,6 +49,8 @@ export class RunManager {
     GameLifecycle.teardownAll();
     GameLifecycle.prepareNewRun();
     this.pendingEvolutions = [];
+    // Fresh run starts with no mutation pick (MutationPickPanel sets it)
+    MetaManager.setActiveRunMutation(undefined);
 
     // Use provided heroes or fall back to defaults
     const ids = heroIds && heroIds.length >= 2 ? heroIds : ['warrior', 'archer'];
@@ -73,7 +75,7 @@ export class RunManager {
     }
 
     // Mutation: start with a random common relic
-    if (MetaManager.hasMutation('start_with_relic')) {
+    if (MetaManager.isMutationEffective('start_with_relic')) {
       const relicPool = (relicsData as any[]).filter((r: any) => r.rarity === 'common');
       if (relicPool.length > 0) {
         const pick = this.rng.pick(relicPool);
@@ -136,6 +138,22 @@ export class RunManager {
   setHeroFormation(heroId: string, formation: 'front' | 'back'): void {
     const hero = this.state.heroes.find(h => h.id === heroId);
     if (hero) hero.formation = formation;
+  }
+
+  // ---- Active Mutation ----
+
+  /** Set which single mutation is active for this run (Mutation-pick feature). */
+  setActiveMutation(id: string): void {
+    this.state.activeMutationId = id;
+    MetaManager.setActiveRunMutation(id);
+  }
+
+  /**
+   * Whether a mutation is effectively active for this run.
+   * Delegates to MetaManager.isMutationEffective to avoid duplicating logic.
+   */
+  isMutationActive(id: string): boolean {
+    return MetaManager.isMutationEffective(id);
   }
 
   // ---- Mutations ----
@@ -578,5 +596,7 @@ export class RunManager {
     } else {
       this.rng = new SeededRNG(data.state.seed);
     }
+    // Restore the per-run mutation pick (undefined on old saves = all active)
+    MetaManager.setActiveRunMutation(this.state.activeMutationId);
   }
 }

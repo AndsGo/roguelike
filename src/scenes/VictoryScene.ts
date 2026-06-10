@@ -1,6 +1,6 @@
 import { RunManager } from '../managers/RunManager';
 import { RunEndContext } from '../managers/MetaManager';
-import { Theme, colorToString } from '../ui/Theme';
+import { Theme, colorToString, getAccessibility } from '../ui/Theme';
 import { ParticleManager } from '../systems/ParticleManager';
 import { RunEndPanel } from '../ui/RunEndPanel';
 import { UI } from '../i18n';
@@ -27,6 +27,38 @@ export class VictoryScene extends BaseEndScene {
 
     const title = this.createTitle(UI.victory.title, 55, Theme.colors.gold, '40px');
 
+    // Override the base scale-in with a Back.easeOut bounce (scale 1.15 → 1)
+    this.tweens.killTweensOf(title);
+    title.setScale(1.15);
+    this.tweens.add({
+      targets: title,
+      scaleX: 1,
+      scaleY: 1,
+      duration: 500,
+      ease: 'Back.easeOut',
+    });
+
+    // Gold particles falling from top (12 particles, staggered)
+    const reduceMotion = getAccessibility().reduceMotion;
+    if (!reduceMotion) {
+      for (let gi = 0; gi < 12; gi++) {
+        const px = v.cx - 120 + Math.random() * 240;
+        const particle = this.add.graphics();
+        particle.fillStyle(Theme.colors.gold, 0.85);
+        particle.fillRect(-2, -2, 4, 4);
+        particle.setPosition(px, -8);
+        this.tweens.add({
+          targets: particle,
+          y: 60 + Math.random() * 80,
+          alpha: { from: 1, to: 0 },
+          duration: 2000,
+          delay: gi * 150,
+          ease: 'Quad.easeIn',
+          onComplete: () => particle.destroy(),
+        });
+      }
+    }
+
     this.tweens.add({
       targets: title,
       scaleX: 1.05,
@@ -35,7 +67,7 @@ export class VictoryScene extends BaseEndScene {
       yoyo: true,
       repeat: -1,
       ease: 'Sine.easeInOut',
-      delay: 500,
+      delay: 600,
     });
 
     this.createSubtitle(UI.victory.subtitle, 105, colorToString(Theme.colors.success));
@@ -46,7 +78,10 @@ export class VictoryScene extends BaseEndScene {
       partyHeroIds: heroStates.map(h => h.id),
       partyElements: heroStates.map(h => {
         const data = (heroesData as { id: string; element: string | null }[]).find(d => d.id === h.id);
-        return data?.element ?? undefined;
+        // temporaryElement (event-granted conversions) counts toward unlock
+        // checks — it is the ONLY path into lightning-element unlocks, since
+        // no default hero is lightning (the "thunder deadlock" fix).
+        return h.temporaryElement ?? data?.element ?? undefined;
       }),
       partyRoles: heroStates.map(h => {
         const data = (heroesData as { id: string; role: string }[]).find(d => d.id === h.id);

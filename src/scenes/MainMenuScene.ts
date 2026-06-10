@@ -18,6 +18,7 @@ import { RunManager } from '../managers/RunManager';
 import heroesData from '../data/heroes.json';
 import { TextFactory } from '../ui/TextFactory';
 import { applyUiCamera, fillBackground, onViewResize, pointerView, restartOnResize, view, viewBounds } from '../ui/Viewport';
+import { getAccessibility } from '../ui/Theme';
 
 export class MainMenuScene extends Phaser.Scene {
   private upgradePanel: Panel | null = null;
@@ -58,12 +59,53 @@ export class MainMenuScene extends Phaser.Scene {
       });
     }
 
+    // Floating star particles (ambient atmosphere below the title)
+    const reduceMotion = getAccessibility().reduceMotion;
+    const starCount = 12;
+    const titleBaseY = Math.round(v.vh * 0.16);
+    for (let si = 0; si < starCount; si++) {
+      const sx = 20 + Math.random() * (v.vw - 40);
+      const sy = titleBaseY + 20 + Math.random() * (v.vh * 0.55);
+      const starAlpha = 0.2 + Math.random() * 0.3;
+      const star = this.add.graphics();
+      star.fillStyle(0xffffff, 1);
+      star.fillRect(0, 0, 2, 2);
+      star.setPosition(sx, sy);
+      star.setAlpha(starAlpha);
+      if (!reduceMotion) {
+        const floatDist = 8 + Math.random() * 12;
+        const dur = 2800 + Math.random() * 2000;
+        this.tweens.add({
+          targets: star,
+          y: sy - floatDist,
+          alpha: 0,
+          duration: dur,
+          delay: si * 250,
+          ease: 'Sine.easeInOut',
+          onComplete: () => {
+            star.setPosition(sx, sy);
+            star.setAlpha(starAlpha);
+            this.tweens.add({
+              targets: star,
+              y: sy - floatDist,
+              alpha: 0,
+              duration: dur,
+              ease: 'Sine.easeInOut',
+              repeat: -1,
+              yoyo: false,
+            });
+          },
+        });
+      }
+    }
+
     // Title (16% down — exactly y=72 on the classic 450-high viewport)
-    const title = TextFactory.create(this, v.cx, Math.round(v.vh * 0.16), UI.mainMenu.title, 'title', {
+    const title = TextFactory.create(this, v.cx, titleBaseY, UI.mainMenu.title, 'title', {
       color: colorToString(Theme.colors.secondary),
       align: 'center',
       stroke: '#000000',
       strokeThickness: 4,
+      shadow: { offsetX: 2, offsetY: 2, color: '#000000', blur: 4, fill: true },
     }).setOrigin(0.5);
 
     this.tweens.add({
@@ -77,7 +119,7 @@ export class MainMenuScene extends Phaser.Scene {
     });
 
     // Subtitle
-    TextFactory.create(this, v.cx, Math.round(v.vh * 0.16) + (v.compact ? 50 : 73), UI.mainMenu.subtitle, 'body', {
+    TextFactory.create(this, v.cx, titleBaseY + (v.compact ? 50 : 73), UI.mainMenu.subtitle, 'body', {
       color: '#8899cc',
     }).setOrigin(0.5);
 

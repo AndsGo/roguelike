@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { Theme, lightenColor, darkenColor } from './Theme';
+import { Theme, lightenColor, darkenColor, getAccessibility } from './Theme';
 import { AudioManager } from '../systems/AudioManager';
 import { TextFactory } from './TextFactory';
 import { isTouchDevice, tapTolerance } from '../utils/device';
@@ -96,25 +96,33 @@ export class Button extends Phaser.GameObjects.Container {
   private onHover(): void {
     if (!this.isEnabled) return;
     this.drawButton(lightenColor(this.baseColor, 0.15), lightenColor(this.borderColor, 0.15));
-    this.scene.tweens.add({
-      targets: this,
-      scaleX: 1.05,
-      scaleY: 1.05,
-      duration: 100,
-      ease: 'Sine.easeOut',
-    });
+    if (getAccessibility().reduceMotion) {
+      this.setScale(1.05);
+    } else {
+      this.scene.tweens.add({
+        targets: this,
+        scaleX: 1.05,
+        scaleY: 1.05,
+        duration: 100,
+        ease: 'Sine.easeOut',
+      });
+    }
   }
 
   private onOut(): void {
     if (!this.isEnabled) return;
     this.drawButton(this.baseColor, this.borderColor);
-    this.scene.tweens.add({
-      targets: this,
-      scaleX: 1,
-      scaleY: 1,
-      duration: 100,
-      ease: 'Sine.easeOut',
-    });
+    if (getAccessibility().reduceMotion) {
+      this.setScale(1);
+    } else {
+      this.scene.tweens.add({
+        targets: this,
+        scaleX: 1,
+        scaleY: 1,
+        duration: 100,
+        ease: 'Sine.easeOut',
+      });
+    }
   }
 
   private onDown(pointer: Phaser.Input.Pointer): void {
@@ -122,25 +130,33 @@ export class Button extends Phaser.GameObjects.Container {
     this.pressX = pointer.x;
     this.pressY = pointer.y;
     this.drawButton(darkenColor(this.baseColor, 0.2), this.borderColor);
-    this.scene.tweens.add({
-      targets: this,
-      scaleX: 0.95,
-      scaleY: 0.95,
-      duration: 60,
-      ease: 'Sine.easeOut',
-    });
+    if (getAccessibility().reduceMotion) {
+      this.setScale(0.95);
+    } else {
+      this.scene.tweens.add({
+        targets: this,
+        scaleX: 0.95,
+        scaleY: 0.95,
+        duration: 60,
+        ease: 'Sine.easeOut',
+      });
+    }
   }
 
   private onUp(pointer: Phaser.Input.Pointer): void {
     if (!this.isEnabled) return;
     this.drawButton(this.baseColor, this.borderColor);
-    this.scene.tweens.add({
-      targets: this,
-      scaleX: 1.05,
-      scaleY: 1.05,
-      duration: 60,
-      ease: 'Sine.easeOut',
-    });
+    if (getAccessibility().reduceMotion) {
+      this.setScale(1.05);
+    } else {
+      this.scene.tweens.add({
+        targets: this,
+        scaleX: 1.05,
+        scaleY: 1.05,
+        duration: 60,
+        ease: 'Sine.easeOut',
+      });
+    }
 
     // Fire callback if pointer didn't drag far from press position
     // (tolerance is wider for touch — fingers wobble more than mice)

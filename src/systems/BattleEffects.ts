@@ -326,6 +326,118 @@ export class BattleEffects {
     }
   }
 
+  /** Ignite reaction: orange sparks drift upward (融化) */
+  showIgniteEffect(x: number, y: number): void {
+    const count = 6 + Math.floor(Math.random() * 3); // 6-8
+    if (getAccessibility().reduceMotion) {
+      const g = this.scene.add.graphics();
+      g.setDepth(200);
+      g.fillStyle(0xff6600, 0.7);
+      for (let i = 0; i < count; i++) {
+        const ox = (i - count / 2) * 6;
+        g.fillRect(x + ox, y - 12, 2, 2);
+      }
+      this.scene.time.delayedCall(200, () => g.destroy());
+      return;
+    }
+    for (let i = 0; i < count; i++) {
+      const g = this.scene.add.graphics();
+      g.setDepth(200);
+      const ox = (Math.random() - 0.5) * 24;
+      const oy = (Math.random() - 0.5) * 10;
+      g.fillStyle(0xff6600, 0.9);
+      g.fillRect(x + ox, y + oy, 2, 2);
+      this.scene.tweens.add({
+        targets: g,
+        y: g.y - 20 - Math.random() * 15,
+        alpha: 0,
+        duration: 500 + Math.random() * 100,
+        ease: 'Sine.easeOut',
+        onComplete: () => g.destroy(),
+      });
+    }
+  }
+
+  /** Freeze reaction: radial pale-blue lines burst (超导) */
+  showFreezeEffect(x: number, y: number): void {
+    const lineCount = 6;
+    const g = this.scene.add.graphics();
+    g.setDepth(200);
+    g.lineStyle(1.5, 0x88ddff, 0.9);
+    for (let i = 0; i < lineCount; i++) {
+      const angle = (i / lineCount) * Math.PI * 2;
+      g.lineBetween(x, y, x + Math.cos(angle) * 14, y + Math.sin(angle) * 14);
+    }
+    const duration = getAccessibility().reduceMotion ? 200 : 300;
+    this.scene.tweens.add({
+      targets: g,
+      alpha: 0,
+      duration,
+      ease: 'Sine.easeOut',
+      onComplete: () => g.destroy(),
+    });
+  }
+
+  /** Shock reaction: yellow zigzag lines flicker twice (超载) */
+  showShockEffect(x: number, y: number): void {
+    const duration = getAccessibility().reduceMotion ? 200 : 240;
+    const repeatCount = getAccessibility().reduceMotion ? 0 : 1;
+    for (let z = 0; z < 2; z++) {
+      const g = this.scene.add.graphics();
+      g.setDepth(200);
+      g.lineStyle(1.5, 0xffee00, 0.9);
+      const ox = (z - 0.5) * 12;
+      // 3-segment zigzag
+      g.beginPath();
+      g.moveTo(x + ox, y - 12);
+      g.lineTo(x + ox + 6, y);
+      g.lineTo(x + ox - 4, y + 6);
+      g.lineTo(x + ox + 4, y + 14);
+      g.strokePath();
+      this.scene.tweens.add({
+        targets: g,
+        alpha: 0,
+        duration,
+        ease: 'Stepped',
+        repeat: repeatCount,
+        yoyo: true,
+        onComplete: () => g.destroy(),
+      });
+    }
+  }
+
+  /** Annihilate reaction: purple dots fall and fade (湮灭) */
+  showAnnihilateEffect(x: number, y: number): void {
+    const count = 8;
+    if (getAccessibility().reduceMotion) {
+      const g = this.scene.add.graphics();
+      g.setDepth(200);
+      g.fillStyle(0xaa44ff, 0.8);
+      for (let i = 0; i < count; i++) {
+        const ox = (i - count / 2) * 5;
+        g.fillCircle(x + ox, y, 2);
+      }
+      this.scene.time.delayedCall(200, () => g.destroy());
+      return;
+    }
+    for (let i = 0; i < count; i++) {
+      const g = this.scene.add.graphics();
+      g.setDepth(200);
+      const ox = (Math.random() - 0.5) * 28;
+      const oy = (Math.random() - 0.5) * 10;
+      g.fillStyle(0xaa44ff, 0.85);
+      g.fillCircle(x + ox, y + oy, 2);
+      this.scene.tweens.add({
+        targets: g,
+        y: g.y + 18 + Math.random() * 10,
+        alpha: 0,
+        duration: 450 + Math.random() * 100,
+        ease: 'Quad.easeIn',
+        onComplete: () => g.destroy(),
+      });
+    }
+  }
+
   /** AOE indicator circle */
   showAoeIndicator(
     x: number,

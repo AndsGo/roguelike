@@ -155,7 +155,7 @@ export class SettingsScene extends Phaser.Scene {
 
     const kbCols = 4;
     const kbColWidth = 110;
-    const kbRowHeight = 16;
+    const kbRowHeight = 20;
 
     for (let i = 0; i < rebindableActions.length; i++) {
       const action = rebindableActions[i];
@@ -170,7 +170,13 @@ export class SettingsScene extends Phaser.Scene {
       const keyText = TextFactory.create(this, col + 65, rowY,
         `[${KeybindingConfig.getDisplayKey(action)}]`, 'small', {
           color: colorToString(Theme.colors.gold),
-        }).setOrigin(0, 0.5).setInteractive({ useHandCursor: true });
+        }).setOrigin(0, 0.5);
+      // Pad the hit area to a ≥28px-tall touch target without changing layout
+      keyText.setInteractive({
+        hitArea: new Phaser.Geom.Rectangle(-4, (keyText.height - 28) / 2, keyText.width + 16, 28),
+        hitAreaCallback: Phaser.Geom.Rectangle.Contains,
+        useHandCursor: true,
+      });
 
       keyText.on('pointerup', () => {
         this.startRebind(action, keyText);

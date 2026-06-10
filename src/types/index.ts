@@ -143,6 +143,15 @@ export interface SkillData {
   element?: ElementType;
   effects?: SkillEffect[]; // chain-capable effect list
   isUltimate?: boolean;
+  /** Multi-strike: split total damage into N independently-critting hits */
+  hits?: number;
+  /** Every hit crits (e.g. backstab, 暗影连斩) */
+  forceCrit?: boolean;
+  /** Flat crit-chance bonus applied only to this skill's hits */
+  bonusCritChance?: number;
+  /** Execute: below this target HP fraction, damage is multiplied */
+  executeThreshold?: number;
+  executeMultiplier?: number;
 }
 
 // ============ Items ============
@@ -330,6 +339,8 @@ export interface RunState {
     title: string;
     rules: Array<{ type: string; label: string; value: any }>;
   };
+  /** The single mutation active for this run (set when ≥3 mutations are unlocked). Undefined = all unlocked mutations are active (legacy/< 3 unlocked). */
+  activeMutationId?: string;
 }
 
 export interface RelicState {
@@ -375,6 +386,7 @@ export interface MetaProgressionData {
   defeatedBosses: string[];       // boss IDs killed across all runs
   hellVictories?: number;         // victories on hell difficulty
   mutations?: string[];           // unlocked mutation IDs (optional for legacy saves)
+  dailyChallengesCompleted?: number; // count of daily challenge victories (optional for legacy saves)
 }
 
 export interface PermanentUpgrade {

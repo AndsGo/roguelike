@@ -8,7 +8,7 @@
     "targetType": "enemy",
     "baseDamage": 50,
     "scalingStat": "attack",
-    "scalingRatio": 1.0,
+    "scalingRatio": 1,
     "range": 50,
     "statusEffect": "stun",
     "effectDuration": 1.5
@@ -90,7 +90,7 @@
     "targetType": "ally",
     "baseDamage": -80,
     "scalingStat": "magicPower",
-    "scalingRatio": 1.0,
+    "scalingRatio": 1,
     "range": 200,
     "element": "holy"
   },
@@ -118,7 +118,8 @@
     "scalingStat": "attack",
     "scalingRatio": 1.4,
     "range": 60,
-    "element": "dark"
+    "element": "dark",
+    "forceCrit": true
   },
   {
     "id": "shadow_strike",
@@ -129,7 +130,7 @@
     "targetType": "enemy",
     "baseDamage": 45,
     "scalingStat": "attack",
-    "scalingRatio": 1.0,
+    "scalingRatio": 1,
     "range": 55,
     "element": "dark"
   },
@@ -169,7 +170,7 @@
     "targetType": "all_enemies",
     "baseDamage": 80,
     "scalingStat": "magicPower",
-    "scalingRatio": 1.0,
+    "scalingRatio": 1,
     "range": 250,
     "statusEffect": "burn",
     "effectDuration": 3,
@@ -198,7 +199,7 @@
     "targetType": "enemy",
     "baseDamage": 45,
     "scalingStat": "magicPower",
-    "scalingRatio": 1.0,
+    "scalingRatio": 1,
     "range": 220,
     "statusEffect": "slow",
     "effectDuration": 2,
@@ -229,7 +230,7 @@
     "targetType": "enemy",
     "baseDamage": 55,
     "scalingStat": "magicPower",
-    "scalingRatio": 1.0,
+    "scalingRatio": 1,
     "range": 230,
     "element": "lightning",
     "effects": [
@@ -239,7 +240,7 @@
         "element": "lightning",
         "baseDamage": 55,
         "scalingStat": "magicPower",
-        "scalingRatio": 1.0,
+        "scalingRatio": 1,
         "chain": {
           "type": "damage",
           "damageType": "magical",
@@ -283,7 +284,7 @@
     "targetType": "enemy",
     "baseDamage": 45,
     "scalingStat": "magicPower",
-    "scalingRatio": 1.0,
+    "scalingRatio": 1,
     "range": 210,
     "statusEffect": "dark_dot",
     "effectDuration": 3,
@@ -327,7 +328,7 @@
     "targetType": "enemy",
     "baseDamage": 50,
     "scalingStat": "magicPower",
-    "scalingRatio": 1.0,
+    "scalingRatio": 1,
     "range": 200,
     "element": "holy"
   },
@@ -586,7 +587,7 @@
     "targetType": "enemy",
     "baseDamage": 55,
     "scalingStat": "magicPower",
-    "scalingRatio": 1.0,
+    "scalingRatio": 1,
     "range": 200,
     "element": "holy"
   },
@@ -665,7 +666,12 @@
     "effectDuration": 8,
     "isUltimate": true,
     "effects": [
-      { "type": "status", "statusEffectId": "defense_up", "statusDuration": 8, "baseDamage": 80 }
+      {
+        "type": "status",
+        "statusEffectId": "defense_up",
+        "statusDuration": 8,
+        "baseDamage": 80
+      }
     ]
   },
   {
@@ -679,7 +685,8 @@
     "scalingStat": "attack",
     "scalingRatio": 1.5,
     "range": 300,
-    "isUltimate": true
+    "isUltimate": true,
+    "hits": 5
   },
   {
     "id": "ult_meteor_fall",
@@ -720,10 +727,12 @@
     "targetType": "enemy",
     "baseDamage": 300,
     "scalingStat": "attack",
-    "scalingRatio": 2.0,
+    "scalingRatio": 2,
     "range": 50,
     "element": "dark",
-    "isUltimate": true
+    "isUltimate": true,
+    "hits": 6,
+    "forceCrit": true
   },
   {
     "id": "ult_holy_judgment",
@@ -739,7 +748,12 @@
     "element": "holy",
     "isUltimate": true,
     "effects": [
-      { "type": "heal", "baseDamage": 80, "scalingStat": "magicPower", "scalingRatio": 0.5 }
+      {
+        "type": "heal",
+        "baseDamage": 80,
+        "scalingStat": "magicPower",
+        "scalingRatio": 0.5
+      }
     ]
   },
   {
@@ -751,10 +765,12 @@
     "targetType": "enemy",
     "baseDamage": 300,
     "scalingStat": "attack",
-    "scalingRatio": 2.0,
+    "scalingRatio": 2,
     "range": 50,
     "element": "dark",
-    "isUltimate": true
+    "isUltimate": true,
+    "executeThreshold": 0.3,
+    "executeMultiplier": 2
   },
   {
     "id": "ult_thunder_storm",
@@ -785,7 +801,12 @@
     "range": 300,
     "isUltimate": true,
     "effects": [
-      { "type": "status", "statusEffectId": "regen", "statusDuration": 10, "baseDamage": 30 }
+      {
+        "type": "status",
+        "statusEffectId": "regen",
+        "statusDuration": 10,
+        "baseDamage": 30
+      }
     ]
   },
   {
@@ -802,7 +823,12 @@
     "element": "dark",
     "isUltimate": true,
     "effects": [
-      { "type": "status", "statusEffectId": "decay", "statusDuration": 6, "baseDamage": 25 }
+      {
+        "type": "status",
+        "statusEffectId": "decay",
+        "statusDuration": 6,
+        "baseDamage": 25
+      }
     ]
   },
   {
@@ -819,7 +845,12 @@
     "element": "fire",
     "isUltimate": true,
     "effects": [
-      { "type": "status", "statusEffectId": "attack_buff", "statusDuration": 8, "baseDamage": 100 }
+      {
+        "type": "status",
+        "statusEffectId": "attack_buff",
+        "statusDuration": 8,
+        "baseDamage": 100
+      }
     ]
   },
   {
@@ -851,7 +882,12 @@
     "range": 300,
     "isUltimate": true,
     "effects": [
-      { "type": "status", "statusEffectId": "attack_buff", "statusDuration": 10, "baseDamage": 50 }
+      {
+        "type": "status",
+        "statusEffectId": "attack_buff",
+        "statusDuration": 10,
+        "baseDamage": 50
+      }
     ]
   },
   {
@@ -868,7 +904,12 @@
     "element": "fire",
     "isUltimate": true,
     "effects": [
-      { "type": "status", "statusEffectId": "attack_buff", "statusDuration": 10, "baseDamage": 80 }
+      {
+        "type": "status",
+        "statusEffectId": "attack_buff",
+        "statusDuration": 10,
+        "baseDamage": 80
+      }
     ]
   },
   {
@@ -880,12 +921,17 @@
     "targetType": "all_enemies",
     "baseDamage": 80,
     "scalingStat": "magicPower",
-    "scalingRatio": 1.0,
+    "scalingRatio": 1,
     "range": 300,
     "element": "dark",
     "isUltimate": true,
     "effects": [
-      { "type": "status", "statusEffectId": "defense_down", "statusDuration": 8, "baseDamage": -40 }
+      {
+        "type": "status",
+        "statusEffectId": "defense_down",
+        "statusDuration": 8,
+        "baseDamage": -40
+      }
     ]
   },
   {
@@ -900,7 +946,8 @@
     "scalingRatio": 1.5,
     "range": 300,
     "element": "lightning",
-    "isUltimate": true
+    "isUltimate": true,
+    "hits": 3
   },
   {
     "id": "ult_holy_aegis",
@@ -916,7 +963,12 @@
     "element": "holy",
     "isUltimate": true,
     "effects": [
-      { "type": "status", "statusEffectId": "regen", "statusDuration": 8, "baseDamage": 25 }
+      {
+        "type": "status",
+        "statusEffectId": "regen",
+        "statusDuration": 8,
+        "baseDamage": 25
+      }
     ]
   },
   {
@@ -949,7 +1001,12 @@
     "element": "lightning",
     "isUltimate": true,
     "effects": [
-      { "type": "status", "statusEffectId": "attack_buff", "statusDuration": 8, "baseDamage": 60 }
+      {
+        "type": "status",
+        "statusEffectId": "attack_buff",
+        "statusDuration": 8,
+        "baseDamage": 60
+      }
     ]
   },
   {
@@ -1001,7 +1058,8 @@
     "baseDamage": 40,
     "scalingStat": "attack",
     "scalingRatio": 1.3,
-    "range": 80
+    "range": 80,
+    "bonusCritChance": 0.25
   },
   {
     "id": "pack_instinct",
@@ -1026,7 +1084,7 @@
     "targetType": "enemy",
     "baseDamage": 80,
     "scalingStat": "attack",
-    "scalingRatio": 2.0,
+    "scalingRatio": 2,
     "range": 80,
     "isUltimate": true
   },
@@ -1052,7 +1110,7 @@
     "targetType": "all_enemies",
     "baseDamage": 50,
     "scalingStat": "attack",
-    "scalingRatio": 1.0,
+    "scalingRatio": 1,
     "range": 120,
     "element": "fire",
     "statusEffect": "stun",
@@ -1096,7 +1154,7 @@
     "targetType": "enemy",
     "baseDamage": 30,
     "scalingStat": "attack",
-    "scalingRatio": 1.0,
+    "scalingRatio": 1,
     "range": 350,
     "element": "lightning"
   },
@@ -1254,7 +1312,7 @@
     "description": "喷射火焰，造成魔法伤害",
     "damageType": "magical",
     "scalingStat": "magicPower",
-    "scalingRatio": 1.0,
+    "scalingRatio": 1,
     "targetType": "enemy",
     "cooldown": 7,
     "baseDamage": 30,
@@ -1262,57 +1320,133 @@
     "element": "fire"
   },
   {
-    "id": "frost_shield", "name": "霜盾", "description": "为目标施加冰霜护盾，降低受到的伤害",
-    "damageType": "magical", "scalingStat": "magicPower", "scalingRatio": -0.6,
-    "targetType": "ally", "cooldown": 8, "baseDamage": -40, "range": 300,
-    "element": "ice", "statusEffect": "buff", "effectDuration": 5
+    "id": "frost_shield",
+    "name": "霜盾",
+    "description": "为目标施加冰霜护盾，降低受到的伤害",
+    "damageType": "magical",
+    "scalingStat": "magicPower",
+    "scalingRatio": -0.6,
+    "targetType": "ally",
+    "cooldown": 8,
+    "baseDamage": -40,
+    "range": 300,
+    "element": "ice",
+    "statusEffect": "buff",
+    "effectDuration": 5
   },
   {
-    "id": "glacial_pulse", "name": "冰川脉冲", "description": "释放冰川能量，对所有敌人造成冰属性伤害并减速",
-    "damageType": "magical", "scalingStat": "magicPower", "scalingRatio": 0.7,
-    "targetType": "all_enemies", "cooldown": 10, "baseDamage": 25, "range": 300,
-    "element": "ice", "statusEffect": "slow", "effectDuration": 3
+    "id": "glacial_pulse",
+    "name": "冰川脉冲",
+    "description": "释放冰川能量，对所有敌人造成冰属性伤害并减速",
+    "damageType": "magical",
+    "scalingStat": "magicPower",
+    "scalingRatio": 0.7,
+    "targetType": "all_enemies",
+    "cooldown": 10,
+    "baseDamage": 25,
+    "range": 300,
+    "element": "ice",
+    "statusEffect": "slow",
+    "effectDuration": 3
   },
   {
-    "id": "ult_frozen_sanctuary", "name": "冰封圣域", "description": "召唤冰封圣域，大幅治疗全体友军",
-    "damageType": "magical", "scalingStat": "magicPower", "scalingRatio": -1.2,
-    "targetType": "all_allies", "cooldown": 0, "baseDamage": -60, "range": 999,
-    "element": "ice", "isUltimate": true
+    "id": "ult_frozen_sanctuary",
+    "name": "冰封圣域",
+    "description": "召唤冰封圣域，大幅治疗全体友军",
+    "damageType": "magical",
+    "scalingStat": "magicPower",
+    "scalingRatio": -1.2,
+    "targetType": "all_allies",
+    "cooldown": 0,
+    "baseDamage": -60,
+    "range": 999,
+    "element": "ice",
+    "isUltimate": true
   },
   {
-    "id": "holy_blessing", "name": "圣光祝福", "description": "为目标施加圣光祝福，提升攻击力",
-    "damageType": "magical", "scalingStat": "magicPower", "scalingRatio": -0.5,
-    "targetType": "ally", "cooldown": 9, "baseDamage": -30, "range": 280,
-    "element": "holy", "statusEffect": "buff", "effectDuration": 6
+    "id": "holy_blessing",
+    "name": "圣光祝福",
+    "description": "为目标施加圣光祝福，提升攻击力",
+    "damageType": "magical",
+    "scalingStat": "magicPower",
+    "scalingRatio": -0.5,
+    "targetType": "ally",
+    "cooldown": 9,
+    "baseDamage": -30,
+    "range": 280,
+    "element": "holy",
+    "statusEffect": "buff",
+    "effectDuration": 6
   },
   {
-    "id": "radiant_burst", "name": "光辉爆发", "description": "释放圣光能量，对所有敌人造成圣属性伤害",
-    "damageType": "magical", "scalingStat": "magicPower", "scalingRatio": 0.8,
-    "targetType": "all_enemies", "cooldown": 10, "baseDamage": 30, "range": 300,
+    "id": "radiant_burst",
+    "name": "光辉爆发",
+    "description": "释放圣光能量，对所有敌人造成圣属性伤害",
+    "damageType": "magical",
+    "scalingStat": "magicPower",
+    "scalingRatio": 0.8,
+    "targetType": "all_enemies",
+    "cooldown": 10,
+    "baseDamage": 30,
+    "range": 300,
     "element": "holy"
   },
   {
-    "id": "ult_divine_empowerment", "name": "神圣赋能", "description": "神圣之力赋予全体友军，大幅提升攻击力和攻击速度",
-    "damageType": "magical", "scalingStat": "magicPower", "scalingRatio": -0.8,
-    "targetType": "all_allies", "cooldown": 0, "baseDamage": -40, "range": 999,
-    "element": "holy", "isUltimate": true, "statusEffect": "buff", "effectDuration": 8
+    "id": "ult_divine_empowerment",
+    "name": "神圣赋能",
+    "description": "神圣之力赋予全体友军，大幅提升攻击力和攻击速度",
+    "damageType": "magical",
+    "scalingStat": "magicPower",
+    "scalingRatio": -0.8,
+    "targetType": "all_allies",
+    "cooldown": 0,
+    "baseDamage": -40,
+    "range": 999,
+    "element": "holy",
+    "isUltimate": true,
+    "statusEffect": "buff",
+    "effectDuration": 8
   },
   {
-    "id": "frost_arrow", "name": "霜冻箭", "description": "射出冰冻箭矢，造成物理伤害并减速目标",
-    "damageType": "physical", "scalingStat": "attack", "scalingRatio": 1.1,
-    "targetType": "enemy", "cooldown": 6, "baseDamage": 40, "range": 350,
-    "element": "ice", "statusEffect": "slow", "effectDuration": 2
+    "id": "frost_arrow",
+    "name": "霜冻箭",
+    "description": "射出冰冻箭矢，造成物理伤害并减速目标",
+    "damageType": "physical",
+    "scalingStat": "attack",
+    "scalingRatio": 1.1,
+    "targetType": "enemy",
+    "cooldown": 6,
+    "baseDamage": 40,
+    "range": 350,
+    "element": "ice",
+    "statusEffect": "slow",
+    "effectDuration": 2
   },
   {
-    "id": "dragon_ice_breath", "name": "龙息寒流", "description": "喷射冰属性龙息，对所有敌人造成伤害",
-    "damageType": "magical", "scalingStat": "attack", "scalingRatio": 0.6,
-    "targetType": "all_enemies", "cooldown": 12, "baseDamage": 35, "range": 250,
+    "id": "dragon_ice_breath",
+    "name": "龙息寒流",
+    "description": "喷射冰属性龙息，对所有敌人造成伤害",
+    "damageType": "magical",
+    "scalingStat": "attack",
+    "scalingRatio": 0.6,
+    "targetType": "all_enemies",
+    "cooldown": 12,
+    "baseDamage": 35,
+    "range": 250,
     "element": "ice"
   },
   {
-    "id": "ult_glacial_barrage", "name": "冰川弹幕", "description": "释放连续冰箭弹幕，对单体造成大量物理伤害",
-    "damageType": "physical", "scalingStat": "attack", "scalingRatio": 2.0,
-    "targetType": "enemy", "cooldown": 0, "baseDamage": 80, "range": 350,
-    "element": "ice", "isUltimate": true
+    "id": "ult_glacial_barrage",
+    "name": "冰川弹幕",
+    "description": "释放连续冰箭弹幕，对单体造成大量物理伤害",
+    "damageType": "physical",
+    "scalingStat": "attack",
+    "scalingRatio": 2,
+    "targetType": "enemy",
+    "cooldown": 0,
+    "baseDamage": 80,
+    "range": 350,
+    "element": "ice",
+    "isUltimate": true
   }
 ]

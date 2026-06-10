@@ -4,45 +4,148 @@
     "name": "魔法森林",
     "description": "充满神秘生物的魔法森林",
     "nodeCount": 8,
-    "enemyPool": ["slime", "goblin", "ice_wolf", "fire_lizard", "light_sprite"],
-    "bossPool": ["frost_queen", "dragon_boss"],
-    "eventPool": ["healing_spring", "wandering_warrior", "frozen_lake", "ancient_library", "mushroom_grove", "frozen_cavern", "wandering_ice_mage", "holy_spring", "event_fairy_circle", "event_wounded_traveler", "event_ancient_tree", "event_lost_ranger", "dragon_egg", "traveling_bard", "mirror_pool", "spirit_guardian", "elemental_rift"],
+    "enemyPool": [
+      "slime",
+      "goblin",
+      "ice_wolf",
+      "fire_lizard",
+      "light_sprite",
+      "frost_giant",
+      "enemy_ice_mage"
+    ],
+    "bossPool": [
+      "frost_queen",
+      "dragon_boss"
+    ],
+    "eventPool": [
+      "healing_spring",
+      "wandering_warrior",
+      "frozen_lake",
+      "ancient_library",
+      "mushroom_grove",
+      "frozen_cavern",
+      "wandering_ice_mage",
+      "holy_spring",
+      "event_fairy_circle",
+      "event_wounded_traveler",
+      "event_ancient_tree",
+      "event_lost_ranger",
+      "dragon_egg",
+      "traveling_bard",
+      "mirror_pool",
+      "spirit_guardian",
+      "elemental_rift"
+    ],
     "elementAffinity": "ice",
-    "difficultyMultiplier": 1.1
+    "difficultyMultiplier": 1.35
   },
   {
     "id": "act2_volcano",
     "name": "火山荒原",
     "description": "被恶魔和烈焰统治的焦土",
     "nodeCount": 8,
-    "enemyPool": ["fire_elemental", "flame_knight", "orc_warrior", "storm_hawk", "dark_cultist"],
-    "bossPool": ["thunder_titan"],
-    "eventPool": ["volcano_cave", "blacksmith", "mysterious_merchant", "thunder_peak", "trapped_chest", "thunder_dojo", "elemental_rift", "lost_training_ground", "event_lava_pool", "event_fire_spirit", "event_dwarven_forge", "event_volcanic_vent", "blood_pact", "merchant_caravan", "elemental_shrine"],
+    "enemyPool": [
+      "fire_elemental",
+      "flame_knight",
+      "orc_warrior",
+      "storm_hawk",
+      "dark_cultist"
+    ],
+    "bossPool": [
+      "thunder_titan"
+    ],
+    "eventPool": [
+      "volcano_cave",
+      "blacksmith",
+      "mysterious_merchant",
+      "thunder_peak",
+      "trapped_chest",
+      "thunder_dojo",
+      "elemental_rift",
+      "lost_training_ground",
+      "event_lava_pool",
+      "event_fire_spirit",
+      "event_dwarven_forge",
+      "event_volcanic_vent",
+      "blood_pact",
+      "merchant_caravan",
+      "elemental_shrine"
+    ],
     "elementAffinity": "fire",
-    "difficultyMultiplier": 1.4
+    "difficultyMultiplier": 1.6
   },
   {
     "id": "act3_abyss",
     "name": "深渊",
     "description": "暗影与亡灵的领域",
     "nodeCount": 8,
-    "enemyPool": ["shadow_wraith", "dark_cultist", "skeleton_archer", "dark_mage", "thunder_golem"],
-    "bossPool": ["shadow_lord"],
-    "eventPool": ["shadow_shrine", "holy_temple", "fortune_teller", "mysterious_portal", "goblin_camp", "dark_market", "ancient_battlefield", "event_shadow_altar", "event_lost_soul", "event_abyssal_merchant", "event_dark_ritual", "cursed_well", "dark_bargain"],
-    "featuredEvents": ["cursed_well", "dark_bargain", "event_dark_ritual", "event_shadow_altar"],
+    "enemyPool": [
+      "shadow_wraith",
+      "dark_cultist",
+      "skeleton_archer",
+      "dark_mage",
+      "thunder_golem"
+    ],
+    "bossPool": [
+      "shadow_lord"
+    ],
+    "eventPool": [
+      "shadow_shrine",
+      "holy_temple",
+      "fortune_teller",
+      "mysterious_portal",
+      "goblin_camp",
+      "dark_market",
+      "ancient_battlefield",
+      "event_shadow_altar",
+      "event_lost_soul",
+      "event_abyssal_merchant",
+      "event_dark_ritual",
+      "cursed_well",
+      "dark_bargain"
+    ],
+    "featuredEvents": [
+      "cursed_well",
+      "dark_bargain",
+      "event_dark_ritual",
+      "event_shadow_altar"
+    ],
     "elementAffinity": "dark",
-    "difficultyMultiplier": 1.8
+    "difficultyMultiplier": 2
   },
   {
     "id": "act4_forge",
     "name": "元素熔炉",
     "description": "传说中的元素熔炉，五种元素在此交汇融合。",
     "nodeCount": 10,
-    "enemyPool": ["flame_construct", "frost_sentinel", "lightning_strider", "holy_smith", "void_weaver", "elemental_chimera"],
-    "bossPool": ["heart_of_the_forge"],
-    "eventPool": ["forge_trial", "element_shard", "master_smith", "ancient_altar", "blacksmith", "elemental_rift", "elemental_shrine", "ancient_golem"],
-    "featuredEvents": ["elemental_shrine", "elemental_rift", "element_shard"],
+    "enemyPool": [
+      "flame_construct",
+      "frost_sentinel",
+      "lightning_strider",
+      "holy_smith",
+      "void_weaver",
+      "elemental_chimera",
+      "holy_guardian"
+    ],
+    "bossPool": [
+      "heart_of_the_forge"
+    ],
+    "eventPool": [
+      "forge_trial",
+      "element_shard",
+      "master_smith",
+      "ancient_altar",
+      "blacksmith",
+      "elemental_rift",
+      "elemental_shrine",
+      "ancient_golem"
+    ],
+    "featuredEvents": [
+      "elemental_shrine",
+      "elemental_rift",
+      "element_shard"
+    ],
     "elementAffinity": null,
-    "difficultyMultiplier": 2.2
+    "difficultyMultiplier": 2.4
   }
 ]

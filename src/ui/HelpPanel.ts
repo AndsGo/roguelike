@@ -186,7 +186,7 @@ export class HelpPanel {
       color: '#888888',
     }).setOrigin(0.5).setDepth(801);
 
-    this.closeHit = scene.add.rectangle(b.cx, b.cy + HelpPanel.PANEL_HEIGHT / 2 - 16, 80, 24, 0x000000, 0)
+    this.closeHit = scene.add.rectangle(b.cx, b.cy + HelpPanel.PANEL_HEIGHT / 2 - 16, 80, 40, 0x000000, 0)
       .setInteractive({ useHandCursor: true })
       .setDepth(801);
     this.closeHit.on('pointerup', () => this.close());

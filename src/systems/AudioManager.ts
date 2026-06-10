@@ -31,7 +31,7 @@ const SCENE_BGM_MAP: Record<string, string> = {
 /** EventBus event → SFX key mapping (typed for type-safe registration) */
 const SFX_EVENT_ENTRIES: [GameEventType, string][] = [
   ['unit:damage', 'sfx_hit'],
-  ['unit:kill', 'sfx_kill'],
+  // unit kill/death handled by custom unit:death listener (hero deaths get a low-pitched variant)
   ['unit:heal', 'sfx_heal'],
   // skill:use and element:reaction handled by custom listeners below
   ['item:equip', 'sfx_equip'],
@@ -95,6 +95,10 @@ export class AudioManager {
   private settings: AudioSettings;
   private currentBgmKey: string = '';
   private currentBgm: Phaser.Sound.BaseSound | null = null;
+  /** Previous BGM instance still fading out (cleared on fade completion) */
+  private fadingBgm: Phaser.Sound.BaseSound | null = null;
+  /** Playback rate applied to bgm_battle, varies per act */
+  private battleBgmRate: number = 1.0;
   private activeSfxCount: number = 0;
   private sfxListenersRegistered: boolean = false;
 
@@ -131,9 +135,22 @@ export class AudioManager {
     // Check if audio key exists
     if (!scene.sound.get(key) && !scene.cache.audio.exists(key)) return;
 
+    // If a previous BGM is still fading out, kill it immediately to avoid orphan instances
+    if (this.fadingBgm) {
+      const stale = this.fadingBgm;
+      this.fadingBgm = null;
+      try {
+        stale.stop();
+        stale.destroy();
+      } catch {
+        // already destroyed by its fade tween — nothing to do
+      }
+    }
+
     // Fade out current BGM
     if (this.currentBgm) {
       const oldBgm = this.currentBgm;
+      this.fadingBgm = oldBgm;
       scene.tweens.add({
         targets: oldBgm,
         volume: 0,
@@ -141,6 +158,7 @@ export class AudioManager {
         onComplete: () => {
           oldBgm.stop();
           oldBgm.destroy();
+          if (this.fadingBgm === oldBgm) this.fadingBgm = null;
         },
       });
     }
@@ -154,6 +172,11 @@ export class AudioManager {
       });
       this.currentBgm.play();
       this.currentBgmKey = key;
+
+      // Per-act variation for the battle theme (boss theme stays at 1.0)
+      if (key === 'bgm_battle') {
+        this.applyBgmRate(this.currentBgm, this.battleBgmRate);
+      }
 
       // Fade in
       scene.tweens.add({
@@ -177,8 +200,39 @@ export class AudioManager {
     }
   }
 
+  /**
+   * Set the current battle act for BGM variation. Applies a per-act playback
+   * rate to bgm_battle (act0=1.0, act1=1.04, act2=0.96, act3=1.08).
+   * Called by BattleScene.create; boss battles use bgm_boss and are unaffected.
+   */
+  setBattleAct(act: number): void {
+    const rates = [1.0, 1.04, 0.96, 1.08];
+    this.battleBgmRate = rates[act] ?? 1.0;
+    if (this.currentBgmKey === 'bgm_battle' && this.currentBgm) {
+      this.applyBgmRate(this.currentBgm, this.battleBgmRate);
+    }
+  }
+
+  /** Apply playback rate to a BGM instance (setRate lives on concrete sound classes) */
+  private applyBgmRate(bgm: Phaser.Sound.BaseSound, rate: number): void {
+    const sound = bgm as unknown as { setRate?: (rate: number) => void };
+    if (typeof sound.setRate === 'function') {
+      sound.setRate(rate);
+    }
+  }
+
   /** Stop current BGM immediately */
   stopBgm(): void {
+    if (this.fadingBgm) {
+      const stale = this.fadingBgm;
+      this.fadingBgm = null;
+      try {
+        stale.stop();
+        stale.destroy();
+      } catch {
+        // already destroyed
+      }
+    }
     if (this.currentBgm) {
       this.currentBgm.stop();
       this.currentBgm.destroy();
@@ -235,6 +289,49 @@ export class AudioManager {
     }
   }
 
+  /**
+   * Play a one-shot SFX with explicit detune/rate/volume overrides.
+   * Used for stingers and pitched variants — intentionally independent of
+   * playSfx's concurrency/priority logic (these are low-frequency, high-salience cues).
+   */
+  playSfxVariant(key: string, opts: { detune?: number; rate?: number; volumeScale?: number } = {}): void {
+    if (!this.game || !this.settings.sfxEnabled) return;
+
+    const scene = this.getActiveScene();
+    if (!scene) return;
+    if (!scene.cache.audio.exists(key)) return;
+
+    try {
+      const volume = this.settings.masterVolume * this.settings.sfxVolume * (opts.volumeScale ?? 1);
+      const sfx = scene.sound.add(key, {
+        volume,
+        detune: opts.detune ?? 0,
+        rate: opts.rate ?? 1,
+      });
+      sfx.once('complete', () => sfx.destroy());
+      sfx.play();
+    } catch {
+      ErrorHandler.report('warn', 'AudioManager', `failed to play SFX variant: ${key}`);
+    }
+  }
+
+  /** Two-part victory stinger: bright levelup followed by a coin chime */
+  playVictoryStinger(): void {
+    this.playSfxVariant('sfx_levelup', { detune: 200 });
+    setTimeout(() => this.playSfxVariant('sfx_coin'), 100);
+  }
+
+  /** Defeat stinger: deep-pitched bad-event cue */
+  playDefeatStinger(): void {
+    this.playSfxVariant('sfx_event_bad', { detune: -500 });
+  }
+
+  /** Two-part boss phase-transition stinger: low crit hit, then rising ult-ready cue */
+  private playBossPhaseStinger(): void {
+    this.playSfxVariant('sfx_crit', { detune: -300 });
+    setTimeout(() => this.playSfxVariant('sfx_ult_ready', { detune: 200 }), 250);
+  }
+
   /** Register EventBus listeners for SFX triggers */
   registerSfxListeners(): void {
     if (this.sfxListenersRegistered) return;
@@ -262,6 +359,36 @@ export class AudioManager {
     };
     this.sfxListeners.set('element:reaction', reactionListener);
     bus.on('element:reaction', reactionListener);
+
+    // Unit death: heroes get a deep-pitched kill sound, enemies keep the standard one
+    const deathListener = (data: { unitId: string; isHero: boolean }) => {
+      if (data.isHero) {
+        this.playSfxVariant('sfx_kill', { detune: -400 });
+      } else {
+        this.playSfx('sfx_kill');
+      }
+    };
+    this.sfxListeners.set('unit:death', deathListener);
+    bus.on('unit:death', deathListener);
+
+    // Boss phase transition: two-part stinger
+    const bossPhaseListener = () => this.playBossPhaseStinger();
+    this.sfxListeners.set('boss:phase', bossPhaseListener);
+    bus.on('boss:phase', bossPhaseListener);
+
+    // Relic acquisition: bright equip variant
+    const relicListener = () => this.playSfxVariant('sfx_equip', { detune: 300 });
+    this.sfxListeners.set('relic:acquire', relicListener);
+    bus.on('relic:acquire', relicListener);
+
+    // Combo escalation: rising pitch from 3 hits onward (bypasses playSfx throttling — low frequency)
+    const comboListener = (data: { unitId: string; comboCount: number }) => {
+      if (data.comboCount >= 3) {
+        this.playSfxVariant('sfx_hit', { detune: Math.min(600, data.comboCount * 60) });
+      }
+    };
+    this.sfxListeners.set('combo:hit', comboListener);
+    bus.on('combo:hit', comboListener);
   }
 
   /** Unregister EventBus SFX listeners */
@@ -331,6 +458,12 @@ export class AudioManager {
   private getActiveScene(): Phaser.Scene | null {
     if (!this.game) return null;
     const scenes = this.game.scene.getScenes(true);
+    // Prefer a real scene with a usable audio cache (skip system/bootstrap scenes)
+    for (const s of scenes) {
+      if (s.sys?.settings?.key !== '__SYSTEM' && s.cache?.audio) {
+        return s;
+      }
+    }
     return scenes.length > 0 ? scenes[0] : null;
   }
 }

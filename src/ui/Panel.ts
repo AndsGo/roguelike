@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { Theme } from './Theme';
+import { Theme, lightenColor, darkenColor } from './Theme';
 import { TextFactory } from './TextFactory';
 import { isTouchDevice } from '../utils/device';
 import { pointerView } from './Viewport';
@@ -72,6 +72,27 @@ export class Panel extends Phaser.GameObjects.Container {
     this.bg.fillRoundedRect(-width / 2, -height / 2, width, height, 8);
     this.bg.lineStyle(2, borderColor, 1);
     this.bg.strokeRoundedRect(-width / 2, -height / 2, width, height, 8);
+
+    // Pixel-art border accents: top highlight, bottom shadow, corner dots
+    const highlightColor = lightenColor(borderColor, 0.3);
+    const shadowColor = darkenColor(borderColor, 0.3);
+    const lx = -width / 2 + 9;  // after corner radius
+    const rx = width / 2 - 9;
+    const ty = -height / 2;
+    const by = height / 2;
+    // Top 1px highlight line
+    this.bg.lineStyle(1, highlightColor, 0.7);
+    this.bg.lineBetween(lx, ty + 1, rx, ty + 1);
+    // Bottom 1px shadow line
+    this.bg.lineStyle(1, shadowColor, 0.7);
+    this.bg.lineBetween(lx, by - 1, rx, by - 1);
+    // Corner dots (3×3 fillRect)
+    this.bg.fillStyle(borderColor, 1);
+    this.bg.fillRect(-width / 2, -height / 2, 3, 3);       // top-left
+    this.bg.fillRect(width / 2 - 3, -height / 2, 3, 3);    // top-right
+    this.bg.fillRect(-width / 2, height / 2 - 3, 3, 3);    // bottom-left
+    this.bg.fillRect(width / 2 - 3, height / 2 - 3, 3, 3); // bottom-right
+
     this.add(this.bg);
 
     // Title bar

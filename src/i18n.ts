@@ -54,7 +54,7 @@ export const UI = {
     front: '前排',
     back: '后排',
     autoAssign: '自动分配',
-    tip: '前排英雄更容易被近战敌人攻击',
+    tip: '前排英雄更容易被近战敌人攻击 · 点击英雄可切换前/后排',
     noFrontWarning: '前排无人，后排将直接承伤',
     healerFrontWarning: '治疗在前排，生存风险高',
     recommended: '推荐',
@@ -213,6 +213,12 @@ export const UI = {
     unlockedHeroes: (names: string) => `已解锁英雄: ${names}`,
     retry: '再来一次',
     mainMenu: '主菜单',
+    recapTitle: '── 本局复盘 ──',
+    recapBestHero: (name: string, dmg: number) => `最强英雄: ${name}(${dmg}伤害)`,
+    recapNodes: (n: number) => `通过节点: ${n}`,
+    recapCombo: (n: number) => `最大连击: ${n}`,
+    recapCrits: (n: number) => `暴击次数: ${n}`,
+    recapReactions: (n: number) => `元素反应: ${n}`,
   },
 
   // VictoryScene
