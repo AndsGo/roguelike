@@ -81,12 +81,19 @@ export function pointerView(scene: Phaser.Scene, pointer: Phaser.Input.Pointer):
  */
 export interface ViewBounds { x: number; y: number; w: number; h: number; cx: number; cy: number }
 export function viewBounds(scene: Phaser.Scene): ViewBounds {
-  const cam = scene.cameras?.main as { zoom?: number; midPoint?: { x: number; y: number } } | undefined;
+  const cam = scene.cameras?.main as { zoom?: number; scrollX?: number; scrollY?: number } | undefined;
   const sw = scene.scale?.width ?? GAME_WIDTH;
   const sh = scene.scale?.height ?? GAME_HEIGHT;
   const z = cam?.zoom ?? 1;
-  const cx = cam?.midPoint?.x ?? GAME_WIDTH / 2;
-  const cy = cam?.midPoint?.y ?? GAME_HEIGHT / 2;
+  // Derive the visible center from scroll (an input we set synchronously),
+  // NOT cam.midPoint — midPoint only refreshes during preRender, so it is
+  // stale when a scene reads bounds inside its own create() on a camera
+  // that has never rendered (the classic "HUD anchored to screen center"
+  // bug on a fresh page load straight into battle).
+  // Camera zoom pivots on the viewport center, so world point
+  // (scrollX + sw/2, scrollY + sh/2) maps to the canvas center.
+  const cx = (cam?.scrollX ?? 0) + sw / 2;
+  const cy = (cam?.scrollY ?? 0) + sh / 2;
   const w = sw / z;
   const h = sh / z;
   return { x: cx - w / 2, y: cy - h / 2, w, h, cx, cy };
