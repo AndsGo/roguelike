@@ -1,5 +1,4 @@
 import Phaser from 'phaser';
-import { GAME_WIDTH, GAME_HEIGHT } from '../constants';
 import { Theme, getElementColor } from './Theme';
 import { TextFactory } from './TextFactory';
 import { Hero } from '../entities/Hero';
@@ -7,12 +6,14 @@ import { UltimateSystem } from '../systems/UltimateSystem';
 import { EventBus } from '../systems/EventBus';
 import { attachPressInteraction } from './PressInteraction';
 import { isTouchDevice } from '../utils/device';
+import { viewBounds, uiBoost } from './Viewport';
 import { SkillData } from '../types';
 import skillsData from '../data/skills.json';
 
 const BUTTON_SIZE = 36;
 const BUTTON_GAP = 8;
-const BAR_Y = GAME_HEIGHT - 100; // Above SkillBar (which is at GAME_HEIGHT - 50)
+/** Bar sits this far above the viewport bottom (above the SkillBar at 50). */
+const BAR_BOTTOM_OFFSET = 100;
 
 /**
  * Ultimate skill bar — 4 circular buttons (one per party slot).
@@ -35,13 +36,18 @@ export class UltimateBar extends Phaser.GameObjects.Container {
     this.setDepth(101);
 
     this.buildSlots();
+    // Anchor bottom-center of the visible viewport, boosted on touch
+    const b = viewBounds(scene);
+    const boost = uiBoost();
+    this.setScale(boost);
+    this.setPosition(b.cx, b.y + b.h - BAR_BOTTOM_OFFSET * boost);
     scene.add.existing(this);
   }
 
   private buildSlots(): void {
     const count = Math.min(this.heroes.length, 4);
     const totalWidth = count * (BUTTON_SIZE + BUTTON_GAP) - BUTTON_GAP;
-    const startX = (GAME_WIDTH - totalWidth) / 2;
+    const startX = -totalWidth / 2;
 
     for (let i = 0; i < count; i++) {
       const hero = this.heroes[i];
@@ -55,7 +61,7 @@ export class UltimateBar extends Phaser.GameObjects.Container {
       const slot = new UltimateSlot(
         this.scene,
         x,
-        BAR_Y,
+        0,
         hero,
         ultSkill,
         i,

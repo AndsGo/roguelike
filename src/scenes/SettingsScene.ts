@@ -1,5 +1,4 @@
 import Phaser from 'phaser';
-import { GAME_WIDTH, GAME_HEIGHT } from '../constants';
 import { Button } from '../ui/Button';
 import { Theme, colorToString, getAccessibility, setAccessibility } from '../ui/Theme';
 import { AudioManager } from '../systems/AudioManager';
@@ -9,6 +8,7 @@ import { TutorialSystem } from '../systems/TutorialSystem';
 import { UI } from '../i18n';
 import { KeybindingConfig, KeyAction, ACTION_LABELS } from '../config/keybindings';
 import { TextFactory } from '../ui/TextFactory';
+import { applyUiCamera, fillBackground, onViewResize, pointerView, restartOnResize, view, viewBounds } from '../ui/Viewport';
 
 /**
  * Settings scene accessible from MainMenu and BattlePauseMenu.
@@ -16,6 +16,7 @@ import { TextFactory } from '../ui/TextFactory';
  */
 export class SettingsScene extends Phaser.Scene {
   private returnScene: string = 'MainMenuScene';
+  private sceneData: { returnScene?: string } = {};
   private activeRebindHandler: ((event: KeyboardEvent) => void) | null = null;
 
   constructor() {
@@ -23,20 +24,26 @@ export class SettingsScene extends Phaser.Scene {
   }
 
   init(data?: { returnScene?: string }): void {
+    this.sceneData = data ?? {};
     this.returnScene = data?.returnScene ?? 'MainMenuScene';
   }
 
   create(): void {
+    // 响应式相机 + 窗口resize时重建场景
+    onViewResize(this, () => applyUiCamera(this));
+    restartOnResize(this, this.sceneData);
+    const v = view(this);
+
     // Background
-    this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, 0x0a0a1e);
+    fillBackground(this, 0x0a0a1e);
 
     // Title
-    TextFactory.create(this, GAME_WIDTH / 2, 30, UI.settings.title, 'title', {
+    TextFactory.create(this, v.cx, 30, UI.settings.title, 'title', {
       color: colorToString(Theme.colors.secondary),
     }).setOrigin(0.5);
 
-    const leftCol = 160;
-    const rightCol = 520;
+    const leftCol = Math.round(v.vw * 0.20);
+    const rightCol = Math.round(v.vw * 0.65);
     let y = 65;
 
     // ---- Audio Section ----
@@ -54,7 +61,7 @@ export class SettingsScene extends Phaser.Scene {
 
     // ---- Save Slots Section ----
     for (let slot = 0; slot < 3; slot++) {
-      this.createSaveSlotRow(leftCol, y, slot);
+      this.createSaveSlotRow(leftCol, y, slot, rightCol);
       y += 22;
     }
 
@@ -177,7 +184,7 @@ export class SettingsScene extends Phaser.Scene {
     this.createMetaResetRow(leftCol, rightCol, y);
 
     // ---- Back Button ----
-    new Button(this, GAME_WIDTH / 2, GAME_HEIGHT - 35, UI.settings.back,
+    new Button(this, v.cx, v.vh - 35, UI.settings.back,
       140, 36, () => {
         this.scene.start(this.returnScene);
       }, Theme.colors.primary);
@@ -193,7 +200,7 @@ export class SettingsScene extends Phaser.Scene {
       color: '#ffffff',
     }).setOrigin(0, 0.5);
 
-    const sliderX = 320;
+    const sliderX = Math.round(view(this).cx - 80);
     const sliderWidth = 200;
     const sliderY = y;
 
@@ -225,7 +232,7 @@ export class SettingsScene extends Phaser.Scene {
     ).setInteractive({ useHandCursor: true });
 
     hitZone.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
-      const ratio = Phaser.Math.Clamp((pointer.x - sliderX) / sliderWidth, 0, 1);
+      const ratio = Phaser.Math.Clamp((pointerView(this, pointer).x - sliderX) / sliderWidth, 0, 1);
       handle.x = sliderX + sliderWidth * ratio;
       this.drawSliderFill(trackFill, sliderX, sliderY, sliderWidth, ratio);
       valueText.setText(`${Math.round(ratio * 100)}%`);
@@ -253,7 +260,7 @@ export class SettingsScene extends Phaser.Scene {
     graphics.fillRoundedRect(x, y - 4, width * ratio, 8, 4);
   }
 
-  private createSaveSlotRow(x: number, y: number, slot: number): void {
+  private createSaveSlotRow(x: number, y: number, slot: number, rightCol: number): void {
     const hasSave = SaveManager.hasSave(slot);
     const info = hasSave ? SaveManager.getSaveInfo(slot) : null;
 
@@ -266,7 +273,7 @@ export class SettingsScene extends Phaser.Scene {
     }).setOrigin(0, 0.5);
 
     if (hasSave) {
-      const deleteBtn = new Button(this, 580, y,
+      const deleteBtn = new Button(this, rightCol + 60, y,
         UI.settings.deleteSave(slot), 100, 24, () => {
           this.showDeleteConfirmation(slot, label, deleteBtn);
         }, Theme.colors.danger);
@@ -278,18 +285,20 @@ export class SettingsScene extends Phaser.Scene {
     label: Phaser.GameObjects.Text,
     deleteBtn: Button,
   ): void {
+    const b = viewBounds(this);
+
     const overlay = this.add.rectangle(
-      GAME_WIDTH / 2, GAME_HEIGHT / 2,
-      GAME_WIDTH, GAME_HEIGHT, 0x000000, Theme.modalBackdropAlpha,
+      b.cx, b.cy,
+      b.w + 4, b.h + 4, 0x000000, Theme.modalBackdropAlpha,
     ).setInteractive();
 
     const panelBg = this.add.graphics();
     panelBg.fillStyle(Theme.colors.panel, 0.95);
-    panelBg.fillRoundedRect(GAME_WIDTH / 2 - 150, GAME_HEIGHT / 2 - 45, 300, 90, 8);
+    panelBg.fillRoundedRect(b.cx - 150, b.cy - 45, 300, 90, 8);
     panelBg.lineStyle(2, Theme.colors.panelBorder, 0.8);
-    panelBg.strokeRoundedRect(GAME_WIDTH / 2 - 150, GAME_HEIGHT / 2 - 45, 300, 90, 8);
+    panelBg.strokeRoundedRect(b.cx - 150, b.cy - 45, 300, 90, 8);
 
-    const msg = TextFactory.create(this, GAME_WIDTH / 2, GAME_HEIGHT / 2 - 15,
+    const msg = TextFactory.create(this, b.cx, b.cy - 15,
       UI.settings.deleteSaveConfirm(slot), 'body', {
         color: colorToString(Theme.colors.danger),
         align: 'center',
@@ -297,7 +306,7 @@ export class SettingsScene extends Phaser.Scene {
 
     const elements = [overlay, panelBg, msg];
 
-    const yesBtn = new Button(this, GAME_WIDTH / 2 - 55, GAME_HEIGHT / 2 + 20,
+    const yesBtn = new Button(this, b.cx - 55, b.cy + 20,
       UI.mainMenu.yes, 70, 26, () => {
         SaveManager.deleteSave(slot);
         label.setText(UI.settings.saveEmpty(slot));
@@ -308,7 +317,7 @@ export class SettingsScene extends Phaser.Scene {
         noBtn.destroy();
       }, Theme.colors.danger);
 
-    const noBtn = new Button(this, GAME_WIDTH / 2 + 55, GAME_HEIGHT / 2 + 20,
+    const noBtn = new Button(this, b.cx + 55, b.cy + 20,
       UI.mainMenu.no, 70, 26, () => {
         elements.forEach(e => e.destroy());
         yesBtn.destroy();

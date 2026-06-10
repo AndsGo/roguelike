@@ -1,8 +1,8 @@
 import Phaser from 'phaser';
-import { GAME_WIDTH, GAME_HEIGHT } from '../constants';
 import { AudioManager, BGM_KEYS, SFX_KEYS } from '../systems/AudioManager';
 import { SaveManager } from '../managers/SaveManager';
 import { TextFactory } from '../ui/TextFactory';
+import { applyUiCamera, onViewResize, view } from '../ui/Viewport';
 
 export class BootScene extends Phaser.Scene {
   constructor() {
@@ -10,19 +10,22 @@ export class BootScene extends Phaser.Scene {
   }
 
   preload(): void {
+    onViewResize(this, () => applyUiCamera(this));
+    const v = view(this);
+
     // Loading bar
     const barWidth = 300;
     const barHeight = 20;
-    const barX = (GAME_WIDTH - barWidth) / 2;
-    const barY = GAME_HEIGHT / 2;
+    const barX = v.cx - barWidth / 2;
+    const barY = v.cy;
 
-    const progressBg = this.add.rectangle(GAME_WIDTH / 2, barY, barWidth, barHeight, 0x333333);
+    const progressBg = this.add.rectangle(v.cx, barY, barWidth, barHeight, 0x333333);
     progressBg.setStrokeStyle(1, 0x666666);
 
     const progressBar = this.add.rectangle(barX + 2, barY, 0, barHeight - 4, 0x4488ff);
     progressBar.setOrigin(0, 0.5);
 
-    const loadingText = TextFactory.create(this, GAME_WIDTH / 2, barY - 30, 'Loading...', 'subtitle', {
+    const loadingText = TextFactory.create(this, v.cx, barY - 30, 'Loading...', 'subtitle', {
       color: '#ffffff',
     }).setOrigin(0.5);
 
@@ -62,7 +65,8 @@ export class BootScene extends Phaser.Scene {
   }
 
   private showStorageWarning(): void {
-    const msg = TextFactory.create(this, GAME_WIDTH / 2, GAME_HEIGHT / 2 + 40,
+    const v = view(this);
+    const msg = TextFactory.create(this, v.cx, v.cy + 40,
       '⚠ 存储不可用 - 游戏进度将无法保存', 'body', {
         color: '#ff8844',
       }).setOrigin(0.5);

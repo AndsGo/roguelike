@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { GAME_WIDTH, GAME_HEIGHT, MAP_HIDDEN_NODE_COST, EVOLUTION_LEVEL } from '../constants';
+import { MAP_HIDDEN_NODE_COST, EVOLUTION_LEVEL } from '../constants';
 import { SaveManager } from '../managers/SaveManager';
 import { RunManager } from '../managers/RunManager';
 import { MapGenerator } from '../systems/MapGenerator';
@@ -22,6 +22,7 @@ import { hasEvolutionConfig, getEvolutionBranches } from '../systems/SkillSystem
 import heroesData from '../data/heroes.json';
 import skillsData from '../data/skills.json';
 import { isTouchDevice } from '../utils/device';
+import { applyUiCamera, fillBackground, onViewResize, pointerView, restartOnResize, view } from '../ui/Viewport';
 
 export class MapScene extends Phaser.Scene {
   private mapContainer!: Phaser.GameObjects.Container;
@@ -55,10 +56,14 @@ export class MapScene extends Phaser.Scene {
       rm.setMap(map);
     }
 
+    // Responsive UI camera (mobile boost makes nodes physically larger;
+    // the map already scrolls horizontally to absorb the narrower viewport)
+    onViewResize(this, () => applyUiCamera(this));
+    restartOnResize(this);
+    const v = view(this);
+
     // Background
-    this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, Theme.colors.background)
-      .setScrollFactor(0)
-      .setDepth(0);
+    fillBackground(this, Theme.colors.background);
 
     // Build layer structure from node graph
     const map = rm.getMap();
@@ -70,12 +75,12 @@ export class MapScene extends Phaser.Scene {
     const startX = 60;
     const headerHeight = 55;
     const heroPanelHeight = 75;
-    const mapAreaHeight = GAME_HEIGHT - headerHeight - heroPanelHeight;
+    const mapAreaHeight = v.vh - headerHeight - heroPanelHeight;
     const mapCenterY = headerHeight + mapAreaHeight / 2;
 
     // Calculate total width
     this.totalMapWidth = startX * 2 + (layers.length - 1) * layerSpacing;
-    const needsScroll = this.totalMapWidth > GAME_WIDTH;
+    const needsScroll = this.totalMapWidth > v.vw;
 
     // Create scrollable container for the map
     this.mapContainer = this.add.container(0, 0);
@@ -388,27 +393,27 @@ export class MapScene extends Phaser.Scene {
     // Fixed UI elements (not in scrollable container)
 
     // Header background
-    const headerBg = this.add.graphics().setScrollFactor(0).setDepth(100);
+    const headerBg = this.add.graphics().setDepth(100);
     headerBg.fillStyle(Theme.colors.background, 0.95);
-    headerBg.fillRect(0, 0, GAME_WIDTH, headerHeight);
+    headerBg.fillRect(0, 0, v.vw, headerHeight);
     headerBg.lineStyle(1, Theme.colors.panelBorder, 0.5);
-    headerBg.lineBetween(0, headerHeight, GAME_WIDTH, headerHeight);
+    headerBg.lineBetween(0, headerHeight, v.vw, headerHeight);
 
     // Title
-    TextFactory.create(this, GAME_WIDTH / 2, 16, UI.map.title, 'subtitle', {
+    TextFactory.create(this, v.cx, 16, UI.map.title, 'subtitle', {
       color: '#ffffff',
-    }).setOrigin(0.5).setScrollFactor(0).setDepth(101);
+    }).setOrigin(0.5).setDepth(101);
 
     // Act + Floor indicator
     const currentAct = rm.getCurrentAct();
-    TextFactory.create(this, GAME_WIDTH / 2, 34, UI.map.floorLabel(currentAct + 1, acts[currentAct]?.name ?? '', rm.getFloor()), 'small', {
+    TextFactory.create(this, v.cx, 34, UI.map.floorLabel(currentAct + 1, acts[currentAct]?.name ?? '', rm.getFloor()), 'small', {
       color: '#8899cc',
-    }).setOrigin(0.5).setScrollFactor(0).setDepth(101);
+    }).setOrigin(0.5).setDepth(101);
 
     // Gold display
-    TextFactory.create(this, GAME_WIDTH - 15, 8, UI.map.gold(rm.getGold()), 'body', {
+    TextFactory.create(this, v.vw - 15, 8, UI.map.gold(rm.getGold()), 'body', {
       color: colorToString(Theme.colors.gold),
-    }).setOrigin(1, 0).setScrollFactor(0).setDepth(101);
+    }).setOrigin(1, 0).setDepth(101);
 
     // Daily challenge rules banner
     const runState = rm.getState();
@@ -416,22 +421,22 @@ export class MapScene extends Phaser.Scene {
       const rules = runState.dailyModifiers.rules as DailyRule[];
       const ruleText = rules.map((r: any) => DailyChallengeManager.formatDailyRuleShort(r)).join('  ');
 
-      const bannerBg = this.add.graphics().setScrollFactor(0).setDepth(101);
+      const bannerBg = this.add.graphics().setDepth(101);
       bannerBg.fillStyle(0xccaa00, 0.15);
-      bannerBg.fillRoundedRect(10, 30, GAME_WIDTH - 20, 18, 4);
+      bannerBg.fillRoundedRect(10, 30, v.vw - 20, 18, 4);
 
-      TextFactory.create(this, GAME_WIDTH / 2, 39, `每日挑战: ${ruleText}`, 'small', {
+      TextFactory.create(this, v.cx, 39, `每日挑战: ${ruleText}`, 'small', {
         color: '#ccaa44',
-      }).setOrigin(0.5).setScrollFactor(0).setDepth(102);
+      }).setOrigin(0.5).setDepth(102);
     }
 
     // Overview button
-    const overviewBtn = TextFactory.create(this, GAME_WIDTH - 15, 26, '[概览]', 'small', {
+    const overviewBtn = TextFactory.create(this, v.vw - 15, 26, '[概览]', 'small', {
       color: colorToString(Theme.colors.ui.accent),
-    }).setOrigin(1, 0).setScrollFactor(0).setDepth(101);
+    }).setOrigin(1, 0).setDepth(101);
     const overviewHit = this.add.rectangle(overviewBtn.x - overviewBtn.width / 2, overviewBtn.y + 6, overviewBtn.width + 10, 16, 0x000000, 0)
       .setInteractive({ useHandCursor: true })
-      .setScrollFactor(0).setDepth(101);
+      .setDepth(101);
     overviewHit.on('pointerup', () => {
       if (!this.overviewPanel) {
         this.overviewPanel = new RunOverviewPanel(this, () => { this.overviewPanel = null; });
@@ -442,7 +447,7 @@ export class MapScene extends Phaser.Scene {
     const completedCount = map.filter(n => n.completed).length;
     TextFactory.create(this, 15, 8, UI.map.runStats(rm.getHeroes().length, rm.getRelics().length, completedCount, map.length), 'small', {
       color: '#7788aa',
-    }).setOrigin(0, 0).setScrollFactor(0).setDepth(101);
+    }).setOrigin(0, 0).setDepth(101);
 
     // Interactive hero panel at bottom
     this.heroPanelObjects = MapRenderer.drawInteractiveHeroPanel(
@@ -460,13 +465,13 @@ export class MapScene extends Phaser.Scene {
     );
 
     // Formation button near hero panel
-    const formBtn = new Button(this, GAME_WIDTH - 50, GAME_HEIGHT - 45,
+    const formBtn = new Button(this, v.vw - 50, v.vh - 45,
       UI.formation.title, 50, 24, () => {
         if (!this.formationPanel) {
           this.formationPanel = new FormationPanel(this, () => { this.formationPanel = null; });
         }
       });
-    formBtn.setScrollFactor(0);
+    formBtn;
     formBtn.setDepth(101);
 
     // Set up camera scrolling if map is wider than screen
@@ -512,21 +517,24 @@ export class MapScene extends Phaser.Scene {
   }
 
   private setupDragScroll(): void {
-    const maxScroll = Math.max(0, this.totalMapWidth - GAME_WIDTH);
+    const v = view(this);
+    const maxScroll = Math.max(0, this.totalMapWidth - v.vw);
     let scrollStartX = 0;
 
     this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
+      const pv = pointerView(this, pointer);
       // Only start drag in map area (not header/hero panel)
-      if (pointer.y > 55 && pointer.y < GAME_HEIGHT - 75) {
+      if (pv.y > 55 && pv.y < v.vh - 75) {
         this.isDragging = false;
-        this.dragStartX = pointer.x;
+        this.dragStartX = pv.x;
         scrollStartX = this.scrollX;
       }
     });
 
     this.input.on('pointermove', (pointer: Phaser.Input.Pointer) => {
-      if (pointer.isDown && pointer.y > 55 && pointer.y < GAME_HEIGHT - 75) {
-        const dx = pointer.x - this.dragStartX;
+      const pv = pointerView(this, pointer);
+      if (pointer.isDown && pv.y > 55 && pv.y < v.vh - 75) {
+        const dx = pv.x - this.dragStartX;
         if (Math.abs(dx) > 5) {
           this.isDragging = true;
         }
@@ -540,7 +548,8 @@ export class MapScene extends Phaser.Scene {
     this.input.on('pointerup', (pointer: Phaser.Input.Pointer) => {
       // Use distance-based check: isDragging stays true so node pointerup sees it,
       // then reset immediately. No timer race condition.
-      const dist = Math.abs(pointer.x - this.dragStartX);
+      const pv = pointerView(this, pointer);
+      const dist = Math.abs(pv.x - this.dragStartX);
       // Keep isDragging=true if we actually dragged, so node click guards work.
       // Reset it synchronously after the current event cycle via next frame.
       if (dist < 8) {
@@ -568,9 +577,10 @@ export class MapScene extends Phaser.Scene {
     }
     if (count === 0) return;
 
+    const v = view(this);
     const avgX = sumX / count;
-    const maxScroll = Math.max(0, this.totalMapWidth - GAME_WIDTH);
-    this.scrollX = Phaser.Math.Clamp(avgX - GAME_WIDTH / 2, 0, maxScroll);
+    const maxScroll = Math.max(0, this.totalMapWidth - v.vw);
+    this.scrollX = Phaser.Math.Clamp(avgX - v.vw / 2, 0, maxScroll);
     this.mapContainer.x = -this.scrollX;
   }
 
@@ -580,8 +590,9 @@ export class MapScene extends Phaser.Scene {
     const act = acts[actIndex];
 
     // Full-screen overlay
-    const overlay = this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, 0x000000, 0)
-      .setScrollFactor(0)
+    const av = view(this);
+    const overlay = this.add.rectangle(av.cx, av.cy, av.vw + 4, av.vh + 4, 0x000000, 0)
+      
       .setDepth(200)
       .setInteractive();
 
@@ -594,19 +605,19 @@ export class MapScene extends Phaser.Scene {
     });
 
     // "Entering Act X" title
-    const title = TextFactory.create(this, GAME_WIDTH / 2, GAME_HEIGHT / 2 - 50, UI.map.enterAct(actIndex + 1), 'title', {
+    const title = TextFactory.create(this, av.cx, av.cy - 50, UI.map.enterAct(actIndex + 1), 'title', {
       color: '#ffffff',
-    }).setOrigin(0.5).setScrollFactor(0).setDepth(201).setAlpha(0);
+    }).setOrigin(0.5).setDepth(201).setAlpha(0);
 
     // Act name
-    const name = TextFactory.create(this, GAME_WIDTH / 2, GAME_HEIGHT / 2 - 15, act.name, 'subtitle', {
+    const name = TextFactory.create(this, av.cx, av.cy - 15, act.name, 'subtitle', {
       color: colorToString(Theme.colors.secondary),
-    }).setOrigin(0.5).setScrollFactor(0).setDepth(201).setAlpha(0);
+    }).setOrigin(0.5).setDepth(201).setAlpha(0);
 
     // Description
-    const desc = TextFactory.create(this, GAME_WIDTH / 2, GAME_HEIGHT / 2 + 15, act.description, 'label', {
+    const desc = TextFactory.create(this, av.cx, av.cy + 15, act.description, 'label', {
       color: '#aaaacc',
-    }).setOrigin(0.5).setScrollFactor(0).setDepth(201).setAlpha(0);
+    }).setOrigin(0.5).setDepth(201).setAlpha(0);
 
     // Fade in text
     this.tweens.add({
@@ -620,7 +631,7 @@ export class MapScene extends Phaser.Scene {
     // Continue button (after text appears)
     this.time.delayedCall(600, () => {
       const btn = new Button(
-        this, GAME_WIDTH / 2, GAME_HEIGHT / 2 + 65,
+        this, av.cx, av.cy + 65,
         UI.map.continueBtn, 140, 36,
         () => {
           // Fade out everything
@@ -640,7 +651,7 @@ export class MapScene extends Phaser.Scene {
         },
         Theme.colors.primary,
       );
-      btn.setScrollFactor(0);
+      btn;
       btn.setDepth(202);
       btn.setAlpha(0);
       this.tweens.add({
@@ -678,7 +689,8 @@ export class MapScene extends Phaser.Scene {
         return !(hero.skillEvolutions ?? {})[`${hero.id}:${skill0}`];
       });
       if (hasPending) {
-        const warn = TextFactory.create(this, GAME_WIDTH / 2, GAME_HEIGHT - 60,
+        const wv = view(this);
+        const warn = TextFactory.create(this, wv.cx, wv.vh - 60,
           UI.evolution.pendingWarning, 'body', {
             color: colorToString(Theme.colors.danger),
             stroke: '#000000', strokeThickness: 2,

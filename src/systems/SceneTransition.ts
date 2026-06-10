@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
-import { GAME_WIDTH, GAME_HEIGHT } from '../constants';
 import { AudioManager } from './AudioManager';
 import { DEPTH } from '../config/visual';
+import { viewBounds } from '../ui/Viewport';
 
 /** Standard transition durations (ms) */
 export const TRANSITION = {
@@ -25,9 +25,10 @@ export class SceneTransition {
     duration: number = TRANSITION.NORMAL,
   ): void {
     // Create black overlay
+    const b = viewBounds(scene);
     const overlay = scene.add.rectangle(
-      GAME_WIDTH / 2, GAME_HEIGHT / 2,
-      GAME_WIDTH, GAME_HEIGHT,
+      b.cx, b.cy,
+      b.w + 4, b.h + 4,
       0x000000, 0,
     ).setDepth(DEPTH.SCENE_OVERLAY);
 
@@ -54,19 +55,20 @@ export class SceneTransition {
     data?: object,
     duration: number = TRANSITION.NORMAL,
   ): void {
+    const b = viewBounds(scene);
     const overlay = scene.add.rectangle(
-      GAME_WIDTH / 2, GAME_HEIGHT / 2,
-      GAME_WIDTH, GAME_HEIGHT,
+      b.cx, b.cy,
+      b.w + 4, b.h + 4,
       0x000000, 0,
     ).setDepth(DEPTH.SCENE_OVERLAY);
 
     let camX = 0;
     let camY = 0;
     switch (direction) {
-      case 'left': camX = GAME_WIDTH; break;
-      case 'right': camX = -GAME_WIDTH; break;
-      case 'up': camY = GAME_HEIGHT; break;
-      case 'down': camY = -GAME_HEIGHT; break;
+      case 'left': camX = b.w; break;
+      case 'right': camX = -b.w; break;
+      case 'up': camY = b.h; break;
+      case 'down': camY = -b.h; break;
     }
 
     // Slide camera and fade overlay

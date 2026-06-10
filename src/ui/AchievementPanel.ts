@@ -1,11 +1,11 @@
 import Phaser from 'phaser';
-import { GAME_WIDTH, GAME_HEIGHT } from '../constants';
 import { Panel } from './Panel';
 import { Theme, colorToString } from './Theme';
 import { TextFactory } from './TextFactory';
 import { AchievementManager, AchievementDef } from '../managers/AchievementManager';
 import { MetaManager } from '../managers/MetaManager';
 import { ACHIEVEMENT_ICONS } from '../i18n';
+import { viewBounds, pointerView } from './Viewport';
 
 const ROW_HEIGHT = 40;
 
@@ -28,23 +28,26 @@ export class AchievementPanel {
     this.scene = scene;
     this.onCloseCallback = onClose;
 
+    const b = viewBounds(scene);
+
     // Semi-transparent backdrop (click to close)
     this.backdrop = scene.add.rectangle(
-      GAME_WIDTH / 2, GAME_HEIGHT / 2,
-      GAME_WIDTH, GAME_HEIGHT,
+      b.cx, b.cy,
+      b.w + 4, b.h + 4,
       0x000000, Theme.modalBackdropAlpha,
     ).setInteractive({ useHandCursor: true }).setDepth(799);
     this.backdrop.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
       // Only close when clicking outside the panel area
+      const pv = pointerView(scene, pointer);
       const hw = AchievementPanel.PANEL_WIDTH / 2;
       const hh = AchievementPanel.PANEL_HEIGHT / 2;
-      if (pointer.x < GAME_WIDTH / 2 - hw || pointer.x > GAME_WIDTH / 2 + hw ||
-          pointer.y < GAME_HEIGHT / 2 - hh || pointer.y > GAME_HEIGHT / 2 + hh) {
+      if (pv.x < b.cx - hw || pv.x > b.cx + hw ||
+          pv.y < b.cy - hh || pv.y > b.cy + hh) {
         this.close();
       }
     });
 
-    this.panel = new Panel(scene, GAME_WIDTH / 2, GAME_HEIGHT / 2, AchievementPanel.PANEL_WIDTH, AchievementPanel.PANEL_HEIGHT, {
+    this.panel = new Panel(scene, b.cx, b.cy, AchievementPanel.PANEL_WIDTH, AchievementPanel.PANEL_HEIGHT, {
       title: '成就列表',
       animate: true,
     });
@@ -74,11 +77,11 @@ export class AchievementPanel {
     this.panel.setContentHeight(achievements.length * ROW_HEIGHT + 80);
 
     // Fixed close button (outside scrollable content, always visible)
-    this.closeText = TextFactory.create(scene, GAME_WIDTH / 2, GAME_HEIGHT / 2 + AchievementPanel.PANEL_HEIGHT / 2 - 16, '[ 关闭 ]', 'label', {
+    this.closeText = TextFactory.create(scene, b.cx, b.cy + AchievementPanel.PANEL_HEIGHT / 2 - 16, '[ 关闭 ]', 'label', {
       color: '#888888',
     }).setOrigin(0.5).setDepth(801);
 
-    this.closeHit = scene.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2 + AchievementPanel.PANEL_HEIGHT / 2 - 16, 80, 24, 0x000000, 0)
+    this.closeHit = scene.add.rectangle(b.cx, b.cy + AchievementPanel.PANEL_HEIGHT / 2 - 16, 80, 24, 0x000000, 0)
       .setInteractive({ useHandCursor: true })
       .setDepth(801);
     this.closeHit.on('pointerup', () => this.close());

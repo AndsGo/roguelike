@@ -2,8 +2,8 @@ import Phaser from 'phaser';
 import { EventBus } from './EventBus';
 import { ErrorHandler } from './ErrorHandler';
 import { SaveManager } from '../managers/SaveManager';
-import { GAME_WIDTH, GAME_HEIGHT } from '../config/balance';
 import { TextFactory } from '../ui/TextFactory';
+import { viewBounds } from '../ui/Viewport';
 
 /** A tutorial tip shown once to the player */
 export interface TutorialTip {
@@ -34,7 +34,7 @@ export class TutorialSystem {
       trigger: 'BattleScene',
       title: '战斗基础',
       message: '英雄会自动战斗！使用1x/2x/3x按钮调整战斗速度。',
-      highlight: { x: GAME_WIDTH / 2 - 60, y: GAME_HEIGHT - 40, width: 120, height: 30 },
+      highlight: { x: 340, y: 410, width: 120, height: 30 },
     },
     {
       id: 'first_shop',
@@ -186,25 +186,29 @@ export class TutorialSystem {
     const panelWidth = 320;
     const panelHeight = 120;
     const allElements: Phaser.GameObjects.GameObject[] = [];
+    // Visible design rect — correct under both UI and world cameras
+    const vb = viewBounds(scene);
 
     if (tip.highlight) {
       // Spotlight mode: 4 dark rectangles around the highlight region + border
       const hl = tip.highlight;
       const alpha = 0.5;
+      const vRight = vb.x + vb.w;
+      const vBottom = vb.y + vb.h;
 
       // Top
-      const top = scene.add.rectangle(GAME_WIDTH / 2, hl.y / 2, GAME_WIDTH, hl.y, 0x000000, alpha)
+      const top = scene.add.rectangle(vb.cx, (vb.y + hl.y) / 2, vb.w, Math.max(0, hl.y - vb.y), 0x000000, alpha)
         .setDepth(900).setInteractive({ useHandCursor: true });
       // Bottom
       const bottomY = hl.y + hl.height;
-      const bottom = scene.add.rectangle(GAME_WIDTH / 2, (bottomY + GAME_HEIGHT) / 2, GAME_WIDTH, GAME_HEIGHT - bottomY, 0x000000, alpha)
+      const bottom = scene.add.rectangle(vb.cx, (bottomY + vBottom) / 2, vb.w, Math.max(0, vBottom - bottomY), 0x000000, alpha)
         .setDepth(900).setInteractive({ useHandCursor: true });
       // Left
-      const left = scene.add.rectangle(hl.x / 2, hl.y + hl.height / 2, hl.x, hl.height, 0x000000, alpha)
+      const left = scene.add.rectangle((vb.x + hl.x) / 2, hl.y + hl.height / 2, Math.max(0, hl.x - vb.x), hl.height, 0x000000, alpha)
         .setDepth(900).setInteractive({ useHandCursor: true });
       // Right
       const rightX = hl.x + hl.width;
-      const right = scene.add.rectangle((rightX + GAME_WIDTH) / 2, hl.y + hl.height / 2, GAME_WIDTH - rightX, hl.height, 0x000000, alpha)
+      const right = scene.add.rectangle((rightX + vRight) / 2, hl.y + hl.height / 2, Math.max(0, vRight - rightX), hl.height, 0x000000, alpha)
         .setDepth(900).setInteractive({ useHandCursor: true });
 
       // Highlight border
@@ -216,7 +220,7 @@ export class TutorialSystem {
 
       // Position panel above or below the highlight
       const panelAbove = hl.y > panelHeight + 20;
-      const panelCx = Math.min(Math.max(hl.x + hl.width / 2, panelWidth / 2 + 10), GAME_WIDTH - panelWidth / 2 - 10);
+      const panelCx = Math.min(Math.max(hl.x + hl.width / 2, vb.x + panelWidth / 2 + 10), vb.x + vb.w - panelWidth / 2 - 10);
       const panelCy = panelAbove
         ? hl.y - panelHeight / 2 - 10
         : hl.y + hl.height + panelHeight / 2 + 10;
@@ -256,12 +260,12 @@ export class TutorialSystem {
       });
     } else {
       // Original full-screen mode
-      const cx = tip.position?.x ?? GAME_WIDTH / 2;
-      const cy = tip.position?.y ?? GAME_HEIGHT / 2;
+      const cx = tip.position?.x ?? vb.cx;
+      const cy = tip.position?.y ?? vb.cy;
 
       const backdrop = scene.add.rectangle(
-        GAME_WIDTH / 2, GAME_HEIGHT / 2,
-        GAME_WIDTH, GAME_HEIGHT,
+        vb.cx, vb.cy,
+        vb.w + 4, vb.h + 4,
         0x000000, 0.4,
       ).setDepth(900).setInteractive({ useHandCursor: true });
       allElements.push(backdrop);

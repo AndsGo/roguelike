@@ -1,5 +1,4 @@
 import Phaser from 'phaser';
-import { GAME_WIDTH, GAME_HEIGHT } from '../constants';
 import { Panel } from './Panel';
 import { Theme, colorToString, getElementColor, getRarityColor } from './Theme';
 import { TextFactory } from './TextFactory';
@@ -8,6 +7,7 @@ import { StatsManager, RunStats } from '../managers/StatsManager';
 import { UI, getHeroDisplayName } from '../i18n';
 import itemsData from '../data/items.json';
 import relicsData from '../data/relics.json';
+import { viewBounds, pointerView } from './Viewport';
 
 const PANEL_WIDTH = 560;
 const PANEL_HEIGHT = 380;
@@ -40,22 +40,26 @@ export class BuildReviewPanel {
     this.scene = scene;
     this.onCloseCallback = onClose;
 
-    // Semi-transparent backdrop
+    // Semi-transparent backdrop covering the visible viewport
+    const b = viewBounds(scene);
+    const panelW = Math.min(PANEL_WIDTH, b.w - 16);
+    const panelH = Math.min(PANEL_HEIGHT, b.h - 16);
     this.backdrop = scene.add.rectangle(
-      GAME_WIDTH / 2, GAME_HEIGHT / 2,
-      GAME_WIDTH, GAME_HEIGHT,
+      b.cx, b.cy,
+      b.w + 4, b.h + 4,
       0x000000, Theme.modalBackdropAlpha,
     ).setInteractive({ useHandCursor: true }).setDepth(799);
     this.backdrop.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
-      const hw = PANEL_WIDTH / 2;
-      const hh = PANEL_HEIGHT / 2;
-      if (pointer.x < GAME_WIDTH / 2 - hw || pointer.x > GAME_WIDTH / 2 + hw ||
-          pointer.y < GAME_HEIGHT / 2 - hh || pointer.y > GAME_HEIGHT / 2 + hh) {
+      const pv = pointerView(scene, pointer);
+      const hw = panelW / 2;
+      const hh = panelH / 2;
+      if (pv.x < b.cx - hw || pv.x > b.cx + hw ||
+          pv.y < b.cy - hh || pv.y > b.cy + hh) {
         this.close();
       }
     });
 
-    this.panel = new Panel(scene, GAME_WIDTH / 2, GAME_HEIGHT / 2, PANEL_WIDTH, PANEL_HEIGHT, {
+    this.panel = new Panel(scene, b.cx, b.cy, panelW, panelH, {
       title: UI.buildReview.title,
       animate: true,
     });
@@ -88,12 +92,12 @@ export class BuildReviewPanel {
 
     // ---- Fixed close button ----
     this.closeText = TextFactory.create(
-      scene, GAME_WIDTH / 2, GAME_HEIGHT / 2 + PANEL_HEIGHT / 2 - 16,
+      scene, b.cx, b.cy + panelH / 2 - 16,
       UI.buildReview.close, 'label', { color: '#888888' },
     ).setOrigin(0.5).setDepth(801);
 
     this.closeHit = scene.add.rectangle(
-      GAME_WIDTH / 2, GAME_HEIGHT / 2 + PANEL_HEIGHT / 2 - 16, 80, 24, 0x000000, 0,
+      b.cx, b.cy + panelH / 2 - 16, 80, 24, 0x000000, 0,
     ).setInteractive({ useHandCursor: true }).setDepth(801);
     this.closeHit.on('pointerup', () => this.close());
   }

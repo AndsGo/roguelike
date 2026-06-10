@@ -2,13 +2,13 @@ import Phaser from 'phaser';
 import { HeroData, HeroState, EquipmentSlot, SkillAdvancement, UnitStats } from '../types';
 import { RunManager } from '../managers/RunManager';
 import { Theme, colorToString, getRarityColor } from './Theme';
-import { GAME_WIDTH, GAME_HEIGHT } from '../constants';
 import { TextFactory } from './TextFactory';
 import { STAT_LABELS, SLOT_LABELS, formatStat, ELEMENT_NAMES, RACE_NAMES, CLASS_NAMES } from '../i18n';
 import { expForLevel } from '../utils/math';
 import { SYNERGY_DEFINITIONS } from '../config/synergies';
 import skillsData from '../data/skills.json';
 import advancementsData from '../data/skill-advancements.json';
+import { viewBounds } from './Viewport';
 
 const POPUP_WIDTH = 420;
 const POPUP_HEIGHT = 430;
@@ -24,23 +24,27 @@ export class HeroDetailPopup extends Phaser.GameObjects.Container {
     super(scene, 0, 0);
     this.setDepth(800);
 
+    const b = viewBounds(scene);
+    const panelW = Math.min(POPUP_WIDTH, b.w - 16);
+    const panelH = Math.min(POPUP_HEIGHT, b.h - 16);
+
     // Semi-transparent backdrop (full screen)
     this.backdrop = scene.add.rectangle(
-      GAME_WIDTH / 2, GAME_HEIGHT / 2,
-      GAME_WIDTH, GAME_HEIGHT,
+      b.cx, b.cy,
+      b.w + 4, b.h + 4,
       0x000000, Theme.modalBackdropAlpha,
     ).setInteractive({ useHandCursor: true });
     this.add(this.backdrop);
 
-    const cx = GAME_WIDTH / 2;
-    const cy = GAME_HEIGHT / 2;
+    const cx = b.cx;
+    const cy = b.cy;
 
     // Panel background
     const panel = scene.add.graphics();
     panel.fillStyle(Theme.colors.panel, 0.95);
-    panel.fillRoundedRect(cx - POPUP_WIDTH / 2, cy - POPUP_HEIGHT / 2, POPUP_WIDTH, POPUP_HEIGHT, 8);
+    panel.fillRoundedRect(cx - panelW / 2, cy - panelH / 2, panelW, panelH, 8);
     panel.lineStyle(2, Theme.colors.panelBorder, 1);
-    panel.strokeRoundedRect(cx - POPUP_WIDTH / 2, cy - POPUP_HEIGHT / 2, POPUP_WIDTH, POPUP_HEIGHT, 8);
+    panel.strokeRoundedRect(cx - panelW / 2, cy - panelH / 2, panelW, panelH, 8);
     this.add(panel);
 
     const rm = RunManager.getInstance();
@@ -49,7 +53,7 @@ export class HeroDetailPopup extends Phaser.GameObjects.Container {
     const lvl = heroState.level;
 
     // ---- Header: Name / Level / Element / Race / Class ----
-    const topY = cy - POPUP_HEIGHT / 2 + 18;
+    const topY = cy - panelH / 2 + 18;
 
     const elementLabel = heroData.element ? ` [${ELEMENT_NAMES[heroData.element] ?? heroData.element}]` : '';
     const raceLabel = heroData.race ? (RACE_NAMES[heroData.race] ?? heroData.race) : '';
@@ -89,7 +93,7 @@ export class HeroDetailPopup extends Phaser.GameObjects.Container {
 
     // ---- Effective Stats: base + equip + synergy = final ----
     const statsStartY = expBarY + 16;
-    const leftX = cx - POPUP_WIDTH / 2 + 20;
+    const leftX = cx - panelW / 2 + 20;
     const rightX = cx + 10;
 
     // Compute equipment bonuses
@@ -256,7 +260,7 @@ export class HeroDetailPopup extends Phaser.GameObjects.Container {
       }
       const t = TextFactory.create(scene, leftX, equipY + 16 + i * 14, line, 'small', {
         color: item ? colorToString(getRarityColor(item.rarity)) : '#666666',
-        wordWrap: { width: POPUP_WIDTH - 40 },
+        wordWrap: { width: panelW - 40 },
       }).setDepth(801);
       this.add(t);
     }
@@ -280,7 +284,7 @@ export class HeroDetailPopup extends Phaser.GameObjects.Container {
       const shortDesc = desc.length > 22 ? desc.substring(0, 22) + '...' : desc;
       const t = TextFactory.create(scene, leftX, skillRowY, `  ${name} - ${shortDesc}`, 'small', {
         color: '#aabbdd',
-        wordWrap: { width: POPUP_WIDTH - 40 },
+        wordWrap: { width: panelW - 40 },
       }).setDepth(801);
       this.add(t);
       // advance by measured height so scaled-up text never overlaps the next row
@@ -306,7 +310,7 @@ export class HeroDetailPopup extends Phaser.GameObjects.Container {
         const bonusStr = bonusParts.length > 0 ? ` (${bonusParts.join(', ')})` : '';
         const advText = TextFactory.create(scene, leftX + 12, skillRowY, `${marker} Lv${adv.requiredHeroLevel}: ${adv.name}${bonusStr}`, 'tiny', {
           color: unlocked ? '#88ff88' : '#555566',
-          wordWrap: { width: POPUP_WIDTH - 60 },
+          wordWrap: { width: panelW - 60 },
         }).setDepth(801);
         this.add(advText);
         skillRowY += Math.max(12, advText.height + 1);
@@ -333,7 +337,7 @@ export class HeroDetailPopup extends Phaser.GameObjects.Container {
         const effectDesc = activeThresholdDef?.description ?? '';
         const synText = TextFactory.create(scene, leftX + 4, synRowY, `${def.name} [${as.count}]: ${effectDesc}${nextStr}`, 'tiny', {
           color: '#ddcc88',
-          wordWrap: { width: POPUP_WIDTH - 50 },
+          wordWrap: { width: panelW - 50 },
         }).setDepth(801);
         this.add(synText);
         synRowY += Math.max(12, synText.height + 1);
@@ -341,7 +345,7 @@ export class HeroDetailPopup extends Phaser.GameObjects.Container {
     }
 
     // ---- Close instruction ----
-    const closeText = TextFactory.create(scene, cx, cy + POPUP_HEIGHT / 2 - 14, '[ 点击关闭 ]', 'small', {
+    const closeText = TextFactory.create(scene, cx, cy + panelH / 2 - 14, '[ 点击关闭 ]', 'small', {
       color: '#666677',
     }).setOrigin(0.5).setDepth(801);
     this.add(closeText);

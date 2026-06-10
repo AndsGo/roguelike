@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { GAME_WIDTH, GAME_HEIGHT } from '../constants';
+import { viewBounds } from './Viewport';
 import { SkillEvolution, SkillData } from '../types';
 import { Theme, colorToString } from './Theme';
 import { Button } from './Button';
@@ -29,13 +29,14 @@ export class SkillEvolutionPanel {
   }
 
   private build(heroName: string): void {
-    const cx = GAME_WIDTH / 2;
-    const cy = GAME_HEIGHT / 2;
-    const panelW = 480;
-    const panelH = 320;
+    const b = viewBounds(this.scene);
+    const cx = b.cx;
+    const cy = b.cy;
+    const panelW = Math.min(480, b.w - 16);
+    const panelH = Math.min(320, b.h - 16);
 
     // Backdrop (no close-on-click — player must choose a branch)
-    const backdrop = this.scene.add.rectangle(cx, cy, GAME_WIDTH, GAME_HEIGHT, 0x000000, Theme.modalBackdropAlpha)
+    const backdrop = this.scene.add.rectangle(cx, cy, b.w + 4, b.h + 4, 0x000000, Theme.modalBackdropAlpha)
       .setInteractive().setDepth(799);
     this.elements.push(backdrop);
 

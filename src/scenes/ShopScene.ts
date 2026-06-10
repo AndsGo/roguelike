@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
-import { GAME_WIDTH, GAME_HEIGHT, SHOP_REFRESH_BASE_COST, SELL_PRICE_RATIO } from '../constants';
+import { SHOP_REFRESH_BASE_COST, SELL_PRICE_RATIO } from '../constants';
+import { applyUiCamera, fillBackground, onViewResize, pointerView, view } from '../ui/Viewport';
 import { RunManager } from '../managers/RunManager';
 import { ShopGenerator } from '../systems/ShopGenerator';
 import { ItemData, HeroState } from '../types';
@@ -20,6 +21,7 @@ export class ShopScene extends Phaser.Scene {
   private selectedHero: HeroState | null = null;
   private itemCards: { container: Phaser.GameObjects.Container; item: ItemData; priceText: Phaser.GameObjects.Text; compareText: Phaser.GameObjects.Text; sold: boolean }[] = [];
   private heroButtons: Phaser.GameObjects.Container[] = [];
+  private itemsContainer!: Phaser.GameObjects.Container;
   private refreshCount = 0;
   private refreshBtn!: Button;
 
@@ -41,18 +43,23 @@ export class ShopScene extends Phaser.Scene {
 
     this.shopItems = ShopGenerator.generate(rng, rm.getCurrentAct());
 
+    // Responsive camera. NO restartOnResize here: create() rolls shop
+    // inventory from the run RNG, so a rebuild would reroll the items.
+    onViewResize(this, () => applyUiCamera(this));
+    const v = view(this);
+
     // Background
-    this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, Theme.colors.background);
+    fillBackground(this, Theme.colors.background);
 
     // Title
-    TextFactory.create(this, GAME_WIDTH / 2, 22, UI.shop.title, 'title', {
+    TextFactory.create(this, v.cx, 22, UI.shop.title, 'title', {
       color: colorToString(Theme.colors.success),
-    }).setOrigin(0.5);
+    }).setOrigin(0.5).setDepth(20);
 
     // Gold display
-    this.goldText = TextFactory.create(this, GAME_WIDTH - 15, 12, `${rm.getGold()}G`, 'body', {
+    this.goldText = TextFactory.create(this, v.vw - 15, 12, `${rm.getGold()}G`, 'body', {
       color: colorToString(Theme.colors.gold),
-    }).setOrigin(1, 0);
+    }).setOrigin(1, 0).setDepth(20);
 
     // Hero selection
     TextFactory.create(this, 20, 50, UI.shop.selectHero, 'label', {
@@ -97,26 +104,61 @@ export class ShopScene extends Phaser.Scene {
     // Synergy hints bar
     this.buildSynergyBar(heroes);
 
-    // Shop items
+    // Shop items: responsive column count; drag-scroll when they overflow
+    const colW = 230;
+    const rowH = 120;
+    const cols = Math.max(1, Math.min(3, Math.floor((v.vw - 40) / colW)));
+    const gridLeft = v.cx - (cols * colW) / 2 + 35;
+    const gridTop = 155;
+    this.itemsContainer = this.add.container(0, 0);
     this.shopItems.forEach((item, i) => {
-      const x = 70 + (i % 3) * 230;
-      const y = 155 + Math.floor(i / 3) * 120;
+      const x = gridLeft + (i % cols) * colW;
+      const y = gridTop + Math.floor(i / cols) * rowH;
       this.createItemCard(item, x, y, rm);
     });
 
     // Leave button (shifted left for refresh button)
-    new Button(this, 310, GAME_HEIGHT - 30, UI.shop.leaveShop, 140, 35, () => {
+    const leaveBtn = new Button(this, v.cx - 90, v.vh - 30, UI.shop.leaveShop, 140, 35, () => {
       rm.markNodeCompleted(this.nodeIndex);
       SaveManager.autoSave();
       SceneTransition.fadeTransition(this, 'MapScene');
     });
+    leaveBtn.setDepth(11);
 
     // Refresh button
     const refreshCost = this.getRefreshCost();
-    this.refreshBtn = new Button(this, 490, GAME_HEIGHT - 30, UI.shop.refresh(refreshCost), 140, 35, () => {
+    this.refreshBtn = new Button(this, v.cx + 90, v.vh - 30, UI.shop.refresh(refreshCost), 140, 35, () => {
       this.refreshShop();
     }, Theme.colors.secondary);
+    this.refreshBtn.setDepth(11);
     this.updateRefreshButton();
+
+    // Vertical drag-scroll for overflowing item rows
+    const rows = Math.ceil(this.shopItems.length / cols);
+    const gridHeight = rows * rowH;
+    const visibleH = (v.vh - 55) - gridTop + 60;
+    const maxScroll = Math.max(0, gridHeight - visibleH);
+    if (maxScroll > 0) {
+      let scrollY = 0;
+      let dragStartY = 0;
+      let scrollStart = 0;
+      let dragging = false;
+      this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
+        const pv = pointerView(this, pointer);
+        if (pv.y > 120 && pv.y < v.vh - 55) {
+          dragging = true;
+          dragStartY = pv.y;
+          scrollStart = scrollY;
+        }
+      });
+      this.input.on('pointermove', (pointer: Phaser.Input.Pointer) => {
+        if (!dragging || !pointer.isDown) { dragging = false; return; }
+        const pv = pointerView(this, pointer);
+        scrollY = Phaser.Math.Clamp(scrollStart - (pv.y - dragStartY), 0, maxScroll);
+        this.itemsContainer.y = -scrollY;
+      });
+      this.input.on('pointerup', () => { dragging = false; });
+    }
 
     TutorialSystem.showTipIfNeeded(this, 'first_shop');
   }
@@ -126,7 +168,8 @@ export class ShopScene extends Phaser.Scene {
     const text = formatSynergyTags(tags);
 
     if (text) {
-      TextFactory.create(this, GAME_WIDTH / 2, 105, `${UI.shop.synergyLabel} ${text}`, 'small', {
+      const v = view(this);
+      TextFactory.create(this, v.cx, 105, `${UI.shop.synergyLabel} ${text}`, 'small', {
         color: '#ccaa44',
       }).setOrigin(0.5);
     }
@@ -141,6 +184,7 @@ export class ShopScene extends Phaser.Scene {
 
   private createItemCard(item: ItemData, x: number, y: number, rm: RunManager): void {
     const container = this.add.container(x, y);
+    this.itemsContainer.add(container);
 
     const rarityColor = getRarityColor(item.rarity);
 
@@ -363,7 +407,8 @@ export class ShopScene extends Phaser.Scene {
   }
 
   private showMessage(text: string): void {
-    const msg = TextFactory.create(this, GAME_WIDTH / 2, GAME_HEIGHT - 65, text, 'body', {
+    const v = view(this);
+    const msg = TextFactory.create(this, v.cx, v.vh - 65, text, 'body', {
       color: '#ffffff',
       stroke: '#000000',
       strokeThickness: 2,

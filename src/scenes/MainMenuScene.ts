@@ -1,5 +1,4 @@
 import Phaser from 'phaser';
-import { GAME_WIDTH, GAME_HEIGHT } from '../constants';
 import { Button } from '../ui/Button';
 import { Panel } from '../ui/Panel';
 import { SaveManager } from '../managers/SaveManager';
@@ -18,6 +17,7 @@ import { DailyChallengeManager } from '../managers/DailyChallengeManager';
 import { RunManager } from '../managers/RunManager';
 import heroesData from '../data/heroes.json';
 import { TextFactory } from '../ui/TextFactory';
+import { applyUiCamera, fillBackground, onViewResize, pointerView, restartOnResize, view, viewBounds } from '../ui/Viewport';
 
 export class MainMenuScene extends Phaser.Scene {
   private upgradePanel: Panel | null = null;
@@ -38,23 +38,28 @@ export class MainMenuScene extends Phaser.Scene {
     this.helpPanel = null;
     this.codexPanel = null;
 
+    // Responsive camera: design units, dynamic viewport (see Viewport.ts)
+    onViewResize(this, () => applyUiCamera(this));
+    restartOnResize(this);
+    const v = view(this);
+
     // Background
-    this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, 0x0a0a1e);
+    fillBackground(this, 0x0a0a1e);
 
     // Ambient particles
     const particles = new ParticleManager(this);
     for (let i = 0; i < 3; i++) {
       this.time.delayedCall(i * 800, () => {
         particles.createBuffEffect(
-          100 + Math.random() * (GAME_WIDTH - 200),
-          100 + Math.random() * (GAME_HEIGHT - 200),
+          100 + Math.random() * (v.vw - 200),
+          100 + Math.random() * (v.vh - 200),
           Theme.colors.primary,
         );
       });
     }
 
-    // Title
-    const title = TextFactory.create(this, GAME_WIDTH / 2, 72, UI.mainMenu.title, 'title', {
+    // Title (16% down — exactly y=72 on the classic 450-high viewport)
+    const title = TextFactory.create(this, v.cx, Math.round(v.vh * 0.16), UI.mainMenu.title, 'title', {
       color: colorToString(Theme.colors.secondary),
       align: 'center',
       stroke: '#000000',
@@ -72,13 +77,13 @@ export class MainMenuScene extends Phaser.Scene {
     });
 
     // Subtitle
-    TextFactory.create(this, GAME_WIDTH / 2, 145, UI.mainMenu.subtitle, 'body', {
+    TextFactory.create(this, v.cx, Math.round(v.vh * 0.16) + (v.compact ? 50 : 73), UI.mainMenu.subtitle, 'body', {
       color: '#8899cc',
     }).setOrigin(0.5);
 
-    // Button layout
-    const btnSpacing = 34;
-    let btnY = 185;
+    // Button layout (compact viewports stack tighter to fit ~350 design px)
+    const btnSpacing = v.compact ? 30 : 34;
+    let btnY = Math.round(v.vh * (v.compact ? 0.38 : 0.41));
 
     // Continue button (if save exists)
     if (SaveManager.hasSave(0)) {
@@ -86,7 +91,7 @@ export class MainMenuScene extends Phaser.Scene {
       const saveLabel = saveInfo
         ? UI.mainMenu.continueBtn(saveInfo.floor, saveInfo.heroCount)
         : UI.mainMenu.continue;
-      new Button(this, GAME_WIDTH / 2, btnY, saveLabel, 280, 30, () => {
+      new Button(this, v.cx, btnY, saveLabel, 280, 30, () => {
         SaveManager.loadGame(0);
         SceneTransition.fadeTransition(this, 'MapScene');
       }, Theme.colors.success);
@@ -94,7 +99,7 @@ export class MainMenuScene extends Phaser.Scene {
     }
 
     // New Game button
-    new Button(this, GAME_WIDTH / 2, btnY, UI.mainMenu.newGame, 180, 30, () => {
+    new Button(this, v.cx, btnY, UI.mainMenu.newGame, 180, 30, () => {
       if (SaveManager.hasSave(0)) {
         this.showNewGameConfirmation();
       } else {
@@ -106,7 +111,7 @@ export class MainMenuScene extends Phaser.Scene {
     // Daily Challenge button
     const dailyCompleted = DailyChallengeManager.isCompletedToday();
     const dailyLabel = dailyCompleted ? UI.daily.completed : UI.daily.title;
-    const dailyBtn = new Button(this, GAME_WIDTH / 2, btnY, dailyLabel, 180, 30, () => {
+    const dailyBtn = new Button(this, v.cx, btnY, dailyLabel, 180, 30, () => {
       if (dailyCompleted) return;
       this.showDailyChallengePreview();
     }, dailyCompleted ? 0x555555 : Theme.colors.gold);
@@ -116,25 +121,25 @@ export class MainMenuScene extends Phaser.Scene {
     btnY += btnSpacing;
 
     // Upgrades button
-    new Button(this, GAME_WIDTH / 2, btnY, UI.mainMenu.upgrades, 180, 30, () => {
+    new Button(this, v.cx, btnY, UI.mainMenu.upgrades, 180, 30, () => {
       this.showUpgradePanel();
     }, Theme.colors.panelBorder);
     btnY += btnSpacing;
 
     // Achievements button
-    new Button(this, GAME_WIDTH / 2, btnY, '成就', 180, 30, () => {
+    new Button(this, v.cx, btnY, '成就', 180, 30, () => {
       this.showAchievementPanel();
     }, Theme.colors.panelBorder);
     btnY += btnSpacing;
 
     // Help button
-    new Button(this, GAME_WIDTH / 2, btnY, '帮助', 180, 30, () => {
+    new Button(this, v.cx, btnY, '帮助', 180, 30, () => {
       this.showHelpPanel();
     }, Theme.colors.panelBorder);
     btnY += btnSpacing;
 
     // Codex button
-    new Button(this, GAME_WIDTH / 2, btnY, UI.codex.title, 180, 30, () => {
+    new Button(this, v.cx, btnY, UI.codex.title, 180, 30, () => {
       this.showCodexPanel();
     }, Theme.colors.panelBorder);
     btnY += btnSpacing;
@@ -142,7 +147,7 @@ export class MainMenuScene extends Phaser.Scene {
     // Audio toggle buttons (top-right corner)
     const audio = AudioManager.getInstance();
     const bgmLabel = audio.isBgmEnabled() ? UI.audio.bgmOn : UI.audio.bgmOff;
-    const bgmBtn = TextFactory.create(this, GAME_WIDTH - 15, 12, bgmLabel, 'small', {
+    const bgmBtn = TextFactory.create(this, v.vw - 15, 12, bgmLabel, 'small', {
       color: audio.isBgmEnabled() ? '#88cc88' : '#888888',
     }).setOrigin(1, 0).setInteractive({ useHandCursor: true });
     bgmBtn.on('pointerup', () => {
@@ -152,7 +157,7 @@ export class MainMenuScene extends Phaser.Scene {
     });
 
     const sfxLabel = audio.isSfxEnabled() ? UI.audio.sfxOn : UI.audio.sfxOff;
-    const sfxBtn = TextFactory.create(this, GAME_WIDTH - 15, 26, sfxLabel, 'small', {
+    const sfxBtn = TextFactory.create(this, v.vw - 15, 26, sfxLabel, 'small', {
       color: audio.isSfxEnabled() ? '#88cc88' : '#888888',
     }).setOrigin(1, 0).setInteractive({ useHandCursor: true });
     sfxBtn.on('pointerup', () => {
@@ -162,7 +167,7 @@ export class MainMenuScene extends Phaser.Scene {
     });
 
     // Settings gear button (top-right)
-    const settingsBtn = TextFactory.create(this, GAME_WIDTH - 15, 44, '[设置]', 'small', {
+    const settingsBtn = TextFactory.create(this, v.vw - 15, 44, '[设置]', 'small', {
       color: '#888888',
     }).setOrigin(1, 0).setInteractive({ useHandCursor: true });
     settingsBtn.on('pointerup', () => {
@@ -172,7 +177,7 @@ export class MainMenuScene extends Phaser.Scene {
     // Skip tutorial button (only shown if tutorials not yet skipped)
     TutorialSystem.init();
     if (!TutorialSystem.allSkipped()) {
-      const skipBtn = TextFactory.create(this, GAME_WIDTH - 15, btnY - 10, UI.tutorial.skipAll, 'small', {
+      const skipBtn = TextFactory.create(this, v.vw - 15, btnY - 10, UI.tutorial.skipAll, 'small', {
         color: '#666688',
       }).setOrigin(1, 0.5).setInteractive({ useHandCursor: true });
       skipBtn.on('pointerup', () => {
@@ -187,12 +192,12 @@ export class MainMenuScene extends Phaser.Scene {
     const meta = MetaManager.getMetaData();
     const currency = MetaManager.getMetaCurrency();
     const statsStr = UI.mainMenu.stats(meta.totalRuns, meta.totalVictories, meta.unlockedHeroes.length, heroesData.length, currency);
-    TextFactory.create(this, GAME_WIDTH / 2, GAME_HEIGHT - 38, statsStr, 'small', {
+    TextFactory.create(this, v.cx, v.vh - 34, statsStr, 'small', {
       color: '#666688',
     }).setOrigin(0.5);
 
     // Version
-    TextFactory.create(this, GAME_WIDTH / 2, GAME_HEIGHT - 18, UI.mainMenu.version, 'small', {
+    TextFactory.create(this, v.cx, v.vh - 16, UI.mainMenu.version, 'small', {
       color: '#555577',
     }).setOrigin(0.5);
   }
@@ -207,10 +212,11 @@ export class MainMenuScene extends Phaser.Scene {
 
     const panelW = 320;
     const panelH = 220;
-    const cx = GAME_WIDTH / 2;
-    const cy = GAME_HEIGHT / 2;
+    const b = viewBounds(this);
+    const cx = b.cx;
+    const cy = b.cy;
 
-    const backdrop = this.add.rectangle(cx, cy, GAME_WIDTH, GAME_HEIGHT, 0x000000, Theme.modalBackdropAlpha)
+    const backdrop = this.add.rectangle(cx, cy, b.w + 4, b.h + 4, 0x000000, Theme.modalBackdropAlpha)
       .setInteractive().setDepth(799);
 
     const panelBg = this.add.graphics().setDepth(800);
@@ -251,10 +257,11 @@ export class MainMenuScene extends Phaser.Scene {
     };
 
     backdrop.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
+      const pv = pointerView(this, pointer);
       const hw = panelW / 2;
       const hh = panelH / 2;
-      if (pointer.x < cx - hw || pointer.x > cx + hw ||
-          pointer.y < cy - hh || pointer.y > cy + hh) {
+      if (pv.x < cx - hw || pv.x > cx + hw ||
+          pv.y < cy - hh || pv.y > cy + hh) {
         cleanup();
       }
     });
@@ -290,20 +297,21 @@ export class MainMenuScene extends Phaser.Scene {
     const meta = MetaManager.getMetaData();
     const victories = meta.totalVictories;
 
+    const b = viewBounds(this);
     const panelW = 400;
-    const panelH = 280;
+    const panelH = Math.min(280, b.h - 16);
 
     // Overlay — click outside panel to close
-    const overlay = this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, 0x000000, Theme.modalBackdropAlpha)
+    const overlay = this.add.rectangle(b.cx, b.cy, b.w + 4, b.h + 4, 0x000000, Theme.modalBackdropAlpha)
       .setInteractive().setDepth(799);
 
     const panelBg = this.add.graphics().setDepth(800);
     panelBg.fillStyle(Theme.colors.panel, 0.95);
-    panelBg.fillRoundedRect(GAME_WIDTH / 2 - panelW / 2, GAME_HEIGHT / 2 - panelH / 2, panelW, panelH, 8);
+    panelBg.fillRoundedRect(b.cx - panelW / 2, b.cy - panelH / 2, panelW, panelH, 8);
     panelBg.lineStyle(2, Theme.colors.panelBorder, 0.8);
-    panelBg.strokeRoundedRect(GAME_WIDTH / 2 - panelW / 2, GAME_HEIGHT / 2 - panelH / 2, panelW, panelH, 8);
+    panelBg.strokeRoundedRect(b.cx - panelW / 2, b.cy - panelH / 2, panelW, panelH, 8);
 
-    const titleText = TextFactory.create(this, GAME_WIDTH / 2, GAME_HEIGHT / 2 - panelH / 2 + 22, UI.difficulty.title, 'subtitle', {
+    const titleText = TextFactory.create(this, b.cx, b.cy - panelH / 2 + 22, UI.difficulty.title, 'subtitle', {
       color: colorToString(Theme.colors.secondary),
     }).setOrigin(0.5).setDepth(800);
 
@@ -312,26 +320,27 @@ export class MainMenuScene extends Phaser.Scene {
 
     const cleanup = () => {
       allElements.forEach(el => el.destroy());
-      buttons.forEach(b => b.destroy());
+      buttons.forEach(b2 => b2.destroy());
     };
 
     // Click outside panel area to close
     overlay.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
+      const pv = pointerView(this, pointer);
       const hw = panelW / 2;
       const hh = panelH / 2;
-      if (pointer.x < GAME_WIDTH / 2 - hw || pointer.x > GAME_WIDTH / 2 + hw ||
-          pointer.y < GAME_HEIGHT / 2 - hh || pointer.y > GAME_HEIGHT / 2 + hh) {
+      if (pv.x < b.cx - hw || pv.x > b.cx + hw ||
+          pv.y < b.cy - hh || pv.y > b.cy + hh) {
         cleanup();
       }
     });
 
-    const startY = GAME_HEIGHT / 2 - panelH / 2 + 52;
-    const rowH = 48;
+    const rowH = Math.min(48, Math.floor((panelH - 90) / DIFFICULTY_LEVELS.length));
+    const startY = b.cy - panelH / 2 + 52;
 
     for (let i = 0; i < DIFFICULTY_LEVELS.length; i++) {
       const diff = DIFFICULTY_LEVELS[i];
       const y = startY + i * rowH;
-      const leftX = GAME_WIDTH / 2 - panelW / 2 + 20;
+      const leftX = b.cx - panelW / 2 + 20;
 
       // Unlock requirements
       const unlockReqs: Record<string, number> = { normal: 0, hard: 0, nightmare: 1, hell: 3 };
@@ -356,7 +365,7 @@ export class MainMenuScene extends Phaser.Scene {
 
       // Start button (right side)
       if (!isLocked) {
-        const btn = new Button(this, GAME_WIDTH / 2 + panelW / 2 - 50, y + 10, UI.difficulty.start, 60, 26, () => {
+        const btn = new Button(this, b.cx + panelW / 2 - 50, y + 10, UI.difficulty.start, 60, 26, () => {
           cleanup();
           // Go to hero draft scene with selected difficulty
           SceneTransition.fadeTransition(this, 'HeroDraftScene', { difficulty: diff.id });
@@ -365,7 +374,7 @@ export class MainMenuScene extends Phaser.Scene {
         buttons.push(btn);
       } else {
         // Locked indicator
-        const lockText = TextFactory.create(this, GAME_WIDTH / 2 + panelW / 2 - 50, y + 10, '\uD83D\uDD12', 'subtitle', {
+        const lockText = TextFactory.create(this, b.cx + panelW / 2 - 50, y + 10, '\uD83D\uDD12', 'subtitle', {
           color: '#555555',
         }).setOrigin(0.5).setDepth(800);
         allElements.push(lockText);
@@ -373,7 +382,7 @@ export class MainMenuScene extends Phaser.Scene {
     }
 
     // Cancel/close button
-    const cancelBtn = new Button(this, GAME_WIDTH / 2, startY + DIFFICULTY_LEVELS.length * rowH + 10, UI.mainMenu.close, 80, 26, () => {
+    const cancelBtn = new Button(this, b.cx, startY + DIFFICULTY_LEVELS.length * rowH + 10, UI.mainMenu.close, 80, 26, () => {
       cleanup();
       cancelBtn.destroy();
     }, 0x555555);
@@ -382,17 +391,18 @@ export class MainMenuScene extends Phaser.Scene {
   }
 
   private showNewGameConfirmation(): void {
+    const b = viewBounds(this);
     // Overlay background
-    const overlay = this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, 0x000000, Theme.modalBackdropAlpha)
+    const overlay = this.add.rectangle(b.cx, b.cy, b.w + 4, b.h + 4, 0x000000, Theme.modalBackdropAlpha)
       .setInteractive().setDepth(799);
 
     const panelBg = this.add.graphics().setDepth(800);
     panelBg.fillStyle(Theme.colors.panel, 0.95);
-    panelBg.fillRoundedRect(GAME_WIDTH / 2 - 160, GAME_HEIGHT / 2 - 55, 320, 110, 8);
+    panelBg.fillRoundedRect(b.cx - 160, b.cy - 55, 320, 110, 8);
     panelBg.lineStyle(2, Theme.colors.panelBorder, 0.8);
-    panelBg.strokeRoundedRect(GAME_WIDTH / 2 - 160, GAME_HEIGHT / 2 - 55, 320, 110, 8);
+    panelBg.strokeRoundedRect(b.cx - 160, b.cy - 55, 320, 110, 8);
 
-    const msg = TextFactory.create(this, GAME_WIDTH / 2, GAME_HEIGHT / 2 - 25, UI.mainMenu.confirmOverwrite, 'body', {
+    const msg = TextFactory.create(this, b.cx, b.cy - 25, UI.mainMenu.confirmOverwrite, 'body', {
       color: colorToString(Theme.colors.danger),
       align: 'center',
     }).setOrigin(0.5).setDepth(800);
@@ -407,21 +417,22 @@ export class MainMenuScene extends Phaser.Scene {
 
     // Click outside panel to close
     overlay.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
+      const pv = pointerView(this, pointer);
       const hw = 160;
       const hh = 55;
-      if (pointer.x < GAME_WIDTH / 2 - hw || pointer.x > GAME_WIDTH / 2 + hw ||
-          pointer.y < GAME_HEIGHT / 2 - hh || pointer.y > GAME_HEIGHT / 2 + hh) {
+      if (pv.x < b.cx - hw || pv.x > b.cx + hw ||
+          pv.y < b.cy - hh || pv.y > b.cy + hh) {
         cleanup();
       }
     });
 
-    const yesBtn = new Button(this, GAME_WIDTH / 2 - 60, GAME_HEIGHT / 2 + 25, UI.mainMenu.yes, 80, 30, () => {
+    const yesBtn = new Button(this, b.cx - 60, b.cy + 25, UI.mainMenu.yes, 80, 30, () => {
       cleanup();
       this.startNewGame();
     }, Theme.colors.danger);
     yesBtn.setDepth(801);
 
-    const noBtn = new Button(this, GAME_WIDTH / 2 + 60, GAME_HEIGHT / 2 + 25, UI.mainMenu.no, 80, 30, () => {
+    const noBtn = new Button(this, b.cx + 60, b.cy + 25, UI.mainMenu.no, 80, 30, () => {
       cleanup();
     }, Theme.colors.primary);
     noBtn.setDepth(801);
@@ -475,21 +486,26 @@ export class MainMenuScene extends Phaser.Scene {
       return;
     }
 
+    const b = viewBounds(this);
+    const panelW = Math.min(500, b.w - 16);
+    const panelH = Math.min(340, b.h - 16);
+
     // Full-screen overlay (click to close)
     this.upgradeOverlay = this.add.rectangle(
-      GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, 0x000000, Theme.modalBackdropAlpha,
+      b.cx, b.cy, b.w + 4, b.h + 4, 0x000000, Theme.modalBackdropAlpha,
     ).setInteractive({ useHandCursor: true }).setDepth(799);
     this.upgradeOverlay.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
       // Only close when clicking outside the panel area
-      const pw = 500 / 2;
-      const ph = 340 / 2;
-      if (pointer.x < GAME_WIDTH / 2 - pw || pointer.x > GAME_WIDTH / 2 + pw ||
-          pointer.y < GAME_HEIGHT / 2 - ph || pointer.y > GAME_HEIGHT / 2 + ph) {
+      const pv = pointerView(this, pointer);
+      const pw = panelW / 2;
+      const ph = panelH / 2;
+      if (pv.x < b.cx - pw || pv.x > b.cx + pw ||
+          pv.y < b.cy - ph || pv.y > b.cy + ph) {
         this.closeUpgradePanel();
       }
     });
 
-    const panel = new Panel(this, GAME_WIDTH / 2, GAME_HEIGHT / 2, 500, 340, {
+    const panel = new Panel(this, b.cx, b.cy, panelW, panelH, {
       title: UI.mainMenu.upgradeTitle,
       animate: true,
     });
@@ -675,12 +691,13 @@ export class MainMenuScene extends Phaser.Scene {
     panel.setContentHeight(baseHeight + mutationHeight);
 
     // Fixed close button (outside scrollable content, always visible)
-    const panelHeight = 340;
-    this.upgradeCloseText = TextFactory.create(this, GAME_WIDTH / 2, GAME_HEIGHT / 2 + panelHeight / 2 - 16, UI.mainMenu.close, 'label', {
+    const b2 = viewBounds(this);
+    const panelHeight = Math.min(340, b2.h - 16);
+    this.upgradeCloseText = TextFactory.create(this, b2.cx, b2.cy + panelHeight / 2 - 16, UI.mainMenu.close, 'label', {
       color: '#888888',
     }).setOrigin(0.5).setDepth(801);
 
-    this.upgradeCloseHit = this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2 + panelHeight / 2 - 16, 80, 24, 0x000000, 0)
+    this.upgradeCloseHit = this.add.rectangle(b2.cx, b2.cy + panelHeight / 2 - 16, 80, 24, 0x000000, 0)
       .setInteractive({ useHandCursor: true })
       .setDepth(801);
     this.upgradeCloseHit.on('pointerup', () => this.closeUpgradePanel());

@@ -1,4 +1,3 @@
-import { GAME_WIDTH, GAME_HEIGHT } from '../constants';
 import { RunManager } from '../managers/RunManager';
 import { RunEndContext } from '../managers/MetaManager';
 import { Theme, colorToString } from '../ui/Theme';
@@ -7,6 +6,7 @@ import { UI } from '../i18n';
 import { BaseEndScene } from './BaseEndScene';
 import heroesData from '../data/heroes.json';
 import { TextFactory } from '../ui/TextFactory';
+import { fillBackground, view } from '../ui/Viewport';
 
 export class GameOverScene extends BaseEndScene {
   constructor() {
@@ -14,9 +14,10 @@ export class GameOverScene extends BaseEndScene {
   }
 
   create(): void {
+    const v = view(this);
     const rm = RunManager.getInstance();
 
-    this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, 0x0a0a0a);
+    fillBackground(this, 0x0a0a0a);
 
     this.createTitle(UI.gameOver.title, 70, Theme.colors.danger);
 
@@ -24,11 +25,11 @@ export class GameOverScene extends BaseEndScene {
 
     // Run stats
     const node = rm.getCurrentNode() + 1;
-    TextFactory.create(this, GAME_WIDTH / 2, 160, UI.gameOver.reached(node), 'body', {
+    TextFactory.create(this, v.cx, 160, UI.gameOver.reached(node), 'body', {
       color: '#aaaaaa',
     }).setOrigin(0.5);
 
-    TextFactory.create(this, GAME_WIDTH / 2, 182, UI.gameOver.goldEarned(rm.getGold()), 'body', {
+    TextFactory.create(this, v.cx, 182, UI.gameOver.goldEarned(rm.getGold()), 'body', {
       color: colorToString(Theme.colors.gold),
     }).setOrigin(0.5);
 
@@ -53,15 +54,15 @@ export class GameOverScene extends BaseEndScene {
 
     this.createSoulsText(215, UI.gameOver.soulsEarned(metaReward));
 
-    RunEndPanel.renderRewards(this, GAME_WIDTH / 2, 240, newAchievements, UI.gameOver);
+    RunEndPanel.renderRewards(this, v.cx, 240, newAchievements, UI.gameOver);
 
     // Daily challenge completion
     this.settleDailyChallenge(false, 270);
 
-    // Build review + retry + main menu buttons
-    this.createBuildReviewButton(GAME_HEIGHT - 130);
-    this.createRetryButton(GAME_HEIGHT - 90);
-    this.createMainMenuButton(GAME_HEIGHT - 50, UI.gameOver.mainMenu, Theme.colors.danger);
+    // Build review + retry + main menu buttons — anchor from bottom
+    this.createBuildReviewButton(v.vh - 130);
+    this.createRetryButton(v.vh - 90);
+    this.createMainMenuButton(v.vh - 50, UI.gameOver.mainMenu, Theme.colors.danger);
   }
 
   shutdown(): void {

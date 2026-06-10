@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { GAME_WIDTH, GAME_HEIGHT } from '../constants';
+import { view } from './Viewport';
 import { MapNode, NodeType, ActConfig, HeroState, HeroData } from '../types';
 import { Theme, colorToString, getRoleColor, getNodeColor } from './Theme';
 import { UI, SLOT_LABELS } from '../i18n';
@@ -151,11 +151,12 @@ export class MapRenderer {
     getHeroData: (id: string) => HeroData,
     getMaxHp: (hero: HeroState, data: HeroData) => number,
   ): void {
+    const v = view(scene);
     const totalWidth = heroes.length * 80;
-    const startX = GAME_WIDTH / 2 - totalWidth / 2;
-    const panelY = GAME_HEIGHT - 70;
+    const startX = v.cx - totalWidth / 2;
+    const panelY = v.vh - 70;
 
-    const panelBg = scene.add.graphics().setScrollFactor(0).setDepth(100);
+    const panelBg = scene.add.graphics().setDepth(100);
     panelBg.fillStyle(Theme.colors.panel, 0.85);
     panelBg.fillRoundedRect(startX - 8, panelY, totalWidth + 16, 65, 6);
     panelBg.lineStyle(1, Theme.colors.panelBorder, 0.5);
@@ -167,22 +168,22 @@ export class MapRenderer {
       const y = panelY + 12;
 
       const roleColor = getRoleColor(data.role);
-      const bar = scene.add.graphics().setScrollFactor(0).setDepth(101);
+      const bar = scene.add.graphics().setDepth(101);
       bar.fillStyle(roleColor, 0.6);
       bar.fillRoundedRect(x - 30, y, 60, 3, 2);
 
       TextFactory.create(scene, x, y + 10, data.name, 'small', {
         color: '#ffffff',
-      }).setOrigin(0.5).setScrollFactor(0).setDepth(101);
+      }).setOrigin(0.5).setDepth(101);
 
       TextFactory.create(scene, x, y + 22, `Lv.${hero.level}`, 'small', {
         color: colorToString(Theme.colors.secondary),
-      }).setOrigin(0.5).setScrollFactor(0).setDepth(101);
+      }).setOrigin(0.5).setDepth(101);
 
       const maxHp = getMaxHp(hero, data);
       const hpRatio = hero.currentHp / maxHp;
       const hpBarWidth = 54;
-      const hpG = scene.add.graphics().setScrollFactor(0).setDepth(101);
+      const hpG = scene.add.graphics().setDepth(101);
       hpG.fillStyle(0x333333, 1);
       hpG.fillRoundedRect(x - hpBarWidth / 2, y + 32, hpBarWidth, 4, 2);
       const hpColor = hpRatio > 0.6 ? 0x44ff44 : hpRatio > 0.3 ? 0xffaa00 : 0xff4444;
@@ -191,7 +192,7 @@ export class MapRenderer {
 
       TextFactory.create(scene, x, y + 43, `${hero.currentHp}/${maxHp}`, 'small', {
         color: '#aaaaaa',
-      }).setOrigin(0.5).setScrollFactor(0).setDepth(101);
+      }).setOrigin(0.5).setDepth(101);
     });
   }
 
@@ -204,11 +205,12 @@ export class MapRenderer {
     onHeroClick: (heroState: HeroState, heroData: HeroData) => void,
   ): Phaser.GameObjects.GameObject[] {
     const interactiveObjects: Phaser.GameObjects.GameObject[] = [];
+    const v = view(scene);
     const totalWidth = heroes.length * 80;
-    const startX = GAME_WIDTH / 2 - totalWidth / 2;
-    const panelY = GAME_HEIGHT - 70;
+    const startX = v.cx - totalWidth / 2;
+    const panelY = v.vh - 70;
 
-    const panelBg = scene.add.graphics().setScrollFactor(0).setDepth(100);
+    const panelBg = scene.add.graphics().setDepth(100);
     panelBg.fillStyle(Theme.colors.panel, 0.85);
     panelBg.fillRoundedRect(startX - 8, panelY, totalWidth + 16, 65, 6);
     panelBg.lineStyle(1, Theme.colors.panelBorder, 0.5);
@@ -222,7 +224,7 @@ export class MapRenderer {
 
       // Role color bar
       const roleColor = getRoleColor(data.role);
-      const bar = scene.add.graphics().setScrollFactor(0).setDepth(101);
+      const bar = scene.add.graphics().setDepth(101);
       bar.fillStyle(roleColor, 0.6);
       bar.fillRoundedRect(x - 30, y, 60, 3, 2);
       interactiveObjects.push(bar);
@@ -230,18 +232,18 @@ export class MapRenderer {
       // Name
       TextFactory.create(scene, x, y + 10, data.name, 'small', {
         color: '#ffffff',
-      }).setOrigin(0.5).setScrollFactor(0).setDepth(101);
+      }).setOrigin(0.5).setDepth(101);
 
       // Level
       TextFactory.create(scene, x, y + 22, `Lv.${hero.level}`, 'small', {
         color: colorToString(Theme.colors.secondary),
-      }).setOrigin(0.5).setScrollFactor(0).setDepth(101);
+      }).setOrigin(0.5).setDepth(101);
 
       // HP bar
       const maxHp = getMaxHp(hero, data);
       const hpRatio = hero.currentHp / maxHp;
       const hpBarWidth = 54;
-      const hpG = scene.add.graphics().setScrollFactor(0).setDepth(101);
+      const hpG = scene.add.graphics().setDepth(101);
       hpG.fillStyle(0x333333, 1);
       hpG.fillRoundedRect(x - hpBarWidth / 2, y + 32, hpBarWidth, 4, 2);
       const hpColor = hpRatio > 0.6 ? 0x44ff44 : hpRatio > 0.3 ? 0xffaa00 : 0xff4444;
@@ -255,23 +257,23 @@ export class MapRenderer {
         const sx = x - 20 + s * 14;
         const sy = y + 42;
         const hasEquip = hero.equipment[slots[s]] !== null;
-        const eqG = scene.add.graphics().setScrollFactor(0).setDepth(101);
+        const eqG = scene.add.graphics().setDepth(101);
         eqG.fillStyle(hasEquip ? 0x44aa44 : 0x333333, hasEquip ? 0.8 : 0.5);
         eqG.fillRoundedRect(sx, sy, 10, 10, 1);
         const eqLabel = TextFactory.create(scene, sx + 5, sy + 5, slotLabels[s], 'tiny', {
           color: hasEquip ? '#ffffff' : '#666666',
-        }).setOrigin(0.5).setScrollFactor(0).setDepth(102);
+        }).setOrigin(0.5).setDepth(102);
         interactiveObjects.push(eqG, eqLabel);
       }
 
       // Clickable hit zone
       const hitZone = scene.add.rectangle(x, panelY + 32, 76, 60, 0x000000, 0)
-        .setScrollFactor(0).setDepth(103)
+        .setDepth(103)
         .setInteractive({ useHandCursor: true });
       interactiveObjects.push(hitZone);
 
       // Hover highlight
-      const highlight = scene.add.graphics().setScrollFactor(0).setDepth(100).setAlpha(0);
+      const highlight = scene.add.graphics().setDepth(100).setAlpha(0);
       highlight.fillStyle(0xffffff, 0.08);
       highlight.fillRoundedRect(x - 38, panelY + 2, 76, 61, 4);
       interactiveObjects.push(highlight);

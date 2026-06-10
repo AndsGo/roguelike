@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
-import { GAME_WIDTH, GAME_HEIGHT } from '../constants';
 import { Theme, colorToString, getRoleColor } from './Theme';
+import { viewBounds } from './Viewport';
 import { TextFactory } from './TextFactory';
 import { HeroData, EnemyData, UnitRole, RaceType, ClassType } from '../types';
 import { MetaManager } from '../managers/MetaManager';
@@ -29,27 +29,31 @@ export class CodexDetailPopup extends Phaser.GameObjects.Container {
     this.setDepth(802);
     this.onCloseCallback = onClose;
 
+    const b = viewBounds(scene);
+    const panelW = Math.min(POPUP_WIDTH, b.w - 16);
+    const panelH = Math.min(POPUP_HEIGHT, b.h - 16);
+
     // Semi-transparent backdrop
     this.backdrop = scene.add.rectangle(
-      GAME_WIDTH / 2, GAME_HEIGHT / 2,
-      GAME_WIDTH, GAME_HEIGHT,
+      b.cx, b.cy,
+      b.w + 4, b.h + 4,
       0x000000, Theme.modalBackdropAlphaNested,
     ).setInteractive({ useHandCursor: true });
     this.add(this.backdrop);
 
-    const cx = GAME_WIDTH / 2;
-    const cy = GAME_HEIGHT / 2;
+    const cx = b.cx;
+    const cy = b.cy;
 
     // Panel background
     const panel = scene.add.graphics();
     panel.fillStyle(Theme.colors.panel, 0.95);
-    panel.fillRoundedRect(cx - POPUP_WIDTH / 2, cy - POPUP_HEIGHT / 2, POPUP_WIDTH, POPUP_HEIGHT, 8);
+    panel.fillRoundedRect(cx - panelW / 2, cy - panelH / 2, panelW, panelH, 8);
     panel.lineStyle(2, Theme.colors.panelBorder, 1);
-    panel.strokeRoundedRect(cx - POPUP_WIDTH / 2, cy - POPUP_HEIGHT / 2, POPUP_WIDTH, POPUP_HEIGHT, 8);
+    panel.strokeRoundedRect(cx - panelW / 2, cy - panelH / 2, panelW, panelH, 8);
     this.add(panel);
 
-    const leftX = cx - POPUP_WIDTH / 2 + 20;
-    const topY = cy - POPUP_HEIGHT / 2 + 20;
+    const leftX = cx - panelW / 2 + 20;
+    const topY = cy - panelH / 2 + 20;
 
     // ---- Left side: Chibi sprite ----
     const isBoss = !isHero && !!(data as EnemyData).isBoss;
@@ -192,7 +196,7 @@ export class CodexDetailPopup extends Phaser.GameObjects.Container {
         const shortDesc = desc.length > 35 ? desc.substring(0, 35) + '...' : desc;
         const t = TextFactory.create(scene, infoX + 8, infoY, `${name} - ${shortDesc}`, 'small', {
           color: '#aabbdd',
-          wordWrap: { width: POPUP_WIDTH - 140 },
+          wordWrap: { width: panelW - 140 },
         });
         this.add(t);
         infoY += 14;
@@ -212,7 +216,7 @@ export class CodexDetailPopup extends Phaser.GameObjects.Container {
     }
 
     // ---- Close instruction ----
-    const closeText = TextFactory.create(scene, cx, cy + POPUP_HEIGHT / 2 - 14, '[ 点击关闭 ]', 'small', {
+    const closeText = TextFactory.create(scene, cx, cy + panelH / 2 - 14, '[ 点击关闭 ]', 'small', {
       color: '#666677',
     }).setOrigin(0.5);
     this.add(closeText);

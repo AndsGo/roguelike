@@ -1,5 +1,4 @@
 import Phaser from 'phaser';
-import { GAME_WIDTH, GAME_HEIGHT } from '../constants';
 import { RunManager } from '../managers/RunManager';
 import { EventData, EventChoice, EventOutcome, EventNodeData, ElementType } from '../types';
 import { Button } from '../ui/Button';
@@ -13,6 +12,7 @@ import { AudioManager } from '../systems/AudioManager';
 import { MetaManager } from '../managers/MetaManager';
 import { TutorialSystem } from '../systems/TutorialSystem';
 import { TextFactory } from '../ui/TextFactory';
+import { applyUiCamera, fillBackground, onViewResize, restartOnResize, view } from '../ui/Viewport';
 
 /** Classify the risk level of an event choice based on worst-case effects. */
 export function getChoiceRiskLevel(choice: EventChoice): { label: string; color: string } {
@@ -47,21 +47,28 @@ export function getChoiceRiskLevel(choice: EventChoice): { label: string; color:
 export class EventScene extends Phaser.Scene {
   private nodeIndex!: number;
   private choiceMade = false;
+  private sceneData: { nodeIndex: number } = { nodeIndex: 0 };
 
   constructor() {
     super({ key: 'EventScene' });
   }
 
   init(data?: { nodeIndex: number }): void {
-    this.nodeIndex = data?.nodeIndex ?? 0;
+    this.sceneData = { nodeIndex: data?.nodeIndex ?? 0 };
+    this.nodeIndex = this.sceneData.nodeIndex;
     this.choiceMade = false;
   }
 
   create(): void {
+    // 响应式相机 + 窗口resize时重建场景
+    onViewResize(this, () => applyUiCamera(this));
+    restartOnResize(this, this.sceneData);
+    const v = view(this);
+
     const rm = RunManager.getInstance();
     const rng = rm.getRng();
 
-    this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, Theme.colors.background);
+    fillBackground(this, Theme.colors.background);
 
     // Use the event assigned by MapGenerator if available, otherwise random fallback
     const eventPool = eventsData as EventData[];
@@ -94,23 +101,23 @@ export class EventScene extends Phaser.Scene {
 
     // Letterbox bars
     const barHeight = 40;
-    const topBar = this.add.rectangle(GAME_WIDTH / 2, barHeight / 2, GAME_WIDTH, barHeight, 0x000000).setDepth(50);
-    const bottomBar = this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT - barHeight / 2, GAME_WIDTH, barHeight, 0x000000).setDepth(50);
+    const topBar = this.add.rectangle(v.cx, barHeight / 2, v.vw, barHeight, 0x000000).setDepth(50);
+    const bottomBar = this.add.rectangle(v.cx, v.vh - barHeight / 2, v.vw, barHeight, 0x000000).setDepth(50);
 
     // Title (starts invisible)
-    const title = TextFactory.create(this, GAME_WIDTH / 2, 38, event.title, 'title', {
+    const title = TextFactory.create(this, v.cx, 38, event.title, 'title', {
       color: colorToString(getNodeColor('event')),
     }).setOrigin(0.5).setAlpha(0);
 
     // Description (starts invisible)
-    const desc = TextFactory.create(this, GAME_WIDTH / 2, 85, event.description, 'body', {
+    const desc = TextFactory.create(this, v.cx, 85, event.description, 'body', {
       color: '#cccccc',
       wordWrap: { width: 600 },
       align: 'center',
     }).setOrigin(0.5).setAlpha(0);
 
     // Gold display
-    TextFactory.create(this, GAME_WIDTH - 15, 12, `${rm.getGold()}G`, 'body', {
+    TextFactory.create(this, v.vw - 15, 12, `${rm.getGold()}G`, 'body', {
       color: colorToString(Theme.colors.gold),
     }).setOrigin(1, 0);
 
@@ -143,7 +150,7 @@ export class EventScene extends Phaser.Scene {
     });
     this.tweens.add({
       targets: bottomBar,
-      y: GAME_HEIGHT + barHeight / 2,
+      y: v.vh + barHeight / 2,
       duration: 400,
       delay: 600,
       ease: 'Sine.easeInOut',
@@ -151,14 +158,16 @@ export class EventScene extends Phaser.Scene {
     });
 
     // Step 4: Choices stagger in (700ms + i*120ms)
+    // 选项按钮起点改为 vh 比例，以适配移动端较小的 vh (~350)
+    const choiceBtnStartY = Math.round(v.vh * 0.37);
     const choiceElements: Phaser.GameObjects.GameObject[] = [];
     event.choices.forEach((choice, i) => {
       // 58px spacing leaves room for the probability hint below each button
       // even at the mobile 1.25 text scale
-      const btnY = 165 + i * 58;
+      const btnY = choiceBtnStartY + i * 58;
       const btn = new Button(
         this,
-        GAME_WIDTH / 2,
+        v.cx,
         btnY,
         choice.text,
         400,
@@ -184,7 +193,7 @@ export class EventScene extends Phaser.Scene {
           const label = this.getOutcomeSentiment(o);
           return `${UI.event.probability(pct)} ${label}`;
         });
-        const hintText = TextFactory.create(this, GAME_WIDTH / 2, btnY + 27, hints.join('  |  '), 'tiny', {
+        const hintText = TextFactory.create(this, v.cx, btnY + 27, hints.join('  |  '), 'tiny', {
           color: '#888899',
           align: 'center',
         }).setOrigin(0.5).setAlpha(0);
@@ -200,7 +209,7 @@ export class EventScene extends Phaser.Scene {
 
       // Risk level tag
       const risk = getChoiceRiskLevel(choice);
-      const riskTag = TextFactory.create(this, GAME_WIDTH / 2 + 215, btnY, `[${risk.label}]`, 'small', {
+      const riskTag = TextFactory.create(this, v.cx + 215, btnY, `[${risk.label}]`, 'small', {
         color: risk.color,
       }).setOrigin(0, 0.5).setAlpha(0);
 
@@ -336,7 +345,8 @@ export class EventScene extends Phaser.Scene {
   }
 
   private showOutcome(outcome: EventOutcome): void {
-    this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, Theme.colors.background);
+    const ov = view(this);
+    fillBackground(this, Theme.colors.background);
 
     // Brief sentiment flash + outcome SFX
     const sentiment = this.getOutcomeSentiment(outcome);
@@ -347,7 +357,7 @@ export class EventScene extends Phaser.Scene {
       audio.playSfx('sfx_event_bad');
     }
     const flashColor = sentiment === '有利' ? 0x44ff44 : sentiment === '危险' ? 0xff4444 : sentiment === '风险' ? 0xffaa44 : 0xffffff;
-    const flash = this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, flashColor, 0.2).setDepth(10);
+    const flash = this.add.rectangle(ov.cx, ov.cy, ov.vw, ov.vh, flashColor, 0.2).setDepth(10);
     this.tweens.add({
       targets: flash,
       alpha: 0,
@@ -356,7 +366,7 @@ export class EventScene extends Phaser.Scene {
       onComplete: () => flash.destroy(),
     });
 
-    const outcomeText = TextFactory.create(this, GAME_WIDTH / 2, GAME_HEIGHT / 2 - 40, outcome.description, 'subtitle', {
+    const outcomeText = TextFactory.create(this, ov.cx, ov.cy - 40, outcome.description, 'subtitle', {
       color: '#ffffff',
       wordWrap: { width: 600 },
       align: 'center',
@@ -383,14 +393,14 @@ export class EventScene extends Phaser.Scene {
     const fadeTargets: Phaser.GameObjects.GameObject[] = [outcomeText];
 
     if (effectTexts.length > 0) {
-      const effectLabel = TextFactory.create(this, GAME_WIDTH / 2, GAME_HEIGHT / 2 + 10, effectTexts.join('\n'), 'body', {
+      const effectLabel = TextFactory.create(this, ov.cx, ov.cy + 10, effectTexts.join('\n'), 'body', {
         color: '#aaccff',
         align: 'center',
       }).setOrigin(0.5).setAlpha(0);
       fadeTargets.push(effectLabel);
     }
 
-    const btn = new Button(this, GAME_WIDTH / 2, GAME_HEIGHT - 50, UI.event.continueBtn, 140, 40, () => {
+    const btn = new Button(this, ov.cx, ov.vh - 50, UI.event.continueBtn, 140, 40, () => {
       SceneTransition.fadeTransition(this, 'MapScene');
     });
     btn.setAlpha(0);

@@ -1,5 +1,4 @@
 import Phaser from 'phaser';
-import { GAME_WIDTH, GAME_HEIGHT } from '../constants';
 import { Theme, colorToString } from './Theme';
 import { TextFactory } from './TextFactory';
 import { SkillQueueSystem } from '../systems/SkillQueueSystem';
@@ -9,11 +8,13 @@ import { UI } from '../i18n';
 import { EventBus } from '../systems/EventBus';
 import { attachPressInteraction } from './PressInteraction';
 import { isTouchDevice } from '../utils/device';
+import { viewBounds, uiBoost } from './Viewport';
 import skillsData from '../data/skills.json';
 
 const SLOT_SIZE = 44;
 const SLOT_GAP = 4;
-const BAR_Y = GAME_HEIGHT - 50;
+/** Bar top sits this far above the bottom of the visible viewport. */
+const BAR_BOTTOM_OFFSET = 50;
 
 /** Shrink a text object so it never renders wider than maxWidth. */
 function fitTextWidth(text: Phaser.GameObjects.Text, maxWidth: number): void {
@@ -42,6 +43,12 @@ export class SkillBar extends Phaser.GameObjects.Container {
     this.setDepth(101);
 
     this.buildSlots();
+    // Anchor bottom-center of the visible viewport; touch devices get the
+    // uiBoost so slots reach a comfortable physical size.
+    const b = viewBounds(scene);
+    const boost = uiBoost();
+    this.setScale(boost);
+    this.setPosition(b.cx, b.y + b.h - BAR_BOTTOM_OFFSET * boost);
     scene.add.existing(this);
   }
 
@@ -55,17 +62,17 @@ export class SkillBar extends Phaser.GameObjects.Container {
       }
     }
 
-    // Cap at 8 slots
+    // Cap at 8 slots, centered around the container origin
     const visibleSlots = allSkillSlots.slice(0, 8);
     const totalWidth = visibleSlots.length * (SLOT_SIZE + SLOT_GAP) - SLOT_GAP;
-    const startX = (GAME_WIDTH - totalWidth) / 2;
+    const startX = -totalWidth / 2;
 
     for (const entry of visibleSlots) {
       const x = startX + entry.index * (SLOT_SIZE + SLOT_GAP);
       const slot = new SkillSlot(
         this.scene,
         x,
-        BAR_Y,
+        0,
         entry.hero,
         entry.skill,
         entry.index + 1, // hotkey label 1-8

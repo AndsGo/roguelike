@@ -1,5 +1,4 @@
 import Phaser from 'phaser';
-import { GAME_WIDTH, GAME_HEIGHT } from '../constants';
 import { Button } from '../ui/Button';
 import { Theme, colorToString } from '../ui/Theme';
 import { SceneTransition, TRANSITION } from '../systems/SceneTransition';
@@ -10,6 +9,7 @@ import { RunManager } from '../managers/RunManager';
 import { BuildReviewPanel } from '../ui/BuildReviewPanel';
 import { UI } from '../i18n';
 import { TextFactory } from '../ui/TextFactory';
+import { applyUiCamera, onViewResize, restartOnResize, view } from '../ui/Viewport';
 
 /**
  * Base class for GameOverScene and VictoryScene.
@@ -20,6 +20,8 @@ export abstract class BaseEndScene extends Phaser.Scene {
 
   init(): void {
     this.rewardsApplied = false;
+    onViewResize(this, () => applyUiCamera(this));
+    restartOnResize(this);
   }
 
   /** Settle meta rewards (guarded against re-entry). */
@@ -38,7 +40,8 @@ export abstract class BaseEndScene extends Phaser.Scene {
     color: number,
     fontSize: string = '36px',
   ): Phaser.GameObjects.Text {
-    const title = TextFactory.create(this, GAME_WIDTH / 2, y, text, 'title', {
+    const v = view(this);
+    const title = TextFactory.create(this, v.cx, y, text, 'title', {
       color: colorToString(color),
       stroke: '#000000',
       strokeThickness: 4,
@@ -57,7 +60,8 @@ export abstract class BaseEndScene extends Phaser.Scene {
 
   /** Create centered subtitle text. */
   protected createSubtitle(text: string, y: number, color: string): Phaser.GameObjects.Text {
-    return TextFactory.create(this, GAME_WIDTH / 2, y, text, 'body', {
+    const v = view(this);
+    return TextFactory.create(this, v.cx, y, text, 'body', {
       color,
     }).setOrigin(0.5);
   }
@@ -68,7 +72,8 @@ export abstract class BaseEndScene extends Phaser.Scene {
     label: string,
     color: number,
   ): void {
-    new Button(this, GAME_WIDTH / 2, y, label, 180, 45, () => {
+    const v = view(this);
+    new Button(this, v.cx, y, label, 180, 45, () => {
       SceneTransition.fadeTransition(this, 'MainMenuScene', undefined, TRANSITION.NORMAL);
     }, color);
   }
@@ -78,7 +83,8 @@ export abstract class BaseEndScene extends Phaser.Scene {
     y: number,
     text: string,
   ): Phaser.GameObjects.Text {
-    return TextFactory.create(this, GAME_WIDTH / 2, y, text, 'body', {
+    const v = view(this);
+    return TextFactory.create(this, v.cx, y, text, 'body', {
       color: colorToString(Theme.colors.secondary),
       fontStyle: 'bold',
     }).setOrigin(0.5);
@@ -86,15 +92,17 @@ export abstract class BaseEndScene extends Phaser.Scene {
 
   /** Create a "retry" button that jumps directly to HeroDraftScene, preserving difficulty. */
   protected createRetryButton(y: number): void {
+    const v = view(this);
     const difficulty = RunManager.getInstance().getDifficulty();
-    new Button(this, GAME_WIDTH / 2, y, UI.gameOver.retry, 180, 45, () => {
+    new Button(this, v.cx, y, UI.gameOver.retry, 180, 45, () => {
       SceneTransition.fadeTransition(this, 'HeroDraftScene', { difficulty }, TRANSITION.NORMAL);
     }, Theme.colors.primary);
   }
 
   /** Create a "build review" button that opens the BuildReviewPanel. */
   protected createBuildReviewButton(y: number): void {
-    new Button(this, GAME_WIDTH / 2, y, UI.buildReview.title, 160, 36, () => {
+    const v = view(this);
+    new Button(this, v.cx, y, UI.buildReview.title, 160, 36, () => {
       new BuildReviewPanel(this, () => {});
     }, Theme.colors.panelBorder);
   }
@@ -114,13 +122,15 @@ export abstract class BaseEndScene extends Phaser.Scene {
     const totalScore = floorScore + goldScore + victoryBonus;
     DailyChallengeManager.updateBestScore(totalScore);
 
+    const v = view(this);
+
     // Display daily challenge completion banner
-    TextFactory.create(this, GAME_WIDTH / 2, baseY, `[ ${UI.daily.challengeComplete} ]`, 'body', {
+    TextFactory.create(this, v.cx, baseY, `[ ${UI.daily.challengeComplete} ]`, 'body', {
       color: '#ffcc00',
       fontStyle: 'bold',
     }).setOrigin(0.5);
 
-    TextFactory.create(this, GAME_WIDTH / 2, baseY + 18, UI.daily.score(totalScore), 'body', {
+    TextFactory.create(this, v.cx, baseY + 18, UI.daily.score(totalScore), 'body', {
       color: '#ffffff',
     }).setOrigin(0.5);
 
@@ -131,7 +141,7 @@ export abstract class BaseEndScene extends Phaser.Scene {
     const ghostEntries = ghosts.map(g => ({ ...g, isPlayer: false }));
     const leaderboard = [...ghostEntries, playerEntry].sort((a, b) => b.score - a.score);
 
-    TextFactory.create(this, GAME_WIDTH / 2, baseY + 42, UI.daily.leaderboardTitle, 'label', {
+    TextFactory.create(this, v.cx, baseY + 42, UI.daily.leaderboardTitle, 'label', {
       color: '#ccaa44', fontStyle: 'bold',
     }).setOrigin(0.5);
 
@@ -140,11 +150,11 @@ export abstract class BaseEndScene extends Phaser.Scene {
       const prefix = entry.isPlayer ? '→ ' : '  ';
       const suffix = entry.isPlayer ? ' ←' : '';
       const line = `${prefix}${i + 1}. ${entry.name}  ${entry.score}${suffix}`;
-      TextFactory.create(this, GAME_WIDTH / 2, baseY + 60 + i * 16, line, 'small', { color }).setOrigin(0.5);
+      TextFactory.create(this, v.cx, baseY + 60 + i * 16, line, 'small', { color }).setOrigin(0.5);
     });
 
     const playerRank = leaderboard.findIndex(e => e.isPlayer) + 1;
-    TextFactory.create(this, GAME_WIDTH / 2, baseY + 60 + leaderboard.length * 16 + 4, UI.daily.yourRank(playerRank, leaderboard.length), 'small', {
+    TextFactory.create(this, v.cx, baseY + 60 + leaderboard.length * 16 + 4, UI.daily.yourRank(playerRank, leaderboard.length), 'small', {
       color: '#888888',
     }).setOrigin(0.5);
 

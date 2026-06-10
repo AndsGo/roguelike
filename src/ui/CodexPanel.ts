@@ -1,5 +1,4 @@
 import Phaser from 'phaser';
-import { GAME_WIDTH, GAME_HEIGHT } from '../constants';
 import { Panel } from './Panel';
 import { Theme, colorToString, getRoleColor } from './Theme';
 import { TextFactory } from './TextFactory';
@@ -10,6 +9,7 @@ import { CodexDetailPopup } from './CodexDetailPopup';
 import heroesData from '../data/heroes.json';
 import enemiesData from '../data/enemies.json';
 import { HeroData, EnemyData, UnitRole, RaceType, ClassType } from '../types';
+import { viewBounds, pointerView } from './Viewport';
 
 const PANEL_WIDTH = 560;
 const PANEL_HEIGHT = 400;
@@ -41,22 +41,25 @@ export class CodexPanel {
     this.scene = scene;
     this.onCloseCallback = onClose;
 
+    const b = viewBounds(scene);
+
     // Semi-transparent backdrop (click to close)
     this.backdrop = scene.add.rectangle(
-      GAME_WIDTH / 2, GAME_HEIGHT / 2,
-      GAME_WIDTH, GAME_HEIGHT,
+      b.cx, b.cy,
+      b.w + 4, b.h + 4,
       0x000000, Theme.modalBackdropAlpha,
     ).setInteractive({ useHandCursor: true }).setDepth(799);
     this.backdrop.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
+      const pv = pointerView(scene, pointer);
       const hw = PANEL_WIDTH / 2;
       const hh = PANEL_HEIGHT / 2;
-      if (pointer.x < GAME_WIDTH / 2 - hw || pointer.x > GAME_WIDTH / 2 + hw ||
-          pointer.y < GAME_HEIGHT / 2 - hh || pointer.y > GAME_HEIGHT / 2 + hh) {
+      if (pv.x < b.cx - hw || pv.x > b.cx + hw ||
+          pv.y < b.cy - hh || pv.y > b.cy + hh) {
         this.close();
       }
     });
 
-    this.panel = new Panel(scene, GAME_WIDTH / 2, GAME_HEIGHT / 2, PANEL_WIDTH, PANEL_HEIGHT, {
+    this.panel = new Panel(scene, b.cx, b.cy, PANEL_WIDTH, PANEL_HEIGHT, {
       title: UI.codex.title,
       animate: true,
     });
@@ -69,11 +72,11 @@ export class CodexPanel {
     this.renderTab();
 
     // Fixed close button (outside scrollable content)
-    this.closeText = TextFactory.create(scene, GAME_WIDTH / 2, GAME_HEIGHT / 2 + PANEL_HEIGHT / 2 - 16, UI.codex.close, 'label', {
+    this.closeText = TextFactory.create(scene, b.cx, b.cy + PANEL_HEIGHT / 2 - 16, UI.codex.close, 'label', {
       color: '#888888',
     }).setOrigin(0.5).setDepth(801);
 
-    this.closeHit = scene.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2 + PANEL_HEIGHT / 2 - 16, 80, 24, 0x000000, 0)
+    this.closeHit = scene.add.rectangle(b.cx, b.cy + PANEL_HEIGHT / 2 - 16, 80, 24, 0x000000, 0)
       .setInteractive({ useHandCursor: true })
       .setDepth(801);
     this.closeHit.on('pointerup', () => this.close());
@@ -85,9 +88,10 @@ export class CodexPanel {
       { key: 'monster', label: UI.codex.monsterTab },
     ];
 
-    const tabY = GAME_HEIGHT / 2 - PANEL_HEIGHT / 2 + 38;
+    const b = viewBounds(this.scene);
+    const tabY = b.cy - PANEL_HEIGHT / 2 + 38;
     const tabWidth = 100;
-    const tabStartX = GAME_WIDTH / 2 - tabWidth - 4;
+    const tabStartX = b.cx - tabWidth - 4;
 
     for (let i = 0; i < tabLabels.length; i++) {
       const tab = tabLabels[i];
@@ -120,9 +124,10 @@ export class CodexPanel {
   }
 
   private updateTabHighlights(): void {
+    const b = viewBounds(this.scene);
     const tabWidth = 100;
-    const tabY = GAME_HEIGHT / 2 - PANEL_HEIGHT / 2 + 38;
-    const tabStartX = GAME_WIDTH / 2 - tabWidth - 4;
+    const tabY = b.cy - PANEL_HEIGHT / 2 + 38;
+    const tabStartX = b.cx - tabWidth - 4;
 
     for (let i = 0; i < this.tabBgs.length; i++) {
       const bg = this.tabBgs[i];

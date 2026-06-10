@@ -1,5 +1,4 @@
 import Phaser from 'phaser';
-import { GAME_WIDTH, GAME_HEIGHT } from '../constants';
 import { Panel } from './Panel';
 import { Theme, colorToString } from './Theme';
 import { TextFactory } from './TextFactory';
@@ -9,6 +8,7 @@ import { ElementType } from '../types';
 import { MetaManager } from '../managers/MetaManager';
 import { UI, RACE_NAMES, CLASS_NAMES, formatUnlockCondition } from '../i18n';
 import heroesData from '../data/heroes.json';
+import { viewBounds, pointerView } from './Viewport';
 
 const ELEMENT_NAMES: Record<ElementType, string> = {
   fire: '火', ice: '冰', lightning: '雷', dark: '暗', holy: '光',
@@ -32,23 +32,26 @@ export class HelpPanel {
     this.scene = scene;
     this.onCloseCallback = onClose;
 
+    const b = viewBounds(scene);
+
     // Semi-transparent backdrop (click to close)
     this.backdrop = scene.add.rectangle(
-      GAME_WIDTH / 2, GAME_HEIGHT / 2,
-      GAME_WIDTH, GAME_HEIGHT,
+      b.cx, b.cy,
+      b.w + 4, b.h + 4,
       0x000000, Theme.modalBackdropAlpha,
     ).setInteractive({ useHandCursor: true }).setDepth(799);
     this.backdrop.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
       // Only close when clicking outside the panel area
+      const pv = pointerView(scene, pointer);
       const hw = HelpPanel.PANEL_WIDTH / 2;
       const hh = HelpPanel.PANEL_HEIGHT / 2;
-      if (pointer.x < GAME_WIDTH / 2 - hw || pointer.x > GAME_WIDTH / 2 + hw ||
-          pointer.y < GAME_HEIGHT / 2 - hh || pointer.y > GAME_HEIGHT / 2 + hh) {
+      if (pv.x < b.cx - hw || pv.x > b.cx + hw ||
+          pv.y < b.cy - hh || pv.y > b.cy + hh) {
         this.close();
       }
     });
 
-    this.panel = new Panel(scene, GAME_WIDTH / 2, GAME_HEIGHT / 2, HelpPanel.PANEL_WIDTH, HelpPanel.PANEL_HEIGHT, {
+    this.panel = new Panel(scene, b.cx, b.cy, HelpPanel.PANEL_WIDTH, HelpPanel.PANEL_HEIGHT, {
       title: '帮助 / 参考',
       animate: true,
     });
@@ -179,11 +182,11 @@ export class HelpPanel {
     this.panel.setContentHeight(y + 40 + 165);
 
     // Fixed close button (outside scrollable content, always visible)
-    this.closeText = TextFactory.create(scene, GAME_WIDTH / 2, GAME_HEIGHT / 2 + HelpPanel.PANEL_HEIGHT / 2 - 16, '[ 关闭 ]', 'label', {
+    this.closeText = TextFactory.create(scene, b.cx, b.cy + HelpPanel.PANEL_HEIGHT / 2 - 16, '[ 关闭 ]', 'label', {
       color: '#888888',
     }).setOrigin(0.5).setDepth(801);
 
-    this.closeHit = scene.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2 + HelpPanel.PANEL_HEIGHT / 2 - 16, 80, 24, 0x000000, 0)
+    this.closeHit = scene.add.rectangle(b.cx, b.cy + HelpPanel.PANEL_HEIGHT / 2 - 16, 80, 24, 0x000000, 0)
       .setInteractive({ useHandCursor: true })
       .setDepth(801);
     this.closeHit.on('pointerup', () => this.close());

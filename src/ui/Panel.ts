@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { Theme } from './Theme';
 import { TextFactory } from './TextFactory';
 import { isTouchDevice } from '../utils/device';
+import { pointerView } from './Viewport';
 
 export interface PanelConfig {
   title?: string;
@@ -142,8 +143,11 @@ export class Panel extends Phaser.GameObjects.Container {
         panelRef.stopInertia();
         panelRef.dragActive = true;
         panelRef.isDragScrolling = false;
-        panelRef.dragStartY = pointer.y;
-        panelRef.lastDragY = pointer.y;
+        // Track in design units so scroll distance matches finger travel
+        // under any camera zoom.
+        const pv = pointerView(scene, pointer);
+        panelRef.dragStartY = pv.y;
+        panelRef.lastDragY = pv.y;
         panelRef.dragVelocity = 0;
         panelRef.dragScrollStart = panelRef.scrollY;
       }
@@ -153,13 +157,14 @@ export class Panel extends Phaser.GameObjects.Container {
         panelRef.dragActive = false;
         return;
       }
-      const dy = pointer.y - panelRef.dragStartY;
+      const pv = pointerView(scene, pointer);
+      const dy = pv.y - panelRef.dragStartY;
       if (Math.abs(dy) > dragThreshold) panelRef.isDragScrolling = true;
       if (panelRef.isDragScrolling) {
         // Smoothed per-event velocity for the release inertia
-        const step = pointer.y - panelRef.lastDragY;
+        const step = pv.y - panelRef.lastDragY;
         panelRef.dragVelocity = panelRef.dragVelocity * 0.3 + step * 0.7;
-        panelRef.lastDragY = pointer.y;
+        panelRef.lastDragY = pv.y;
         const maxScroll = panelRef.getMaxScroll();
         panelRef.scrollY = Phaser.Math.Clamp(panelRef.dragScrollStart - dy, 0, maxScroll);
         panelRef.contentContainer.y = -panelRef.scrollY + (panelRef.config.title ? 12 : 0);
@@ -197,10 +202,11 @@ export class Panel extends Phaser.GameObjects.Container {
     }
   }
 
-  /** Check if pointer is within panel bounds */
+  /** Check if pointer is within panel bounds (design-space comparison) */
   private isPointerInBounds(pointer: Phaser.Input.Pointer): boolean {
-    const px = pointer.x;
-    const py = pointer.y;
+    const pv = pointerView(this.scene, pointer);
+    const px = pv.x;
+    const py = pv.y;
     return (
       px >= this.x - this.panelWidth / 2 &&
       px <= this.x + this.panelWidth / 2 &&

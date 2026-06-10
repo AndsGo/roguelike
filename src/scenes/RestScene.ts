@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { GAME_WIDTH, GAME_HEIGHT, REST_HEAL_PERCENT, REST_TRAIN_EXP, REST_SCAVENGE_GOLD_MIN, REST_SCAVENGE_GOLD_MAX } from '../constants';
+import { REST_HEAL_PERCENT, REST_TRAIN_EXP, REST_SCAVENGE_GOLD_MIN, REST_SCAVENGE_GOLD_MAX } from '../constants';
 import { RunManager } from '../managers/RunManager';
 import { Button } from '../ui/Button';
 import { Theme, colorToString, getNodeColor } from '../ui/Theme';
@@ -9,6 +9,7 @@ import { ParticleManager } from '../systems/ParticleManager';
 import { UI } from '../i18n';
 import { TutorialSystem } from '../systems/TutorialSystem';
 import { TextFactory } from '../ui/TextFactory';
+import { applyUiCamera, fillBackground, onViewResize, restartOnResize, view } from '../ui/Viewport';
 
 export class RestScene extends Phaser.Scene {
   private nodeIndex!: number;
@@ -26,23 +27,27 @@ export class RestScene extends Phaser.Scene {
   create(): void {
     const rm = RunManager.getInstance();
 
-    this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, Theme.colors.background);
+    onViewResize(this, () => applyUiCamera(this));
+    restartOnResize(this, { nodeIndex: this.nodeIndex });
+    const v = view(this);
+
+    fillBackground(this, Theme.colors.background);
 
     // Campfire glow
     const particles = new ParticleManager(this);
-    particles.createBuffEffect(GAME_WIDTH / 2, 80, 0xff6633);
+    particles.createBuffEffect(v.cx, Math.round(v.vh * 0.15), 0xff6633);
 
-    TextFactory.create(this, GAME_WIDTH / 2, 55, UI.rest.title, 'title', {
+    TextFactory.create(this, v.cx, Math.round(v.vh * 0.12), UI.rest.title, 'title', {
       color: colorToString(getNodeColor('rest')),
     }).setOrigin(0.5);
 
-    TextFactory.create(this, GAME_WIDTH / 2, 100, UI.rest.campfireText, 'body', {
+    TextFactory.create(this, v.cx, Math.round(v.vh * 0.22), UI.rest.campfireText, 'body', {
       color: '#aaaacc',
     }).setOrigin(0.5);
 
     // Show current HP
     const heroes = rm.getHeroes();
-    TextFactory.create(this, GAME_WIDTH / 2, 140, UI.rest.teamStatus, 'label', {
+    TextFactory.create(this, v.cx, Math.round(v.vh * 0.31), UI.rest.teamStatus, 'label', {
       color: '#8899cc',
     }).setOrigin(0.5);
 
@@ -52,15 +57,15 @@ export class RestScene extends Phaser.Scene {
       const ratio = hero.currentHp / maxHp;
       const hpColor = ratio > 0.6 ? '#44ff44' : ratio > 0.3 ? '#ffaa00' : '#ff4444';
 
-      TextFactory.create(this, GAME_WIDTH / 2, 165 + i * 22, `${data.name}: ${hero.currentHp}/${maxHp} HP`, 'label', {
+      TextFactory.create(this, v.cx, Math.round(v.vh * 0.31) + 25 + i * (v.compact ? 18 : 22), `${data.name}: ${hero.currentHp}/${maxHp} HP`, 'label', {
         color: hpColor,
       }).setOrigin(0.5);
     });
 
-    // 3 choice buttons
-    const btnY = 290;
+    // 3 choice buttons (anchored toward the bottom of the viewport)
+    const btnY = v.vh - (v.compact ? 90 : 160);
     const btnSpacing = 160;
-    const btnStartX = GAME_WIDTH / 2 - btnSpacing;
+    const btnStartX = v.cx - btnSpacing;
     const healPercent = Math.round(REST_HEAL_PERCENT * 100);
 
     // Rest button
@@ -154,12 +159,13 @@ export class RestScene extends Phaser.Scene {
   }
 
   private showResultScreen(message: string, color: number, rm: RunManager): void {
-    this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, Theme.colors.background);
+    const v = view(this);
+    fillBackground(this, Theme.colors.background);
 
     const healParticles = new ParticleManager(this);
-    healParticles.createHealEffect(GAME_WIDTH / 2, GAME_HEIGHT / 2 - 40);
+    healParticles.createHealEffect(v.cx, v.cy - 40);
 
-    const title = TextFactory.create(this, GAME_WIDTH / 2, GAME_HEIGHT / 2 - 40, message, 'title', {
+    const title = TextFactory.create(this, v.cx, v.cy - 40, message, 'title', {
       color: colorToString(color),
     }).setOrigin(0.5).setAlpha(0);
 
@@ -169,13 +175,13 @@ export class RestScene extends Phaser.Scene {
     heroes.forEach((hero, i) => {
       const data = rm.getHeroData(hero.id);
       const maxHp = rm.getMaxHp(hero, data);
-      const heroText = TextFactory.create(this, GAME_WIDTH / 2, GAME_HEIGHT / 2 + i * 22, `${data.name}: ${hero.currentHp}/${maxHp} HP (Lv.${hero.level})`, 'label', {
+      const heroText = TextFactory.create(this, v.cx, v.cy + i * (v.compact ? 18 : 22), `${data.name}: ${hero.currentHp}/${maxHp} HP (Lv.${hero.level})`, 'label', {
         color: colorToString(color),
       }).setOrigin(0.5).setAlpha(0);
       fadeTargets.push(heroText);
     });
 
-    const btn = new Button(this, GAME_WIDTH / 2, GAME_HEIGHT - 50, UI.rest.continueBtn, 140, 40, () => {
+    const btn = new Button(this, v.cx, v.vh - 40, UI.rest.continueBtn, 140, 40, () => {
       SceneTransition.fadeTransition(this, 'MapScene');
     });
     btn.setAlpha(0);

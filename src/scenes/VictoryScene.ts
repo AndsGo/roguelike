@@ -1,4 +1,3 @@
-import { GAME_WIDTH, GAME_HEIGHT } from '../constants';
 import { RunManager } from '../managers/RunManager';
 import { RunEndContext } from '../managers/MetaManager';
 import { Theme, colorToString } from '../ui/Theme';
@@ -8,6 +7,7 @@ import { UI } from '../i18n';
 import { BaseEndScene } from './BaseEndScene';
 import heroesData from '../data/heroes.json';
 import { TextFactory } from '../ui/TextFactory';
+import { fillBackground, view } from '../ui/Viewport';
 
 export class VictoryScene extends BaseEndScene {
   constructor() {
@@ -15,14 +15,15 @@ export class VictoryScene extends BaseEndScene {
   }
 
   create(): void {
+    const v = view(this);
     const rm = RunManager.getInstance();
 
-    this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, 0x0a0a1e);
+    fillBackground(this, 0x0a0a1e);
 
     // Celebration particles
     const particles = new ParticleManager(this);
-    particles.createLevelUpEffect(GAME_WIDTH / 2 - 100, 60);
-    particles.createLevelUpEffect(GAME_WIDTH / 2 + 100, 60);
+    particles.createLevelUpEffect(v.cx - 100, 60);
+    particles.createLevelUpEffect(v.cx + 100, 60);
 
     const title = this.createTitle(UI.victory.title, 55, Theme.colors.gold, '40px');
 
@@ -59,34 +60,34 @@ export class VictoryScene extends BaseEndScene {
     const { metaReward, newAchievements } = this.settleRewards(true, rm.getFloor(), context);
 
     // Final team
-    TextFactory.create(this, GAME_WIDTH / 2, 135, UI.victory.finalTeam, 'body', {
+    TextFactory.create(this, v.cx, 135, UI.victory.finalTeam, 'body', {
       color: '#8899cc',
     }).setOrigin(0.5);
 
     const heroes = rm.getHeroes();
     heroes.forEach((hero, i) => {
       const data = rm.getHeroData(hero.id);
-      TextFactory.create(this, GAME_WIDTH / 2, 155 + i * 18, `${data.name} Lv.${hero.level}`, 'label', {
+      TextFactory.create(this, v.cx, 155 + i * 18, `${data.name} Lv.${hero.level}`, 'label', {
         color: '#ffffff',
       }).setOrigin(0.5);
     });
 
     const rewardY = 155 + heroes.length * 18 + 15;
 
-    TextFactory.create(this, GAME_WIDTH / 2, rewardY, UI.victory.finalGold(rm.getGold()), 'body', {
+    TextFactory.create(this, v.cx, rewardY, UI.victory.finalGold(rm.getGold()), 'body', {
       color: colorToString(Theme.colors.gold),
     }).setOrigin(0.5);
 
     this.createSoulsText(rewardY + 22, UI.victory.soulsEarned(metaReward));
 
-    RunEndPanel.renderRewards(this, GAME_WIDTH / 2, rewardY + 45, newAchievements, UI.victory);
+    RunEndPanel.renderRewards(this, v.cx, rewardY + 45, newAchievements, UI.victory);
 
     // Daily challenge completion
     this.settleDailyChallenge(true, rewardY + 70);
 
-    // Build review + main menu buttons
-    this.createBuildReviewButton(GAME_HEIGHT - 80);
-    this.createMainMenuButton(GAME_HEIGHT - 40, UI.victory.mainMenu, Theme.colors.secondary);
+    // Build review + main menu buttons — anchor from bottom
+    this.createBuildReviewButton(v.vh - 80);
+    this.createMainMenuButton(v.vh - 40, UI.victory.mainMenu, Theme.colors.secondary);
   }
 
   shutdown(): void {

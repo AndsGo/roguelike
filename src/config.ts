@@ -21,12 +21,13 @@ export const gameConfig: Phaser.Types.Core.GameConfig = {
   roundPixels: true,
   scale: {
     parent: 'game-container',
-    mode: Phaser.Scale.FIT,
-    autoCenter: Phaser.Scale.CENTER_BOTH,
-    // Intentionally NO dpr-scaled resolution: the backing store stays
-    // 800×450 and the browser stretches it. Correct for this pixel-art
-    // style (CSS image-rendering: pixelated); text stays crisp separately
-    // via TextFactory's setResolution(2).
+    // RESIZE: the canvas always matches the container (device/window) size.
+    // World content renders under a fit-scaled worldRoot; UI renders under a
+    // boost-scaled uiRoot (see src/ui/Viewport.ts). 800×450 below is only the
+    // pre-boot initial size.
+    mode: Phaser.Scale.RESIZE,
+    // No dpr-scaled resolution: logical px == CSS px, browser upscales to
+    // physical. Correct for pixel art; text stays crisp via setResolution(2).
     min: { width: 320, height: 180 },
   },
   physics: {

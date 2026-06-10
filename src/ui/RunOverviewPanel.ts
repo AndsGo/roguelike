@@ -1,5 +1,4 @@
 import Phaser from 'phaser';
-import { GAME_WIDTH, GAME_HEIGHT } from '../constants';
 import { Panel } from './Panel';
 import { Theme, colorToString, getElementColor, getRarityColor, getRoleColor } from './Theme';
 import { TextFactory } from './TextFactory';
@@ -9,6 +8,7 @@ import { getDifficultyConfig } from '../config/difficulty';
 import { UI, getHeroDisplayName, ROLE_NAMES, RACE_NAMES, CLASS_NAMES } from '../i18n';
 import relicsData from '../data/relics.json';
 import itemsData from '../data/items.json';
+import { viewBounds, pointerView } from './Viewport';
 
 const PANEL_WIDTH = 540;
 const PANEL_HEIGHT = 400;
@@ -36,23 +36,26 @@ export class RunOverviewPanel {
     this.scene = scene;
     this.onCloseCallback = onClose;
 
+    const b = viewBounds(scene);
+
     // Semi-transparent backdrop
     this.backdrop = scene.add.rectangle(
-      GAME_WIDTH / 2, GAME_HEIGHT / 2,
-      GAME_WIDTH, GAME_HEIGHT,
+      b.cx, b.cy,
+      b.w + 4, b.h + 4,
       0x000000, Theme.modalBackdropAlpha,
     ).setInteractive({ useHandCursor: true }).setDepth(799);
     this.backdrop.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
       // Only close when clicking outside the panel area
+      const pv = pointerView(scene, pointer);
       const hw = PANEL_WIDTH / 2;
       const hh = PANEL_HEIGHT / 2;
-      if (pointer.x < GAME_WIDTH / 2 - hw || pointer.x > GAME_WIDTH / 2 + hw ||
-          pointer.y < GAME_HEIGHT / 2 - hh || pointer.y > GAME_HEIGHT / 2 + hh) {
+      if (pv.x < b.cx - hw || pv.x > b.cx + hw ||
+          pv.y < b.cy - hh || pv.y > b.cy + hh) {
         this.close();
       }
     });
 
-    this.panel = new Panel(scene, GAME_WIDTH / 2, GAME_HEIGHT / 2, PANEL_WIDTH, PANEL_HEIGHT, {
+    this.panel = new Panel(scene, b.cx, b.cy, PANEL_WIDTH, PANEL_HEIGHT, {
       title: UI.runOverview.title,
       animate: true,
     });
@@ -271,11 +274,11 @@ export class RunOverviewPanel {
     this.panel.setContentHeight(y + 170);
 
     // ---- Fixed close button (outside scrollable content) ----
-    this.closeText = TextFactory.create(scene, GAME_WIDTH / 2, GAME_HEIGHT / 2 + PANEL_HEIGHT / 2 - 16, UI.runOverview.close, 'label', {
+    this.closeText = TextFactory.create(scene, b.cx, b.cy + PANEL_HEIGHT / 2 - 16, UI.runOverview.close, 'label', {
       color: '#888888',
     }).setOrigin(0.5).setDepth(801);
 
-    this.closeHit = scene.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2 + PANEL_HEIGHT / 2 - 16, 80, 24, 0x000000, 0)
+    this.closeHit = scene.add.rectangle(b.cx, b.cy + PANEL_HEIGHT / 2 - 16, 80, 24, 0x000000, 0)
       .setInteractive({ useHandCursor: true })
       .setDepth(801);
     this.closeHit.on('pointerup', () => this.close());

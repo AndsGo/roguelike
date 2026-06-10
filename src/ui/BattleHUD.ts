@@ -1,5 +1,4 @@
 import Phaser from 'phaser';
-import { GAME_WIDTH, GAME_HEIGHT } from '../constants';
 import { Theme, colorToString, getRoleColor, getElementColor } from './Theme';
 import { TextFactory } from './TextFactory';
 import { Unit } from '../entities/Unit';
@@ -11,6 +10,7 @@ import { SYNERGY_DEFINITIONS } from '../config/synergies';
 import { SkillBar } from './SkillBar';
 import { SkillQueueSystem } from '../systems/SkillQueueSystem';
 import { attachPressInteraction } from './PressInteraction';
+import { viewBounds, ViewBounds } from './Viewport';
 import { SaveManager } from '../managers/SaveManager';
 
 /**
@@ -40,6 +40,8 @@ export class BattleHUD extends Phaser.GameObjects.Container {
   private onUnitDamage: (data: { sourceId: string; targetId: string; amount: number }) => void;
   private skillBar: SkillBar | null = null;
   private ultimateBar: { updateSlots(): void } | null = null;
+  /** Visible design-space rect (anchors HUD blocks to real screen edges). */
+  private vb: ViewBounds;
 
   constructor(
     scene: Phaser.Scene,
@@ -52,6 +54,7 @@ export class BattleHUD extends Phaser.GameObjects.Container {
     this.heroes = heroes;
     this.enemies = enemies;
     this.onSpeedChange = onSpeedChange;
+    this.vb = viewBounds(scene);
     this.setDepth(100);
 
     // Build unitId -> unitName lookup for stats display
@@ -70,8 +73,8 @@ export class BattleHUD extends Phaser.GameObjects.Container {
     // Synergy indicators (bottom-left)
     this.createSynergyIndicators();
 
-    // Combo counter (bottom-right)
-    this.comboText = TextFactory.create(scene, GAME_WIDTH * 3 / 4, GAME_HEIGHT - 30, '', 'title', {
+    // Combo counter (bottom-right quadrant)
+    this.comboText = TextFactory.create(scene, this.vb.cx + this.vb.w / 4, this.vb.y + this.vb.h - 30, '', 'title', {
       color: colorToString(Theme.colors.secondary),
       stroke: '#000000',
       strokeThickness: 3,
@@ -79,12 +82,12 @@ export class BattleHUD extends Phaser.GameObjects.Container {
     this.add(this.comboText);
 
     // Stats toggle button — use padded hit zone for easier clicking
-    const statsBtn = TextFactory.create(scene, GAME_WIDTH - 10, GAME_HEIGHT - 65, '[统计]', 'small', {
+    const statsBtn = TextFactory.create(scene, this.vb.x + this.vb.w - 10, this.vb.y + this.vb.h - 65, '[统计]', 'small', {
       color: '#888888',
     }).setOrigin(1, 1);
     this.add(statsBtn);
 
-    const statsHit = scene.add.rectangle(GAME_WIDTH - 30, GAME_HEIGHT - 70, 56, 24, 0x000000, 0)
+    const statsHit = scene.add.rectangle(this.vb.x + this.vb.w - 30, this.vb.y + this.vb.h - 70, 56, 24, 0x000000, 0)
       .setInteractive({ useHandCursor: true });
     statsHit.on('pointerup', () => this.toggleStats());
     this.add(statsHit);
@@ -110,7 +113,7 @@ export class BattleHUD extends Phaser.GameObjects.Container {
 
   private createHeroPortraits(): void {
     this.heroes.forEach((hero, i) => {
-      const container = this.scene.add.container(8, 32 + i * 22);
+      const container = this.scene.add.container(this.vb.x + 8, this.vb.y + 32 + i * 22);
 
       // Role color bar (left 3px vertical strip)
       const roleBar = this.scene.add.graphics();
@@ -167,7 +170,7 @@ export class BattleHUD extends Phaser.GameObjects.Container {
 
   private createEnemyPortraits(): void {
     this.enemies.forEach((enemy, i) => {
-      const container = this.scene.add.container(GAME_WIDTH - 108, 32 + i * 22);
+      const container = this.scene.add.container(this.vb.x + this.vb.w - 108, this.vb.y + 32 + i * 22);
 
       // Left badge slot (mutually exclusive: boss > elite > element)
       if (enemy.isBoss) {
@@ -216,8 +219,8 @@ export class BattleHUD extends Phaser.GameObjects.Container {
 
   private createSpeedControl(): Phaser.GameObjects.Text {
     // Place speed control in top-center area, right of the battle type label
-    const btnX = GAME_WIDTH / 2 + 55;
-    const btnY = 12;
+    const btnX = this.vb.cx + 55;
+    const btnY = this.vb.y + 12;
 
     const bg = this.scene.add.graphics();
     bg.fillStyle(Theme.colors.panel, 0.7);
@@ -257,9 +260,9 @@ export class BattleHUD extends Phaser.GameObjects.Container {
     const synergies = rm.getActiveSynergies();
 
     // Place synergy indicators below hero portraits (left side)
-    const baseY = 32 + this.heroes.length * 22 + 10;
+    const baseY = this.vb.y + 32 + this.heroes.length * 22 + 10;
     synergies.forEach((syn, i) => {
-      const x = 10 + i * 22;
+      const x = this.vb.x + 10 + i * 22;
       const y = baseY;
 
       const circle = this.scene.add.graphics();
@@ -333,7 +336,7 @@ export class BattleHUD extends Phaser.GameObjects.Container {
     }
 
     this.statsVisible = true;
-    this.statsPanel = this.scene.add.container(GAME_WIDTH - 130, 80);
+    this.statsPanel = this.scene.add.container(this.vb.x + this.vb.w - 130, this.vb.y + 80);
 
     const bg = this.scene.add.graphics();
     bg.fillStyle(Theme.colors.panel, 0.9);

@@ -1,5 +1,4 @@
 import Phaser from 'phaser';
-import { GAME_WIDTH, GAME_HEIGHT } from '../constants';
 import { BattleResult, SkillData } from '../types';
 import { Button } from '../ui/Button';
 import { RunManager } from '../managers/RunManager';
@@ -11,9 +10,11 @@ import { TextFactory } from '../ui/TextFactory';
 import { SkillEvolutionPanel } from '../ui/SkillEvolutionPanel';
 import { getEvolutionBranches } from '../systems/SkillSystem';
 import skillsData from '../data/skills.json';
+import { applyUiCamera, fillBackground, onViewResize, restartOnResize, view } from '../ui/Viewport';
 
 export class RewardScene extends Phaser.Scene {
   private result!: BattleResult;
+  private sceneData!: { result: BattleResult };
 
   constructor() {
     super({ key: 'RewardScene' });
@@ -21,27 +22,32 @@ export class RewardScene extends Phaser.Scene {
 
   init(data: { result: BattleResult }): void {
     this.result = data.result;
+    this.sceneData = data;
   }
 
   create(): void {
+    onViewResize(this, () => applyUiCamera(this));
+    restartOnResize(this, this.sceneData);
+    const v = view(this);
+
     const result = this.result;
     const rm = RunManager.getInstance();
 
     // Guard against missing battle result data
     if (!result) {
-      this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, Theme.colors.background);
-      TextFactory.create(this, GAME_WIDTH / 2, GAME_HEIGHT / 2, UI.reward.title, 'title', {
+      fillBackground(this, Theme.colors.background);
+      TextFactory.create(this, v.cx, v.cy, UI.reward.title, 'title', {
         color: '#ffffff',
       }).setOrigin(0.5);
-      new Button(this, GAME_WIDTH / 2, GAME_HEIGHT - 38, UI.reward.continueBtn, 160, 38, () => {
+      new Button(this, v.cx, v.vh - 36, UI.reward.continueBtn, 160, 38, () => {
         SceneTransition.fadeTransition(this, 'MapScene');
       });
       return;
     }
 
-    this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, Theme.colors.background);
+    fillBackground(this, Theme.colors.background);
 
-    const title = TextFactory.create(this, GAME_WIDTH / 2, 55, UI.reward.title, 'title', {
+    const title = TextFactory.create(this, v.cx, 55, UI.reward.title, 'title', {
       color: colorToString(Theme.colors.success),
     }).setOrigin(0.5).setScale(0);
 
@@ -54,11 +60,11 @@ export class RewardScene extends Phaser.Scene {
     });
 
     // Rewards with staggered appearance
-    const goldText = TextFactory.create(this, GAME_WIDTH / 2, 110, UI.reward.gold(result.goldEarned), 'subtitle', {
+    const goldText = TextFactory.create(this, v.cx, 110, UI.reward.gold(result.goldEarned), 'subtitle', {
       color: colorToString(Theme.colors.gold),
     }).setOrigin(0.5).setAlpha(0);
 
-    const expText = TextFactory.create(this, GAME_WIDTH / 2, 138, UI.reward.exp(result.expEarned), 'subtitle', {
+    const expText = TextFactory.create(this, v.cx, 138, UI.reward.exp(result.expEarned), 'subtitle', {
       color: colorToString(Theme.colors.primary),
     }).setOrigin(0.5).setAlpha(0);
 
@@ -66,39 +72,41 @@ export class RewardScene extends Phaser.Scene {
     this.tweens.add({ targets: expText, alpha: 1, y: 133, delay: 400, duration: 300 });
 
     // Survivors
-    TextFactory.create(this, GAME_WIDTH / 2, 170, UI.reward.survivors(result.survivors.length), 'body', {
+    TextFactory.create(this, v.cx, 170, UI.reward.survivors(result.survivors.length), 'body', {
       color: colorToString(Theme.colors.textDim),
     }).setOrigin(0.5);
 
     // Team status
     const heroes = rm.getHeroes();
+    const rowGap = v.compact ? 17 : 20;
     heroes.forEach((hero, i) => {
       const hd = rm.getHeroData(hero.id);
       const maxHp = rm.getMaxHp(hero, hd);
       const alive = result.survivors.includes(hero.id);
-      TextFactory.create(this, GAME_WIDTH / 2, 200 + i * 20, `${hd.name} Lv.${hero.level}  HP:${hero.currentHp}/${maxHp}`, 'label', {
+      TextFactory.create(this, v.cx, 200 + i * rowGap, `${hd.name} Lv.${hero.level}  HP:${hero.currentHp}/${maxHp}`, 'label', {
         color: alive ? colorToString(Theme.colors.text) : colorToString(Theme.colors.danger),
       }).setOrigin(0.5);
     });
 
     // Per-hero battle stats
     const runStats = StatsManager.getRunStats();
-    const statsY = 200 + heroes.length * 20 + 15;
-    TextFactory.create(this, GAME_WIDTH / 2, statsY, UI.reward.battleStatsHeader, 'small', {
+    const statsY = 200 + heroes.length * rowGap + 15;
+    TextFactory.create(this, v.cx, statsY, UI.reward.battleStatsHeader, 'small', {
       color: '#8899bb',
     }).setOrigin(0.5);
 
     // Column headers
-    const colX = { name: GAME_WIDTH / 2 - 140, dmg: GAME_WIDTH / 2 - 10, heal: GAME_WIDTH / 2 + 60, kills: GAME_WIDTH / 2 + 130 };
+    const colX = { name: v.cx - 140, dmg: v.cx - 10, heal: v.cx + 60, kills: v.cx + 130 };
     const headerY = statsY + 14;
     TextFactory.create(this, colX.dmg, headerY, UI.reward.dmg, 'tiny', { color: '#888888' }).setOrigin(0.5);
     TextFactory.create(this, colX.heal, headerY, UI.reward.heal, 'tiny', { color: '#888888' }).setOrigin(0.5);
     TextFactory.create(this, colX.kills, headerY, UI.reward.kills, 'tiny', { color: '#888888' }).setOrigin(0.5);
 
+    const statRowGap = v.compact ? 12 : 14;
     heroes.forEach((hero, i) => {
       const hd = rm.getHeroData(hero.id);
       const hs = runStats.heroStats[hero.id];
-      const rowY = headerY + 14 + i * 14;
+      const rowY = headerY + 14 + i * statRowGap;
       const alive = result.survivors.includes(hero.id);
       const nameColor = alive ? '#aaaaaa' : '#664444';
       TextFactory.create(this, colX.name, rowY, hd.name, 'tiny', { color: nameColor });
@@ -107,7 +115,7 @@ export class RewardScene extends Phaser.Scene {
       TextFactory.create(this, colX.kills, rowY, `${hs?.kills ?? 0}`, 'tiny', { color: '#cccc88' }).setOrigin(0.5);
     });
 
-    TextFactory.create(this, GAME_WIDTH / 2, GAME_HEIGHT - 80, UI.reward.totalGold(rm.getGold()), 'body', {
+    TextFactory.create(this, v.cx, v.vh - 80, UI.reward.totalGold(rm.getGold()), 'body', {
       color: colorToString(Theme.colors.gold),
     }).setOrigin(0.5);
 
@@ -144,7 +152,8 @@ export class RewardScene extends Phaser.Scene {
   }
 
   private showContinueButton(): void {
-    new Button(this, GAME_WIDTH / 2, GAME_HEIGHT - 38, UI.reward.continueBtn, 160, 38, () => {
+    const v = view(this);
+    new Button(this, v.cx, v.vh - 36, UI.reward.continueBtn, 160, 38, () => {
       SceneTransition.fadeTransition(this, 'MapScene');
     });
   }

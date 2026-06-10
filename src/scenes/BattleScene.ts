@@ -24,6 +24,7 @@ import { hasElementAdvantage } from '../config/elements';
 import enemiesData from '../data/enemies.json';
 import actsData from '../data/acts.json';
 import { queueUnitSpriteSheets } from '../systems/UnitSpriteAssets';
+import { applyWorldCamera, fillBackground, onViewResize, viewBounds } from '../ui/Viewport';
 import skillsData from '../data/skills.json';
 import skillVisualsData from '../data/skill-visuals.json';
 import { Button } from '../ui/Button';
@@ -132,10 +133,16 @@ export class BattleScene extends Phaser.Scene {
     }
     const actIndex = rm.getCurrentAct();
 
-    // Act-themed background
+    // Responsive world camera: 800×450 battlefield fit-scaled and centered;
+    // the visible design rect (vb) can be wider/taller — edge-anchored UI
+    // and full-bleed backgrounds use it.
+    onViewResize(this, () => applyWorldCamera(this));
+    const vb = viewBounds(this);
+
+    // Act-themed background (fills the whole visible viewport)
     const actBgColors = [0x0a1a0e, 0x1a0a0a, 0x0a0a1a]; // forest, volcano, abyss
     const bgColor = actBgColors[actIndex] ?? Theme.colors.background;
-    this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, bgColor);
+    fillBackground(this, bgColor, { world: true });
 
     // Background decorations per act
     const bgDecor = this.add.graphics();
@@ -143,7 +150,7 @@ export class BattleScene extends Phaser.Scene {
     switch (actIndex) {
       case 0: // Forest
         bgDecor.fillStyle(0x1a3a1e, 0.5);
-        bgDecor.fillRect(0, BATTLE_GROUND_Y + 40, GAME_WIDTH, GAME_HEIGHT - BATTLE_GROUND_Y - 40);
+        bgDecor.fillRect(vb.x, BATTLE_GROUND_Y + 40, vb.w, vb.y + vb.h - BATTLE_GROUND_Y - 40);
         for (let i = 0; i < 5; i++) {
           const tx = 80 + i * 160;
           bgDecor.fillStyle(0x0a2a0e, 0.3);
@@ -152,9 +159,9 @@ export class BattleScene extends Phaser.Scene {
         break;
       case 1: // Volcano
         bgDecor.fillStyle(0x3a1a0a, 0.5);
-        bgDecor.fillRect(0, BATTLE_GROUND_Y + 40, GAME_WIDTH, GAME_HEIGHT - BATTLE_GROUND_Y - 40);
+        bgDecor.fillRect(vb.x, BATTLE_GROUND_Y + 40, vb.w, vb.y + vb.h - BATTLE_GROUND_Y - 40);
         bgDecor.lineStyle(2, 0xff4400, 0.2);
-        bgDecor.lineBetween(0, BATTLE_GROUND_Y + 42, GAME_WIDTH, BATTLE_GROUND_Y + 42);
+        bgDecor.lineBetween(vb.x, BATTLE_GROUND_Y + 42, vb.x + vb.w, BATTLE_GROUND_Y + 42);
         bgDecor.fillStyle(0xff6600, 0.15);
         for (let i = 0; i < 8; i++) {
           bgDecor.fillCircle(100 + i * 90, 60 + (i % 3) * 40, 2);
@@ -163,7 +170,7 @@ export class BattleScene extends Phaser.Scene {
       case 2: // Abyss
         for (let i = 0; i < 10; i++) {
           bgDecor.fillStyle(0x1a0a2a, 0.1);
-          bgDecor.fillRect(0, GAME_HEIGHT - i * 20, GAME_WIDTH, 20);
+          bgDecor.fillRect(vb.x, vb.y + vb.h - i * 20, vb.w, 20);
         }
         break;
     }
@@ -171,19 +178,19 @@ export class BattleScene extends Phaser.Scene {
     // Ground line
     const ground = this.add.graphics();
     ground.lineStyle(1, 0x333355, 0.5);
-    ground.lineBetween(0, BATTLE_GROUND_Y + 50, GAME_WIDTH, BATTLE_GROUND_Y + 50);
+    ground.lineBetween(vb.x, BATTLE_GROUND_Y + 50, vb.x + vb.w, BATTLE_GROUND_Y + 50);
 
-    // Boss vignette
+    // Boss vignette (frames the real screen edges)
     if (node.type === 'boss') {
       const vignette = this.add.graphics();
       vignette.lineStyle(4, 0xff2222, 0.4);
-      vignette.strokeRect(2, 2, GAME_WIDTH - 4, GAME_HEIGHT - 4);
+      vignette.strokeRect(vb.x + 2, vb.y + 2, vb.w - 4, vb.h - 4);
       vignette.lineStyle(8, 0xff0000, 0.15);
-      vignette.strokeRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
+      vignette.strokeRect(vb.x, vb.y, vb.w, vb.h);
     }
     const typeLabel = node.type === 'boss' ? UI.battle.boss : node.type === 'elite' ? UI.battle.elite : UI.battle.battle;
     const labelColor = node.type === 'boss' ? colorToString(Theme.colors.danger) : '#ffffff';
-    TextFactory.create(this, GAME_WIDTH / 2, 12, typeLabel, 'body', {
+    TextFactory.create(this, vb.cx, vb.y + 12, typeLabel, 'body', {
       color: labelColor,
       fontStyle: 'bold',
     }).setOrigin(0.5);
@@ -328,11 +335,11 @@ export class BattleScene extends Phaser.Scene {
       }
     }
 
-    // Golden border for daily runs
+    // Golden border for daily runs (frames the real screen edges)
     if (runState.isDaily) {
       const border = this.add.graphics();
       border.lineStyle(2, 0xccaa44, 0.6);
-      border.strokeRect(1, 1, GAME_WIDTH - 2, GAME_HEIGHT - 2);
+      border.strokeRect(vb.x + 1, vb.y + 1, vb.w - 2, vb.h - 2);
       border.setDepth(100);
     }
 
@@ -460,7 +467,7 @@ export class BattleScene extends Phaser.Scene {
 
     // Wave indicator for gauntlet
     if (this.isGauntlet) {
-      this.waveIndicator = TextFactory.create(this, GAME_WIDTH / 2, 45, UI.wave.indicator(1, this.battleSystem.getTotalWaves()), 'body', {
+      this.waveIndicator = TextFactory.create(this, vb.cx, vb.y + 45, UI.wave.indicator(1, this.battleSystem.getTotalWaves()), 'body', {
         color: '#cc44cc', fontStyle: 'bold',
         stroke: '#000000', strokeThickness: 2,
       }).setOrigin(0.5).setDepth(200);
@@ -743,10 +750,10 @@ export class BattleScene extends Phaser.Scene {
     this.healerGraphics.setVisible(false);
 
     // Threat toggle button (bottom-right area, near stats button)
-    const threatBtn = TextFactory.create(this, GAME_WIDTH - 10, GAME_HEIGHT - 78, '[威胁线]', 'small', {
+    const threatBtn = TextFactory.create(this, vb.x + vb.w - 10, vb.y + vb.h - 78, '[威胁线]', 'small', {
       color: '#888888',
     }).setOrigin(1, 1);
-    const threatHit = this.add.rectangle(GAME_WIDTH - 35, GAME_HEIGHT - 83, 64, 22, 0x000000, 0)
+    const threatHit = this.add.rectangle(vb.x + vb.w - 35, vb.y + vb.h - 83, 64, 22, 0x000000, 0)
       .setInteractive({ useHandCursor: true });
     threatHit.on('pointerup', () => {
       this.threatLinesVisible = !this.threatLinesVisible;
@@ -760,10 +767,10 @@ export class BattleScene extends Phaser.Scene {
     });
 
     // Run-overview button: the only touch path to the overview (Tab on desktop)
-    TextFactory.create(this, GAME_WIDTH - 10, GAME_HEIGHT - 102, '[概览]', 'small', {
+    TextFactory.create(this, vb.x + vb.w - 10, vb.y + vb.h - 102, '[概览]', 'small', {
       color: '#888888',
     }).setOrigin(1, 1);
-    const overviewHit = this.add.rectangle(GAME_WIDTH - 35, GAME_HEIGHT - 107, 64, 26, 0x000000, 0)
+    const overviewHit = this.add.rectangle(vb.x + vb.w - 35, vb.y + vb.h - 107, 64, 26, 0x000000, 0)
       .setInteractive({ useHandCursor: true });
     overviewHit.on('pointerup', () => this.openOverview());
 
@@ -785,18 +792,18 @@ export class BattleScene extends Phaser.Scene {
     // Act modifier indicator
     const actModDesc = this.battleSystem.actModifier?.getActDescription();
     if (actModDesc) {
-      TextFactory.create(this, GAME_WIDTH / 2, 26, actModDesc, 'small', {
+      TextFactory.create(this, vb.cx, vb.y + 26, actModDesc, 'small', {
         color: '#887766',
       }).setOrigin(0.5);
     }
 
     // Gold display (top-right, near battle type label)
-    TextFactory.create(this, GAME_WIDTH - 15, 10, `${rm.getGold()}G`, 'label', {
+    TextFactory.create(this, vb.x + vb.w - 15, vb.y + 10, `${rm.getGold()}G`, 'label', {
       color: colorToString(Theme.colors.gold),
     }).setOrigin(1, 0);
 
     // Pause button (top-right)
-    const pauseBtn = TextFactory.create(this, GAME_WIDTH - 15, 26, UI.battle.pauseBtn, 'small', {
+    const pauseBtn = TextFactory.create(this, vb.x + vb.w - 15, vb.y + 26, UI.battle.pauseBtn, 'small', {
       color: '#888888',
     }).setOrigin(1, 0).setInteractive({ useHandCursor: true });
     pauseBtn.on('pointerup', () => this.togglePause());
@@ -854,16 +861,17 @@ export class BattleScene extends Phaser.Scene {
       ? this.battleSystem.enemies.filter(e => e.isAlive)
       : this.battleSystem.heroes.filter(h => h.isAlive);
 
-    // Dim overlay
+    // Dim overlay (covers the whole visible viewport)
+    const tb = viewBounds(this);
     const dim = this.add.rectangle(
-      GAME_WIDTH / 2, GAME_HEIGHT / 2,
-      GAME_WIDTH, GAME_HEIGHT, 0x000000, 0.3,
+      tb.cx, tb.cy,
+      tb.w + 4, tb.h + 4, 0x000000, 0.3,
     ).setDepth(90).setInteractive();
     dim.on('pointerup', () => this.cancelTargetingMode());
     this.targetingOverlays.push(dim);
 
     // Instruction text
-    const instruction = TextFactory.create(this, GAME_WIDTH / 2, 20, '选择目标 (ESC取消)', 'body', {
+    const instruction = TextFactory.create(this, tb.cx, tb.y + 20, '选择目标 (ESC取消)', 'body', {
       color: '#ffcc00',
       fontStyle: 'bold',
       stroke: '#000000',
@@ -947,10 +955,11 @@ export class BattleScene extends Phaser.Scene {
   private pauseBattle(): void {
     this.battleSystem.isPaused = true;
 
-    // Overlay
+    // Overlay (covers the whole visible viewport)
+    const pb = viewBounds(this);
     const overlay = this.add.rectangle(
-      GAME_WIDTH / 2, GAME_HEIGHT / 2,
-      GAME_WIDTH, GAME_HEIGHT, 0x000000, Theme.modalBackdropAlpha,
+      pb.cx, pb.cy,
+      pb.w + 4, pb.h + 4, 0x000000, Theme.modalBackdropAlpha,
     ).setInteractive().setDepth(100);
 
     // Panel background

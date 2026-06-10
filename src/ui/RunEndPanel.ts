@@ -1,5 +1,4 @@
 import Phaser from 'phaser';
-import { GAME_WIDTH } from '../constants';
 import { MetaManager, RunEndContext } from '../managers/MetaManager';
 import { StatsManager } from '../managers/StatsManager';
 import { AchievementManager } from '../managers/AchievementManager';

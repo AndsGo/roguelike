@@ -1,5 +1,4 @@
 import Phaser from 'phaser';
-import { GAME_WIDTH, GAME_HEIGHT } from '../constants';
 import { Theme, getRoleColor } from './Theme';
 import { Button } from './Button';
 import { TextFactory } from './TextFactory';
@@ -7,6 +6,7 @@ import { HeroState } from '../types';
 import { RunManager, autoFormationByRole } from '../managers/RunManager';
 import { getOrCreateTexture, ChibiConfig } from '../systems/UnitRenderer';
 import { UI } from '../i18n';
+import { viewBounds, pointerView } from './Viewport';
 
 const PANEL_W = 400;
 const PANEL_H = 280;
@@ -25,15 +25,18 @@ export class FormationPanel {
   private build(): void {
     this.clearObjects();
     const scene = this.scene;
-    const panelX = (GAME_WIDTH - PANEL_W) / 2;
-    const panelY = (GAME_HEIGHT - PANEL_H) / 2;
+    const b = viewBounds(scene);
+    const panelW = Math.min(PANEL_W, b.w - 16);
+    const panelH = Math.min(PANEL_H, b.h - 16);
+    const panelX = b.cx - panelW / 2;
+    const panelY = b.cy - panelH / 2;
 
     // Backdrop
-    const backdrop = scene.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, 0x000000, Theme.modalBackdropAlpha)
+    const backdrop = scene.add.rectangle(b.cx, b.cy, b.w + 4, b.h + 4, 0x000000, Theme.modalBackdropAlpha)
       .setDepth(799).setInteractive();
     backdrop.on('pointerup', (p: Phaser.Input.Pointer) => {
-      const px = p.x, py = p.y;
-      if (px < panelX || px > panelX + PANEL_W || py < panelY || py > panelY + PANEL_H) {
+      const pv = pointerView(scene, p);
+      if (pv.x < panelX || pv.x > panelX + panelW || pv.y < panelY || pv.y > panelY + panelH) {
         this.close();
       }
     });
@@ -42,26 +45,26 @@ export class FormationPanel {
     // Panel background
     const bg = scene.add.graphics().setDepth(800);
     bg.fillStyle(Theme.colors.panel, 0.95);
-    bg.fillRoundedRect(panelX, panelY, PANEL_W, PANEL_H, 8);
+    bg.fillRoundedRect(panelX, panelY, panelW, panelH, 8);
     bg.lineStyle(2, Theme.colors.panelBorder, 1);
-    bg.strokeRoundedRect(panelX, panelY, PANEL_W, PANEL_H, 8);
+    bg.strokeRoundedRect(panelX, panelY, panelW, panelH, 8);
     this.objects.push(bg);
 
     // Title
-    const title = TextFactory.create(scene, GAME_WIDTH / 2, panelY + 20, UI.formation.title, 'subtitle', {
+    const title = TextFactory.create(scene, b.cx, panelY + 20, UI.formation.title, 'subtitle', {
       color: '#ffffff',
     }).setOrigin(0.5).setDepth(800);
     this.objects.push(title);
 
     // Tip
-    const tip = TextFactory.create(scene, GAME_WIDTH / 2, panelY + 38, UI.formation.tip, 'small', {
+    const tip = TextFactory.create(scene, b.cx, panelY + 38, UI.formation.tip, 'small', {
       color: '#aaaaaa',
     }).setOrigin(0.5).setDepth(800);
     this.objects.push(tip);
 
     // Column labels — front on right (closer to enemies visually), back on left
-    const frontX = GAME_WIDTH / 2 + 80;
-    const backX = GAME_WIDTH / 2 - 80;
+    const frontX = b.cx + 80;
+    const backX = b.cx - 80;
 
     const frontLabel = TextFactory.create(scene, frontX, panelY + 58, UI.formation.front, 'body', {
       color: '#ff8844', fontStyle: 'bold',
@@ -76,7 +79,7 @@ export class FormationPanel {
     // Divider line
     const divider = scene.add.graphics().setDepth(800);
     divider.lineStyle(1, 0x555555, 0.5);
-    divider.lineBetween(GAME_WIDTH / 2, panelY + 70, GAME_WIDTH / 2, panelY + PANEL_H - 50);
+    divider.lineBetween(b.cx, panelY + 70, b.cx, panelY + panelH - 50);
     this.objects.push(divider);
 
     // Draw heroes in their columns
@@ -92,14 +95,14 @@ export class FormationPanel {
     const heroStates = rm.getHeroes();
     const warnings = this.getFormationWarnings(heroStates);
     warnings.forEach((warn, i) => {
-      const warnText = TextFactory.create(scene, GAME_WIDTH / 2,
-        panelY + PANEL_H - 55 - i * 14,
+      const warnText = TextFactory.create(scene, b.cx,
+        panelY + panelH - 55 - i * 14,
         warn, 'tiny', { color: '#ff8844' }).setOrigin(0.5).setDepth(800);
       this.objects.push(warnText);
     });
 
     // Auto-assign button
-    const autoBtn = new Button(scene, GAME_WIDTH / 2, panelY + PANEL_H - 28,
+    const autoBtn = new Button(scene, b.cx, panelY + panelH - 28,
       UI.formation.autoAssign, 100, 24, () => {
         this.autoAssignAll();
       });
@@ -107,7 +110,7 @@ export class FormationPanel {
     this.objects.push(autoBtn);
 
     // Close button
-    const closeBtn = new Button(scene, panelX + PANEL_W - 20, panelY + 12,
+    const closeBtn = new Button(scene, panelX + panelW - 20, panelY + 12,
       '✕', 24, 24, () => {
         this.close();
       });
@@ -119,7 +122,7 @@ export class FormationPanel {
     const rm = RunManager.getInstance();
 
     heroes.forEach((hero, i) => {
-      const spacing = Math.min(55, (PANEL_H - 130) / Math.max(heroes.length, 1));
+      const spacing = Math.min(55, (Math.min(PANEL_H, viewBounds(this.scene).h - 16) - 130) / Math.max(heroes.length, 1));
       const y = startY + i * spacing;
       const data = rm.getHeroData(hero.id);
 
