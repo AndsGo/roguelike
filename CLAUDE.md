@@ -40,7 +40,8 @@ MainMenuScene → HeroDraftScene → MapScene ──┐
 
 `BattleSystem` orchestrates combat. Key subsystems:
 - **DamageSystem** — `base × defMod × critMod × elementMod × comboMod × variance(±10%)`
-- **SkillSystem** — Cooldown-based skills with targeting, advancement tracking
+- **SkillSystem** — Cooldown-based skills with targeting, advancement tracking. Status effects resolve via the declarative `STATUS_EFFECT_SPECS` table (18 effect names → type/stat). Promise-keeping skill fields: `hits`, `forceCrit`, `bonusCritChance`, `executeThreshold`/`executeMultiplier`.
+- **ItemEffectSystem** — rare-weapon procs (on-hit/on-kill, declarative `WEAPON_EFFECTS` table), rolled on the battle's seeded RNG from BattleSystem's basic-attack path
 - **TargetingSystem** — O(n) scoring with typed arrays + 500ms staleness cache
 - **ElementSystem** — fire>ice>lightning>fire cycle, dark↔holy mutual. 4 reactions (ignite/freeze/shock/decay)
 - **SynergySystem** — 6 race + 6 class + 5 element synergies with threshold-based bonuses
@@ -89,7 +90,7 @@ The canvas always matches the window/device size; the MAIN CAMERA's zoom maps 80
 
 ### Data Files
 
-All game content is in `src/data/` as JSON: heroes (26), enemies (28), skills (93), items (52), relics (48), events (49), achievements (26), acts (4). Type interfaces in `src/types/index.ts`.
+All game content is in `src/data/` as JSON: heroes (26), enemies (28), skills (93), items (52), relics (48), events (49), achievements (27), acts (4). Type interfaces in `src/types/index.ts`.
 
 ### Seeded RNG
 
@@ -103,7 +104,7 @@ All game content is in `src/data/` as JSON: heroes (26), enemies (28), skills (9
 
 **Test helpers:** `tests/helpers/scene-harness.ts` — `createScene()`, `tickFrames()`, `findText()`.
 
-**99 test suites, 1198 tests.** Key test categories:
+**100 test suites, 1204 tests.** Key test categories:
 - Content integrity (cross-reference validation between heroes/skills/items)
 - Manager unit tests (RunManager, SaveManager, MetaManager, StatsManager)
 - System tests (BattleEffects, DamageSystem, StatusEffects, Difficulty)

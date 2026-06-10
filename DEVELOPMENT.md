@@ -6,11 +6,11 @@
 
 | 项目 | 数据 |
 |------|------|
-| 开发周期 | 2026-02-26 ~ 2026-06-10 |
-| Claude 会话数 | 37+ 次 |
-| Git 提交数 | 275+ |
-| 代码规模 | 109 文件, 23,500+ 行 TS + 5,100+ 行 JSON 数据 |
-| 测试用例 | 1198 (99 个测试套件) |
+| 开发周期 | 2026-02-26 ~ 2026-06-11 |
+| Claude 会话数 | 38+ 次 |
+| Git 提交数 | 330+ |
+| 代码规模 | 98 个 src 文件 22,400+ 行 TS + 7,700+ 行 JSON 数据 + 12,700+ 行测试代码 |
+| 测试用例 | 1204 (100 个测试套件) |
 | 技术栈 | TypeScript + Phaser 3 + Vite |
 
 ---
@@ -212,6 +212,33 @@ Day 27 续 (Jun 10 下午) — 响应式架构 Scale.RESIZE (v1.27.0)
  ├─ 验收: 1280×720/1920×1080/900×650/844×390真触摸 全过, 零黑边,
  │   桌面文字原生分辨率渲染
  └─ → 1198 测试通过, 99 套件, 零 TypeScript 错误, 生产构建通过
+
+Day 27 续 (Jun 10 晚) — 专业游戏团队全面评估 (只评估不修复)
+ ├─ 5 个专项代理并行评估 (美术/游戏性/UX/音频/内容) + 主评审性能实测与 E2E 走查
+ ├─ 事实核验排除 2 处代理误报 (手绘精灵图"未集成"/手动技能"不存在")
+ ├─ 发现 2 个隐性 P0: 雷电系解锁数学死锁、13 个未映射 statusEffect 致 24 技能状态无效
+ └─ → docs/game-evaluation-report-2026-06-10.md + 6 份分项报告, 综合 6.1/10
+
+Day 28 (Jun 10 晚 ~ Jun 11) — 评估优化全量实施 (v1.28.0)
+ ├─ S0 功能性缺陷:
+ │   ├─ STATUS_EFFECT_SPECS 声明式映射表 (18 状态名 → 类型/属性, 24 技能状态生效)
+ │   ├─ 雷电解锁死锁修复 (temporaryElement 计入解锁判定 + storm_falcon 阈值 5→3)
+ │   ├─ 技能文案承诺补实: hits 多段/forceCrit 必暴/executeThreshold 处决
+ │   ├─ frost_giant/enemy_ice_mage/holy_guardian 入池 (死内容激活)
+ │   └─ 成就判定改用本局 victory (修复老玩家开局即弹"速通"成就)
+ ├─ S1 表现力与平衡:
+ │   ├─ 战斗背景 4 幕分层、元素反应专属特效、Boss 节点形状区分
+ │   ├─ 幕难度 1.35/1.6/2.0/2.4 压扁曲线; 暴击上限 0.75/2.5x; 防御软上限 20→30
+ │   ├─ Support 价值可视化 (增益↑/再生+ 浮字); 选人卡信息重构 + 手绘头像
+ │   └─ 进化/手动技能/商店三连教学 + 技能就绪呼吸光; BGM 分幕变速变调
+ ├─ S2 重玩性与内容:
+ │   ├─ 每日挑战 Meta 化 (胜利计数 + 50 灵魂加成 + daily_warrior 成就, 共 27 成就)
+ │   ├─ Mutation 每局三选一 (MutationPickPanel); GameOver 本局复盘
+ │   ├─ dragon_boss/frost_queen 三阶段化; +14 技能进阶 +8 技能进化 (28 分支/14 英雄)
+ │   ├─ ItemEffectSystem 稀有武器特效 (烈焰灼烧/冰霜冰冻/暗影击杀狂热, 种子RNG)
+ │   └─ 地图进化徽章、暂停菜单帮助、面板像素装饰、性能预算/音频规范文档
+ ├─ 代理截断教训: 子代理 ~30-40 工具调用后截断, 改为主会话直接收尾 + 逐项代码核验
+ └─ → 1204 测试通过, 100 套件, 零 TypeScript 错误, 双端 E2E 通过 (console 零错误)
 ```
 
 ---
@@ -693,10 +720,10 @@ Claude: 追踪 events.json → EventScene → RunManager → Hero.calculateStats
 
 ```
 src/
-├── scenes/ (12个)
+├── scenes/ (13个)
 │   ├── BootScene.ts          # 资源加载
 │   ├── MainMenuScene.ts      # 主菜单 + 升级 + 难度选择
-│   ├── HeroDraftScene.ts     # 英雄选择
+│   ├── HeroDraftScene.ts     # 英雄选择 + Mutation 三选一
 │   ├── MapScene.ts           # 冒险地图 (BFS分支)
 │   ├── BattleScene.ts        # 自动战斗
 │   ├── RewardScene.ts        # 战斗奖励
@@ -704,10 +731,11 @@ src/
 │   ├── EventScene.ts         # 随机事件 (电影过场)
 │   ├── RestScene.ts          # 休息回复
 │   ├── SettingsScene.ts      # 设置
-│   ├── GameOverScene.ts      # 失败 (继承BaseEndScene)
+│   ├── BaseEndScene.ts       # 结算基类 (奖励/每日挑战结算共用)
+│   ├── GameOverScene.ts      # 失败 + 本局复盘 (继承BaseEndScene)
 │   └── VictoryScene.ts       # 胜利 (继承BaseEndScene)
 │
-├── systems/ (28个)
+├── systems/ (31个)
 │   ├── BattleSystem.ts       # 战斗主循环
 │   ├── DamageSystem.ts       # 伤害计算管道
 │   ├── SkillSystem.ts        # 技能释放逻辑
@@ -735,14 +763,18 @@ src/
 │   ├── RelicSystem.ts        # 遗物运行时求值 (三层架构)
 │   ├── UltimateSystem.ts     # 终极技能能量管理
 │   ├── DamageAccumulator.ts  # 伤害数字合并
-│   └── BossPhaseSystem.ts    # Boss 阶段触发
+│   ├── BossPhaseSystem.ts    # Boss 阶段触发
+│   ├── AffixSystem.ts        # 精英/Boss 词缀 (10种)
+│   ├── UnitSpriteAssets.ts   # 手绘精灵图配置 + 按需加载
+│   └── ItemEffectSystem.ts   # 稀有武器特效 (on-hit/on-kill 声明表)
 │
-├── managers/ (5个)
+├── managers/ (6个)
 │   ├── RunManager.ts         # 单局运行状态 (序列化/反序列化)
 │   ├── SaveManager.ts        # 3槽存档 + 校验 + 自动存档
-│   ├── MetaManager.ts        # 跨局进度 + 英雄解锁
-│   ├── StatsManager.ts       # 运行统计
-│   └── AchievementManager.ts # 25个成就
+│   ├── MetaManager.ts        # 跨局进度 + 英雄解锁 + 每日完成计数
+│   ├── StatsManager.ts       # 运行统计 (含本局 victory 标记)
+│   ├── DailyChallengeManager.ts # 每日挑战 (种子/规则/排行榜)
+│   └── AchievementManager.ts # 27个成就
 │
 ├── entities/
 │   ├── Unit.ts               # 基础单位 (元素+羁绊+有效属性管道)
@@ -767,12 +799,13 @@ src/
 │   └── MapRenderer.ts        # 地图渲染
 │
 ├── data/
-│   ├── heroes.ts (23)        ├── enemies.ts (28)
-│   ├── skills.ts (80)        ├── items.ts (52)
-│   ├── events.ts (37)        ├── relics.ts (48)
-│   ├── acts.ts (4)           ├── achievements.ts (25)
+│   ├── heroes.json (26)      ├── enemies.json (28)
+│   ├── skills.json (93)      ├── items.json (52)
+│   ├── events.json (49)      ├── relics.json (48)
+│   ├── acts.json (4)         ├── achievements.json (27)
+│   ├── boss-phases.json      ├── skill-evolutions.json (28分支)
 │   ├── pixel-templates.ts    # 像素矩阵模板 + 调色板
-│   ├── skill-visuals.ts      └── skill-advancements.ts
+│   ├── skill-visuals.ts      └── skill-advancements.json (79条)
 │
 ├── config/
 │   ├── balance.ts            ├── elements.ts
@@ -1030,6 +1063,31 @@ src/
 - 地图连线加亮 (线宽1→2px, 可达路径亮蓝色)
 - 英雄选择未解锁卡片显示解锁条件
 - 战斗英雄名隐藏 + 敌人HUD元素指示器重排
+
+> v1.19.0 ~ v1.27.0 的版本详情见「一、开发脉络总览」时间线与 README 版本历史。
+
+### v1.28.0 — 评估驱动全面优化 (Jun 10-11)
+
+**起因:** 6 维度专业评估 (美术/游戏性/UX/音频/性能/内容, 综合 6.1/10) 识别出"系统在跑、效果为空"类隐性缺陷 → `docs/game-evaluation-report-2026-06-10.md`
+
+**S0 功能性缺陷 (玩家不可感知的静默失效):**
+- 13 个未映射 statusEffect 名致 24 技能状态无效 → `STATUS_EFFECT_SPECS` 声明式映射表 + 回归测试
+- 雷电系英雄解锁数学死锁 (无默认雷电英雄 + temporaryElement 不计入) → 双向修复
+- 技能文案承诺补实: `hits` 多段 / `forceCrit` 必暴 / `executeThreshold` 处决字段落地
+- frost_giant / enemy_ice_mage / holy_guardian 三个从未出场的敌人入池
+
+**S1 表现力与平衡:**
+- 战斗背景 4 幕分层、元素反应 4 种专属特效、Boss 节点形状区分
+- 幕难度 1.35/1.6/2.0/2.4、暴击上限 (0.75/2.5x)、防御软上限 20→30
+- Support 价值可视化、选人卡信息重构、进化/手动技能/商店教学补全
+
+**S2 重玩性与内容:**
+- 每日挑战 Meta 化 (胜利计数 + 灵魂加成 + daily_warrior 成就)
+- Mutation 每局三选一 (`MutationPickPanel`)、GameOver 本局复盘
+- `ItemEffectSystem` 稀有武器特效 (种子 RNG 保持战斗可复现)
+- +14 技能进阶 (共79条) +8 技能进化 (28分支/14英雄)、Boss 三阶段化
+
+**终验:** tsc 零错误、1204/1204 测试、双端 E2E (桌面 + 手机横竖屏) console 零错误
 
 ---
 
