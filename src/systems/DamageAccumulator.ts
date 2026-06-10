@@ -108,7 +108,7 @@ export class DamageAccumulator {
 
   private flush(entry: PendingEntry): void {
     const yOffset = this.getNextYOffset(entry.targetId);
-    new DamageNumber(
+    DamageNumber.spawn(
       entry.scene,
       entry.x,
       entry.y + BASE_Y_OFFSET + yOffset,

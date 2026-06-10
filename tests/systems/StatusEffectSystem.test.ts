@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 // Mock DamageNumber — StatusEffectSystem 中 DoT/HoT tick 会 new DamageNumber(...)
 vi.mock('../../src/components/DamageNumber', () => ({
-  DamageNumber: vi.fn(),
+  DamageNumber: { spawn: vi.fn() },
 }));
 
 import { StatusEffectSystem } from '../../src/systems/StatusEffectSystem';

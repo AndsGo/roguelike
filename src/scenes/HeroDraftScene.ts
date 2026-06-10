@@ -14,6 +14,7 @@ import { calculateSynergyTags, formatSynergyTags } from '../utils/synergy-helper
 import { TextFactory } from '../ui/TextFactory';
 import { getOrCreateTexture, ChibiConfig } from '../systems/UnitRenderer';
 import { drawRoleIcon, drawElementIcon } from '../ui/PixelIcons';
+import { attachPressInteraction } from '../ui/PressInteraction';
 import { getElementColor } from '../ui/Theme';
 
 // Opening draft size. Set to 4 so players can reach a count=4 race/class
@@ -232,18 +233,11 @@ export class HeroDraftScene extends Phaser.Scene {
       .setInteractive({ useHandCursor: true });
     container.add(hitZone);
 
-    // Left click: toggle selection
-    hitZone.on('pointerup', (pointer: Phaser.Input.Pointer) => {
-      if (pointer.button === 0) {
-        this.toggleHeroSelection(hero.id);
-      }
-    });
-
-    // Right click: show detail popup
-    hitZone.on('pointerup', (pointer: Phaser.Input.Pointer) => {
-      if (pointer.button === 2) {
-        this.showHeroDetail(hero);
-      }
+    // Tap toggles selection; right-click (desktop) or long-press (touch)
+    // shows the detail popup.
+    attachPressInteraction(this, hitZone, {
+      onTap: () => this.toggleHeroSelection(hero.id),
+      onSecondary: () => this.showHeroDetail(hero),
     });
 
     // Hover highlight

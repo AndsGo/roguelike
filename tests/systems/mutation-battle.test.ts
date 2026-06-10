@@ -11,7 +11,7 @@ import { createMockUnit } from '../mocks/phaser';
 
 // Mock DamageNumber to avoid scene rendering issues in tests
 vi.mock('../../src/components/DamageNumber', () => ({
-  DamageNumber: vi.fn(),
+  DamageNumber: { spawn: vi.fn() },
 }));
 
 // Helper: unlock mutation tier and purchase a specific mutation

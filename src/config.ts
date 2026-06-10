@@ -20,8 +20,14 @@ export const gameConfig: Phaser.Types.Core.GameConfig = {
   pixelArt: true,
   roundPixels: true,
   scale: {
+    parent: 'game-container',
     mode: Phaser.Scale.FIT,
     autoCenter: Phaser.Scale.CENTER_BOTH,
+    // Intentionally NO dpr-scaled resolution: the backing store stays
+    // 800×450 and the browser stretches it. Correct for this pixel-art
+    // style (CSS image-rendering: pixelated); text stays crisp separately
+    // via TextFactory's setResolution(2).
+    min: { width: 320, height: 180 },
   },
   physics: {
     default: 'arcade',

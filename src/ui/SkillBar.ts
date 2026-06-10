@@ -7,11 +7,20 @@ import { Hero } from '../entities/Hero';
 import { SkillData } from '../types';
 import { UI } from '../i18n';
 import { EventBus } from '../systems/EventBus';
+import { attachPressInteraction } from './PressInteraction';
+import { isTouchDevice } from '../utils/device';
 import skillsData from '../data/skills.json';
 
 const SLOT_SIZE = 44;
 const SLOT_GAP = 4;
 const BAR_Y = GAME_HEIGHT - 50;
+
+/** Shrink a text object so it never renders wider than maxWidth. */
+function fitTextWidth(text: Phaser.GameObjects.Text, maxWidth: number): void {
+  if (text.width > maxWidth) {
+    text.setScale(maxWidth / text.width);
+  }
+}
 
 /**
  * Bottom-center skill bar showing up to 8 skill slots (4 heroes × 2 skills).
@@ -146,48 +155,42 @@ class SkillSlot extends Phaser.GameObjects.Container {
     }).setOrigin(0, 0).setAlpha(0);
     this.add(this.queueBadge);
 
-    // Skill name (abbreviated, 2 chars)
+    // Skill name (abbreviated, 3 chars), shrunk to fit the slot when the
+    // accessibility textScale pushes it wider than the slot.
     const skillName = this.getSkillDisplayName(skill.id);
     this.nameText = TextFactory.create(scene, SLOT_SIZE / 2, SLOT_SIZE / 2 - 4, skillName.substring(0, 3), 'label', {
       color: '#ffffff',
       align: 'center',
     }).setOrigin(0.5);
+    fitTextWidth(this.nameText, SLOT_SIZE - 2);
     this.add(this.nameText);
 
     // Hero name indicator (tiny, bottom)
     const heroLabel = TextFactory.create(scene, SLOT_SIZE / 2, SLOT_SIZE - 4, hero.unitName.substring(0, 2), 'tiny', {
       color: '#888888',
     }).setOrigin(0.5, 1);
+    fitTextWidth(heroLabel, SLOT_SIZE - 2);
     this.add(heroLabel);
 
-    // Hotkey label (top-right corner)
+    // Hotkey label (top-right corner) — meaningless on touch devices
     this.hotkeyText = TextFactory.create(scene, SLOT_SIZE - 3, 2, `${hotkeyNum}`, 'tiny', {
       color: '#666666',
-    }).setOrigin(1, 0);
+    }).setOrigin(1, 0).setVisible(!isTouchDevice());
     this.add(this.hotkeyText);
 
     // Cooldown overlay
     this.cdOverlay = scene.add.graphics();
     this.add(this.cdOverlay);
 
-    // Interactive hit area
-    let pressX = 0;
-    let pressY = 0;
-    const hitArea = scene.add.rectangle(SLOT_SIZE / 2, SLOT_SIZE / 2, SLOT_SIZE + 4, SLOT_SIZE + 4, 0x000000, 0)
+    // Interactive hit area: tap fires, hover OR long-press shows the tooltip
+    // (long-press is the only way to read skill info on touch devices).
+    const hitArea = scene.add.rectangle(SLOT_SIZE / 2, SLOT_SIZE / 2, SLOT_SIZE + 8, SLOT_SIZE + 8, 0x000000, 0)
       .setInteractive({ useHandCursor: true });
-    hitArea.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
-      pressX = pointer.x;
-      pressY = pointer.y;
+    attachPressInteraction(scene, hitArea, {
+      onTap: () => { this.tryFire(); },
+      onShowInfo: () => this.showTooltip(),
+      onHideInfo: () => this.hideTooltip(),
     });
-    hitArea.on('pointerup', (pointer: Phaser.Input.Pointer) => {
-      const dx = pointer.x - pressX;
-      const dy = pointer.y - pressY;
-      if (dx * dx + dy * dy < 400) { // < 20px movement
-        this.tryFire();
-      }
-    });
-    hitArea.on('pointerover', () => this.showTooltip());
-    hitArea.on('pointerout', () => this.hideTooltip());
     this.add(hitArea);
   }
 

@@ -5,6 +5,8 @@ import { TextFactory } from './TextFactory';
 import { Hero } from '../entities/Hero';
 import { UltimateSystem } from '../systems/UltimateSystem';
 import { EventBus } from '../systems/EventBus';
+import { attachPressInteraction } from './PressInteraction';
+import { isTouchDevice } from '../utils/device';
 import { SkillData } from '../types';
 import skillsData from '../data/skills.json';
 
@@ -144,11 +146,11 @@ class UltimateSlot extends Phaser.GameObjects.Container {
     }).setOrigin(0.5, 0);
     this.add(heroLabel);
 
-    // Hotkey label (Q/W/E/R)
+    // Hotkey label (Q/W/E/R) — meaningless on touch devices
     const hotkeys = ['Q', 'W', 'E', 'R'];
     const hotkeyText = TextFactory.create(scene, BUTTON_SIZE - 2, 2, hotkeys[slotIndex] ?? '', 'tiny', {
       color: '#666666',
-    }).setOrigin(1, 0);
+    }).setOrigin(1, 0).setVisible(!isTouchDevice());
     this.add(hotkeyText);
 
     // Energy percentage text
@@ -157,17 +159,14 @@ class UltimateSlot extends Phaser.GameObjects.Container {
     }).setOrigin(0.5);
     this.add(this.energyText);
 
-    // Interactive hit area (pointerup with distance check per project convention)
-    const hitArea = scene.add.rectangle(cx, cy, BUTTON_SIZE + 4, BUTTON_SIZE + 4, 0x000000, 0)
+    // Interactive hit area: tap fires, hover OR long-press shows the tooltip
+    const hitArea = scene.add.rectangle(cx, cy, BUTTON_SIZE + 8, BUTTON_SIZE + 8, 0x000000, 0)
       .setInteractive({ useHandCursor: true });
-    let downX = 0, downY = 0;
-    hitArea.on('pointerdown', (_p: unknown, x: number, y: number) => { downX = x; downY = y; });
-    hitArea.on('pointerup', (_p: unknown, x: number, y: number) => {
-      const dist = Math.sqrt((x - downX) ** 2 + (y - downY) ** 2);
-      if (dist < 20) this.tryFire();
+    attachPressInteraction(scene, hitArea, {
+      onTap: () => { this.tryFire(); },
+      onShowInfo: () => this.showTooltip(),
+      onHideInfo: () => this.hideTooltip(),
     });
-    hitArea.on('pointerover', () => this.showTooltip());
-    hitArea.on('pointerout', () => this.hideTooltip());
     this.add(hitArea);
   }
 

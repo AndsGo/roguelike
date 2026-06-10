@@ -276,13 +276,15 @@ export class HeroDetailPopup extends Phaser.GameObjects.Container {
       const skill = allSkills.find(s => s.id === skillId);
       const name = skill?.name ?? skillId;
       const desc = skill?.description ?? '';
-      const shortDesc = desc.length > 30 ? desc.substring(0, 30) + '...' : desc;
+      // 22 chars keeps one line even at textScale 1.25 (mobile default)
+      const shortDesc = desc.length > 22 ? desc.substring(0, 22) + '...' : desc;
       const t = TextFactory.create(scene, leftX, skillRowY, `  ${name} - ${shortDesc}`, 'small', {
         color: '#aabbdd',
         wordWrap: { width: POPUP_WIDTH - 40 },
       }).setDepth(801);
       this.add(t);
-      skillRowY += 14;
+      // advance by measured height so scaled-up text never overlaps the next row
+      skillRowY += Math.max(14, t.height + 2);
 
       // Show advancement progress with bonus details
       const advs = allAdvancements
@@ -307,7 +309,7 @@ export class HeroDetailPopup extends Phaser.GameObjects.Container {
           wordWrap: { width: POPUP_WIDTH - 60 },
         }).setDepth(801);
         this.add(advText);
-        skillRowY += 12;
+        skillRowY += Math.max(12, advText.height + 1);
       }
     });
 
@@ -334,7 +336,7 @@ export class HeroDetailPopup extends Phaser.GameObjects.Container {
           wordWrap: { width: POPUP_WIDTH - 50 },
         }).setDepth(801);
         this.add(synText);
-        synRowY += 12;
+        synRowY += Math.max(12, synText.height + 1);
       }
     }
 

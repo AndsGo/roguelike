@@ -27,8 +27,8 @@ describe('TextFactory', () => {
     expect(subtitle.style.fontSize).toBe('16px');
     expect(body.style.fontSize).toBe('13px');
     expect(label.style.fontSize).toBe('11px');
-    expect(small.style.fontSize).toBe('10px');
-    expect(tiny.style.fontSize).toBe('9px');
+    expect(small.style.fontSize).toBe('11px');
+    expect(tiny.style.fontSize).toBe('10px');
   });
 
   it('uses Chinese-friendly font family', () => {

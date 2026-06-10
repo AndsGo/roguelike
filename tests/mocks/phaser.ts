@@ -14,6 +14,12 @@ export class MockText {
   setStyle() { return this; }
   setColor() { return this; }
   setFontSize() { return this; }
+  setDepth() { return this; }
+  setPosition(x: number, y: number) { this.x = x; this.y = y; return this; }
+  setAlpha() { return this; }
+  setScale() { return this; }
+  setVisible() { return this; }
+  setActive() { return this; }
   destroy() {}
 }
 
@@ -94,6 +100,7 @@ export class MockScene {
     on: vi.fn(),
     off: vi.fn(),
     emit: vi.fn(),
+    once: vi.fn(),
   };
 
   scene = {

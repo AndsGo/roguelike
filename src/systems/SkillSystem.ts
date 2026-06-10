@@ -253,7 +253,7 @@ export class SkillSystem {
             element: skillElement,
           });
         } else {
-          new DamageNumber(
+          DamageNumber.spawn(
             target.scene,
             target.x + this.rng.nextInt(-10, 10),
             target.y - 20,
@@ -268,7 +268,7 @@ export class SkillSystem {
           if (this.accumulator) {
             this.accumulator.addDamage(`${target.unitId}_reaction`, target.scene, target.x + this.rng.nextInt(-10, 10), target.y, result.elementReactionDamage);
           } else {
-            new DamageNumber(
+            DamageNumber.spawn(
               target.scene,
               target.x + this.rng.nextInt(-10, 10),
               target.y - 30,

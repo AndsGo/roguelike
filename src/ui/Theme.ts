@@ -1,4 +1,5 @@
 import { SaveManager } from '../managers/SaveManager';
+import { isTouchDevice } from '../utils/device';
 
 const ACCESSIBILITY_KEY = 'roguelike_accessibility';
 
@@ -23,7 +24,14 @@ export function getAccessibility(): AccessibilitySettings {
     // Merge over defaults so legacy saves missing newer fields (e.g. textScale)
     // fall back to sane values instead of undefined.
     const loaded = SaveManager.loadData<AccessibilitySettings>(ACCESSIBILITY_KEY);
-    accessibilityCache = { ...defaultAccessibility, ...(loaded ?? {}) };
+    const defaults = { ...defaultAccessibility };
+    // Touch devices get larger text by default: at FIT scale on a ~6" phone,
+    // the desktop presets land below readable size. A user-saved textScale
+    // (any persisted settings object) always wins over this default.
+    if (isTouchDevice() && (loaded === null || loaded === undefined)) {
+      defaults.textScale = 1.25;
+    }
+    accessibilityCache = { ...defaults, ...(loaded ?? {}) };
   }
   return accessibilityCache;
 }

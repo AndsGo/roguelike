@@ -6,6 +6,7 @@ import { UI } from '../i18n';
 import { HeroDetailPopup } from './HeroDetailPopup';
 import { TextFactory } from './TextFactory';
 import { drawRoleIcon, drawElementIcon } from './PixelIcons';
+import { attachPressInteraction } from './PressInteraction';
 import { getOrCreateTexture, ChibiConfig } from '../systems/UnitRenderer';
 
 export class HeroCard extends Phaser.GameObjects.Container {
@@ -131,20 +132,13 @@ export class HeroCard extends Phaser.GameObjects.Container {
       this.add(slotLabel);
     }
 
-    // Click to expand details, right-click for full popup
+    // Tap to expand details; right-click (desktop) or long-press (touch)
+    // opens the full popup — touch devices have no right button.
     this.setSize(this.cardWidth, this.cardHeight);
     this.setInteractive({ useHandCursor: true });
-    let downX = 0, downY = 0;
-    this.on('pointerdown', (p: Phaser.Input.Pointer) => { downX = p.x; downY = p.y; });
-    this.on('pointerup', (pointer: Phaser.Input.Pointer) => {
-      const dx = pointer.x - downX, dy = pointer.y - downY;
-      if (dx * dx + dy * dy < 400) {
-        if (pointer.rightButtonReleased()) {
-          this.openDetailPopup();
-        } else {
-          this.toggleDetails();
-        }
-      }
+    attachPressInteraction(scene, this, {
+      onTap: () => this.toggleDetails(),
+      onSecondary: () => this.openDetailPopup(),
     });
 
     scene.add.existing(this);

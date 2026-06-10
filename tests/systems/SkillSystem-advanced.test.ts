@@ -1,8 +1,8 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
-// Mock DamageNumber — executeSkill 中会 new DamageNumber(...)
+// Mock DamageNumber — executeSkill 中会调用 DamageNumber.spawn(...)
 vi.mock('../../src/components/DamageNumber', () => ({
-  DamageNumber: vi.fn(),
+  DamageNumber: { spawn: vi.fn() },
 }));
 
 import { SkillSystem } from '../../src/systems/SkillSystem';

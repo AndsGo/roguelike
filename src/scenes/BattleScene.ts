@@ -5,7 +5,7 @@ import { RunManager } from '../managers/RunManager';
 import { BattleSystem } from '../systems/BattleSystem';
 import { Hero } from '../entities/Hero';
 import { Enemy } from '../entities/Enemy';
-import { BattleNodeData, EnemyData, BattleResult, ElementType, HeroData } from '../types';
+import { ActConfig, BattleNodeData, EnemyData, BattleResult, ElementType, HeroData } from '../types';
 import { BattleHUD } from '../ui/BattleHUD';
 import { BattleEffects } from '../systems/BattleEffects';
 import { ParticleManager } from '../systems/ParticleManager';
@@ -22,6 +22,8 @@ import { Unit } from '../entities/Unit';
 import { Theme, colorToString, getElementColor } from '../ui/Theme';
 import { hasElementAdvantage } from '../config/elements';
 import enemiesData from '../data/enemies.json';
+import actsData from '../data/acts.json';
+import { queueUnitSpriteSheets } from '../systems/UnitSpriteAssets';
 import skillsData from '../data/skills.json';
 import skillVisualsData from '../data/skill-visuals.json';
 import { Button } from '../ui/Button';
@@ -94,6 +96,23 @@ export class BattleScene extends Phaser.Scene {
     this.nodeIndex = data?.nodeIndex ?? 0;
     this.battleEndHandled = false;
     this.allUnits = [];
+  }
+
+  preload(): void {
+    // Per-battle spritesheet loading (the 55 sheets total ~80MB, far too
+    // heavy to preload on mobile): queue only what this battle can need —
+    // the party's heroes plus the current act's enemy/boss pools. Anything
+    // missed (e.g. mid-battle summons) renders via the chibi fallback.
+    const rm = RunManager.getInstance();
+    const keys: Array<string | undefined> = [];
+    for (const state of rm.getHeroes()) {
+      keys.push(rm.getHeroData(state.id)?.spriteKey);
+    }
+    const act = (actsData as ActConfig[])[rm.getCurrentAct()];
+    for (const id of [...(act?.enemyPool ?? []), ...(act?.bossPool ?? [])]) {
+      keys.push((enemiesData as EnemyData[]).find(e => e.id === id)?.spriteKey);
+    }
+    queueUnitSpriteSheets(this, keys);
   }
 
   create(): void {
@@ -740,6 +759,14 @@ export class BattleScene extends Phaser.Scene {
       }
     });
 
+    // Run-overview button: the only touch path to the overview (Tab on desktop)
+    TextFactory.create(this, GAME_WIDTH - 10, GAME_HEIGHT - 102, '[概览]', 'small', {
+      color: '#888888',
+    }).setOrigin(1, 1);
+    const overviewHit = this.add.rectangle(GAME_WIDTH - 35, GAME_HEIGHT - 107, 64, 26, 0x000000, 0)
+      .setInteractive({ useHandCursor: true });
+    overviewHit.on('pointerup', () => this.openOverview());
+
     // Target selection mode handlers
     this.onTargetRequest = (data) => {
       this.enterTargetingMode(data.unitId, data.skillId, data.targetType);
@@ -786,19 +813,7 @@ export class BattleScene extends Phaser.Scene {
 
     // Tab key for run overview
     const tabKey = this.input.keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.TAB);
-    tabKey?.on('down', () => {
-      if (this.overviewPanel) return;
-      if (!this.battleSystem.isPaused) {
-        this.battleSystem.isPaused = true;
-      }
-      this.overviewPanel = new RunOverviewPanel(this, () => {
-        this.overviewPanel = null;
-        // Resume if no pause menu is open
-        if (this.pauseElements.length === 0) {
-          this.battleSystem.isPaused = false;
-        }
-      });
-    });
+    tabKey?.on('down', () => this.openOverview());
 
     TutorialSystem.showTipIfNeeded(this, 'first_battle');
 
@@ -813,6 +828,21 @@ export class BattleScene extends Phaser.Scene {
     if (rm.getState().activeSynergies && rm.getState().activeSynergies.length > 0) {
       TutorialSystem.showTipIfNeeded(this, 'first_synergy');
     }
+  }
+
+  /** Open the run overview, pausing combat while it is visible. */
+  private openOverview(): void {
+    if (this.overviewPanel) return;
+    if (!this.battleSystem.isPaused) {
+      this.battleSystem.isPaused = true;
+    }
+    this.overviewPanel = new RunOverviewPanel(this, () => {
+      this.overviewPanel = null;
+      // Resume if no pause menu is open
+      if (this.pauseElements.length === 0) {
+        this.battleSystem.isPaused = false;
+      }
+    });
   }
 
   private enterTargetingMode(unitId: string, skillId: string, targetType: string): void {

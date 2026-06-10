@@ -10,6 +10,7 @@ import { RunManager } from '../managers/RunManager';
 import { SYNERGY_DEFINITIONS } from '../config/synergies';
 import { SkillBar } from './SkillBar';
 import { SkillQueueSystem } from '../systems/SkillQueueSystem';
+import { attachPressInteraction } from './PressInteraction';
 import { SaveManager } from '../managers/SaveManager';
 
 /**
@@ -287,10 +288,13 @@ export class BattleHUD extends Phaser.GameObjects.Container {
         }).setOrigin(0, 1).setAlpha(0).setDepth(110);
         this.add(tooltip);
 
-        // Create invisible hit zone for pointer events
-        const hitZone = this.scene.add.zone(x, y, 18, 18).setInteractive({ useHandCursor: true });
-        hitZone.on('pointerover', () => tooltip.setAlpha(1));
-        hitZone.on('pointerout', () => tooltip.setAlpha(0));
+        // Invisible hit zone: hover (desktop) / long-press or tap (touch) toggles the tooltip
+        const hitZone = this.scene.add.zone(x, y, 26, 26).setInteractive({ useHandCursor: true });
+        attachPressInteraction(this.scene, hitZone, {
+          onTap: () => tooltip.setAlpha(tooltip.alpha > 0 ? 0 : 1),
+          onShowInfo: () => tooltip.setAlpha(1),
+          onHideInfo: () => tooltip.setAlpha(0),
+        });
         this.add(hitZone);
       }
     });

@@ -381,9 +381,37 @@ export function getAllUnitSpriteSheets(): UnitSpriteSheetConfig[] {
   return Object.values(AI_UNIT_SPRITES);
 }
 
+/**
+ * Load EVERY authored spritesheet (~80MB of PNGs). Desktop-only luxury;
+ * mobile uses queueUnitSpriteSheets for per-battle loading instead.
+ * Kept exported for tooling/tests.
+ */
 export function preloadUnitSpriteSheets(scene: Phaser.Scene): void {
   for (const config of Object.values(AI_UNIT_SPRITES)) {
     if (!scene.textures.exists(config.textureKey)) {
+      scene.load.spritesheet(config.textureKey, config.path, {
+        frameWidth: config.frameWidth,
+        frameHeight: config.frameHeight,
+      });
+    }
+  }
+}
+
+/**
+ * Queue only the spritesheets for the given sprite keys (skipping unknown
+ * keys and already-loaded textures). Call from a scene's preload(), where
+ * Phaser runs the loader automatically before create().
+ *
+ * Safe to under-queue: Unit falls back to a generated chibi texture when
+ * a sheet isn't present (see Unit's constructor).
+ */
+export function queueUnitSpriteSheets(
+  scene: Phaser.Scene,
+  spriteKeys: Array<string | undefined | null>,
+): void {
+  for (const key of spriteKeys) {
+    const config = key ? AI_UNIT_SPRITES[key] : undefined;
+    if (config && !scene.textures.exists(config.textureKey)) {
       scene.load.spritesheet(config.textureKey, config.path, {
         frameWidth: config.frameWidth,
         frameHeight: config.frameHeight,

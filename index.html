@@ -4,9 +4,32 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <title>Roguelike Auto-Battler</title>
+  <link rel="icon" type="image/png" href="favicon.png" />
+  <!-- PWA: add-to-home-screen is the only true-fullscreen path on iOS -->
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="theme-color" content="#1a1a2e" />
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { background: #111; overflow: hidden; display: flex; justify-content: center; align-items: center; height: 100vh; touch-action: none; }
+    /* dvh tracks the mobile browser address bar collapsing; vh does not */
+    @supports (height: 100dvh) {
+      body { height: 100dvh; }
+    }
+    /* Keep the canvas out of the notch / home-indicator zones.
+       viewport-fit=cover extends the page under them; these insets pull
+       the game area back inside the safe region (0 on regular screens).
+       NOTE: no flex centering here — Phaser's CENTER_BOTH already centers
+       the canvas inside this container; double-centering skews it. */
+    #game-container {
+      width: 100%;
+      height: 100%;
+      padding: env(safe-area-inset-top, 0) env(safe-area-inset-right, 0)
+               env(safe-area-inset-bottom, 0) env(safe-area-inset-left, 0);
+    }
     canvas { image-rendering: pixelated; image-rendering: crisp-edges; touch-action: manipulation; }
 
     /* 手机竖屏旋转提示 */
@@ -33,24 +56,35 @@
     <div style="font-size: 48px;">↻</div>
     <div>请旋转手机至横屏</div>
   </div>
+  <div id="game-container"></div>
   <script>
-    // 移动设备首次触摸时请求全屏 + 横屏锁定
+    // 移动设备触摸时请求全屏 + 横屏锁定。
+    // iOS Safari 不支持 documentElement.requestFullscreen / orientation.lock,
+    // 这条链路在 iPhone 上会静默失败 —— 那里靠旋转提示 + PWA(manifest)兜底。
+    // 监听不再用 once:在 Android 上首次请求被拒(如手势不被认可)时后续触摸可重试。
     (function() {
       var isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
       if (!isMobile) return;
 
-      document.addEventListener('touchend', function onFirstTouch() {
-        document.removeEventListener('touchend', onFirstTouch);
+      function requestFullscreen() {
+        if (document.fullscreenElement) {
+          document.removeEventListener('touchend', requestFullscreen);
+          return;
+        }
         var el = document.documentElement;
         var rfs = el.requestFullscreen || el.webkitRequestFullscreen;
-        if (rfs) {
-          rfs.call(el).then(function() {
-            if (screen.orientation && screen.orientation.lock) {
-              screen.orientation.lock('landscape').catch(function() {});
-            }
-          }).catch(function() {});
+        if (!rfs) {
+          document.removeEventListener('touchend', requestFullscreen);
+          return;
         }
-      }, { once: true });
+        rfs.call(el).then(function() {
+          document.removeEventListener('touchend', requestFullscreen);
+          if (screen.orientation && screen.orientation.lock) {
+            screen.orientation.lock('landscape').catch(function() {});
+          }
+        }).catch(function() {});
+      }
+      document.addEventListener('touchend', requestFullscreen);
     })();
   </script>
   <script type="module" src="/src/main.ts"></script>

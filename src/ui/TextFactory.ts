@@ -10,8 +10,8 @@ const PRESETS: Record<TextPreset, Phaser.Types.GameObjects.Text.TextStyle> = {
   subtitle: { fontSize: '16px', fontFamily: FONT_FAMILY, fontStyle: 'bold' },
   body:     { fontSize: '13px', fontFamily: FONT_FAMILY },
   label:    { fontSize: '11px', fontFamily: FONT_FAMILY, fontStyle: 'bold' },
-  small:    { fontSize: '10px', fontFamily: FONT_FAMILY },
-  tiny:     { fontSize: '9px',  fontFamily: FONT_FAMILY },
+  small:    { fontSize: '11px', fontFamily: FONT_FAMILY },
+  tiny:     { fontSize: '10px', fontFamily: FONT_FAMILY },
 };
 
 export class TextFactory {

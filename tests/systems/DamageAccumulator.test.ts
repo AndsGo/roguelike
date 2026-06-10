@@ -1,16 +1,17 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 // Mock DamageNumber before importing DamageAccumulator
+// (production code calls the pooled static factory DamageNumber.spawn)
 vi.mock('../../src/components/DamageNumber', () => {
   return {
-    DamageNumber: vi.fn(),
+    DamageNumber: { spawn: vi.fn() },
   };
 });
 
 import { DamageAccumulator } from '../../src/systems/DamageAccumulator';
 import { DamageNumber } from '../../src/components/DamageNumber';
 
-const MockDamageNumber = DamageNumber as unknown as ReturnType<typeof vi.fn>;
+const MockDamageNumber = DamageNumber.spawn as unknown as ReturnType<typeof vi.fn>;
 
 function createMockScene(): any {
   return {

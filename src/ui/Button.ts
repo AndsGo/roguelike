@@ -2,9 +2,16 @@ import Phaser from 'phaser';
 import { Theme, lightenColor, darkenColor } from './Theme';
 import { AudioManager } from '../systems/AudioManager';
 import { TextFactory } from './TextFactory';
+import { isTouchDevice, tapTolerance } from '../utils/device';
 
 export class Button extends Phaser.GameObjects.Container {
   private static readonly HIT_PADDING = 8;
+  /**
+   * Minimum hit-area edge on touch devices, in game pixels.
+   * 52 game px ≈ 44 CSS px at the ~0.85 FIT scale of a small phone —
+   * the iOS/Android touch-target guideline. Visuals are unaffected.
+   */
+  private static readonly MIN_TOUCH_HIT = 52;
   private bg: Phaser.GameObjects.Graphics;
   private label: Phaser.GameObjects.Text;
   private isEnabled: boolean = true;
@@ -41,6 +48,7 @@ export class Button extends Phaser.GameObjects.Container {
     this.label = TextFactory.create(scene, 0, 0, text, 'subtitle', {
       color: '#ffffff',
     }).setOrigin(0.5);
+    this.fitLabel();
     this.add(this.label);
 
     this.setSize(width, height);
@@ -55,15 +63,19 @@ export class Button extends Phaser.GameObjects.Container {
   }
 
   private buildHitConfig(): Phaser.Types.Input.InputConfiguration {
-    const p = Button.HIT_PADDING;
+    // Per-axis padding: at least HIT_PADDING; on touch devices grow small
+    // buttons up to MIN_TOUCH_HIT without changing their visuals.
+    const minEdge = isTouchDevice() ? Button.MIN_TOUCH_HIT : 0;
+    const px = Math.max(Button.HIT_PADDING, (minEdge - this.btnWidth) / 2);
+    const py = Math.max(Button.HIT_PADDING, (minEdge - this.btnHeight) / 2);
     // Note: Phaser's setInteractive() on Containers sets origin to 0.5,
     // which adds displayOriginX/Y (=width/2, height/2) to hit test coords.
-    // So hit area Rectangle(-p, -p, w+2p, h+2p) maps to world-space
-    // [-w/2-p, +w/2+p] centered on the Container's position.
+    // So hit area Rectangle(-px, -py, w+2px, h+2py) maps to world-space
+    // [-w/2-px, +w/2+px] centered on the Container's position.
     return {
       hitArea: new Phaser.Geom.Rectangle(
-        -p, -p,
-        this.btnWidth + p * 2, this.btnHeight + p * 2,
+        -px, -py,
+        this.btnWidth + px * 2, this.btnHeight + py * 2,
       ),
       hitAreaCallback: Phaser.Geom.Rectangle.Contains,
       useHandCursor: true,
@@ -131,9 +143,11 @@ export class Button extends Phaser.GameObjects.Container {
     });
 
     // Fire callback if pointer didn't drag far from press position
+    // (tolerance is wider for touch — fingers wobble more than mice)
+    const tol = tapTolerance();
     const dx = pointer.x - this.pressX;
     const dy = pointer.y - this.pressY;
-    if (dx * dx + dy * dy < 400) { // < 20px movement
+    if (dx * dx + dy * dy < tol * tol) {
       AudioManager.getInstance().playSfx('sfx_click');
       if (this.callback) this.callback();
     }
@@ -154,5 +168,19 @@ export class Button extends Phaser.GameObjects.Container {
 
   setText(text: string): void {
     this.label.setText(text);
+    this.fitLabel();
+  }
+
+  /**
+   * Shrink the label so it never spills outside the button — long Chinese
+   * labels overflow fixed-width buttons once the accessibility textScale
+   * (mobile default 1.25) kicks in.
+   */
+  private fitLabel(): void {
+    const maxW = this.btnWidth - 10;
+    this.label.setScale(1);
+    if (this.label.width > maxW) {
+      this.label.setScale(maxW / this.label.width);
+    }
   }
 }

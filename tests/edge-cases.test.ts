@@ -3,7 +3,7 @@ import { createMockLocalStorage } from './mocks/phaser';
 
 // Mock DamageNumber — StatusEffectSystem 依赖
 vi.mock('../src/components/DamageNumber', () => ({
-  DamageNumber: vi.fn(),
+  DamageNumber: { spawn: vi.fn() },
 }));
 
 const mockStorage = createMockLocalStorage();

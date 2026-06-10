@@ -37,7 +37,7 @@ export class StatusEffectSystem {
             if (StatusEffectSystem.accumulator) {
               StatusEffectSystem.accumulator.addDamage(unit.unitId, unit.scene, unit.x, unit.y, dmg, { element: effect.element });
             } else {
-              new DamageNumber(unit.scene, unit.x, unit.y - 20, dmg, false, false);
+              DamageNumber.spawn(unit.scene, unit.x, unit.y - 20, dmg, false, false);
             }
             // Emit damage event so AudioManager plays sfx_hit
             const bus = EventBus.getInstance();
@@ -62,7 +62,7 @@ export class StatusEffectSystem {
             if (StatusEffectSystem.accumulator) {
               StatusEffectSystem.accumulator.addHeal(unit.unitId, unit.scene, unit.x, unit.y, heal);
             } else {
-              new DamageNumber(unit.scene, unit.x, unit.y - 20, heal, true, false);
+              DamageNumber.spawn(unit.scene, unit.x, unit.y - 20, heal, true, false);
             }
           }
         }

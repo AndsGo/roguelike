@@ -21,6 +21,7 @@ import { SkillEvolutionPanel } from '../ui/SkillEvolutionPanel';
 import { hasEvolutionConfig, getEvolutionBranches } from '../systems/SkillSystem';
 import heroesData from '../data/heroes.json';
 import skillsData from '../data/skills.json';
+import { isTouchDevice } from '../utils/device';
 
 export class MapScene extends Phaser.Scene {
   private mapContainer!: Phaser.GameObjects.Container;
@@ -243,8 +244,9 @@ export class MapScene extends Phaser.Scene {
         }).setOrigin(0.5);
         this.mapContainer.add(costText);
 
-        // Click to reveal
-        const hitArea = this.add.zone(pos.x, pos.y, radius * 2, radius * 2).setInteractive({ useHandCursor: true });
+        // Click to reveal (touch devices get a larger hit zone)
+        const hiddenHit = isTouchDevice() ? Math.max(radius * 2, 52) : radius * 2;
+        const hitArea = this.add.zone(pos.x, pos.y, hiddenHit, hiddenHit).setInteractive({ useHandCursor: true });
         this.mapContainer.add(hitArea);
         hitArea.on('pointerup', () => {
           if (this.isDragging) return;
@@ -343,7 +345,9 @@ export class MapScene extends Phaser.Scene {
 
       // Make accessible nodes clickable + hover tooltip for all uncompleted
       if (isAccessible || !isCompleted) {
-        const hitArea = this.add.circle(pos.x, pos.y, radius + 6)
+        // Touch: enlarge node hit circle to ~52 game px diameter (≈44 CSS px)
+        const hitRadius = isTouchDevice() ? Math.max(radius + 6, 26) : radius + 6;
+        const hitArea = this.add.circle(pos.x, pos.y, hitRadius)
           .setInteractive({ useHandCursor: isAccessible })
           .setAlpha(0.01);
         this.mapContainer.add(hitArea);
@@ -353,6 +357,15 @@ export class MapScene extends Phaser.Scene {
             if (!this.isDragging) {
               this.selectNode(node.index);
             }
+          });
+        } else {
+          // Inaccessible nodes have no tap action; on touch, tapping them
+          // is the only way to read their tooltip (no hover exists).
+          hitArea.on('pointerup', (pointer: Phaser.Input.Pointer) => {
+            if (this.isDragging || !pointer.wasTouch) return;
+            this.hideNodeTooltip();
+            this.activeTooltip = new NodeTooltip(this, pos.x, pos.y, node);
+            this.mapContainer.add(this.activeTooltip);
           });
         }
 

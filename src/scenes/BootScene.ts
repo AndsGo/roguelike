@@ -3,7 +3,6 @@ import { GAME_WIDTH, GAME_HEIGHT } from '../constants';
 import { AudioManager, BGM_KEYS, SFX_KEYS } from '../systems/AudioManager';
 import { SaveManager } from '../managers/SaveManager';
 import { TextFactory } from '../ui/TextFactory';
-import { preloadUnitSpriteSheets } from '../systems/UnitSpriteAssets';
 
 export class BootScene extends Phaser.Scene {
   constructor() {
@@ -43,7 +42,9 @@ export class BootScene extends Phaser.Scene {
       this.load.audio(key, [`audio/${key}.ogg`, `audio/${key}.mp3`]);
     }
 
-    preloadUnitSpriteSheets(this);
+    // Unit spritesheets (~80MB total) are intentionally NOT loaded here —
+    // BattleScene.preload() loads just the sheets each battle needs, and
+    // Unit falls back to generated chibi textures for anything missing.
   }
 
   create(): void {

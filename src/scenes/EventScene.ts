@@ -153,7 +153,9 @@ export class EventScene extends Phaser.Scene {
     // Step 4: Choices stagger in (700ms + i*120ms)
     const choiceElements: Phaser.GameObjects.GameObject[] = [];
     event.choices.forEach((choice, i) => {
-      const btnY = 165 + i * 55;
+      // 58px spacing leaves room for the probability hint below each button
+      // even at the mobile 1.25 text scale
+      const btnY = 165 + i * 58;
       const btn = new Button(
         this,
         GAME_WIDTH / 2,
@@ -182,7 +184,7 @@ export class EventScene extends Phaser.Scene {
           const label = this.getOutcomeSentiment(o);
           return `${UI.event.probability(pct)} ${label}`;
         });
-        const hintText = TextFactory.create(this, GAME_WIDTH / 2, btnY + 24, hints.join('  |  '), 'tiny', {
+        const hintText = TextFactory.create(this, GAME_WIDTH / 2, btnY + 27, hints.join('  |  '), 'tiny', {
           color: '#888899',
           align: 'center',
         }).setOrigin(0.5).setAlpha(0);

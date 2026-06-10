@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { Theme } from './Theme';
 import { TextFactory } from './TextFactory';
+import { isTouchDevice } from '../utils/device';
 
 export interface PanelConfig {
   title?: string;
@@ -42,6 +43,9 @@ export class Panel extends Phaser.GameObjects.Container {
   private dragStartY = 0;
   private dragScrollStart = 0;
   private dragActive = false;
+  private dragVelocity = 0;
+  private lastDragY = 0;
+  private inertiaTween: Phaser.Tweens.Tween | null = null;
 
   constructor(
     scene: Phaser.Scene,
@@ -129,12 +133,18 @@ export class Panel extends Phaser.GameObjects.Container {
     scene.input.on('wheel', wheelHandler);
     this.sceneWheelHandler = wheelHandler;
 
-    // Scene-level drag-to-scroll
+    // Scene-level drag-to-scroll.
+    // Threshold: 4px feels right with a mouse, but finger taps wobble —
+    // 10px keeps child buttons tappable without hijacking the tap as a drag.
+    const dragThreshold = isTouchDevice() ? 10 : 4;
     const downHandler = (pointer: Phaser.Input.Pointer) => {
       if (panelRef.isPointerInBounds(pointer)) {
+        panelRef.stopInertia();
         panelRef.dragActive = true;
         panelRef.isDragScrolling = false;
         panelRef.dragStartY = pointer.y;
+        panelRef.lastDragY = pointer.y;
+        panelRef.dragVelocity = 0;
         panelRef.dragScrollStart = panelRef.scrollY;
       }
     };
@@ -144,8 +154,12 @@ export class Panel extends Phaser.GameObjects.Container {
         return;
       }
       const dy = pointer.y - panelRef.dragStartY;
-      if (Math.abs(dy) > 4) panelRef.isDragScrolling = true;
+      if (Math.abs(dy) > dragThreshold) panelRef.isDragScrolling = true;
       if (panelRef.isDragScrolling) {
+        // Smoothed per-event velocity for the release inertia
+        const step = pointer.y - panelRef.lastDragY;
+        panelRef.dragVelocity = panelRef.dragVelocity * 0.3 + step * 0.7;
+        panelRef.lastDragY = pointer.y;
         const maxScroll = panelRef.getMaxScroll();
         panelRef.scrollY = Phaser.Math.Clamp(panelRef.dragScrollStart - dy, 0, maxScroll);
         panelRef.contentContainer.y = -panelRef.scrollY + (panelRef.config.title ? 12 : 0);
@@ -153,6 +167,9 @@ export class Panel extends Phaser.GameObjects.Container {
       }
     };
     const upHandler = () => {
+      if (panelRef.isDragScrolling && Math.abs(panelRef.dragVelocity) > 3) {
+        panelRef.startInertia(panelRef.dragVelocity);
+      }
       panelRef.dragActive = false;
       panelRef.isDragScrolling = false;
     };
@@ -206,6 +223,30 @@ export class Panel extends Phaser.GameObjects.Container {
     this.scrollY = Phaser.Math.Clamp(this.scrollY + deltaY * 0.5, 0, maxScroll);
     this.contentContainer.y = -this.scrollY + (this.config.title ? 12 : 0);
     this.updateScrollbar();
+  }
+
+  /** Flick inertia: keep scrolling after release, decaying to a stop. */
+  private startInertia(releaseVelocity: number): void {
+    this.stopInertia();
+    this.inertiaTween = this.scene.tweens.addCounter({
+      from: releaseVelocity,
+      to: 0,
+      duration: 600,
+      ease: 'Quad.easeOut',
+      onUpdate: (tween) => {
+        const v = (tween as unknown as { getValue: () => number }).getValue();
+        const maxScroll = this.getMaxScroll();
+        this.scrollY = Phaser.Math.Clamp(this.scrollY - v, 0, maxScroll);
+        this.contentContainer.y = -this.scrollY + (this.config.title ? 12 : 0);
+        this.updateScrollbar();
+        if (this.scrollY <= 0 || this.scrollY >= maxScroll) this.stopInertia();
+      },
+    }) as unknown as Phaser.Tweens.Tween;
+  }
+
+  private stopInertia(): void {
+    this.inertiaTween?.remove();
+    this.inertiaTween = null;
   }
 
   /** Draw scrollbar indicator on the right edge */
@@ -266,6 +307,7 @@ export class Panel extends Phaser.GameObjects.Container {
 
   /** Animate closing, then destroy */
   close(onComplete?: () => void): void {
+    this.stopInertia();
     this.removeInputHandlers();
     this.scene.tweens.add({
       targets: this,

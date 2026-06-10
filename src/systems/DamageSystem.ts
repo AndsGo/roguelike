@@ -210,7 +210,7 @@ export class DamageSystem {
         comboCount: this.comboSystem ? this.comboSystem.getComboCount(attacker.unitId) : undefined,
       });
     } else {
-      new DamageNumber(
+      DamageNumber.spawn(
         target.scene,
         target.x + this.rng.nextInt(-10, 10),
         target.y - 20,
@@ -225,7 +225,7 @@ export class DamageSystem {
       if (this.accumulator) {
         this.accumulator.addDamage(`${target.unitId}_reaction`, target.scene, target.x + this.rng.nextInt(-10, 10), target.y, result.elementReactionDamage);
       } else {
-        new DamageNumber(
+        DamageNumber.spawn(
           target.scene,
           target.x + this.rng.nextInt(-10, 10),
           target.y - 30,
@@ -326,7 +326,7 @@ export class DamageSystem {
       if (this.accumulator) {
         this.accumulator.addHeal(target.unitId, target.scene, target.x + this.rng.nextInt(-10, 10), target.y, actual);
       } else {
-        new DamageNumber(
+        DamageNumber.spawn(
           target.scene,
           target.x + this.rng.nextInt(-10, 10),
           target.y - 20,
