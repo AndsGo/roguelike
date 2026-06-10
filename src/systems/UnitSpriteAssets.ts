@@ -405,18 +405,46 @@ export function preloadUnitSpriteSheets(scene: Phaser.Scene): void {
  * Safe to under-queue: Unit falls back to a generated chibi texture when
  * a sheet isn't present (see Unit's constructor).
  */
+/**
+ * Texture keys currently queued on SOME scene's loader (key → queued-at ms).
+ * MapScene prefetches in the background while BattleScene.preload may queue
+ * the same sheets — without this guard the second registration logs
+ * "Texture key already in use". IMPORTANT: a stopping scene does NOT abort
+ * its in-flight XHRs (they still complete and register the texture), so
+ * entries are released per-file on filecomplete/loaderror — never on scene
+ * shutdown. A 60s staleness window re-permits queueing in the unlikely case
+ * a download silently dies (the chibi fallback covers that battle anyway).
+ */
+const inFlightKeys = new Map<string, number>();
+const IN_FLIGHT_STALE_MS = 60_000;
+
 export function queueUnitSpriteSheets(
   scene: Phaser.Scene,
   spriteKeys: Array<string | undefined | null>,
 ): void {
+  // Guards keep this a no-op under the Node test stubs (no loader there).
+  if (!scene.load?.spritesheet || !scene.textures?.exists) return;
+  const now = Date.now();
+  const batch = new Set<string>();
   for (const key of spriteKeys) {
     const config = key ? AI_UNIT_SPRITES[key] : undefined;
-    if (config && !scene.textures.exists(config.textureKey)) {
-      scene.load.spritesheet(config.textureKey, config.path, {
-        frameWidth: config.frameWidth,
-        frameHeight: config.frameHeight,
-      });
-    }
+    if (!config || scene.textures.exists(config.textureKey)) continue;
+    const queuedAt = inFlightKeys.get(config.textureKey);
+    if (queuedAt !== undefined && now - queuedAt < IN_FLIGHT_STALE_MS) continue;
+    inFlightKeys.set(config.textureKey, now);
+    batch.add(config.textureKey);
+    scene.load.spritesheet(config.textureKey, config.path, {
+      frameWidth: config.frameWidth,
+      frameHeight: config.frameHeight,
+    });
+    scene.load.once?.(`filecomplete-spritesheet-${config.textureKey}`, () => {
+      inFlightKeys.delete(config.textureKey);
+    });
+  }
+  if (batch.size > 0) {
+    scene.load.on?.('loaderror', (file: { key?: string }) => {
+      if (file?.key && batch.has(file.key)) inFlightKeys.delete(file.key);
+    });
   }
 }
 

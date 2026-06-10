@@ -104,6 +104,8 @@ export class BattleScene extends Phaser.Scene {
     // heavy to preload on mobile): queue only what this battle can need —
     // the party's heroes plus the current act's enemy/boss pools. Anything
     // missed (e.g. mid-battle summons) renders via the chibi fallback.
+    // MapScene prefetches the same set in the background, so on most runs
+    // everything is already cached and this queue is empty.
     const rm = RunManager.getInstance();
     const keys: Array<string | undefined> = [];
     for (const state of rm.getHeroes()) {
@@ -114,6 +116,33 @@ export class BattleScene extends Phaser.Scene {
       keys.push((enemiesData as EnemyData[]).find(e => e.id === id)?.spriteKey);
     }
     queueUnitSpriteSheets(this, keys);
+
+    // On a slow network the downloads above can take many seconds and the
+    // scene renders NOTHING until create() — which reads as a freeze. Show
+    // a progress bar whenever there is anything left to fetch. (No camera
+    // transform exists yet in preload, so lay out in raw canvas pixels.)
+    if ((this.load.list?.size ?? 0) > 0) {
+      const sw = this.scale.width;
+      const sh = this.scale.height;
+      const barW = Math.min(360, sw * 0.5);
+      const label = this.add.text(sw / 2, sh / 2 - 28, '进入战斗…', {
+        fontSize: '20px',
+        fontFamily: '"Microsoft YaHei", "PingFang SC", sans-serif',
+        color: '#ccccdd',
+      }).setOrigin(0.5).setResolution(2);
+      const barBg = this.add.rectangle(sw / 2, sh / 2 + 8, barW, 14, 0x222233).setStrokeStyle(1, 0x4488ff);
+      const barFill = this.add.rectangle(sw / 2 - barW / 2 + 2, sh / 2 + 8, 0, 10, 0x4488ff).setOrigin(0, 0.5);
+      const onProgress = (value: number): void => {
+        barFill.width = (barW - 4) * value;
+      };
+      this.load.on('progress', onProgress);
+      this.load.once('complete', () => {
+        this.load.off('progress', onProgress);
+        label.destroy();
+        barBg.destroy();
+        barFill.destroy();
+      });
+    }
   }
 
   create(): void {

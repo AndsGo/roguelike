@@ -3,7 +3,7 @@ import { MAP_HIDDEN_NODE_COST, EVOLUTION_LEVEL } from '../constants';
 import { SaveManager } from '../managers/SaveManager';
 import { RunManager } from '../managers/RunManager';
 import { MapGenerator } from '../systems/MapGenerator';
-import { MapNode, ActConfig, SkillData } from '../types';
+import { MapNode, ActConfig, EnemyData, SkillData } from '../types';
 import { Theme, colorToString, getNodeColor } from '../ui/Theme';
 import { SceneTransition } from '../systems/SceneTransition';
 import { Button } from '../ui/Button';
@@ -21,6 +21,8 @@ import { SkillEvolutionPanel } from '../ui/SkillEvolutionPanel';
 import { hasEvolutionConfig, getEvolutionBranches } from '../systems/SkillSystem';
 import heroesData from '../data/heroes.json';
 import skillsData from '../data/skills.json';
+import enemiesData from '../data/enemies.json';
+import { queueUnitSpriteSheets } from '../systems/UnitSpriteAssets';
 import { isTouchDevice } from '../utils/device';
 import { applyUiCamera, fillBackground, onViewResize, pointerView, restartOnResize, view } from '../ui/Viewport';
 
@@ -514,6 +516,20 @@ export class MapScene extends Phaser.Scene {
     this.checkPendingEvolutions(rm);
 
     TutorialSystem.showTipIfNeeded(this, 'first_map');
+
+    // Background-prefetch this act's unit spritesheets while the player is
+    // looking at the map, so entering a battle is instant. BattleScene's
+    // own preload skips textures that already exist; anything still in
+    // flight there shows its progress bar instead of a black screen.
+    const prefetchKeys: Array<string | undefined> = rm.getHeroes().map(h => rm.getHeroData(h.id)?.spriteKey);
+    const actCfg = acts[rm.getCurrentAct()];
+    for (const id of [...(actCfg?.enemyPool ?? []), ...(actCfg?.bossPool ?? [])]) {
+      prefetchKeys.push((enemiesData as EnemyData[]).find(e => e.id === id)?.spriteKey);
+    }
+    queueUnitSpriteSheets(this, prefetchKeys);
+    if ((this.load?.list?.size ?? 0) > 0) {
+      this.load.start();
+    }
   }
 
   private setupDragScroll(): void {
