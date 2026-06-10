@@ -195,6 +195,23 @@ Day 27 (Jun 10) — 移动端全面适配 (v1.26.0)
  ├─ 审核员E2E (Playwright hasTouch+isMobile 真触摸上下文) 全项通过
  │   └─ 发现并修复: #game-container flex居中与 CENTER_BOTH 双重居中致画布偏移
  └─ → 1198 测试通过, 99 套件, 零 TypeScript 错误
+
+Day 27 续 (Jun 10 下午) — 响应式架构 Scale.RESIZE (v1.27.0)
+ ├─ 设计: 3方案对比(令牌布局档/双分辨率/RESIZE), 用户拍板方案三
+ ├─ 架构: 相机缩放映射设计坐标 (src/ui/Viewport.ts)
+ │   ├─ 纯UI场景 zoom=fit×boost(移动1.25) → 动态设计视口 vw/vh
+ │   ├─ 战斗场景 zoom=fit, 战场800×450坐标零迁移
+ │   ├─ pointerView/viewBounds: 指针转换 + 双相机模式通用模态定位
+ │   └─ restartOnResize: 无状态场景窗口变化重建 (RNG场景禁用)
+ ├─ 迁移: 12场景 + 14模态组件 (3并行子代理 + 主会话收尾)
+ │   ├─ HeroDraft/Shop 响应式列数 + 纵向拖拽滚动
+ │   ├─ SkillBar/UltimateBar 底部锚定 + 触摸boost
+ │   └─ BattleHUD/地图顶栏 锚定真实屏幕边缘
+ ├─ E2E发现真bug: setScrollFactor(0)与缩放相机不兼容(zoom 2.4时元素
+ │   绕屏心外推出屏, 手机zoom≈1.08被掩盖) → 全仓清除
+ ├─ 验收: 1280×720/1920×1080/900×650/844×390真触摸 全过, 零黑边,
+ │   桌面文字原生分辨率渲染
+ └─ → 1198 测试通过, 99 套件, 零 TypeScript 错误, 生产构建通过
 ```
 
 ---

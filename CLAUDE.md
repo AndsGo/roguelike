@@ -61,13 +61,24 @@ Units are 16×20 pixel grids composited from layered templates (`src/data/pixel-
 
 **Authored spritesheets** (`public/assets/units/`, configs in `src/systems/UnitSpriteAssets.ts`) are preferred over chibi when loaded. They are **NOT preloaded at boot** (~24MB total): `BattleScene.preload()` queues only the sheets that battle needs (party heroes + current act's enemy/boss pools) via `queueUnitSpriteSheets()`. Anything missing falls back to chibi automatically — under-loading is safe. New sheets must be run through `node scripts/compress-sprites.mjs` (256-color palette quantization).
 
+### Responsive Viewport (Scale.RESIZE)
+
+The canvas always matches the window/device size; the MAIN CAMERA's zoom maps 800×450 design units onto it (see `src/ui/Viewport.ts` — the single source of truth):
+
+- **Pure-UI scenes** (menus, draft, shop, event, rest, end screens): `onViewResize(this, () => applyUiCamera(this))` at create() start. Zoom = `fit × boost` (boost 1.25 on touch — this is what makes mobile UI physically larger). Lay out against `view(this).vw/vh` (the DYNAMIC design viewport: exactly 800×450 on 16:9 desktop, ~640×360 on phones), never GAME_WIDTH/HEIGHT.
+- **World scenes** (Battle): `applyWorldCamera(this)` — zoom = plain `fit`, world stays 800×450. Center-based UI (GAME_WIDTH/2) is still correct (camera centers there); edge-anchored UI uses `viewBounds(scene)`.
+- **Stateless scenes** add `restartOnResize(this, initData)` to rebuild on window resize. NEVER on scenes whose create() consumes RNG (ShopScene) or holds battle state.
+- **Pointer gotcha:** with a zoomed camera `pointer.x/y` are CANVAS pixels. Any comparison against design coordinates must convert via `pointerView(scene, pointer)`. Modal backdrops size/center via `viewBounds(scene)` (works under both camera modes).
+- **NEVER use `setScrollFactor(0)`** — with a zoomed camera, sf=0 objects scale around the screen center and fly off-screen (broke the map header at 1920×1080). Fixed UI is just normal objects; nothing scrolls the camera.
+- **Overflow strategy:** grids compute column count from `vw` (HeroDraft/Shop) and add a drag-scroll container when content exceeds the viewport. Popups clamp `Math.min(size, viewBounds.h - 16)`.
+
 ### Mobile Adaptation
 
 - **No hover-only or right-click-only UI.** Use `attachPressInteraction(scene, target, {onTap, onShowInfo, onHideInfo, onSecondary})` from `src/ui/PressInteraction.ts`: desktop hover → info, touch long-press (350ms) → info/secondary, right-click → secondary, tap → action. Don't hand-roll pointerdown/up distance checks.
 - **Touch detection:** `isTouchDevice()` / `tapTolerance()` (35px touch, 20px mouse) in `src/utils/device.ts`. Tests force results via `__setTouchDeviceForTest()`.
-- **Text scale:** touch devices default to `textScale: 1.25` (set in `Theme.getAccessibility()`, applied inside TextFactory). Any fixed-size layout must tolerate 1.5×: advance rows by measured `text.height`, clamp labels with scale-to-fit (see `Button.fitLabel()`), don't hardcode row spacing tighter than the scaled line height.
-- **Touch targets:** ≥52 game px (≈44 CSS px at phone FIT scale). `Button` auto-expands its hit area on touch; for raw hit zones, size them explicitly.
-- **Canvas centering:** Phaser `CENTER_BOTH` centers inside `#game-container` — do NOT add flex centering to that container (double-centering skews the canvas). Safe-area insets are handled as container padding in index.html.
+- **Text scale:** touch devices default to `textScale: 1.25` (set in `Theme.getAccessibility()`, applied inside TextFactory) — multiplies with the camera boost. Any fixed-size layout must tolerate it: advance rows by measured `text.height`, clamp labels with scale-to-fit (see `Button.fitLabel()`).
+- **Touch targets:** ≥44 CSS px physical. `Button` auto-expands its hit area on touch; the camera boost (1.25) also enlarges everything physically.
+- **Safe-area insets** are handled as `#game-container` padding in index.html. Do NOT add flex centering to that container.
 
 ### UI Patterns
 
