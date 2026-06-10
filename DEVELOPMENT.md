@@ -6,11 +6,11 @@
 
 | 项目 | 数据 |
 |------|------|
-| 开发周期 | 2026-02-26 ~ 2026-03-26 |
-| Claude 会话数 | 36+ 次 |
-| Git 提交数 | 272+ |
-| 代码规模 | 105 文件, 22,500+ 行 TS + 5,100+ 行 JSON 数据 |
-| 测试用例 | 1137 (90 个测试套件) |
+| 开发周期 | 2026-02-26 ~ 2026-06-10 |
+| Claude 会话数 | 37+ 次 |
+| Git 提交数 | 275+ |
+| 代码规模 | 109 文件, 23,500+ 行 TS + 5,100+ 行 JSON 数据 |
+| 测试用例 | 1198 (99 个测试套件) |
 | 技术栈 | TypeScript + Phaser 3 + Vite |
 
 ---
@@ -174,6 +174,27 @@ Day 26 (Mar 26) — 敌人AI + 难度词缀系统
  │   └─ DamageSystem 元素词缀公式查询
  ├─ 截图更新 + README/DEVELOPMENT 文档更新
  └─ → 1137 测试通过, 90 套件, 零 TypeScript 错误
+
+Day 27 (Jun 10) — 移动端全面适配 (v1.26.0)
+ ├─ 评估: 4维度代码审计 + Playwright 手机分辨率 E2E → docs/mobile-eval/
+ │   └─ 结论: 触摸3/10、视口5/10、可读性4/10(70%文本≤10px)、加载4/10(80MB全量预载)
+ ├─ 阶段A 交互可读性:
+ │   ├─ PressInteraction 统一手势 (hover/长按tooltip、长按=右键、触摸容差35px)
+ │   ├─ 触摸设备 textScale 默认1.25 + tiny/small 预设+1px
+ │   ├─ Button/地图节点触摸热区自动扩至52px (视觉不变)
+ │   ├─ 战斗[概览]触屏按钮、触摸隐藏热键标签
+ │   ├─ Panel 触摸滚动 (阈值10px+惯性)、100dvh、scale.refresh、iOS全屏重试
+ ├─ 阶段B 加载性能:
+ │   ├─ 精灵图按需加载 (Boot 0预载, BattleScene.preload 按场加载, 实测9/55张)
+ │   ├─ 256色量化压缩 81.9MB→23.8MB (-71%, scripts/compress-sprites.mjs)
+ │   └─ DamageNumber 飘字对象池 (静态工厂替代 new)
+ ├─ 阶段C 深度适配:
+ │   ├─ 安全区 env(safe-area-inset) 容器内边距 + scale parent/min
+ │   ├─ PWA manifest+图标 (iOS全屏正解) + favicon
+ │   └─ 1.25布局核查修5处溢出 (详情弹窗行距/按钮标签/事件提示/技能槽名/休息按钮)
+ ├─ 审核员E2E (Playwright hasTouch+isMobile 真触摸上下文) 全项通过
+ │   └─ 发现并修复: #game-container flex居中与 CENTER_BOTH 双重居中致画布偏移
+ └─ → 1198 测试通过, 99 套件, 零 TypeScript 错误
 ```
 
 ---
