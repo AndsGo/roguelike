@@ -9,6 +9,8 @@ import { UI, getHeroDisplayName, ROLE_NAMES, RACE_NAMES, CLASS_NAMES } from '../
 import relicsData from '../data/relics.json';
 import itemsData from '../data/items.json';
 import { viewBounds, pointerView } from './Viewport';
+import { createVisualIcon } from './VisualIconRenderer';
+import { getEquipmentIconFrame, getRelicIconFrame } from './ItemIconMapping';
 
 const PANEL_WIDTH = 540;
 const PANEL_HEIGHT = 400;
@@ -141,11 +143,17 @@ export class RunOverviewPanel {
         const rarity = relicDef?.rarity ?? 'common';
         const rarityColor = getRarityColor(rarity);
 
-        // Rarity dot
-        const dotG = scene.add.graphics();
-        dotG.fillStyle(rarityColor, 1);
-        dotG.fillCircle(-240, y + 5, 3);
-        this.panel.addContent(dotG);
+        const relicIcon = createVisualIcon(scene, {
+          sheetKey: 'item_icons',
+          frameName: getRelicIconFrame(),
+          x: -240,
+          y: y + 6,
+          size: 12,
+          tint: rarityColor,
+          fallbackText: '*',
+          fallbackStyle: 'tiny',
+        });
+        this.panel.addContent(relicIcon);
 
         // Name
         const relicName = relicDef?.name ?? relicState.id;
@@ -251,11 +259,25 @@ export class RunOverviewPanel {
       for (const slot of slots) {
         const equip = heroState.equipment[slot];
         const slotLabel = slotLabels[slot];
+        const itemDefForIcon = equip ? (itemsData as any[]).find((it: any) => it.id === equip.id) : undefined;
+        const rarityColorForIcon = getRarityColor(itemDefForIcon?.rarity ?? equip?.rarity ?? 'common');
+        const slotIcon = createVisualIcon(scene, {
+          sheetKey: 'item_icons',
+          frameName: getEquipmentIconFrame(slot),
+          x: -232,
+          y: y + 5,
+          size: 11,
+          tint: equip ? rarityColorForIcon : 0x555566,
+          alpha: equip ? 1 : 0.45,
+          fallbackText: slotLabel.charAt(0),
+          fallbackStyle: 'tiny',
+        });
+        this.panel.addContent(slotIcon);
         if (equip) {
           const itemDef = (itemsData as any[]).find((it: any) => it.id === equip.id);
           const itemName = itemDef?.name ?? equip.id;
           const rarityColor = getRarityColor(itemDef?.rarity ?? 'common');
-          const itemText = TextFactory.create(scene, -228, y, `${slotLabel}: ${itemName}`, 'tiny', {
+          const itemText = TextFactory.create(scene, -216, y, `${slotLabel}: ${itemName}`, 'tiny', {
             color: colorToString(rarityColor),
           });
           this.panel.addContent(itemText);

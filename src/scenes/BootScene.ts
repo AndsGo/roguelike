@@ -3,6 +3,7 @@ import { AudioManager, BGM_KEYS, SFX_KEYS } from '../systems/AudioManager';
 import { SaveManager } from '../managers/SaveManager';
 import { TextFactory } from '../ui/TextFactory';
 import { applyUiCamera, onViewResize, view } from '../ui/Viewport';
+import { preloadVisualSpriteSheets } from '../systems/VisualSpriteAssets';
 
 export class BootScene extends Phaser.Scene {
   constructor() {
@@ -44,6 +45,8 @@ export class BootScene extends Phaser.Scene {
     for (const key of SFX_KEYS) {
       this.load.audio(key, [`audio/${key}.ogg`, `audio/${key}.mp3`]);
     }
+
+    preloadVisualSpriteSheets(this);
 
     // Unit spritesheets (~80MB total) are intentionally NOT loaded here —
     // BattleScene.preload() loads just the sheets each battle needs, and

@@ -291,7 +291,7 @@ export class DamageSystem {
     if (healBonus > 0) {
       healAmount = Math.round(healAmount * (1 + healBonus));
     }
-    const actual = target.heal(healAmount);
+    const actual = target.heal(healAmount, healer.unitId);
 
     // Overflow shield: excess healing becomes temporary HP (max 20% maxHp)
     const totalOverflow = healAmount - actual;

@@ -12,6 +12,7 @@ import { attachPressInteraction } from './PressInteraction';
 import { isTouchDevice } from '../utils/device';
 import { viewBounds, uiBoost } from './Viewport';
 import skillsData from '../data/skills.json';
+import { createVisualIcon } from './VisualIconRenderer';
 
 const SLOT_SIZE = 44;
 const SLOT_GAP = 4;
@@ -126,6 +127,7 @@ class SkillSlot extends Phaser.GameObjects.Container {
   private nameText: Phaser.GameObjects.Text;
   private hotkeyText: Phaser.GameObjects.Text;
   private readyGlow: Phaser.GameObjects.Graphics;
+  private readyIcon: Phaser.GameObjects.GameObject & { setAlpha?: (value: number) => unknown };
   private queueBadge: Phaser.GameObjects.Text;
   private tooltip: Phaser.GameObjects.Container | null = null;
   private isReady: boolean = false;
@@ -160,6 +162,18 @@ class SkillSlot extends Phaser.GameObjects.Container {
     this.readyGlow.strokeRoundedRect(-1, -1, SLOT_SIZE + 2, SLOT_SIZE + 2, 5);
     this.readyGlow.setAlpha(0);
     this.add(this.readyGlow);
+
+    this.readyIcon = createVisualIcon(scene, {
+      sheetKey: 'hud_fx',
+      frameName: 'skill_ready',
+      x: SLOT_SIZE - 8,
+      y: 8,
+      size: 14,
+      alpha: 0,
+      fallbackText: '!',
+      fallbackStyle: 'tiny',
+    }) as Phaser.GameObjects.GameObject & { setAlpha?: (value: number) => unknown };
+    this.add(this.readyIcon);
 
     // Queue position badge (top-left, hidden by default)
     this.queueBadge = TextFactory.create(scene, 2, 2, '', 'small', {
@@ -261,6 +275,7 @@ class SkillSlot extends Phaser.GameObjects.Container {
       this.isReady = true;
       // Breathing glow: skip if tween already running (re-entry guard)
       if (!this.scene.tweens.isTweening(this.readyGlow)) {
+        this.readyIcon.setAlpha?.(1);
         if (!getAccessibility().reduceMotion) {
           // Breathing pulse 0.5 ↔ 1 alpha, 800 ms
           this.readyGlow.setAlpha(1);
@@ -279,6 +294,7 @@ class SkillSlot extends Phaser.GameObjects.Container {
       }
     } else if (!queued && this.isReady) {
       this.isReady = false;
+      this.readyIcon.setAlpha?.(0);
       this.scene.tweens.killTweensOf(this.readyGlow);
       this.readyGlow.setAlpha(0);
     }

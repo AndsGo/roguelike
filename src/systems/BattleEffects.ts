@@ -3,6 +3,7 @@ import { GAME_WIDTH, GAME_HEIGHT } from '../config/balance';
 import { Unit } from '../entities/Unit';
 import { Theme, getAccessibility } from '../ui/Theme';
 import { TextFactory } from '../ui/TextFactory';
+import { getVisualSpriteFrame, getVisualSpriteSheet } from './VisualSpriteAssets';
 
 /**
  * Visual effects for battle: screen shake, hit flash, crit slow-mo,
@@ -13,6 +14,44 @@ export class BattleEffects {
 
   constructor(scene: Phaser.Scene) {
     this.scene = scene;
+  }
+
+  private spawnSpriteEffect(
+    sheetKey: 'skill_fx' | 'hud_fx',
+    frameName: string,
+    x: number,
+    y: number,
+    size: number,
+    tint: number,
+    depth: number,
+    duration: number,
+    tweenProps: Record<string, unknown> = {},
+  ): boolean {
+    const sheet = getVisualSpriteSheet(sheetKey);
+    const frame = getVisualSpriteFrame(sheetKey, frameName);
+    if (
+      !sheet ||
+      frame === undefined ||
+      !this.scene.textures?.exists(sheet.textureKey) ||
+      !this.scene.add.sprite
+    ) {
+      return false;
+    }
+
+    const sprite = this.scene.add.sprite(x, y, sheet.textureKey, frame);
+    sprite.setDisplaySize(size, size);
+    sprite.setTint(tint);
+    sprite.setAlpha(0.9);
+    sprite.setDepth(depth);
+    this.scene.tweens.add({
+      targets: sprite,
+      alpha: 0,
+      duration,
+      ease: 'Sine.easeOut',
+      onComplete: () => sprite.destroy(),
+      ...tweenProps,
+    });
+    return true;
   }
 
   /** Camera shake effect */
@@ -146,6 +185,31 @@ export class BattleEffects {
     color: number = 0xffff00,
     duration: number = 200,
   ): void {
+    const fx = getVisualSpriteSheet('skill_fx');
+    const projectileFrame = getVisualSpriteFrame('skill_fx', 'projectile');
+    if (
+      fx &&
+      projectileFrame !== undefined &&
+      this.scene.textures?.exists(fx.textureKey) &&
+      this.scene.add.sprite
+    ) {
+      const bullet = this.scene.add.sprite(fromX, fromY, fx.textureKey, projectileFrame);
+      bullet.setDisplaySize(18, 18);
+      bullet.setTint(color);
+      bullet.setDepth(150);
+      this.scene.tweens.add({
+        targets: bullet,
+        x: toX,
+        y: toY,
+        duration,
+        ease: 'Quad.easeIn',
+        onComplete: () => {
+          bullet.destroy();
+        },
+      });
+      return;
+    }
+
     const bullet = this.scene.add.graphics();
     bullet.fillStyle(color, 0.9);
     bullet.fillCircle(0, 0, 4);
@@ -172,6 +236,31 @@ export class BattleEffects {
     color: number = 0xff4444,
     duration: number = 400,
   ): void {
+    const fx = getVisualSpriteSheet('skill_fx');
+    const aoeFrame = getVisualSpriteFrame('skill_fx', 'aoe_blast');
+    if (
+      fx &&
+      aoeFrame !== undefined &&
+      this.scene.textures?.exists(fx.textureKey) &&
+      this.scene.add.sprite
+    ) {
+      const blast = this.scene.add.sprite(x, y, fx.textureKey, aoeFrame);
+      blast.setDisplaySize(radius * 0.6, radius * 0.6);
+      blast.setTint(color);
+      blast.setAlpha(0.85);
+      blast.setDepth(150);
+      this.scene.tweens.add({
+        targets: blast,
+        scaleX: 3,
+        scaleY: 3,
+        alpha: 0,
+        duration,
+        ease: 'Quad.easeOut',
+        onComplete: () => blast.destroy(),
+      });
+      return;
+    }
+
     const g = this.scene.add.graphics();
     g.fillStyle(color, 0.3);
     g.fillCircle(x, y, radius * 0.3);
@@ -329,6 +418,12 @@ export class BattleEffects {
   /** Ignite reaction: orange sparks drift upward (融化) */
   showIgniteEffect(x: number, y: number): void {
     const count = 6 + Math.floor(Math.random() * 3); // 6-8
+    if (this.spawnSpriteEffect('skill_fx', 'ignite', x, y, 30, 0xff6600, 200, 420, {
+      y: y - 18,
+      scaleX: 1.35,
+      scaleY: 1.35,
+    })) return;
+
     if (getAccessibility().reduceMotion) {
       const g = this.scene.add.graphics();
       g.setDepth(200);
@@ -360,6 +455,11 @@ export class BattleEffects {
 
   /** Freeze reaction: radial pale-blue lines burst (超导) */
   showFreezeEffect(x: number, y: number): void {
+    if (this.spawnSpriteEffect('skill_fx', 'freeze', x, y, 30, 0x88ddff, 200, getAccessibility().reduceMotion ? 200 : 300, {
+      scaleX: 1.45,
+      scaleY: 1.45,
+    })) return;
+
     const lineCount = 6;
     const g = this.scene.add.graphics();
     g.setDepth(200);
@@ -381,6 +481,14 @@ export class BattleEffects {
   /** Shock reaction: yellow zigzag lines flicker twice (超载) */
   showShockEffect(x: number, y: number): void {
     const duration = getAccessibility().reduceMotion ? 200 : 240;
+    if (this.spawnSpriteEffect('skill_fx', 'shock', x, y, 30, 0xffee00, 200, duration, {
+      scaleX: 1.25,
+      scaleY: 1.25,
+      repeat: getAccessibility().reduceMotion ? 0 : 1,
+      yoyo: true,
+      ease: 'Stepped',
+    })) return;
+
     const repeatCount = getAccessibility().reduceMotion ? 0 : 1;
     for (let z = 0; z < 2; z++) {
       const g = this.scene.add.graphics();
@@ -409,6 +517,13 @@ export class BattleEffects {
   /** Annihilate reaction: purple dots fall and fade (湮灭) */
   showAnnihilateEffect(x: number, y: number): void {
     const count = 8;
+    if (this.spawnSpriteEffect('skill_fx', 'annihilate', x, y, 30, 0xaa44ff, 200, 420, {
+      y: y + 16,
+      scaleX: 1.4,
+      scaleY: 1.4,
+      ease: 'Quad.easeIn',
+    })) return;
+
     if (getAccessibility().reduceMotion) {
       const g = this.scene.add.graphics();
       g.setDepth(200);
@@ -446,6 +561,12 @@ export class BattleEffects {
     color: number = 0xff4444,
     duration: number = 400,
   ): void {
+    if (this.spawnSpriteEffect('hud_fx', 'target_lock', x, y, radius * 2, color, 150, duration, {
+      scaleX: 1.1,
+      scaleY: 1.1,
+      ease: 'Sine.easeIn',
+    })) return;
+
     const g = this.scene.add.graphics();
     g.lineStyle(2, color, 0.5);
     g.strokeCircle(x, y, radius);

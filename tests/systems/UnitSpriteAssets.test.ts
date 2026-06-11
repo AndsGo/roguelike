@@ -1,5 +1,5 @@
-import { describe, expect, it } from 'vitest';
-import { getAllUnitSpriteSheets, getUnitSpriteSheet } from '../../src/systems/UnitSpriteAssets';
+import { describe, expect, it, vi } from 'vitest';
+import { getAllUnitSpriteSheets, getUnitSpriteSheet, queueUnitSpriteSheets } from '../../src/systems/UnitSpriteAssets';
 
 const EXPECTED_FIRST_BATCH = [
   'hero_archer',
@@ -127,5 +127,22 @@ describe('UnitSpriteAssets registry', () => {
       expect(config.frames.hurt).toEqual({ start: 12, end: 15, repeat: 0 });
       expect(config.frames.death).toEqual({ start: 16, end: 19, repeat: 0 });
     }
+  });
+
+  it('returns the number of newly queued spritesheets', () => {
+    const scene = {
+      textures: { exists: vi.fn(() => false) },
+      load: {
+        spritesheet: vi.fn(),
+        once: vi.fn(),
+        on: vi.fn(),
+      },
+    };
+
+    const queued = queueUnitSpriteSheets(scene as any, ['hero_warrior', 'missing_sprite']);
+
+    expect(queued).toBe(1);
+    expect(scene.load.spritesheet).toHaveBeenCalledTimes(1);
+    scene.load.once.mock.calls[0][1]();
   });
 });

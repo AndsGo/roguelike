@@ -8,6 +8,8 @@ import { TextFactory } from './TextFactory';
 import { drawRoleIcon, drawElementIcon } from './PixelIcons';
 import { attachPressInteraction } from './PressInteraction';
 import { getOrCreateTexture, ChibiConfig } from '../systems/UnitRenderer';
+import { createVisualIcon } from './VisualIconRenderer';
+import { getEquipmentIconFrame } from './ItemIconMapping';
 
 export class HeroCard extends Phaser.GameObjects.Container {
   private bg: Phaser.GameObjects.Graphics;
@@ -126,10 +128,18 @@ export class HeroCard extends Phaser.GameObjects.Container {
       slot.fillRoundedRect(sx - 10, sy - 8, 20, 16, 3);
       this.add(slot);
 
-      const slotLabel = TextFactory.create(scene, sx, sy, equipped ? slotIcons[i] : '-', 'small', {
-        color: '#ffffff',
-      }).setOrigin(0.5);
-      this.add(slotLabel);
+      const slotIcon = createVisualIcon(scene, {
+        sheetKey: 'item_icons',
+        frameName: getEquipmentIconFrame(slotNames[i]),
+        x: sx,
+        y: sy,
+        size: 14,
+        tint: equipped ? 0xffffff : 0x777777,
+        alpha: equipped ? 1 : 0.45,
+        fallbackText: equipped ? slotIcons[i] : '-',
+        fallbackStyle: 'small',
+      });
+      this.add(slotIcon);
     }
 
     // Tap to expand details; right-click (desktop) or long-press (touch)

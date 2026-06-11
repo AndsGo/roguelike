@@ -11,6 +11,8 @@ Object.defineProperty(globalThis, 'localStorage', {
 import { SaveManager } from '../../src/managers/SaveManager';
 import { RunManager } from '../../src/managers/RunManager';
 import { EventBus } from '../../src/systems/EventBus';
+import { GameLifecycle } from '../../src/systems/GameLifecycle';
+import { StatsManager } from '../../src/managers/StatsManager';
 import { STARTING_GOLD } from '../../src/constants';
 
 describe('SaveManager', () => {
@@ -61,6 +63,27 @@ describe('SaveManager', () => {
       const result = SaveManager.loadGame(1);
       expect(result).toBe(true);
       expect(rm.getGold()).toBe(savedGold);
+    });
+
+    it('restores run event listeners so battle stats track after continuing a save', () => {
+      SaveManager.saveGame(1);
+
+      // Simulate returning to main menu / later session before pressing Continue.
+      GameLifecycle.teardownAll();
+
+      const result = SaveManager.loadGame(1);
+      expect(result).toBe(true);
+
+      EventBus.getInstance().emit('unit:damage', {
+        sourceId: 'warrior',
+        targetId: 'slime',
+        amount: 123,
+        damageType: 'physical',
+        isCrit: false,
+      });
+
+      expect(StatsManager.getRunStats().totalDamage).toBe(123);
+      expect(StatsManager.getRunStats().heroStats.warrior.damage).toBe(123);
     });
 
     it('returns false for empty slot', () => {

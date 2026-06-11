@@ -5,6 +5,7 @@ import { Theme, colorToString, getRoleColor, getNodeColor, getHealthColor } from
 import { UI, SLOT_LABELS } from '../i18n';
 import { computeNodeLayers } from '../utils/map-utils';
 import { TextFactory } from './TextFactory';
+import { getVisualSpriteFrame, getVisualSpriteSheet } from '../systems/VisualSpriteAssets';
 
 export const NODE_COLORS: Record<NodeType, number> = Theme.colors.node as Record<NodeType, number>;
 
@@ -31,6 +32,32 @@ export interface LayerInfo {
  * Handles pure drawing of map elements without scene interaction logic.
  */
 export class MapRenderer {
+  static createNodeIcon(
+    scene: Phaser.Scene,
+    x: number,
+    y: number,
+    nodeType: NodeType,
+    alpha: number,
+  ): Phaser.GameObjects.GameObject {
+    const sheet = getVisualSpriteSheet('map_nodes');
+    const frame = getVisualSpriteFrame('map_nodes', nodeType);
+    if (
+      sheet &&
+      frame !== undefined &&
+      scene.textures?.exists(sheet.textureKey) &&
+      scene.add.sprite
+    ) {
+      return scene.add.sprite(x, y, sheet.textureKey, frame)
+        .setDisplaySize(nodeType === 'boss' ? 28 : 24, nodeType === 'boss' ? 28 : 24)
+        .setOrigin(0.5)
+        .setAlpha(alpha);
+    }
+
+    return TextFactory.create(scene, x, y, NODE_LABELS[nodeType], nodeType === 'boss' ? 'body' : 'label', {
+      color: '#ffffff',
+    }).setOrigin(0.5).setAlpha(alpha);
+  }
+
   /** Build layer structure from node graph via BFS. */
   static buildLayers(map: MapNode[], acts: ActConfig[]): LayerInfo[] {
     const layers: LayerInfo[] = [];

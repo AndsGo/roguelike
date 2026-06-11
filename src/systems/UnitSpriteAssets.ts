@@ -421,9 +421,9 @@ const IN_FLIGHT_STALE_MS = 60_000;
 export function queueUnitSpriteSheets(
   scene: Phaser.Scene,
   spriteKeys: Array<string | undefined | null>,
-): void {
+): number {
   // Guards keep this a no-op under the Node test stubs (no loader there).
-  if (!scene.load?.spritesheet || !scene.textures?.exists) return;
+  if (!scene.load?.spritesheet || !scene.textures?.exists) return 0;
   const now = Date.now();
   const batch = new Set<string>();
   for (const key of spriteKeys) {
@@ -446,6 +446,7 @@ export function queueUnitSpriteSheets(
       if (file?.key && batch.has(file.key)) inFlightKeys.delete(file.key);
     });
   }
+  return batch.size;
 }
 
 export function ensureUnitSpriteAnimations(scene: Phaser.Scene, config: UnitSpriteSheetConfig): void {

@@ -9,6 +9,7 @@ import { isTouchDevice } from '../utils/device';
 import { viewBounds, uiBoost } from './Viewport';
 import { SkillData } from '../types';
 import skillsData from '../data/skills.json';
+import { createVisualIcon } from './VisualIconRenderer';
 
 const BUTTON_SIZE = 36;
 const BUTTON_GAP = 8;
@@ -104,6 +105,7 @@ class UltimateSlot extends Phaser.GameObjects.Container {
   private ringGraphics: Phaser.GameObjects.Graphics;
   private nameText: Phaser.GameObjects.Text;
   private energyText: Phaser.GameObjects.Text;
+  private readyIcon: Phaser.GameObjects.GameObject & { setAlpha?: (value: number) => unknown };
   private tooltip: Phaser.GameObjects.Container | null = null;
   private isReady: boolean = false;
   private lastEnergyRatio: number = -1;
@@ -165,6 +167,18 @@ class UltimateSlot extends Phaser.GameObjects.Container {
     }).setOrigin(0.5);
     this.add(this.energyText);
 
+    this.readyIcon = createVisualIcon(scene, {
+      sheetKey: 'hud_fx',
+      frameName: 'ultimate_ready',
+      x: BUTTON_SIZE - 5,
+      y: 5,
+      size: 13,
+      alpha: 0,
+      fallbackText: '!',
+      fallbackStyle: 'tiny',
+    }) as Phaser.GameObjects.GameObject & { setAlpha?: (value: number) => unknown };
+    this.add(this.readyIcon);
+
     // Interactive hit area: tap fires, hover OR long-press shows the tooltip
     const hitArea = scene.add.rectangle(cx, cy, BUTTON_SIZE + 8, BUTTON_SIZE + 8, 0x000000, 0)
       .setInteractive({ useHandCursor: true });
@@ -201,6 +215,7 @@ class UltimateSlot extends Phaser.GameObjects.Container {
       this.energyText.setText('\u5C31\u7EEA');
       this.energyText.setColor('#ffcc00');
       this.nameText.setColor('#ffcc00');
+      this.readyIcon.setAlpha?.(1);
       // Pulse glow
       this.readyTween = this.scene.tweens.add({
         targets: this.ringGraphics,
@@ -214,6 +229,7 @@ class UltimateSlot extends Phaser.GameObjects.Container {
       this.isReady = false;
       this.energyText.setColor('#aaaaaa');
       this.nameText.setColor('#ffffff');
+      this.readyIcon.setAlpha?.(0);
       if (this.readyTween) {
         this.readyTween.stop();
         this.readyTween = null;

@@ -8,6 +8,8 @@ import { UI, getHeroDisplayName } from '../i18n';
 import itemsData from '../data/items.json';
 import relicsData from '../data/relics.json';
 import { viewBounds, pointerView } from './Viewport';
+import { createVisualIcon } from './VisualIconRenderer';
+import { getEquipmentIconFrame, getRelicIconFrame } from './ItemIconMapping';
 
 const PANEL_WIDTH = 560;
 const PANEL_HEIGHT = 380;
@@ -207,11 +209,25 @@ export class BuildReviewPanel {
 
       const equippedItems: string[] = [];
       const slots: Array<'weapon' | 'armor' | 'accessory'> = ['weapon', 'armor', 'accessory'];
-      for (const slot of slots) {
+      for (let i = 0; i < slots.length; i++) {
+        const slot = slots[i];
         const item = heroState.equipment[slot];
+        const itemDef = item ? (itemsData as ItemDef[]).find(it => it.id === item.id) : undefined;
+        const rarityColor = getRarityColor(itemDef?.rarity ?? item?.rarity ?? 'common');
+        const slotIcon = createVisualIcon(scene, {
+          sheetKey: 'item_icons',
+          frameName: getEquipmentIconFrame(slot),
+          x: -122 + i * 14,
+          y: y + 5,
+          size: 10,
+          tint: item ? rarityColor : 0x555566,
+          alpha: item ? 1 : 0.45,
+          fallbackText: slot.charAt(0).toUpperCase(),
+          fallbackStyle: 'tiny',
+        });
+        this.panel.addContent(slotIcon);
         if (item) {
           // Look up display name from items data
-          const itemDef = (itemsData as ItemDef[]).find(i => i.id === item.id);
           equippedItems.push(itemDef?.name ?? item.id);
         }
       }
@@ -220,7 +236,7 @@ export class BuildReviewPanel {
         ? equippedItems.join(', ')
         : UI.buildReview.noEquipment;
       const itemColor = equippedItems.length > 0 ? '#8899aa' : '#555566';
-      const itemText = TextFactory.create(scene, -120, y, itemStr, 'tiny', {
+      const itemText = TextFactory.create(scene, -76, y, itemStr, 'tiny', {
         color: itemColor,
       });
       this.panel.addContent(itemText);
@@ -251,7 +267,19 @@ export class BuildReviewPanel {
         const rarityColor = getRarityColor(rarity);
 
         const relicName = relicDef?.name ?? relicState.id;
-        const relicText = TextFactory.create(scene, -240, y, relicName, 'small', {
+        const relicIcon = createVisualIcon(scene, {
+          sheetKey: 'item_icons',
+          frameName: getRelicIconFrame(),
+          x: -240,
+          y: y + 6,
+          size: 12,
+          tint: rarityColor,
+          fallbackText: '*',
+          fallbackStyle: 'tiny',
+        });
+        this.panel.addContent(relicIcon);
+
+        const relicText = TextFactory.create(scene, -224, y, relicName, 'small', {
           color: colorToString(rarityColor),
           fontStyle: 'bold',
         });

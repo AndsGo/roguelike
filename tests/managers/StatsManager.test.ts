@@ -62,6 +62,18 @@ describe('StatsManager', () => {
       expect(stats.totalHealing).toBe(50);
     });
 
+    it('attributes healing to the source unit, not the healed target', () => {
+      EventBus.getInstance().emit('unit:heal', {
+        sourceId: 'priest',
+        targetId: 'warrior',
+        amount: 75,
+      });
+
+      const stats = StatsManager.getRunStats();
+      expect(stats.heroStats.priest.healing).toBe(75);
+      expect(stats.heroStats.warrior).toBeUndefined();
+    });
+
     it('tracks kills from unit:kill events', () => {
       EventBus.getInstance().emit('unit:kill', {
         killerId: 'hero1',

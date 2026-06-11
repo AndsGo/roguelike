@@ -7,7 +7,7 @@ import { MapNode, ActConfig, EnemyData, SkillData } from '../types';
 import { Theme, colorToString, getNodeColor } from '../ui/Theme';
 import { SceneTransition } from '../systems/SceneTransition';
 import { Button } from '../ui/Button';
-import { MapRenderer, NODE_LABELS, LayerInfo } from '../ui/MapRenderer';
+import { MapRenderer, LayerInfo } from '../ui/MapRenderer';
 import { HeroDetailPopup } from '../ui/HeroDetailPopup';
 import actsData from '../data/acts.json';
 import { UI, getHeroDisplayName } from '../i18n';
@@ -365,9 +365,7 @@ export class MapScene extends Phaser.Scene {
 
       // Node icon
       const labelAlpha = isCompleted ? 0.4 : isAccessible ? 1 : 0.25;
-      const label = TextFactory.create(this, pos.x, pos.y, NODE_LABELS[node.type], node.type === 'boss' ? 'body' : 'label', {
-        color: '#ffffff',
-      }).setOrigin(0.5).setAlpha(labelAlpha);
+      const label = MapRenderer.createNodeIcon(this, pos.x, pos.y, node.type, labelAlpha);
       this.mapContainer.add(label);
 
       // Type name below

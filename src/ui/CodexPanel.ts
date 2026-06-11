@@ -1,14 +1,15 @@
 import Phaser from 'phaser';
 import { Panel } from './Panel';
-import { Theme, colorToString, getRoleColor } from './Theme';
+import { Theme, colorToString } from './Theme';
 import { TextFactory } from './TextFactory';
 import { MetaManager } from '../managers/MetaManager';
 import { UI, RACE_NAMES, CLASS_NAMES, ROLE_NAMES, ELEMENT_NAMES } from '../i18n';
-import { getOrCreateTexture, getDisplaySize, ChibiConfig } from '../systems/UnitRenderer';
 import { CodexDetailPopup } from './CodexDetailPopup';
+import { createCodexUnitPortrait } from './CodexUnitPortrait';
+import { queueUnitSpriteSheets } from '../systems/UnitSpriteAssets';
 import heroesData from '../data/heroes.json';
 import enemiesData from '../data/enemies.json';
-import { HeroData, EnemyData, UnitRole, RaceType, ClassType } from '../types';
+import { HeroData, EnemyData } from '../types';
 import { viewBounds, pointerView } from './Viewport';
 
 const PANEL_WIDTH = 560;
@@ -36,6 +37,7 @@ export class CodexPanel {
   private tabBgs: Phaser.GameObjects.Graphics[] = [];
   private tabHits: Phaser.GameObjects.Rectangle[] = [];
   private detailPopup: CodexDetailPopup | null = null;
+  private isClosed = false;
 
   constructor(scene: Phaser.Scene, onClose: () => void) {
     this.scene = scene;
@@ -67,6 +69,8 @@ export class CodexPanel {
 
     // Create tab buttons (absolute screen position, depth 801)
     this.createTabs();
+
+    this.loadRevealedSprites();
 
     // Render initial tab
     this.renderTab();
@@ -219,6 +223,27 @@ export class CodexPanel {
     this.panel.setContentHeight(totalRows * (CARD_HEIGHT + CARD_GAP) + 80);
   }
 
+  private loadRevealedSprites(): void {
+    const unlockedSet = new Set(MetaManager.getUnlockedHeroes());
+    const encounteredSet = new Set(MetaManager.getEncounteredEnemies());
+    const heroKeys = (heroesData as HeroData[])
+      .filter(hero => unlockedSet.has(hero.id))
+      .map(hero => hero.spriteKey);
+    const enemyKeys = (enemiesData as EnemyData[])
+      .filter(enemy => encounteredSet.has(enemy.id))
+      .map(enemy => enemy.spriteKey);
+
+    const queued = queueUnitSpriteSheets(this.scene, [...heroKeys, ...enemyKeys]);
+    if (queued <= 0) return;
+
+    this.scene.load.once?.('complete', () => {
+      if (!this.isClosed) this.renderTab();
+    });
+    if (!this.scene.load.isLoading?.()) {
+      this.scene.load.start?.();
+    }
+  }
+
   private renderCard(
     x: number, y: number,
     data: HeroData | EnemyData,
@@ -236,33 +261,8 @@ export class CodexPanel {
     this.panel.addContent(cardBg);
 
     if (isRevealed) {
-      // Chibi sprite
-      try {
-        const isBoss = !isHero && !!(data as EnemyData).isBoss;
-        const config: ChibiConfig = {
-          role: data.role as UnitRole,
-          race: (data.race ?? 'human') as RaceType,
-          classType: ((data as HeroData).class ?? 'warrior') as ClassType,
-          fillColor: getRoleColor(data.role),
-          borderColor: 0x222222,
-          isHero,
-          isBoss,
-        };
-        const textureKey = getOrCreateTexture(scene, config);
-        const displaySize = getDisplaySize(data.role as UnitRole, isBoss);
-        const sprite = scene.add.image(x, y - 12, textureKey);
-        // Scale chibi to fit card nicely
-        const maxSpriteH = 52;
-        const scale = Math.min(1, maxSpriteH / displaySize.h);
-        sprite.setScale(scale);
-        this.panel.addContent(sprite);
-      } catch {
-        // Fallback: show placeholder text if texture generation fails
-        const placeholder = TextFactory.create(scene, x, y - 12, '?', 'title', {
-          color: '#555555',
-        }).setOrigin(0.5);
-        this.panel.addContent(placeholder);
-      }
+      const sprite = createCodexUnitPortrait(scene, data, isHero, x, y - 12, 52);
+      this.panel.addContent(sprite);
 
       // Name
       const nameText = TextFactory.create(scene, x, y + 32, data.name, 'tiny', {
@@ -305,6 +305,8 @@ export class CodexPanel {
   }
 
   close(onComplete?: () => void): void {
+    this.isClosed = true;
+
     // Clean up detail popup if open
     if (this.detailPopup) {
       this.detailPopup.destroy();

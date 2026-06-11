@@ -10,6 +10,8 @@ import { getOrCreateTexture, getDisplaySize, ChibiConfig } from '../systems/Unit
 import { ensureUnitSpriteAnimations, getUnitSpriteSheet, UnitSpriteAnim, UnitSpriteSheetConfig } from '../systems/UnitSpriteAssets';
 import { UI } from '../i18n';
 import { TextFactory } from '../ui/TextFactory';
+import { createVisualIcon } from '../ui/VisualIconRenderer';
+import { getVisualSpriteSheet } from '../systems/VisualSpriteAssets';
 
 /** Default enemy color (no element) */
 const ENEMY_BASE_COLOR = 0xff4444;
@@ -65,6 +67,8 @@ export class Unit extends Phaser.GameObjects.Container {
   private aiSpriteConfig?: UnitSpriteSheetConfig;
   private nameLabel: Phaser.GameObjects.Text;
   private statusIcons: Phaser.GameObjects.Text;
+  private statusIconObjects: Phaser.GameObjects.GameObject[] = [];
+  private statusIconSignature = '';
   private statusOverlay: Phaser.GameObjects.Image;
   /** Texture key currently shown by the sprite — mirrored onto the status overlay. */
   private spriteTextureKey: string = '';
@@ -439,7 +443,7 @@ export class Unit extends Phaser.GameObjects.Container {
     return remaining;
   }
 
-  heal(amount: number): number {
+  heal(amount: number, sourceId: string = this.unitId): number {
     if (!this.isAlive) return 0;
     const maxHp = this.currentStats.maxHp;
     const actual = Math.min(Math.round(amount), maxHp - this.currentHp);
@@ -449,7 +453,7 @@ export class Unit extends Phaser.GameObjects.Container {
     if (actual > 0) {
       this.flashColor(0x44ff88, 120); // Green heal flash
       EventBus.getInstance().emit('unit:heal', {
-        sourceId: this.unitId,
+        sourceId,
         targetId: this.unitId,
         amount: actual,
       });
@@ -616,6 +620,7 @@ export class Unit extends Phaser.GameObjects.Container {
     if (!this.scene) return;
     if (this.statusEffects.length === 0) {
       this.hideStatusTooltip();
+      this.clearStatusIconObjects();
     }
     const hasBurn = this.statusEffects.some(e => e.type === 'dot' && e.element === 'fire');
     const hasFreeze = this.statusEffects.some(e => e.type === 'stun');
@@ -661,7 +666,39 @@ export class Unit extends Phaser.GameObjects.Container {
       parts.push(`${sym}${dur}`);
     }
 
-    if (parts.length > 0) {
+    const statusSheet = getVisualSpriteSheet('status_icons');
+    const canUseStatusSprites = !!statusSheet && this.scene.textures.exists(statusSheet.textureKey);
+
+    if (parts.length > 0 && canUseStatusSprites) {
+      this.statusIcons.setVisible(false);
+      const visibleEffects = this.statusEffects.slice(0, 3);
+      const signature = visibleEffects.map(e => `${e.type}:${e.element ?? ''}`).join('|');
+      if (signature !== this.statusIconSignature) {
+        this.clearStatusIconObjects();
+        this.statusIconSignature = signature;
+      const startX = -((visibleEffects.length - 1) * 16) / 2;
+      visibleEffects.forEach((eff, index) => {
+        const icon = createVisualIcon(this.scene, {
+          sheetKey: 'status_icons',
+          frameName: eff.type,
+          x: startX + index * 16,
+          y: -this.spriteHeight / 2 - 24,
+          size: 14,
+          fallbackText: parts[index]?.charAt(0) ?? '?',
+          fallbackStyle: 'small',
+        });
+        const interactiveIcon = icon as Phaser.GameObjects.GameObject & {
+          setInteractive?: (config?: unknown) => Phaser.GameObjects.GameObject;
+          on?: (event: string, callback: () => void) => Phaser.GameObjects.GameObject;
+        };
+        interactiveIcon.setInteractive?.({ useHandCursor: true });
+        interactiveIcon.on?.('pointerup', () => this.toggleStatusTooltip());
+        this.statusIconObjects.push(icon);
+        this.add(icon);
+      });
+      }
+    } else if (parts.length > 0) {
+      this.clearStatusIconObjects();
       // Show at most 3 effects to avoid clutter
       this.statusIcons.setText(parts.slice(0, 3).join(' '));
       this.statusIcons.setVisible(true);
@@ -670,6 +707,7 @@ export class Unit extends Phaser.GameObjects.Container {
       const hasOnlyDebuff = (hasDebuff || hasBurn || hasPoison || hasFreeze) && !hasBuff && !hasHot;
       this.statusIcons.setColor(hasOnlyBuff ? '#88ff88' : hasOnlyDebuff ? '#ff8888' : '#ffcc00');
     } else {
+      this.clearStatusIconObjects();
       this.statusIcons.setVisible(false);
     }
 
@@ -686,6 +724,14 @@ export class Unit extends Phaser.GameObjects.Container {
       this.stunTween.stop();
       this.stunTween = null;
     }
+  }
+
+  private clearStatusIconObjects(): void {
+    for (const icon of this.statusIconObjects) {
+      icon.destroy();
+    }
+    this.statusIconObjects = [];
+    this.statusIconSignature = '';
   }
 
   moveToward(targetX: number, targetY: number, delta: number): void {

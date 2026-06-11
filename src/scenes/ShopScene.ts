@@ -12,7 +12,10 @@ import { UI, formatStat, formatStatDiff, SLOT_LABELS } from '../i18n';
 import { AudioManager } from '../systems/AudioManager';
 import { TutorialSystem } from '../systems/TutorialSystem';
 import { calculateSynergyTags, formatSynergyTags } from '../utils/synergy-helpers';
+import { isTouchDevice, tapTolerance } from '../utils/device';
 import { TextFactory } from '../ui/TextFactory';
+import { createVisualIcon } from '../ui/VisualIconRenderer';
+import { getEquipmentIconFrame } from '../ui/ItemIconMapping';
 
 export class ShopScene extends Phaser.Scene {
   private nodeIndex!: number;
@@ -21,6 +24,7 @@ export class ShopScene extends Phaser.Scene {
   private selectedHero: HeroState | null = null;
   private itemCards: { container: Phaser.GameObjects.Container; item: ItemData; priceText: Phaser.GameObjects.Text; compareText: Phaser.GameObjects.Text; sold: boolean; buyBg: Phaser.GameObjects.Graphics; buyLabel: Phaser.GameObjects.Text; buyHit: Phaser.GameObjects.Rectangle }[] = [];
   private heroButtons: Phaser.GameObjects.Container[] = [];
+  private synergyText: Phaser.GameObjects.Text | null = null;
   private itemsContainer!: Phaser.GameObjects.Container;
   private refreshCount = 0;
   private refreshBtn!: Button;
@@ -34,6 +38,7 @@ export class ShopScene extends Phaser.Scene {
     this.selectedHero = null;
     this.itemCards = [];
     this.heroButtons = [];
+    this.synergyText = null;
     this.refreshCount = 0;
   }
 
@@ -61,21 +66,29 @@ export class ShopScene extends Phaser.Scene {
       color: colorToString(Theme.colors.gold),
     }).setOrigin(1, 0).setDepth(20);
 
-    // Hero selection
-    TextFactory.create(this, 20, 50, UI.shop.selectHero, 'label', {
+    // Hero selection (label sits higher on touch — the taller buttons start at y≈58)
+    TextFactory.create(this, 20, isTouchDevice() ? 41 : 50, UI.shop.selectHero, 'label', {
       color: '#8899cc',
     });
 
     const heroes = rm.getHeroes();
+    // Touch: taller button + padded hit area so the physical target clears 44px
+    // (design 30+14 pad ≈ 44-59 physical across phone zoom levels).
+    const touch = isTouchDevice();
+    const btnW = 85;
+    const btnH = touch ? 30 : 22;
+    const btnTop = 1 - btnH / 2; // keep the label's y=1 centerline on both layouts
+    const hitPadX = touch ? 6 : 0;
+    const hitPadY = touch ? 7 : 0;
     heroes.forEach((hero, i) => {
       const data = rm.getHeroData(hero.id);
       const btnContainer = this.add.container(25 + i * 100, 72);
 
       const bg = this.add.graphics();
       bg.fillStyle(Theme.colors.panel, 0.8);
-      bg.fillRoundedRect(0, -10, 85, 22, 4);
+      bg.fillRoundedRect(0, btnTop, btnW, btnH, 4);
       bg.lineStyle(1, Theme.colors.panelBorder, 0.5);
-      bg.strokeRoundedRect(0, -10, 85, 22, 4);
+      bg.strokeRoundedRect(0, btnTop, btnW, btnH, 4);
       btnContainer.add(bg);
 
       const text = TextFactory.create(this, 42, 1, data.name, 'label', {
@@ -83,16 +96,28 @@ export class ShopScene extends Phaser.Scene {
       }).setOrigin(0.5);
       btnContainer.add(text);
 
-      btnContainer.setSize(85, 22);
-      // Hit area must match the bg's top-left draw rect (0,-10,85,22); otherwise
-      // setSize+setInteractive auto-centers the hit zone ~42px left of the visual
-      // (the documented container-origin gotcha). See Button.ts / Panel.ts.
+      btnContainer.setSize(btnW, btnH);
+      // Hit area must match the bg's top-left draw rect (0,btnTop,btnW,btnH);
+      // otherwise setSize+setInteractive auto-centers the hit zone ~42px left of
+      // the visual (the documented container-origin gotcha). See Button.ts / Panel.ts.
       btnContainer.setInteractive({
-        hitArea: new Phaser.Geom.Rectangle(0, -10, 85, 22),
+        hitArea: new Phaser.Geom.Rectangle(
+          -hitPadX, btnTop - hitPadY, btnW + hitPadX * 2, btnH + hitPadY * 2,
+        ),
         hitAreaCallback: Phaser.Geom.Rectangle.Contains,
         useHandCursor: true,
       });
-      btnContainer.on('pointerup', () => {
+      // pointerup + distance check (Button.ts pattern) so a drag/scroll that
+      // ends on the button doesn't switch heroes by accident.
+      let downX = 0;
+      let downY = 0;
+      btnContainer.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
+        downX = pointer.x;
+        downY = pointer.y;
+      });
+      btnContainer.on('pointerup', (pointer: Phaser.Input.Pointer) => {
+        const dist = Phaser.Math.Distance.Between(downX, downY, pointer.x, pointer.y);
+        if (dist > tapTolerance()) return;
         this.selectedHero = hero;
         this.highlightHeroButton(i);
         this.updateComparisonTexts();
@@ -169,7 +194,11 @@ export class ShopScene extends Phaser.Scene {
 
     if (text) {
       const v = view(this);
-      TextFactory.create(this, v.cx, 105, `${UI.shop.synergyLabel} ${text}`, 'small', {
+      // Touch: scaled-up text leaves room for only ONE line between the hero
+      // buttons (bottom ≈88) and the item cards (top ≈113), so the synergy bar
+      // shares that line with the equip badge — visible until a hero is picked,
+      // then the badge takes over (see refreshEquipBadge).
+      this.synergyText = TextFactory.create(this, v.cx, isTouchDevice() ? 98 : 105, `${UI.shop.synergyLabel} ${text}`, 'small', {
         color: '#ccaa44',
       }).setOrigin(0.5);
     }
@@ -217,6 +246,10 @@ export class ShopScene extends Phaser.Scene {
     }
     if (!this.selectedHero) return;
 
+    // Touch: the badge and the synergy bar share the single free line between
+    // hero buttons and item cards — the badge takes over once a hero is picked.
+    if (isTouchDevice()) this.synergyText?.setVisible(false);
+
     const slots = ['weapon', 'armor', 'accessory'] as const;
     const labels = ['武', '护', '饰'] as const;
     const badgeY = 92;
@@ -261,11 +294,17 @@ export class ShopScene extends Phaser.Scene {
     bg.strokeRoundedRect(-60, -42, 210, 95, 6);
     container.add(bg);
 
-    // Rarity indicator dot
-    const rarityDot = this.add.graphics();
-    rarityDot.fillStyle(rarityColor, 1);
-    rarityDot.fillCircle(-48, -28, 4);
-    container.add(rarityDot);
+    const itemIcon = createVisualIcon(this, {
+      sheetKey: 'item_icons',
+      frameName: getEquipmentIconFrame(item.slot),
+      x: -46,
+      y: -29,
+      size: 20,
+      tint: rarityColor,
+      fallbackText: (SLOT_LABELS[item.slot] ?? item.slot).charAt(0),
+      fallbackStyle: 'small',
+    });
+    container.add(itemIcon);
 
     // Item name
     const nameText = TextFactory.create(this, -38, -34, item.name, 'body', {

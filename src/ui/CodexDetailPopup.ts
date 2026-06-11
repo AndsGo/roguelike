@@ -1,11 +1,11 @@
 import Phaser from 'phaser';
-import { Theme, colorToString, getRoleColor } from './Theme';
+import { Theme, colorToString } from './Theme';
 import { viewBounds } from './Viewport';
 import { TextFactory } from './TextFactory';
-import { HeroData, EnemyData, UnitRole, RaceType, ClassType } from '../types';
+import { HeroData, EnemyData } from '../types';
 import { MetaManager } from '../managers/MetaManager';
 import { UI, STAT_LABELS, RACE_NAMES, CLASS_NAMES, ROLE_NAMES, ELEMENT_NAMES, formatUnlockCondition } from '../i18n';
-import { getOrCreateTexture, getDisplaySize, ChibiConfig } from '../systems/UnitRenderer';
+import { createCodexUnitPortrait } from './CodexUnitPortrait';
 import skillsData from '../data/skills.json';
 
 const POPUP_WIDTH = 480;
@@ -55,31 +55,9 @@ export class CodexDetailPopup extends Phaser.GameObjects.Container {
     const leftX = cx - panelW / 2 + 20;
     const topY = cy - panelH / 2 + 20;
 
-    // ---- Left side: Chibi sprite ----
+    // ---- Left side: unit portrait ----
     const isBoss = !isHero && !!(data as EnemyData).isBoss;
-    try {
-      const config: ChibiConfig = {
-        role: data.role as UnitRole,
-        race: (data.race ?? 'human') as RaceType,
-        classType: ((data as HeroData).class ?? 'warrior') as ClassType,
-        fillColor: getRoleColor(data.role),
-        borderColor: 0x222222,
-        isHero,
-        isBoss,
-      };
-      const textureKey = getOrCreateTexture(scene, config);
-      const displaySize = getDisplaySize(data.role as UnitRole, isBoss);
-      const targetHeight = 80;
-      const scale = Math.min(2, targetHeight / displaySize.h);
-      const sprite = scene.add.image(leftX + 40, topY + 50, textureKey).setScale(scale);
-      this.add(sprite);
-    } catch {
-      // Fallback placeholder
-      const placeholder = TextFactory.create(scene, leftX + 40, topY + 50, '?', 'title', {
-        color: '#555555',
-      }).setOrigin(0.5);
-      this.add(placeholder);
-    }
+    this.add(createCodexUnitPortrait(scene, data, isHero, leftX + 40, topY + 50, isBoss ? 92 : 80));
 
     // ---- Right side: Info ----
     const infoX = leftX + 100;

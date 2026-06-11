@@ -1,6 +1,7 @@
 import { SaveData, MetaProgressionData } from '../types';
 import { RunManager } from './RunManager';
 import { ErrorHandler } from '../systems/ErrorHandler';
+import { GameLifecycle } from '../systems/GameLifecycle';
 
 /**
  * Handles localStorage persistence for save slots and meta progression.
@@ -64,6 +65,7 @@ export class SaveManager {
         state: saveData.runState,
         rngState: saveData.rngState ?? saveData.runState.seed,
       }));
+      GameLifecycle.prepareNewRun();
       return true;
     } catch {
       ErrorHandler.report('error', 'SaveManager', `failed to load game from slot ${slot}`);

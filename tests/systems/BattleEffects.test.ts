@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { BattleEffects } from '../../src/systems/BattleEffects';
 import Phaser from 'phaser';
 
@@ -128,6 +128,23 @@ describe('BattleEffects', () => {
       effects.showProjectile(100, 200, 400, 200, 0xffff00, 200);
       expect(true).toBe(true);
     });
+
+    it('uses the skill_fx spritesheet when it is loaded', () => {
+      const sprite = {
+        setDisplaySize: vi.fn().mockReturnThis(),
+        setDepth: vi.fn().mockReturnThis(),
+        setTint: vi.fn().mockReturnThis(),
+        destroy: vi.fn(),
+      };
+      (scene as any).textures = { exists: vi.fn(() => true) };
+      (scene as any).add.sprite = vi.fn(() => sprite);
+
+      effects.showProjectile(100, 200, 400, 200, 0xffff00, 200);
+
+      expect((scene as any).add.sprite).toHaveBeenCalledWith(100, 200, 'visual_skill_fx', 0);
+      expect(sprite.setDisplaySize).toHaveBeenCalledWith(18, 18);
+      expect(sprite.setTint).toHaveBeenCalledWith(0xffff00);
+    });
   });
 
   describe('showAoeBlast', () => {
@@ -135,12 +152,73 @@ describe('BattleEffects', () => {
       effects.showAoeBlast(300, 200, 60, 0xff4444);
       expect(true).toBe(true);
     });
+
+    it('uses the skill_fx aoe frame when it is loaded', () => {
+      const sprite = {
+        setDisplaySize: vi.fn().mockReturnThis(),
+        setDepth: vi.fn().mockReturnThis(),
+        setTint: vi.fn().mockReturnThis(),
+        setAlpha: vi.fn().mockReturnThis(),
+        destroy: vi.fn(),
+      };
+      (scene as any).textures = { exists: vi.fn(() => true) };
+      (scene as any).add.sprite = vi.fn(() => sprite);
+
+      effects.showAoeBlast(300, 200, 60, 0xff4444);
+
+      expect((scene as any).add.sprite).toHaveBeenCalledWith(300, 200, 'visual_skill_fx', 1);
+      expect(sprite.setDisplaySize).toHaveBeenCalledWith(36, 36);
+      expect(sprite.setTint).toHaveBeenCalledWith(0xff4444);
+    });
   });
 
   describe('showAoeIndicator', () => {
     it('creates aoe indicator ring', () => {
       effects.showAoeIndicator(300, 200, 60, 0xff4444);
       expect(true).toBe(true);
+    });
+
+    it('uses the target lock hud frame when it is loaded', () => {
+      const sprite = {
+        setDisplaySize: vi.fn().mockReturnThis(),
+        setDepth: vi.fn().mockReturnThis(),
+        setTint: vi.fn().mockReturnThis(),
+        setAlpha: vi.fn().mockReturnThis(),
+        destroy: vi.fn(),
+      };
+      (scene as any).textures = { exists: vi.fn(() => true) };
+      (scene as any).add.sprite = vi.fn(() => sprite);
+
+      effects.showAoeIndicator(300, 200, 60, 0xff4444);
+
+      expect((scene as any).add.sprite).toHaveBeenCalledWith(300, 200, 'visual_hud_fx', 3);
+      expect(sprite.setDisplaySize).toHaveBeenCalledWith(120, 120);
+      expect(sprite.setTint).toHaveBeenCalledWith(0xff4444);
+    });
+  });
+
+  describe('reaction sprites', () => {
+    it.each([
+      ['showIgniteEffect', 2, 0xff6600],
+      ['showFreezeEffect', 3, 0x88ddff],
+      ['showShockEffect', 4, 0xffee00],
+      ['showAnnihilateEffect', 5, 0xaa44ff],
+    ] as const)('uses the %s skill_fx frame when loaded', (method, frame, tint) => {
+      const sprite = {
+        setDisplaySize: vi.fn().mockReturnThis(),
+        setDepth: vi.fn().mockReturnThis(),
+        setTint: vi.fn().mockReturnThis(),
+        setAlpha: vi.fn().mockReturnThis(),
+        destroy: vi.fn(),
+      };
+      (scene as any).textures = { exists: vi.fn(() => true) };
+      (scene as any).add.sprite = vi.fn(() => sprite);
+
+      effects[method](100, 120);
+
+      expect((scene as any).add.sprite).toHaveBeenCalledWith(100, 120, 'visual_skill_fx', frame);
+      expect(sprite.setDisplaySize).toHaveBeenCalledWith(30, 30);
+      expect(sprite.setTint).toHaveBeenCalledWith(tint);
     });
   });
 });
